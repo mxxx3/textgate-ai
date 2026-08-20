@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <!--
         Deliberately built on the PLATFORM Material theme
         (android:Theme.Material.Light), not the AndroidX/Google
@@ -15,8 +15,13 @@
         <item name="android:textColorSecondary">@color/tg_text_secondary</item>
 
         <!--
-            API 28+ only (ignored as an unknown attribute on older platform
-            versions, which is safe — no crash, simply not applied there).
+            API 27+ only (android:windowLayoutInDisplayCutoutMode was added
+            in Android 8.1 / API 27). tools:targetApi tells Lint this is
+            deliberate rather than an oversight: on the API 26 devices this
+            app's minSdk still allows, the platform simply doesn't recognize
+            this attribute and ignores it — no crash, it's just not applied
+            there, which is fine since edge-to-edge/cutout enforcement from
+            a targetSdk 35 app only happens on much newer OS versions anyway.
             On a targetSdk 35 device the window is allowed to draw under the
             camera cutout by default, and in landscape that cutout sits
             along what becomes the layout's top/leading edge. "shortEdges"
@@ -26,6 +31,6 @@
             depending on default platform behavior that has been observed to
             differ by orientation on some OEM builds.
         -->
-        <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
+        <item name="android:windowLayoutInDisplayCutoutMode" tools:targetApi="27">shortEdges</item>
     </style>
 </resources>

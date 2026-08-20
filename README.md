@@ -651,9 +651,18 @@ all found through real on-device testing:
    view reads back `WindowInsets.Type.systemBars() or
    WindowInsets.Type.displayCutout()` on every layout pass — covering
    orientation changes — and applies it as padding. `themes.xml` also now
-   sets `android:windowLayoutInDisplayCutoutMode="shortEdges"` (API 28+,
-   silently ignored below that) so the cutout inset is requested
-   consistently rather than left to each OEM's default.
+   sets `android:windowLayoutInDisplayCutoutMode="shortEdges"` (API 27+,
+   marked with `tools:targetApi="27"` since it's silently ignored — not a
+   crash — on the API 26 devices `minSdk` still allows) so the cutout
+   inset is requested consistently rather than left to each OEM's default.
+
+   **Amendment (same run):** the first push of this fix failed CI —
+   Lint's `NewApi` check correctly flagged the new theme item as requiring
+   API 27 while `minSdk` is 26, since XML resource attributes (unlike
+   `SDK_INT`-guarded Kotlin code) have no runtime branch Lint can see is
+   protecting them. Fixed by adding `tools:targetApi="27"` on the `<item>`,
+   the standard way to tell Lint the lower-API omission is intentional and
+   safe (the platform simply ignores an attribute it doesn't recognize).
 
 ## 15. Verified build result (GitHub Actions)
 

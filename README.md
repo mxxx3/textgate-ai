@@ -56,7 +56,7 @@ TextGateAI/
         │   │   └── util/
         │   │       └── Debouncer.kt
         │   └── res/                              (layouts, strings, xml configs)
-        ├── test/java/com/textgate/ai/            (JVM unit tests — 33 tests)
+        ├── test/java/com/textgate/ai/            (JVM unit tests — 59 tests)
         └── androidTest/java/com/textgate/ai/     (on-device Keystore test)
 ```
 
@@ -367,7 +367,8 @@ network request, no field write):
 * any exception is raised while inspecting the node
 * the app's package is not on the user's allow-list
 * the app's package matches the hard-coded block-list (password managers,
-  authenticators, OS security surfaces, or a banking/wallet/vault keyword)
+  authenticators, OS security surfaces, named cryptocurrency wallets/
+  exchanges, or a banking/wallet/vault/crypto keyword)
 * the master "Enable ?en trigger" switch is off
 * the trigger is not an exact, case-sensitive `?en` suffix
 * the text before the trigger is empty or exceeds 4000 characters
@@ -428,13 +429,13 @@ other on-screen text, or clipboard contents.
 
 ## 11. Tests
 
-### Unit tests (`./gradlew test`) — 33 tests, no device required
+### Unit tests (`./gradlew test`) — 59 tests, no device required
 
 | File | Scenarios covered |
 |---|---|
 | `TriggerDetectorTest` | exact trigger match & extraction, no-trigger, malformed/partial trigger, empty content, length limit (at and over 4000 chars) |
 | `SensitiveInputGuardTest` | normal field allowed, `isPassword`, all 4 required `inputType` variants, className/hint heuristics, null node, non-editable node, **exception → fail closed** |
-| `AppBlocklistTest` | known password managers/authenticators/system surfaces blocked, keyword heuristic, own-package block, ordinary messaging apps NOT blocked |
+| `AppBlocklistTest` | known password managers/authenticators/system surfaces/crypto wallets & exchanges blocked, keyword heuristic, own-package block, ordinary messaging apps NOT blocked |
 | `AppSettingsStoreTest` | AI disabled by default, allow-list empty by default, allow/disallow round-trip, persistence |
 | `EventGateTest` | end-to-end (minus network) decision chain: allowed+trigger → Ready, no-trigger → NotTriggered, password+trigger → Blocked, **app outside allow-list → Blocked**, master switch off → Blocked, blocklist wins over a mistaken allow-list entry, null node/package → Blocked |
 | `GeminiClientTest` | model-id validation, blank-key rejection, invalid-model rejection, response parsing (success/empty/malformed/blank), **timeout and I/O exception classification** |
@@ -471,7 +472,7 @@ key correctly, and that clearing it removes it.
 ### Running the tests
 
 ```
-./gradlew test               # 33 unit tests, JVM only, ~1-2 minutes
+./gradlew test               # 59 unit tests, JVM only, ~1-2 minutes
 ./gradlew connectedAndroidTest   # optional, needs a device/emulator plugged in
 ```
 
@@ -508,7 +509,7 @@ the Actions tab. It uploads three artifacts from each run:
 
 * `app-debug-apk` — the built APK plus a `app-debug-sha256.txt` file with
   its SHA-256
-* `unit-test-results` — the full JUnit HTML/XML report for all 33 unit
+* `unit-test-results` — the full JUnit HTML/XML report for all 59 unit
   tests
 * `lint-report` — the Android Lint HTML report
 
@@ -590,16 +591,17 @@ Use this to verify the built APK yourself:
 
 **Included, complete, and ready to open in Android Studio:** every Gradle
 file, the manifest, all XML security configs, all Kotlin source, all
-layouts/strings, the ProGuard rules, and 33 unit tests plus one
+layouts/strings, the ProGuard rules, and 59 unit tests plus one
 instrumented test.
 
 **Build verification history.** The project was drafted in an environment
 with no Android SDK and no network path to Google's Maven repository, so
 `./gradlew clean test lint assembleDebug` could not be run there — see
 §12/§15 for how it was instead verified on real infrastructure
-(`.github/workflows/build.yml`, GitHub's own Ubuntu runners). Three real
-compiler/lint bugs were found and fixed this way before the build went
-green:
+(`.github/workflows/build.yml`, GitHub's own Ubuntu runners). Four real
+bugs were found and fixed this way before/after the build went green —
+three compiler/lint errors, and one security gap found through real
+on-device testing:
 
 1. `values/styles.xml` — `<style name="TextGate.SectionTitle">` had no
    explicit `parent`, so AAPT tried to resolve an implicit parent style
@@ -615,6 +617,14 @@ green:
    tripped Lint's `NewApi` check. Fixed by isolating the StrongBox path in
    a `@TargetApi(28)`-annotated private function, called only from the
    `SDK_INT >= P` branch.
+4. `AppBlocklist.kt` — the keyword heuristic (`"wallet"`, `"bank"`, …)
+   missed real cryptocurrency wallet/exchange package names seen on an
+   actual device during testing (`io.metamask`, `app.phantom`,
+   `com.binance.dev`, and 20+ others contain neither substring). Since the
+   app's own threat model explicitly names seed phrases as protected data,
+   these are now exact-blocked rather than left to the keyword match, plus
+   a `"crypto"` keyword was added for unlisted apps. Covered by a new
+   `AppBlocklistTest` case.
 
 ## 15. Verified build result (GitHub Actions)
 
@@ -625,7 +635,7 @@ Gradle 8.9, ubuntu-latest runner, total duration 2m 35s:
 | Step | Result |
 |---|---|
 | `clean` | ✅ |
-| `test` (33 unit tests: `SensitiveInputGuardTest`, `TriggerDetectorTest`, `EventGateTest`, `ResultPolicyTest`, `AppBlocklistTest`, `AppSettingsStoreTest`, `NetworkAllowlistTest`, `GeminiClientTest`) | ✅ all passed |
+| `test` (`SensitiveInputGuardTest`, `TriggerDetectorTest`, `EventGateTest`, `ResultPolicyTest`, `AppBlocklistTest`, `AppSettingsStoreTest`, `NetworkAllowlistTest`, `GeminiClientTest`) | ✅ all passed |
 | `lint` | ✅ 0 errors (19 pre-existing informational warnings, none security-relevant — see the `lint-report` artifact for the full list) |
 | `assembleDebug` | ✅ APK built |
 
@@ -642,3 +652,8 @@ The `connectedAndroidTest (manual)` job (real-emulator run of
 `KeystoreCryptoInstrumentedTest`, the one test needing the genuine
 `AndroidKeyStore` provider) has not been triggered yet — it's optional and
 can be run any time from the Actions tab ("Run workflow").
+
+**Note:** fix #4 above (the cryptocurrency wallet block-list gap) landed
+*after* run #4, so it has not yet gone through its own green CI run —
+push it like the earlier fixes and treat that run, not this one, as the
+current source of truth for `AppBlocklist.kt`.

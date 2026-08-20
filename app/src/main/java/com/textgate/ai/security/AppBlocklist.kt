@@ -56,7 +56,43 @@ object AppBlocklist {
         "com.android.credentialmanager",
         "com.android.intentresolver",
         "com.android.packageinstaller",
-        "android"
+        "android",
+
+        // Cryptocurrency wallets and exchanges. Added after real-device
+        // testing showed these package names slip past the KEYWORD_BLOCKED
+        // heuristic below (e.g. "io.metamask", "app.phantom",
+        // "com.binance.dev" contain no "wallet"/"bank" substring). A wallet
+        // seed phrase or exchange password is at least as catastrophic to
+        // leak as a password-manager master password — the original threat
+        // model for this app names "seed phrases" explicitly — so these are
+        // exact-blocked rather than left to the keyword heuristic.
+        "io.metamask",
+        "app.phantom",
+        "com.wallet.crypto.trustapp",
+        "com.binance.dev",
+        "com.bybit.app",
+        "com.bybit.eu",
+        "com.bitget.exchange",
+        "com.bitmart.bitmarket",
+        "com.coinbase.android",
+        "com.coinex.trade.play",
+        "com.gateio.gateio",
+        "com.kraken.trade",
+        "com.kubi.kucoin",
+        "com.okinc.okex.gp",
+        "com.phemex.app",
+        "com.mexcpro.client",
+        "com.solflare.mobile",
+        "com.chainapsis.keplr",
+        "com.algorand.android",
+        "com.ton_keeper",
+        "com.tronlink.global",
+        "com.kasware.app",
+        "com.skymavis.genesis",
+        "exodusmovement.exodus",
+        "com.ledger.live",
+        "com.coinomi.wallet",
+        "vip.mytoken.wallet"
     )
 
     /**
@@ -75,6 +111,7 @@ object AppBlocklist {
         "bank",
         "banking",
         "wallet",
+        "crypto",
         "vault",
         "seedvault"
     )

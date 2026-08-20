@@ -3,6 +3,7 @@ package com.textgate.ai.settings
 import android.accessibilityservice.AccessibilityServiceInfo
 import android.app.Activity
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -48,6 +49,24 @@ class SettingsActivity : Activity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // This app targets SDK 35, so the system enforces edge-to-edge by
+        // default: the window content is allowed to draw underneath the
+        // status bar and the ActionBar. Because this screen is a plain
+        // platform Activity (no AppCompat/Material, by design — see the
+        // "zero production dependencies" note in build.gradle.kts), it has
+        // none of the automatic inset-handling those libraries provide, so
+        // without this call the top of the first card (the "AI
+        // transformation" title and the "Enable ?en trigger" switch) ends
+        // up rendered behind the status bar and is invisible even at
+        // scroll position zero. Opting back out of edge-to-edge is the
+        // simplest correct fix for a screen this simple, and needs no new
+        // dependency: Window.setDecorFitsSystemWindows is a platform API
+        // (added API 30; this app's minSdk is 26, hence the guard).
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            window.setDecorFitsSystemWindows(true)
+        }
+
         binding = ActivitySettingsBinding.inflate(layoutInflater)
         setContentView(binding.root)
 

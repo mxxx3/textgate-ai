@@ -598,10 +598,10 @@ instrumented test.
 with no Android SDK and no network path to Google's Maven repository, so
 `./gradlew clean test lint assembleDebug` could not be run there — see
 §12/§15 for how it was instead verified on real infrastructure
-(`.github/workflows/build.yml`, GitHub's own Ubuntu runners). Four real
+(`.github/workflows/build.yml`, GitHub's own Ubuntu runners). Five real
 bugs were found and fixed this way before/after the build went green —
-three compiler/lint errors, and one security gap found through real
-on-device testing:
+three compiler/lint errors, one security gap, and one UI bug, the last two
+both found through real on-device testing:
 
 1. `values/styles.xml` — `<style name="TextGate.SectionTitle">` had no
    explicit `parent`, so AAPT tried to resolve an implicit parent style
@@ -625,6 +625,18 @@ on-device testing:
    these are now exact-blocked rather than left to the keyword match, plus
    a `"crypto"` keyword was added for unlisted apps. Covered by a new
    `AppBlocklistTest` case.
+5. `SettingsActivity.kt` — with `targetSdk` 35, Android enforces
+   edge-to-edge by default: window content is allowed to draw underneath
+   the status bar and the ActionBar. Because this screen is a plain
+   platform `Activity` (no AppCompat/Material, by design), it had none of
+   the automatic inset-handling those libraries normally provide, so the
+   top of the first card — the "AI transformation" title and the "Enable
+   ?en trigger" switch — rendered behind the status bar and was invisible
+   even scrolled all the way to the top. Confirmed on a real device via a
+   screenshot, not guessed from the XML alone. Fixed with
+   `window.setDecorFitsSystemWindows(true)` (a platform API, API 30+,
+   guarded by an `SDK_INT` check since `minSdk` is 26) in `onCreate`,
+   which opts the window back out of edge-to-edge.
 
 ## 15. Verified build result (GitHub Actions)
 

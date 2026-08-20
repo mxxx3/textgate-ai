@@ -9,6 +9,8 @@ import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
 import android.view.LayoutInflater
+import android.view.View
+import android.view.WindowInsets
 import android.view.accessibility.AccessibilityManager
 import android.widget.CheckBox
 import android.widget.CompoundButton
@@ -50,25 +52,41 @@ class SettingsActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // This app targets SDK 35, so the system enforces edge-to-edge by
-        // default: the window content is allowed to draw underneath the
-        // status bar and the ActionBar. Because this screen is a plain
-        // platform Activity (no AppCompat/Material, by design — see the
-        // "zero production dependencies" note in build.gradle.kts), it has
-        // none of the automatic inset-handling those libraries provide, so
-        // without this call the top of the first card (the "AI
-        // transformation" title and the "Enable ?en trigger" switch) ends
-        // up rendered behind the status bar and is invisible even at
-        // scroll position zero. Opting back out of edge-to-edge is the
-        // simplest correct fix for a screen this simple, and needs no new
-        // dependency: Window.setDecorFitsSystemWindows is a platform API
-        // (added API 30; this app's minSdk is 26, hence the guard).
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            window.setDecorFitsSystemWindows(true)
-        }
-
         binding = ActivitySettingsBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        // This app targets SDK 35, so the system enforces edge-to-edge by
+        // default: the window content is allowed to draw underneath the
+        // status bar, the display cutout (the front-camera notch), and any
+        // navigation bar. Because this screen is a plain platform Activity
+        // (no AppCompat/Material, by design — see the "zero production
+        // dependencies" note in build.gradle.kts), it has none of the
+        // automatic inset-handling those libraries provide.
+        //
+        // An earlier fix here called window.setDecorFitsSystemWindows(true)
+        // to opt back out of edge-to-edge entirely. That corrected the
+        // portrait symptom (the top card rendering behind the status bar,
+        // making the master switch invisible) but a resident cutout/inset
+        // gap remained in landscape: rotated, the cutout sits along the
+        // layout's leading edge instead of the true top, and on this
+        // device's OEM build the legacy fitSystemWindows path did not
+        // reserve space for it — a sliver of the first card's text peeked
+        // out from under the green ActionBar/status-bar band.
+        //
+        // The robust fix is to do the padding ourselves: stay in
+        // edge-to-edge mode (false) and explicitly read back the system
+        // bar + display cutout insets on every layout pass (orientation
+        // changes included), applying them as padding on the root view.
+        // This works the same way regardless of OEM quirks in the legacy
+        // inset-fitting path. WindowInsets.Type and getInsets() are
+        // platform APIs added in API 30; this app's minSdk is 26, hence the
+        // guard — devices below API 30 cannot enforce edge-to-edge from a
+        // targetSdk 35 app in the first place, so no fallback is needed
+        // there.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            window.setDecorFitsSystemWindows(false)
+            applyInsetsAsPadding(binding.root)
+        }
 
         settingsStore = AppSettingsStore(applicationContext)
         apiKeyStore = SecureApiKeyStore(applicationContext)
@@ -95,6 +113,40 @@ class SettingsActivity : Activity() {
         backgroundExecutor?.shutdownNow()
         backgroundExecutor = null
         super.onDestroy()
+    }
+
+    // ---------------------------------------------------------------
+    // Window insets (edge-to-edge handling — see the comment in onCreate())
+    // ---------------------------------------------------------------
+
+    /**
+     * Pads [root] by the system bar + display cutout insets on every
+     * layout pass, so content never renders underneath the status bar, the
+     * camera cutout, or a navigation bar, in either orientation. The
+     * original (XML-declared) padding is preserved and added to, rather
+     * than replaced, so this is safe to call exactly once regardless of
+     * what padding the layout already specifies.
+     */
+    @android.annotation.TargetApi(Build.VERSION_CODES.R)
+    private fun applyInsetsAsPadding(root: View) {
+        val basePaddingLeft = root.paddingLeft
+        val basePaddingTop = root.paddingTop
+        val basePaddingRight = root.paddingRight
+        val basePaddingBottom = root.paddingBottom
+
+        root.setOnApplyWindowInsetsListener { view, insets ->
+            val bars = insets.getInsets(
+                WindowInsets.Type.systemBars() or WindowInsets.Type.displayCutout()
+            )
+            view.setPadding(
+                basePaddingLeft + bars.left,
+                basePaddingTop + bars.top,
+                basePaddingRight + bars.right,
+                basePaddingBottom + bars.bottom
+            )
+            insets
+        }
+        root.requestApplyInsets()
     }
 
     // ---------------------------------------------------------------

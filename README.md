@@ -598,10 +598,10 @@ instrumented test.
 with no Android SDK and no network path to Google's Maven repository, so
 `./gradlew clean test lint assembleDebug` could not be run there — see
 §12/§15 for how it was instead verified on real infrastructure
-(`.github/workflows/build.yml`, GitHub's own Ubuntu runners). Five real
-bugs were found and fixed this way before/after the build went green —
-three compiler/lint errors, one security gap, and one UI bug, the last two
-both found through real on-device testing:
+(`.github/workflows/build.yml`, GitHub's own Ubuntu runners). Six real bugs
+were found and fixed this way before/after the build went green — three
+compiler/lint errors, one security gap, and two UI bugs, the last three
+all found through real on-device testing:
 
 1. `values/styles.xml` — `<style name="TextGate.SectionTitle">` had no
    explicit `parent`, so AAPT tried to resolve an implicit parent style
@@ -637,6 +637,23 @@ both found through real on-device testing:
    `window.setDecorFitsSystemWindows(true)` (a platform API, API 30+,
    guarded by an `SDK_INT` check since `minSdk` is 26) in `onCreate`,
    which opts the window back out of edge-to-edge.
+6. `SettingsActivity.kt`, follow-up — fix #5 above resolved the portrait
+   symptom but not a related one in landscape: rotated, the display cutout
+   (the front-camera notch) sits along the layout's leading edge instead of
+   the true top, and on the test device's OEM build the legacy
+   `setDecorFitsSystemWindows(true)` path did not reserve space for it — a
+   sliver of the first card's text was visible peeking out from under the
+   green ActionBar/status-bar band. Confirmed on the real device again
+   (landscape screenshot), not guessed from the theme alone. Fixed by
+   reverting to `setDecorFitsSystemWindows(false)` (full edge-to-edge) and
+   doing the inset padding explicitly instead of relying on the platform's
+   legacy auto-fit path: a `View.OnApplyWindowInsetsListener` on the root
+   view reads back `WindowInsets.Type.systemBars() or
+   WindowInsets.Type.displayCutout()` on every layout pass — covering
+   orientation changes — and applies it as padding. `themes.xml` also now
+   sets `android:windowLayoutInDisplayCutoutMode="shortEdges"` (API 28+,
+   silently ignored below that) so the cutout inset is requested
+   consistently rather than left to each OEM's default.
 
 ## 15. Verified build result (GitHub Actions)
 
@@ -665,7 +682,8 @@ The `connectedAndroidTest (manual)` job (real-emulator run of
 `AndroidKeyStore` provider) has not been triggered yet — it's optional and
 can be run any time from the Actions tab ("Run workflow").
 
-**Note:** fix #4 above (the cryptocurrency wallet block-list gap) landed
-*after* run #4, so it has not yet gone through its own green CI run —
-push it like the earlier fixes and treat that run, not this one, as the
-current source of truth for `AppBlocklist.kt`.
+**Note:** fixes #4 and #6 above (the cryptocurrency wallet block-list gap,
+and the landscape display-cutout inset fix) landed *after* run #4, so
+neither has yet gone through its own green CI run — push them like the
+earlier fixes and treat that run, not this one, as the current source of
+truth for `AppBlocklist.kt` and `SettingsActivity.kt`.

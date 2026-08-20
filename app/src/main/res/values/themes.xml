@@ -13,5 +13,19 @@
         <item name="android:windowBackground">@color/tg_background</item>
         <item name="android:textColorPrimary">@color/tg_text_primary</item>
         <item name="android:textColorSecondary">@color/tg_text_secondary</item>
+
+        <!--
+            API 28+ only (ignored as an unknown attribute on older platform
+            versions, which is safe — no crash, simply not applied there).
+            On a targetSdk 35 device the window is allowed to draw under the
+            camera cutout by default, and in landscape that cutout sits
+            along what becomes the layout's top/leading edge. "shortEdges"
+            makes that explicit and, combined with the manual WindowInsets
+            padding applied in SettingsActivity.onCreate(), guarantees the
+            cutout's inset is always accounted for instead of silently
+            depending on default platform behavior that has been observed to
+            differ by orientation on some OEM builds.
+        -->
+        <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
     </style>
 </resources>

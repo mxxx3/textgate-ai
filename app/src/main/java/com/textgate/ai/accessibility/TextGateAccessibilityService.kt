@@ -15,6 +15,7 @@ import com.textgate.ai.security.EventGate
 import com.textgate.ai.security.ResultPolicy
 import com.textgate.ai.security.SecureApiKeyStore
 import com.textgate.ai.security.SensitiveInputGuard
+import com.textgate.ai.security.TriggerDetector
 import com.textgate.ai.util.Debouncer
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -139,7 +140,7 @@ class TextGateAccessibilityService : AccessibilityService() {
                 // the end of the pipeline (see handleResult()).
                 debouncer.schedule {
                     pendingNode = null
-                    confirmAndProcess(packageName!!, safeNode, snapshot, decision.content)
+                    confirmAndProcess(packageName!!, safeNode, snapshot, decision.content, decision.target)
                 }
             }
             is EventGate.Decision.TooLong -> {
@@ -163,7 +164,8 @@ class TextGateAccessibilityService : AccessibilityService() {
         packageName: String,
         node: AccessibilityNodeInfo,
         originalFullText: String,
-        content: String
+        content: String,
+        target: TriggerDetector.Target
     ) {
         if (!requestInFlight.compareAndSet(false, true)) {
             recycleSafely(node)
@@ -206,12 +208,17 @@ class TextGateAccessibilityService : AccessibilityService() {
 
             showToast(getString(R.string.toast_sending_to_gemini))
 
+            val systemPrompt = when (target) {
+                TriggerDetector.Target.ENGLISH -> TranslationPrompts.EN_TRANSLATION_SYSTEM_PROMPT
+                TriggerDetector.Target.POLISH -> TranslationPrompts.PL_TRANSLATION_SYSTEM_PROMPT
+            }
+
             executor.execute {
                 val result = try {
                     GeminiClient.translateBlocking(
                         apiKey = apiKey,
                         model = model,
-                        systemPrompt = TranslationPrompts.EN_TRANSLATION_SYSTEM_PROMPT,
+                        systemPrompt = systemPrompt,
                         userText = content
                     )
                 } catch (_: Exception) {

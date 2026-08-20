@@ -219,12 +219,36 @@
                 android:textSize="13sp"
                 android:textColor="@color/tg_text_secondary" />
 
+            <TextView
+                android:id="@+id/textToggleAdvancedApps"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="@string/btn_show_advanced_apps"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:textColor="@color/tg_primary"
+                android:padding="4dp"
+                android:clickable="true"
+                android:focusable="true" />
+
+            <TextView
+                android:id="@+id/textAdvancedAppsHint"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="@string/allowed_apps_advanced_hint"
+                android:textSize="12sp"
+                android:textColor="@color/tg_text_secondary"
+                android:visibility="gone" />
+
             <LinearLayout
                 android:id="@+id/layoutAppList"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:layout_marginTop="8dp" />
+                android:layout_marginTop="8dp"
+                android:visibility="gone" />
         </LinearLayout>
 
         <!-- Privacy -->

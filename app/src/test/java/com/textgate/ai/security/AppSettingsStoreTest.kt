@@ -11,11 +11,15 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
 /**
- * Covers the "safe by default" half of spec scenario #8: the allow-list is
- * empty and the master switch is off until the user explicitly changes
- * either, which is what makes "app not on the allow-list -> zero requests"
- * true even for an app the user has simply never opened this settings
- * screen for.
+ * Covers the "safe by default" half of spec scenario #8: the master switch
+ * is off until the user explicitly turns it on, so "app not on the
+ * allow-list -> zero requests" holds regardless of what the allow-list
+ * contains. The allow-list itself defaults to a curated set of common
+ * social-media/messaging apps (see AppSettingsStore.DEFAULT_ALLOWED_PACKAGES)
+ * rather than starting empty — a deliberate, requested trade-off so
+ * day-to-day use needs no manual per-app setup — but any app outside that
+ * curated set, or the block-list (see AppBlocklistTest), still gets zero
+ * requests without the user explicitly adding it.
  */
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [33])
@@ -29,10 +33,29 @@ class AppSettingsStoreTest {
     }
 
     @Test
-    fun `allow-list defaults to empty - no app is monitored by default`() {
+    fun `allow-list defaults to the curated social-messaging set, not empty`() {
         val store = AppSettingsStore(context)
-        assertTrue(store.getAllowedPackages().isEmpty())
-        assertFalse(store.isPackageAllowed("org.telegram.messenger"))
+        assertEquals(AppSettingsStore.DEFAULT_ALLOWED_PACKAGES, store.getAllowedPackages())
+        assertTrue(store.isPackageAllowed("org.telegram.messenger"))
+        assertTrue(store.isPackageAllowed("com.whatsapp"))
+    }
+
+    @Test
+    fun `an app outside the curated default set is not allowed until explicitly added`() {
+        val store = AppSettingsStore(context)
+        assertFalse(store.isPackageAllowed("com.example.somerandomgame"))
+    }
+
+    @Test
+    fun `explicitly disabling a default-allowed package overrides the curated default`() {
+        val store = AppSettingsStore(context)
+        assertTrue(store.isPackageAllowed("com.whatsapp"))
+
+        store.setPackageAllowed("com.whatsapp", false)
+
+        assertFalse(store.isPackageAllowed("com.whatsapp"))
+        // Every other default stays intact — disabling one doesn't clear the set.
+        assertTrue(store.isPackageAllowed("org.telegram.messenger"))
     }
 
     @Test
@@ -51,20 +74,24 @@ class AppSettingsStoreTest {
     }
 
     @Test
-    fun `allow-listing one package does not affect another`() {
+    fun `allow-listing one non-default package does not affect another`() {
         val store = AppSettingsStore(context)
-        store.setPackageAllowed("com.whatsapp", true)
-        assertFalse(store.isPackageAllowed("com.discord"))
+        store.setPackageAllowed("com.example.notesapp", true)
+        assertFalse(store.isPackageAllowed("com.example.othernotesapp"))
     }
 
     @Test
     fun `settings persist across separate store instances backed by the same context`() {
+        // Deliberately a package outside DEFAULT_ALLOWED_PACKAGES, so this
+        // only passes if the explicit choice was actually written to
+        // SharedPreferences — not just because the curated default already
+        // happened to say true.
         AppSettingsStore(context).apply {
             isAiEnabled = true
-            setPackageAllowed("com.whatsapp", true)
+            setPackageAllowed("com.example.notesapp", true)
         }
         val reloaded = AppSettingsStore(context)
         assertTrue(reloaded.isAiEnabled)
-        assertTrue(reloaded.isPackageAllowed("com.whatsapp"))
+        assertTrue(reloaded.isPackageAllowed("com.example.notesapp"))
     }
 }

@@ -16,7 +16,7 @@ import org.robolectric.annotation.Config
  * these tests exercise the real gating logic.
  *
  * Covers spec scenarios:
- *   #1 normal field + ?en -> allowed
+ *   #1 normal field + ?en -> allowed (and #1b: + ?pl -> allowed, targeting Polish)
  *   #2 normal field without ?en -> zero requests
  *   #3 password field -> zero requests even with a trigger present
  *   #8 app outside the allow-list -> zero requests
@@ -52,6 +52,23 @@ class EventGateTest {
         val ready = decision as EventGate.Decision.Ready
         assertTrue(ready.content == "nie ma pośpiechu ")
         assertTrue(ready.fullText == "nie ma pośpiechu ?en")
+        assertTrue(ready.target == TriggerDetector.Target.ENGLISH)
+        @Suppress("DEPRECATION") node.recycle()
+    }
+
+    @Test
+    fun `scenario 1b - allowed app plus pl trigger yields Ready targeting Polish`() {
+        val (gate, store) = newGate()
+        store.isAiEnabled = true
+        store.setPackageAllowed("org.telegram.messenger", true)
+        val node = editableNode("no rush at all ?pl")
+
+        val decision = gate.evaluate("org.telegram.messenger", node)
+
+        assertTrue(decision is EventGate.Decision.Ready)
+        val ready = decision as EventGate.Decision.Ready
+        assertTrue(ready.content == "no rush at all ")
+        assertTrue(ready.target == TriggerDetector.Target.POLISH)
         @Suppress("DEPRECATION") node.recycle()
     }
 

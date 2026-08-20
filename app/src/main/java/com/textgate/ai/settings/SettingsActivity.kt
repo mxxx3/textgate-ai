@@ -322,6 +322,14 @@ class SettingsActivity : Activity() {
     // ---------------------------------------------------------------
 
     private fun setupAllowedAppsSection() {
+        // The manual per-app picker starts collapsed (see the XML:
+        // layoutAppList/textAdvancedAppsHint both start GONE) — most users
+        // never need it, since AppSettingsStore.DEFAULT_ALLOWED_PACKAGES
+        // already covers common social/messaging apps with zero setup.
+        // It's still built in the background right away so expanding it
+        // feels instant rather than triggering a fresh load.
+        binding.textToggleAdvancedApps.setOnClickListener { toggleAdvancedAppsVisibility() }
+
         binding.layoutAppList.removeAllViews()
         val loadingLabel = TextView(this).apply { text = getString(R.string.allowed_apps_loading) }
         binding.layoutAppList.addView(loadingLabel)
@@ -335,6 +343,15 @@ class SettingsActivity : Activity() {
             }
             mainHandler.post { renderAppList(apps) }
         }
+    }
+
+    private fun toggleAdvancedAppsVisibility() {
+        val nowExpanded = binding.layoutAppList.visibility != View.VISIBLE
+        binding.layoutAppList.visibility = if (nowExpanded) View.VISIBLE else View.GONE
+        binding.textAdvancedAppsHint.visibility = if (nowExpanded) View.VISIBLE else View.GONE
+        binding.textToggleAdvancedApps.text = getString(
+            if (nowExpanded) R.string.btn_hide_advanced_apps else R.string.btn_show_advanced_apps
+        )
     }
 
     private fun renderAppList(apps: List<LaunchableApp>) {

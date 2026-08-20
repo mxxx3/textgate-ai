@@ -1,14 +1,20 @@
 # TextGate AI
 
-A minimal, privacy-first Android assistant that translates text you type
-into English, triggered only by typing `?en` at the end of a sentence, in
-apps you explicitly allow. Built to be small enough to read end to end in
-one sitting.
+A minimal, privacy-first Android assistant that translates text you type,
+triggered only by typing `?en` (translate to English) or `?pl` (translate
+to Polish) at the end of a sentence, in apps you allow. By default that's
+a curated set of common social-media/messaging apps, with a manual picker
+in Settings for anything else (see §2.1 and §9). Built to be small enough
+to read end to end in one sitting.
 
 ```
 Daj znać jak będziesz miał chwilę, nie ma pośpiechu ?en
                         ↓
 Let me know when you get a chance, no rush.
+
+Let me know when you get a chance, no rush ?pl
+                        ↓
+Daj znać jak będziesz miał chwilę, nie ma pośpiechu.
 ```
 
 It uses **your normal keyboard** (Gboard, SwiftKey, whatever you already
@@ -39,9 +45,9 @@ TextGateAI/
         │   │   ├── security/
         │   │   │   ├── SensitiveInputGuard.kt   (isSensitiveInput — the security gate)
         │   │   │   ├── EventGate.kt             (whitelist/blacklist/trigger decision chain)
-        │   │   │   ├── TriggerDetector.kt       (?en detection + length limit)
+        │   │   │   ├── TriggerDetector.kt       (?en/?pl detection + length limit)
         │   │   │   ├── AppBlocklist.kt          (hard-coded never-allow list)
-        │   │   │   ├── AppSettingsStore.kt      (master switch + user allow-list)
+        │   │   │   ├── AppSettingsStore.kt      (master switch + allow-list, curated default)
         │   │   │   ├── KeystoreCrypto.kt        (AES-256-GCM via AndroidKeyStore)
         │   │   │   ├── SecureApiKeyStore.kt     (encrypted API key persistence)
         │   │   │   └── ResultPolicy.kt          (only Success may touch the field)
@@ -49,14 +55,14 @@ TextGateAI/
         │   │   │   ├── NetworkAllowlist.kt      (the one allowed host)
         │   │   │   └── GeminiClient.kt          (HttpsURLConnection, no HTTP library)
         │   │   ├── model/
-        │   │   │   └── TranslationPrompts.kt    (fixed system prompt)
+        │   │   │   └── TranslationPrompts.kt    (fixed system prompts, one per trigger)
         │   │   ├── settings/
         │   │   │   ├── SettingsActivity.kt
         │   │   │   └── InstalledAppsProvider.kt
         │   │   └── util/
         │   │       └── Debouncer.kt
         │   └── res/                              (layouts, strings, xml configs)
-        ├── test/java/com/textgate/ai/            (JVM unit tests — 59 tests)
+        ├── test/java/com/textgate/ai/            (JVM unit tests — 65 tests)
         └── androidTest/java/com/textgate/ai/     (on-device Keystore test)
 ```
 
@@ -90,16 +96,18 @@ EventGate.evaluate(packageName, node)              ← SECURITY GATE
         │  1. packageName present?
         │  2. master AI switch on?           (AppSettingsStore.isAiEnabled)
         │  3. NOT hard-blocklisted?           (AppBlocklist.isBlocked)
-        │  4. on the user's allow-list?       (AppSettingsStore.isPackageAllowed)
+        │  4. on the allow-list?              (AppSettingsStore.isPackageAllowed —
+        │                                       curated default set, or the user's
+        │                                       own explicit choices once made)
         │  5. node non-null?
         │  6. node.isEditable?                (SensitiveInputGuard.isEditableTextField)
         │  7. node NOT password/sensitive?    (SensitiveInputGuard.isSensitiveInput)
         │  ── only NOW is node.text ever read ──
         ▼
 TriggerDetector.detect(fullText)
-        │  ends with exact suffix "?en"? content ≤ 4000 chars? non-empty?
+        │  ends with exact suffix "?en" or "?pl"? content ≤ 4000 chars? non-empty?
         ▼
-   Decision.Ready(content, fullText)
+   Decision.Ready(content, fullText, target)   ← target: ENGLISH or POLISH
         │  debounced 400ms; any earlier pending node is recycled, not leaked
         ▼
 confirmAndProcess(): re-validates EVERYTHING above again (settings may have
@@ -108,6 +116,7 @@ confirmAndProcess(): re-validates EVERYTHING above again (settings may have
 extract only the text before the trigger — nothing else
         ▼
 GeminiClient.translateBlocking()  — HTTPS POST, header-based API key,
+        │  system prompt chosen by target (TranslationPrompts.EN_/PL_...),
         │  connect to generativelanguage.googleapis.com ONLY
         ▼
 Gemini API response
@@ -365,12 +374,14 @@ network request, no field write):
 * the node's class name or hint text suggests a password/PIN/seed-phrase/
   CVV/OTP/card-number field
 * any exception is raised while inspecting the node
-* the app's package is not on the user's allow-list
+* the app's package is not on the allow-list (the curated default set, or
+  the user's own explicit choices once they've made any — see §14)
 * the app's package matches the hard-coded block-list (password managers,
   authenticators, OS security surfaces, named cryptocurrency wallets/
-  exchanges, or a banking/wallet/vault/crypto keyword)
-* the master "Enable ?en trigger" switch is off
-* the trigger is not an exact, case-sensitive `?en` suffix
+  exchanges, or a banking/wallet/vault/crypto keyword) — this always wins,
+  even for a package present in the curated default allow-list
+* the master "Enable ?en / ?pl triggers" switch is off
+* the trigger is not an exact, case-sensitive `?en` or `?pl` suffix
 * the text before the trigger is empty or exceeds 4000 characters
 * another trigger is already being processed (single in-flight guard)
 * the field's content changed between trigger detection and the debounce
@@ -397,7 +408,7 @@ network request, no field write):
  SECURITY GATE  (EventGate → SensitiveInputGuard, before any text read)
         │  fail ──────────────────────────────► stop, nothing read/sent
         ▼ pass
- trigger detection  ("?en" exact suffix, length ≤ 4000)
+ trigger detection  ("?en"/"?pl" exact suffix, length ≤ 4000)
         │  no match ───────────────────────────► stop, nothing sent
         ▼ match
  extract ONLY the text before the trigger
@@ -421,7 +432,8 @@ database, no file, no static/companion-object cache, no log line.
 
 **The only place text can leave the device:** the single HTTPS POST in
 `GeminiClient.translateBlocking()`, to `generativelanguage.googleapis.com`,
-containing only the text before the trigger and the fixed system prompt —
+containing only the text before the trigger and the fixed system prompt for
+the matched trigger's target language (`?en` → English, `?pl` → Polish) —
 never the package name, device identifiers, model name, prior messages,
 other on-screen text, or clipboard contents.
 
@@ -429,15 +441,15 @@ other on-screen text, or clipboard contents.
 
 ## 11. Tests
 
-### Unit tests (`./gradlew test`) — 59 tests, no device required
+### Unit tests (`./gradlew test`) — 65 tests, no device required
 
 | File | Scenarios covered |
 |---|---|
-| `TriggerDetectorTest` | exact trigger match & extraction, no-trigger, malformed/partial trigger, empty content, length limit (at and over 4000 chars) |
+| `TriggerDetectorTest` | exact `?en`/`?pl` match & extraction (each targeting the right language), no-trigger, malformed/partial trigger, empty content (both triggers), length limit (at and over 4000 chars) |
 | `SensitiveInputGuardTest` | normal field allowed, `isPassword`, all 4 required `inputType` variants, className/hint heuristics, null node, non-editable node, **exception → fail closed** |
 | `AppBlocklistTest` | known password managers/authenticators/system surfaces/crypto wallets & exchanges blocked, keyword heuristic, own-package block, ordinary messaging apps NOT blocked |
-| `AppSettingsStoreTest` | AI disabled by default, allow-list empty by default, allow/disallow round-trip, persistence |
-| `EventGateTest` | end-to-end (minus network) decision chain: allowed+trigger → Ready, no-trigger → NotTriggered, password+trigger → Blocked, **app outside allow-list → Blocked**, master switch off → Blocked, blocklist wins over a mistaken allow-list entry, null node/package → Blocked |
+| `AppSettingsStoreTest` | AI disabled by default, allow-list defaults to the curated social/messaging set (not empty), an app outside that set is unallowed until added, disabling a default-allowed package overrides its default, allow/disallow round-trip, persistence |
+| `EventGateTest` | end-to-end (minus network) decision chain: allowed+`?en` → Ready targeting English, allowed+`?pl` → Ready targeting Polish, no-trigger → NotTriggered, password+trigger → Blocked, **app outside allow-list → Blocked**, master switch off → Blocked, blocklist wins over a mistaken allow-list entry, null node/package → Blocked |
 | `GeminiClientTest` | model-id validation, blank-key rejection, invalid-model rejection, response parsing (success/empty/malformed/blank), **timeout and I/O exception classification** |
 | `ResultPolicyTest` | Success → may replace text; **every single Failure variant → may NOT replace text** |
 | `NetworkAllowlistTest` | official host allowed; look-alike/subdomain/other hosts rejected |
@@ -550,14 +562,22 @@ the log or download the artifacts.
 
 1. Open **TextGate AI**.
 2. Tap **Open Accessibility Settings**, find "TextGate AI" in the list,
-   and turn it on. (Nothing is monitored yet — the master switch and the
-   allow-list are both still off/empty at this point.)
+   and turn it on. (Nothing is monitored yet — the master switch is still
+   off at this point, regardless of the allow-list's contents.)
 3. Back in the app, paste your Gemini API key and tap **Save key
    (encrypted)**.
 4. Tap **Test API connection** to confirm the key and model work.
-5. Turn on **Enable ?en trigger**.
-6. In **Allowed apps**, switch on exactly the apps you want this to work
-   in (e.g. Telegram, WhatsApp, Signal, Discord — nothing is preselected).
+5. Turn on **Enable ?en / ?pl triggers**.
+6. That's it for most people: **Allowed apps** is pre-populated with a
+   curated set of common social-media/messaging apps (WhatsApp, Messenger,
+   Instagram, Telegram, Signal, Discord, Snapchat, TikTok, X, Threads,
+   LinkedIn, SMS/Messages, and others — the exact list is
+   `AppSettingsStore.DEFAULT_ALLOWED_PACKAGES`) with nothing further to
+   configure. If you want a different app, or want to remove one of the
+   defaults, tap **Show advanced: choose apps manually** to reveal the
+   full per-app picker — the first change you make there (adding or
+   removing any app) replaces the curated default with your own choices
+   from then on.
 
 ### Getting a Gemini API key
 
@@ -574,10 +594,11 @@ Use this to verify the built APK yourself:
 
 - [ ] `aapt dump permissions app-debug.apk` shows exactly one permission: `android.permission.INTERNET`
 - [ ] `aapt dump badging app-debug.apk` shows no `<uses-feature>` for camera/microphone/location
-- [ ] With the app freshly installed and the allow-list empty, typing `?en` anywhere produces zero network activity (verify with `adb shell cmd netstats` or a proxy)
-- [ ] Add one app to the allow-list; typing `?en` in a *different, non-allow-listed* app produces zero network activity
+- [ ] With the app freshly installed (master switch still off), typing `?en` or `?pl` anywhere produces zero network activity (verify with `adb shell cmd netstats` or a proxy)
+- [ ] With the master switch on and the allow-list at its curated default, typing `?en` in an app *not* in `AppSettingsStore.DEFAULT_ALLOWED_PACKAGES` and not manually added produces zero network activity
+- [ ] Open **Show advanced: choose apps manually** and confirm the checked apps exactly match `AppSettingsStore.DEFAULT_ALLOWED_PACKAGES`, with every known password manager/banking/authenticator/crypto-wallet package absent from the list entirely
 - [ ] In an allow-listed app, focus a password field (e.g. a login screen) and type `?en` — zero network activity, field untouched
-- [ ] In an allow-listed app, a normal text field with `?en` at the end triggers exactly one HTTPS request to `generativelanguage.googleapis.com` (check with a network proxy — traffic should be TLS to that host only)
+- [ ] In an allow-listed app, a normal text field with `?en` at the end triggers exactly one HTTPS request to `generativelanguage.googleapis.com`, and the same with `?pl`, using the correct target-language system prompt each time (check with a network proxy — traffic should be TLS to that host only)
 - [ ] Turn the master switch off; repeat the above — zero network activity
 - [ ] `adb backup` (or Settings → "Back up my data") does not include this app's data — confirm via `android:allowBackup="false"` and by inspecting the backup archive
 - [ ] `adb logcat` during a full translation cycle contains no request/response body, no API key, no field content, in a `-tag TextGate` or unfiltered search of the app's own log lines
@@ -591,7 +612,7 @@ Use this to verify the built APK yourself:
 
 **Included, complete, and ready to open in Android Studio:** every Gradle
 file, the manifest, all XML security configs, all Kotlin source, all
-layouts/strings, the ProGuard rules, and 59 unit tests plus one
+layouts/strings, the ProGuard rules, and 65 unit tests plus one
 instrumented test.
 
 **Build verification history.** The project was drafted in an environment
@@ -664,6 +685,43 @@ all found through real on-device testing:
    the standard way to tell Lint the lower-API omission is intentional and
    safe (the platform simply ignores an attribute it doesn't recognize).
 
+**Feature update (post-initial delivery, requested by the app's owner):**
+two changes beyond the original spec, both scoped so the existing security
+guarantees are unaffected:
+
+- **A second trigger, `?pl`.** `?en` still translates the preceding text
+  to English; `?pl` translates it to Polish (auto-detecting the source
+  language). `TriggerDetector.detect()` now recognizes either fixed-length
+  suffix and returns which one matched as `Outcome.Ready.target`
+  (`Target.ENGLISH` / `Target.POLISH`), threaded unchanged through
+  `EventGate.Decision.Ready` and `TextGateAccessibilityService` to select
+  the matching system prompt from `TranslationPrompts`. Every existing
+  gate — block-list, allow-list, master switch, sensitivity check, node
+  re-validation after the debounce — runs identically regardless of which
+  trigger matched; only the outbound system prompt differs.
+- **The allow-list now defaults to a curated set of common social-media
+  and messaging apps** (`AppSettingsStore.DEFAULT_ALLOWED_PACKAGES` — 
+  WhatsApp, Messenger, Instagram, Telegram, Signal, Discord, Snapchat,
+  TikTok, X, Threads, LinkedIn, Reddit, Pinterest, WeChat, LINE,
+  KakaoTalk, Viber, Skype, and SMS/Messages) instead of starting empty,
+  so most people never need to open the app-picker at all. The picker
+  itself still exists — a collapsed **"Show advanced: choose apps
+  manually"** toggle in the "Allowed apps" card reveals it — for anyone
+  who wants a different app or wants to remove a default. The first
+  explicit change made there permanently replaces the curated default
+  with the user's own choices (see the doc comment on
+  `AppSettingsStore.getAllowedPackages()`). This is a convenience change,
+  not a weaker boundary: `AppBlocklist` is still consulted independently
+  by `EventGate` for every package, default or user-added alike, so a
+  password manager, banking app, authenticator, or crypto wallet is never
+  reachable through this list regardless of what it contains.
+
+This changed the "safe by default" test in `AppSettingsStoreTest` from
+asserting an *empty* allow-list to asserting the *curated* one — see that
+file's class-level doc comment for why that's still a "zero requests
+until the user (or this curated list) says otherwise" guarantee, not a
+regression of it.
+
 ## 15. Verified build result (GitHub Actions)
 
 Confirmed on `https://github.com/mxxx3/textgate-ai`, workflow run
@@ -692,7 +750,11 @@ The `connectedAndroidTest (manual)` job (real-emulator run of
 can be run any time from the Actions tab ("Run workflow").
 
 **Note:** fixes #4 and #6 above (the cryptocurrency wallet block-list gap,
-and the landscape display-cutout inset fix) landed *after* run #4, so
-neither has yet gone through its own green CI run — push them like the
-earlier fixes and treat that run, not this one, as the current source of
-truth for `AppBlocklist.kt` and `SettingsActivity.kt`.
+and the landscape display-cutout inset fix), and the feature update
+(`?pl` trigger + curated default allow-list) described just before this
+section, all landed *after* run #4, so none of them has yet gone through
+its own green CI run — push them like the earlier fixes and treat that
+run, not this one, as the current source of truth for `AppBlocklist.kt`,
+`SettingsActivity.kt`, `TriggerDetector.kt`, `EventGate.kt`,
+`TranslationPrompts.kt`, `AppSettingsStore.kt`, and
+`TextGateAccessibilityService.kt`.

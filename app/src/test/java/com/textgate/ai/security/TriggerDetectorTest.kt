@@ -15,10 +15,30 @@ import org.junit.Test
 class TriggerDetectorTest {
 
     @Test
-    fun `exact trigger at end of text is detected and stripped`() {
+    fun `exact en trigger at end of text is detected and stripped, targeting English`() {
         val result = TriggerDetector.detect("Daj znać jak będziesz miał chwilę, nie ma pośpiechu ?en")
         val ready = result as TriggerDetector.Outcome.Ready
         assertEquals("Daj znać jak będziesz miał chwilę, nie ma pośpiechu ", ready.content)
+        assertEquals(TriggerDetector.Target.ENGLISH, ready.target)
+    }
+
+    @Test
+    fun `exact pl trigger at end of text is detected and stripped, targeting Polish`() {
+        val result = TriggerDetector.detect("Let me know when you're free, no rush ?pl")
+        val ready = result as TriggerDetector.Outcome.Ready
+        assertEquals("Let me know when you're free, no rush ", ready.content)
+        assertEquals(TriggerDetector.Target.POLISH, ready.target)
+    }
+
+    @Test
+    fun `pl trigger must be an exact case-sensitive match too`() {
+        assertTrue(TriggerDetector.detect("hello ?PL") is TriggerDetector.Outcome.NoTrigger)
+        assertTrue(TriggerDetector.detect("hello ?Pl") is TriggerDetector.Outcome.NoTrigger)
+    }
+
+    @Test
+    fun `trigger with nothing before it results in EmptyContent for pl too`() {
+        assertTrue(TriggerDetector.detect("?pl") is TriggerDetector.Outcome.EmptyContent)
     }
 
     @Test

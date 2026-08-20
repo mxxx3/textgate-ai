@@ -34,8 +34,14 @@ class EventGate(
         /** Trigger matched and content is within limits — safe to send.
          * [fullText] is the complete field text at evaluation time
          * (content + trigger), captured here so callers don't need a
-         * second, separate `node.text` read to snapshot it. */
-        data class Ready(val content: String, val fullText: String) : Decision()
+         * second, separate `node.text` read to snapshot it. [target] is
+         * which language the matched trigger asks for (see
+         * [TriggerDetector.Target]). */
+        data class Ready(
+            val content: String,
+            val fullText: String,
+            val target: TriggerDetector.Target
+        ) : Decision()
     }
 
     fun evaluate(packageName: String?, node: AccessibilityNodeInfo?): Decision {
@@ -53,7 +59,8 @@ class EventGate(
             TriggerDetector.Outcome.NoTrigger,
             TriggerDetector.Outcome.EmptyContent -> Decision.NotTriggered
             is TriggerDetector.Outcome.TooLong -> Decision.TooLong(outcome.length, outcome.limit)
-            is TriggerDetector.Outcome.Ready -> Decision.Ready(outcome.content, fullText.toString())
+            is TriggerDetector.Outcome.Ready ->
+                Decision.Ready(outcome.content, fullText.toString(), outcome.target)
         }
     }
 }

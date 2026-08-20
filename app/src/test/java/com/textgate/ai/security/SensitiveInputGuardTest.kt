@@ -9,7 +9,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.on
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 

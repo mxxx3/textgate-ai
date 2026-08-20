@@ -1,5 +1,6 @@
 package com.textgate.ai.security
 
+import android.annotation.TargetApi
 import android.os.Build
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
@@ -38,25 +39,39 @@ internal object KeystoreCrypto {
 
         (keyStore.getKey(KEY_ALIAS, null) as? SecretKey)?.let { return it }
 
-        val keyGenerator = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, ANDROID_KEYSTORE)
-
-        return try {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                keyGenerator.init(buildSpec(strongBox = true))
-                keyGenerator.generateKey()
-            } else {
-                keyGenerator.init(buildSpec(strongBox = false))
-                keyGenerator.generateKey()
-            }
-        } catch (_: StrongBoxUnavailableException) {
-            // Device has no StrongBox HSM — fall back to the standard
-            // TEE-backed Keystore key, still hardware-isolated on the vast
-            // majority of devices, never in software-only storage.
-            val fallbackGenerator =
-                KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, ANDROID_KEYSTORE)
-            fallbackGenerator.init(buildSpec(strongBox = false))
-            fallbackGenerator.generateKey()
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            generateStrongBoxPreferredKey()
+        } else {
+            generateStandardKey()
         }
+    }
+
+    /**
+     * StrongBox (a discrete hardware security module, when the device has
+     * one) is preferred on API 28+. [StrongBoxUnavailableException] itself
+     * is an API-28 class, so this whole call is isolated behind
+     * [TargetApi] — it is only ever invoked from the SDK_INT >= P branch
+     * above, never on a device where the class wouldn't be loadable.
+     */
+    @TargetApi(Build.VERSION_CODES.P)
+    private fun generateStrongBoxPreferredKey(): SecretKey {
+        val keyGenerator = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, ANDROID_KEYSTORE)
+        return try {
+            keyGenerator.init(buildSpec(strongBox = true))
+            keyGenerator.generateKey()
+        } catch (_: StrongBoxUnavailableException) {
+            // Device claims API 28+ but has no StrongBox HSM — fall back to
+            // the standard TEE-backed Keystore key, still hardware-isolated
+            // on the vast majority of devices, never in software-only
+            // storage.
+            generateStandardKey()
+        }
+    }
+
+    private fun generateStandardKey(): SecretKey {
+        val keyGenerator = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, ANDROID_KEYSTORE)
+        keyGenerator.init(buildSpec(strongBox = false))
+        return keyGenerator.generateKey()
     }
 
     private fun buildSpec(strongBox: Boolean): KeyGenParameterSpec {

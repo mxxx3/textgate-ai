@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="tg_background">#FFFFFFFF</color>
+    <color name="tg_surface">#FFF3F4F6</color>
+    <color name="tg_primary">#FF1B5E20</color>
+    <color name="tg_on_primary">#FFFFFFFF</color>
+    <color name="tg_text_primary">#FF1A1A1A</color>
+    <color name="tg_text_secondary">#FF5F6368</color>
+    <color name="tg_warning">#FFB3261E</color>
+    <color name="tg_divider">#FFE0E0E0</color>
+</resources>

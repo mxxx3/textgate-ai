@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    PERMISSION AUDIT (see README.md "Permissions" section for full detail):
+
+    android.permission.INTERNET
+        Required for the single, explicit HTTPS call this app ever makes:
+        POSTing the text the user selected with the "?en" trigger to the
+        Gemini API host declared in network_security_config.xml. Android has
+        no per-component INTERNET permission — it is process-wide — so it
+        cannot be scoped more tightly than the manifest level. Everywhere
+        else in the app, network access is prevented in software (see
+        NetworkAllowlist / GeminiClient) even though the OS grant is broad.
+
+    No other <uses-permission> is declared. In particular this app requests
+    NONE of: contacts, SMS, call logs, location, microphone, camera,
+    storage, phone state, or QUERY_ALL_PACKAGES. The accessibility
+    capability itself is not a manifest permission the app requests — it is
+    a system-mediated grant the user enables manually in Settings, scoped by
+    accessibility_service_config.xml below.
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <!--
+        Declarative package-visibility filter (Android 11+ / API 30+).
+        This lets SettingsActivity list installed, user-launchable apps for
+        the allow-list screen WITHOUT requesting the QUERY_ALL_PACKAGES
+        permission, which Play Policy restricts and which would let this
+        app see the full list of every package installed on the device
+        (far more than it needs). Only apps that expose a launcher icon are
+        visible through this filter.
+    -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.LAUNCHER" />
+        </intent>
+    </queries>
+
+    <application
+        android:name=".TextGateApplication"
+        android:allowBackup="false"
+        android:fullBackupContent="@xml/backup_rules"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:networkSecurityConfig="@xml/network_security_config"
+        android:usesCleartextTraffic="false"
+        android:theme="@style/Theme.TextGate"
+        android:supportsRtl="true">
+
+        <!--
+            Only launcher entry point. exported="true" is required for the
+            system launcher to start it; it does not accept any external
+            Intent data or deep link (no intent-filter data scheme is
+            declared), so there is no intent-injection surface here beyond
+            "start the app," which is the intended behavior of a launcher
+            activity.
+        -->
+        <activity
+            android:name=".settings.SettingsActivity"
+            android:exported="true"
+            android:launchMode="singleTop"
+            android:windowSoftInputMode="adjustResize">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!--
+            The accessibility service. android:exported="true" is mandatory
+            here: Android will not bind a service the OS Accessibility
+            framework cannot see. It is safe because:
+              1. android:permission binds it exclusively to the platform's
+                 BIND_ACCESSIBILITY_SERVICE permission, which only the
+                 system holds — no other app, however privileged, can bind
+                 to or start this service.
+              2. It declares no other intent-filter, so it cannot be
+                 triggered by an arbitrary broadcast or activity Intent.
+              3. accessibility_service_config.xml further restricts exactly
+                 which event types and window-retrieval flags it receives.
+        -->
+        <service
+            android:name=".accessibility.TextGateAccessibilityService"
+            android:exported="true"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
+            android:label="@string/app_name">
+            <intent-filter>
+                <action android:name="android.accessibilityservice.AccessibilityService" />
+            </intent-filter>
+            <meta-data
+                android:name="android.accessibilityservice"
+                android:resource="@xml/accessibility_service_config" />
+        </service>
+
+    </application>
+</manifest>

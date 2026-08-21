@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Deliberately minimal accessibility service configuration.
+
+    accessibilityEventTypes="typeViewTextChanged"
+        The ONLY event this service subscribes to. It does not receive
+        typeViewFocused, typeWindowStateChanged, typeWindowContentChanged,
+        typeViewClicked, or any other event type, so it never observes
+        navigation, clicks, scrolling, or which screens the user visits —
+        only "the text in the field currently being edited changed."
+
+    We deliberately do NOT set:
+      - android:flagRetrieveInteractiveWindows — this service never enumerates
+        or inspects any window other than the one that raised the event.
+      - android:flagIncludeNotImportantViews — decorative/non-input views are
+        never read.
+      - android:packageNames — left unset (all packages) at the OS
+        subscription level ONLY because the OS accessibility API has no
+        concept of a *dynamically user-editable* allow-list here; the real
+        enforcement happens first thing in
+        TextGateAccessibilityService.onAccessibilityEvent(), which checks
+        event.packageName against the user's saved allow-list and the
+        built-in block-list and returns immediately for anything not
+        explicitly allowed, before any further processing.
+
+    android:canRetrieveWindowContent="true" is required for
+    AccessibilityEvent#getSource() to return a usable node at all; without
+    it the service could not read the field being edited even after the
+    user grants permission. This is intentionally the ONLY window-content
+    capability granted — the service never calls
+    AccessibilityService#getWindows() or #getRootInActiveWindow(), and never
+    walks a node tree; it only ever inspects event.getSource() directly.
+
+    android:notificationTimeout="0" — events are delivered immediately, not
+    batched, so no accessibility event is ever buffered/queued by the
+    framework on our behalf.
+-->
+<accessibility-service xmlns:android="http://schemas.android.com/apk/res/android"
+    android:accessibilityEventTypes="typeViewTextChanged"
+    android:accessibilityFeedbackType="feedbackGeneric"
+    android:accessibilityFlags=""
+    android:canRetrieveWindowContent="true"
+    android:notificationTimeout="0"
+    android:description="@string/accessibility_service_description"
+    android:settingsActivity="com.textgate.ai.settings.SettingsActivity" />

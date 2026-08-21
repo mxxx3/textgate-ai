@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Legacy (pre-Android 12) full-backup ruleset. In practice
+    android:allowBackup="false" in AndroidManifest.xml already disables ALL
+    backup — Auto Backup, adb backup, and full-data backup alike — for every
+    Android version this app supports (minSdk 26). This file exists as an
+    explicit, auditable statement of intent: even if allowBackup were ever
+    flipped back on by mistake, this ruleset excludes everything, so no
+    file, database, or shared-preferences value (including the encrypted
+    Gemini API key material and the app allow-list) would be included in a
+    backup.
+-->
+<full-backup-content>
+    <exclude domain="sharedpref" path="." />
+    <exclude domain="database" path="." />
+    <exclude domain="file" path="." />
+    <exclude domain="root" path="." />
+</full-backup-content>

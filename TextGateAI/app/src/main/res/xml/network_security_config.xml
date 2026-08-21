@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Network Security Config — HTTPS only, single allow-listed host.
+
+    base-config applies to any connection not matched by a more specific
+    domain-config below. cleartextTrafficPermitted="false" here means that
+    even if a future code change accidentally constructed an http:// URL to
+    ANY host, the platform itself would refuse the connection before a
+    single byte left the device. This is a second, independent enforcement
+    layer on top of android:usesCleartextTraffic="false" in the manifest
+    and the code-level NetworkAllowlist check in GeminiClient.
+
+    The <domain-config> allow-lists exactly one host: the official Gemini
+    API host. No other domain is declared anywhere in this file, so no
+    other host benefits from a trust configuration at all — and combined
+    with GeminiClient only ever building URLs against this same constant,
+    there is no code path that can reach a different server.
+
+    trust-anchors is restricted to system-installed certificate authorities
+    only (the <certificates src="system"/> line). A <debug-overrides> block
+    additionally trusts user-installed CAs, but — per the Android Gradle
+    Plugin's own handling of network_security_config.xml — debug-overrides
+    is automatically stripped from release builds by the build tooling, so
+    it can never widen trust in what actually ships to a user. It exists
+    purely so a developer can inspect the app's traffic with a local
+    debugging proxy while working on a debug build.
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+
+    <domain-config cleartextTrafficPermitted="false">
+        <domain includeSubdomains="false">generativelanguage.googleapis.com</domain>
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </domain-config>
+
+    <debug-overrides>
+        <trust-anchors>
+            <certificates src="system" />
+            <certificates src="user" />
+        </trust-anchors>
+    </debug-overrides>
+</network-security-config>

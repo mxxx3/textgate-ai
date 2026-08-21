@@ -2,15 +2,27 @@ package com.textgate.ai.security
 
 /**
  * Detects and extracts a translation trigger from the current full text of
- * a field. Two triggers are supported, each matched as an exact,
- * case-sensitive suffix — the spec is explicit that a trigger must sit
- * exactly at the end of the current text, so no fuzzy matching, trimming,
- * or case-folding is performed here:
+ * a field. Two triggers are supported, matched as an exact, case-sensitive
+ * suffix — a trigger must sit at the end of the current text, so no
+ * case-folding and no matching mid-sentence is performed here:
  *   - "?en" — translate the preceding text into English.
  *   - "?pl" — translate the preceding text into Polish.
- * Both triggers are the same fixed length, so a given piece of text can
- * only ever end with one of them at a time; there is no ambiguity to
- * resolve between them.
+ *
+ * Two narrow, deliberate tolerances exist around the literal suffix, both
+ * added after real on-device use surfaced them — some Android keyboards'
+ * "automatic spacing" feature inserts a space right after typing "?" (since
+ * "?" normally ends a sentence), and/or a trailing space after finishing a
+ * word, before the user can act on the trigger:
+ *   - an OPTIONAL single space between "?" and the language code ("?en" or
+ *     "? en" both match; "?  en" with two spaces does not — this stays a
+ *     tolerance for one specific, observed keyboard behavior, not general
+ *     whitespace fuzzing)
+ *   - any number of trailing spaces after the language code
+ * Neither tolerance changes what gets sent: [Outcome.Ready.content] is
+ * always exactly the text before the "?", so a stray space the keyboard
+ * added around the trigger itself never ends up in the translated text.
+ * Nothing else is fuzzy — case, the language code itself, and "the trigger
+ * must be the last non-space thing in the field" are all still exact.
  *
  * This object never performs any I/O and never reads an AccessibilityNodeInfo
  * itself — it operates purely on a String the caller has already obtained
@@ -24,6 +36,9 @@ object TriggerDetector {
         POLISH
     }
 
+    /** Canonical (no-space) form of each trigger — used in UI copy, docs,
+     * and as a literal test fixture. Matching itself goes through
+     * [TRIGGER_PATTERNS], which also accepts the tolerances described above. */
     const val TRIGGER_EN: String = "?en"
     const val TRIGGER_PL: String = "?pl"
 
@@ -31,9 +46,16 @@ object TriggerDetector {
      * ever cared about the original English trigger. */
     const val TRIGGER: String = TRIGGER_EN
 
-    private val TRIGGERS: Map<String, Target> = linkedMapOf(
-        TRIGGER_EN to Target.ENGLISH,
-        TRIGGER_PL to Target.POLISH
+    /**
+     * `\z` (not `$`) is used deliberately: `$` in Java/Kotlin regex also
+     * matches just before a trailing line terminator, which would let a
+     * field ending in "?en\n" count as triggered. `\z` accepts only the
+     * true, absolute end of the text — the same "trigger must be the very
+     * last thing typed" guarantee the original exact-suffix check had.
+     */
+    private val TRIGGER_PATTERNS: Map<Regex, Target> = linkedMapOf(
+        Regex("\\?[ ]?en[ ]*\\z") to Target.ENGLISH,
+        Regex("\\?[ ]?pl[ ]*\\z") to Target.POLISH
     )
 
     const val MAX_INPUT_LENGTH: Int = 4000
@@ -62,11 +84,11 @@ object TriggerDetector {
         if (fullText.isNullOrEmpty()) return Outcome.NoTrigger
         val text = fullText.toString()
 
-        val (trigger, target) = TRIGGERS.entries.firstOrNull { (trigger, _) ->
-            text.endsWith(trigger)
-        }?.toPair() ?: return Outcome.NoTrigger
+        val (match, target) = TRIGGER_PATTERNS.entries.firstNotNullOfOrNull { (pattern, target) ->
+            pattern.find(text)?.let { it to target }
+        } ?: return Outcome.NoTrigger
 
-        val content = text.substring(0, text.length - trigger.length)
+        val content = text.substring(0, match.range.first)
         if (content.isBlank()) return Outcome.EmptyContent
         if (content.length > MAX_INPUT_LENGTH) return Outcome.TooLong(content.length, MAX_INPUT_LENGTH)
 

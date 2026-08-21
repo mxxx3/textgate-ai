@@ -66,7 +66,21 @@ class AppSettingsStore(context: Context) {
         private const val KEY_AI_ENABLED = "ai_enabled"
         private const val KEY_MODEL = "selected_model"
         private const val KEY_ALLOWED_PACKAGES = "allowed_packages"
-        const val DEFAULT_MODEL = "gemini-2.5-flash"
+
+        /**
+         * Chosen from the app owner's own Google AI Studio rate-limit
+         * dashboard: on that account, gemini-3.5-flash-lite carries by far
+         * the highest free-tier quota of any text-out model on offer (500
+         * requests/day, 15 requests/minute — roughly 25x the 20/day,
+         * 5-10/minute the other Flash-tier models get), while
+         * gemini-2.5-pro showed a flat 0/0 quota. Real-world quotas are
+         * account-specific and can change on Google's side without notice;
+         * if this default ever starts failing, check
+         * aistudio.google.com's rate-limit dashboard and update this
+         * constant (or just type a different model into Settings — nothing
+         * else in the app depends on which model is picked here).
+         */
+        const val DEFAULT_MODEL = "gemini-3.5-flash-lite"
 
         /**
          * Curated, best-effort package names for common social-media and

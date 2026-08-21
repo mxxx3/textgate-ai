@@ -78,10 +78,54 @@ class TriggerDetectorTest {
     }
 
     @Test
-    fun `trigger must be exactly at the end, not followed by anything`() {
-        assertTrue(TriggerDetector.detect("hello ?en ") is TriggerDetector.Outcome.NoTrigger)
+    fun `trigger must be at the end, not followed by real content`() {
+        // Trailing SPACES are tolerated (see the dedicated tests below) —
+        // but any actual character after the trigger still disqualifies it.
         assertTrue(TriggerDetector.detect("hello ?enX") is TriggerDetector.Outcome.NoTrigger)
         assertTrue(TriggerDetector.detect("?english") is TriggerDetector.Outcome.NoTrigger)
+        assertTrue(TriggerDetector.detect("hello ?en.") is TriggerDetector.Outcome.NoTrigger)
+    }
+
+    @Test
+    fun `a single trailing space after the trigger is tolerated (keyboard auto-space)`() {
+        val result = TriggerDetector.detect("hello ?en ")
+        val ready = result as TriggerDetector.Outcome.Ready
+        assertEquals("hello ", ready.content)
+        assertEquals(TriggerDetector.Target.ENGLISH, ready.target)
+    }
+
+    @Test
+    fun `multiple trailing spaces after the trigger are also tolerated`() {
+        assertTrue(TriggerDetector.detect("hello ?en   ") is TriggerDetector.Outcome.Ready)
+        assertTrue(TriggerDetector.detect("hello ?pl  ") is TriggerDetector.Outcome.Ready)
+    }
+
+    @Test
+    fun `a single space between the question mark and the language code is tolerated`() {
+        val enResult = TriggerDetector.detect("hello ? en")
+        val enReady = enResult as TriggerDetector.Outcome.Ready
+        assertEquals("hello ", enReady.content)
+        assertEquals(TriggerDetector.Target.ENGLISH, enReady.target)
+
+        val plResult = TriggerDetector.detect("hello ? pl")
+        val plReady = plResult as TriggerDetector.Outcome.Ready
+        assertEquals(TriggerDetector.Target.POLISH, plReady.target)
+    }
+
+    @Test
+    fun `internal space and trailing spaces both being tolerated at once`() {
+        val result = TriggerDetector.detect("hello ? en  ")
+        val ready = result as TriggerDetector.Outcome.Ready
+        assertEquals("hello ", ready.content)
+        assertEquals(TriggerDetector.Target.ENGLISH, ready.target)
+    }
+
+    @Test
+    fun `two spaces between the question mark and language code is NOT tolerated`() {
+        // The tolerance is narrowly scoped to one specific observed keyboard
+        // behavior (auto-inserting exactly one space), not general
+        // whitespace fuzzing.
+        assertTrue(TriggerDetector.detect("hello ?  en") is TriggerDetector.Outcome.NoTrigger)
     }
 
     @Test

@@ -27,7 +27,7 @@
     <string name="api_key_status_absent">No key saved yet</string>
 
     <string name="label_model">Gemini model</string>
-    <string name="hint_model">e.g. gemini-2.5-flash</string>
+    <string name="hint_model">e.g. gemini-3.5-flash-lite</string>
     <string name="model_suggestions_label">Suggestions (tap to use):</string>
 
     <string name="btn_test_api">Test API connection</string>

@@ -62,7 +62,7 @@ TextGateAI/
         │   │   └── util/
         │   │       └── Debouncer.kt
         │   └── res/                              (layouts, strings, xml configs)
-        ├── test/java/com/textgate/ai/            (JVM unit tests — 65 tests)
+        ├── test/java/com/textgate/ai/            (JVM unit tests — 71 tests)
         └── androidTest/java/com/textgate/ai/     (on-device Keystore test)
 ```
 
@@ -105,7 +105,8 @@ EventGate.evaluate(packageName, node)              ← SECURITY GATE
         │  ── only NOW is node.text ever read ──
         ▼
 TriggerDetector.detect(fullText)
-        │  ends with exact suffix "?en" or "?pl"? content ≤ 4000 chars? non-empty?
+        │  ends with "?en"/"?pl" (± one keyboard-inserted space, see §14)?
+        │  content ≤ 4000 chars? non-empty?
         ▼
    Decision.Ready(content, fullText, target)   ← target: ENGLISH or POLISH
         │  debounced 400ms; any earlier pending node is recycled, not leaked
@@ -381,7 +382,13 @@ network request, no field write):
   exchanges, or a banking/wallet/vault/crypto keyword) — this always wins,
   even for a package present in the curated default allow-list
 * the master "Enable ?en / ?pl triggers" switch is off
-* the trigger is not an exact, case-sensitive `?en` or `?pl` suffix
+* the trigger is not an exact, case-sensitive `?en`/`?pl` at the true end of
+  the text — the only tolerance is one optional space between `?` and the
+  language code, and any number of trailing spaces, both added to absorb
+  keyboards' "automatic spacing"; everything else (case, the language
+  code itself, two-or-more internal spaces, any real character after the
+  trigger) still fails to match, and the tolerated spaces are never part
+  of what's sent to Gemini (see §14)
 * the text before the trigger is empty or exceeds 4000 characters
 * another trigger is already being processed (single in-flight guard)
 * the field's content changed between trigger detection and the debounce
@@ -441,11 +448,11 @@ other on-screen text, or clipboard contents.
 
 ## 11. Tests
 
-### Unit tests (`./gradlew test`) — 65 tests, no device required
+### Unit tests (`./gradlew test`) — 71 tests, no device required
 
 | File | Scenarios covered |
 |---|---|
-| `TriggerDetectorTest` | exact `?en`/`?pl` match & extraction (each targeting the right language), no-trigger, malformed/partial trigger, empty content (both triggers), length limit (at and over 4000 chars) |
+| `TriggerDetectorTest` | exact `?en`/`?pl` match & extraction (each targeting the right language), no-trigger, malformed/partial trigger, empty content (both triggers), length limit (at and over 4000 chars), tolerated single trailing/internal space around the trigger, two internal spaces still rejected |
 | `SensitiveInputGuardTest` | normal field allowed, `isPassword`, all 4 required `inputType` variants, className/hint heuristics, null node, non-editable node, **exception → fail closed** |
 | `AppBlocklistTest` | known password managers/authenticators/system surfaces/crypto wallets & exchanges blocked, keyword heuristic, own-package block, ordinary messaging apps NOT blocked |
 | `AppSettingsStoreTest` | AI disabled by default, allow-list defaults to the curated social/messaging set (not empty), an app outside that set is unallowed until added, disabling a default-allowed package overrides its default, allow/disallow round-trip, persistence |
@@ -612,7 +619,7 @@ Use this to verify the built APK yourself:
 
 **Included, complete, and ready to open in Android Studio:** every Gradle
 file, the manifest, all XML security configs, all Kotlin source, all
-layouts/strings, the ProGuard rules, and 65 unit tests plus one
+layouts/strings, the ProGuard rules, and 71 unit tests plus one
 instrumented test.
 
 **Build verification history.** The project was drafted in an environment
@@ -722,6 +729,52 @@ file's class-level doc comment for why that's still a "zero requests
 until the user (or this curated list) says otherwise" guarantee, not a
 regression of it.
 
+**Feature update #2 (post-initial delivery, requested by the app's
+owner): tolerate keyboard auto-spacing around the trigger.** Reported from
+real use: some Android keyboards' "automatic spacing" feature inserts a
+space right after typing `?` (since it normally ends a sentence), and/or
+a trailing space once a word is finished — both landing the field's text
+one character short of the exact `?en`/`?pl` suffix the original
+`TriggerDetector` required, so the trigger silently never fired. Fixed in
+`TriggerDetector.detect()` by switching from a literal `String.endsWith`
+check to two small, fixed regexes (one per trigger language), each
+anchored to the true end of the text with `\z` (not `$`, which in
+Java/Kotlin regex also matches just before a trailing line terminator —
+`\z` keeps the "trigger must be the very last thing typed" guarantee
+exact): `\?[ ]?en[ ]*\z` and `\?[ ]?pl[ ]*\z`. In plain terms: an
+*optional single space* between `?` and the language code, and *any
+number of trailing spaces* after it, both tolerated; everything else is
+unchanged — matching is still case-sensitive, the language code itself is
+still exact, two-or-more internal spaces still fail to match (this stays
+a narrow tolerance for one observed keyboard behavior, not general
+whitespace fuzzing), and any real character after the trigger still
+disqualifies it. `Outcome.Ready.content` is computed from the regex
+match's start position (where `?` begins), so a tolerated space is never
+included in the text sent to Gemini — the security-relevant "only the
+text before the trigger, verbatim" guarantee is unaffected. Covered by
+five new `TriggerDetectorTest` cases and one new `EventGateTest`
+end-to-end case; total unit tests: 71.
+
+**Feature update #3 (post-initial delivery, requested by the app's
+owner): default model changed to `gemini-3.5-flash-lite`.** The app
+originally defaulted to `gemini-2.5-flash`. The owner's own Google AI
+Studio rate-limit dashboard (`aistudio.google.com`) showed that account
+hitting `gemini-2.5-flash`'s daily quota (peak 22 requests against a
+20/day limit) and `gemini-2.5-pro` sitting at a flat 0/0 quota — i.e. no
+free-tier access to Pro at all on that account — while
+`gemini-3.5-flash-lite` and `gemini-3.1-flash-lite` carried a 500/day,
+15/minute quota, roughly 25x more headroom. `AppSettingsStore.DEFAULT_MODEL`
+and the model-suggestion chips in `SettingsActivity` (now
+`gemini-3.5-flash-lite`, `gemini-3.1-flash-lite`, `gemini-2.5-flash`,
+`gemini-3.7-flash` — `gemini-2.5-pro` deliberately dropped from the
+suggestion list) were updated accordingly, along with the `hint_model`
+string and the manual. This is a plain configuration default, not a
+security- or architecture-relevant change: `GeminiClient` accepts any
+model ID matching its existing validation regex regardless of this
+default, so nothing else in the pipeline changes. Rate limits are
+account-specific and change over time on Google's side — see the doc
+comment on `DEFAULT_MODEL` for how to re-check and update it later.
+
 ## 15. Verified build result (GitHub Actions)
 
 Confirmed on `https://github.com/mxxx3/textgate-ai`, workflow run
@@ -750,11 +803,12 @@ The `connectedAndroidTest (manual)` job (real-emulator run of
 can be run any time from the Actions tab ("Run workflow").
 
 **Note:** fixes #4 and #6 above (the cryptocurrency wallet block-list gap,
-and the landscape display-cutout inset fix), and the feature update
-(`?pl` trigger + curated default allow-list) described just before this
-section, all landed *after* run #4, so none of them has yet gone through
-its own green CI run — push them like the earlier fixes and treat that
-run, not this one, as the current source of truth for `AppBlocklist.kt`,
-`SettingsActivity.kt`, `TriggerDetector.kt`, `EventGate.kt`,
-`TranslationPrompts.kt`, `AppSettingsStore.kt`, and
-`TextGateAccessibilityService.kt`.
+and the landscape display-cutout inset fix), and all three feature updates
+(`?pl` trigger + curated default allow-list; keyboard auto-spacing
+tolerance around the trigger; default model changed to
+`gemini-3.5-flash-lite`) described just before this section, all landed
+*after* run #4, so none of them has yet gone through its own green CI run
+— push them like the earlier fixes and treat that run, not this one, as
+the current source of truth for `AppBlocklist.kt`, `SettingsActivity.kt`,
+`TriggerDetector.kt`, `EventGate.kt`, `TranslationPrompts.kt`,
+`AppSettingsStore.kt`, and `TextGateAccessibilityService.kt`.

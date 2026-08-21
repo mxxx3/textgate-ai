@@ -73,6 +73,23 @@ class EventGateTest {
     }
 
     @Test
+    fun `scenario 1c - a keyboard-inserted trailing space after the trigger still yields Ready`() {
+        val (gate, store) = newGate()
+        store.isAiEnabled = true
+        store.setPackageAllowed("org.telegram.messenger", true)
+        // Simulates auto-spacing keyboards that insert a stray space right
+        // after the trigger before the field can be re-checked.
+        val node = editableNode("nie ma pośpiechu ?en ")
+
+        val decision = gate.evaluate("org.telegram.messenger", node)
+
+        assertTrue(decision is EventGate.Decision.Ready)
+        val ready = decision as EventGate.Decision.Ready
+        assertTrue(ready.content == "nie ma pośpiechu ")
+        @Suppress("DEPRECATION") node.recycle()
+    }
+
+    @Test
     fun `scenario 2 - normal typing without trigger yields NotTriggered`() {
         val (gate, store) = newGate()
         store.isAiEnabled = true

@@ -42,11 +42,20 @@ class SettingsActivity : Activity() {
     private val mainHandler = Handler(Looper.getMainLooper())
     private var backgroundExecutor: ExecutorService? = null
 
+    // Ordered by what actually has free-tier headroom on the app owner's
+    // own Google AI Studio account (checked via aistudio.google.com's
+    // rate-limit dashboard): the two "Flash Lite" models carry by far the
+    // highest daily quota, gemini-2.5-flash is a solid known-good
+    // fallback, and gemini-3.7-flash is the most capable option for the
+    // rare case a translation needs more than Flash-Lite-level reasoning.
+    // gemini-2.5-pro is deliberately left out — it showed a flat 0/0 quota
+    // on that dashboard, so suggesting it here would just invite another
+    // guaranteed-to-fail tap. See AppSettingsStore.DEFAULT_MODEL.
     private val modelSuggestions = listOf(
+        "gemini-3.5-flash-lite",
+        "gemini-3.1-flash-lite",
         "gemini-2.5-flash",
-        "gemini-2.5-pro",
-        "gemini-3.7-flash",
-        "gemini-3.6-flash"
+        "gemini-3.7-flash"
     )
 
     override fun onCreate(savedInstanceState: Bundle?) {

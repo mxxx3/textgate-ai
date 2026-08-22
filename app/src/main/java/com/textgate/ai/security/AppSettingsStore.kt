@@ -88,6 +88,13 @@ class AppSettingsStore(context: Context) {
         private const val KEY_AI_ENABLED = "ai_enabled"
         private const val KEY_MODEL = "selected_model"
         private const val KEY_ALLOWED_PACKAGES = "allowed_packages"
+        private const val KEY_BUBBLE_TARGET_LANGUAGE = "bubble_target_language"
+
+        /** Polish, since that is this app's owner's primary translation
+         * need for received messages — see the long-press bubble feature
+         * (BubbleTranslateGate / TranslationBubble). The user can change
+         * this at any time in Settings. */
+        val DEFAULT_BUBBLE_TARGET_LANGUAGE: TriggerDetector.Target = TriggerDetector.Target.POLISH
 
         /**
          * Chosen from the app owner's own Google AI Studio rate-limit

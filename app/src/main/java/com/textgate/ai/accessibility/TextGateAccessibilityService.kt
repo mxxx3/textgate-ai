@@ -195,23 +195,37 @@ class TextGateAccessibilityService : AccessibilityService() {
      * a stream of rapid-fire events that needs settling.
      */
     private fun handleLongClick(event: AccessibilityEvent) {
-        // Same cheap short-circuit as the typed-trigger path: only one AI
-        // request of either kind runs at a time.
-        if (requestInFlight.get()) return
-
         val packageName = event.packageName?.toString()
         val node = event.source
 
+        val diagBounds = Rect()
+        try {
+            node?.getBoundsInScreen(diagBounds)
+        } catch (_: Exception) {
+            // Leave as zero-rect; the bubble's own clamping keeps it on screen.
+        }
+
         // ============================================================
-        // TEMPORARY DIAGNOSTIC — added to investigate why the bubble
-        // appears in Telegram but not in WhatsApp/SMS. Shows ONLY the
-        // package name (not sensitive — already used everywhere for
-        // gating) and, if blocked, BubbleTranslateGate's abstract block
-        // reason string (e.g. "empty text", "not allow-listed") — NEVER
-        // the message content itself. Remove both toast lines below (and
-        // this comment block) once the root cause is confirmed and fixed.
-        showToast("DIAG: long-click received, package=$packageName")
+        // TEMPORARY DIAGNOSTIC (v2) — added to investigate why the bubble
+        // appears in Telegram but not in WhatsApp/SMS. The first version
+        // of this diagnostic used a Toast, which produced no visible
+        // result anywhere (even in Telegram, where the real feature
+        // works) — Toasts fired from an AccessibilityService are known to
+        // be unreliable on some Android versions/OEM skins. This version
+        // reuses the SAME overlay-bubble rendering path the real feature
+        // already uses successfully, removing that uncertainty entirely.
+        // Shows ONLY the package name (not sensitive — already used
+        // everywhere for gating) and, if blocked, BubbleTranslateGate's
+        // abstract block reason string (e.g. "empty text",
+        // "not allow-listed") — NEVER the message content itself. Remove
+        // this call and the one further below (plus this comment block)
+        // once the root cause is confirmed and fixed.
+        bubble.showResult(diagBounds, "DIAG: long-click seen\npackage=$packageName")
         // ============================================================
+
+        // Same cheap short-circuit as the typed-trigger path: only one AI
+        // request of either kind runs at a time.
+        if (requestInFlight.get()) return
 
         // BubbleTranslateGate performs every remaining check — block-list,
         // allow-list, master switch, sensitivity (deliberately NOT
@@ -234,8 +248,12 @@ class TextGateAccessibilityService : AccessibilityService() {
                 startBubbleTranslation(decision.text, bounds)
             }
             is BubbleTranslateGate.Decision.Blocked -> {
-                // TEMPORARY DIAGNOSTIC — see comment above; remove with it.
-                showToast("DIAG: blocked - ${decision.reason}")
+                // TEMPORARY DIAGNOSTIC (v2) — see comment above; remove
+                // with it. Overwrites the "long-click seen" bubble above
+                // with the specific reason it was blocked, so that bubble
+                // stays on screen (rather than being silently dismissed)
+                // whenever the event fires but gating stops it.
+                bubble.showResult(diagBounds, "DIAG blocked:\n${decision.reason}")
                 node?.let { recycleSafely(it) }
             }
         }

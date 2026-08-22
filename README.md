@@ -151,10 +151,16 @@ Any on-screen text, in an allowed app (need NOT be editable — a received
 message bubble, a comment, a label — this is the whole point)
         │  user long-presses it
         ▼
-fires AccessibilityEvent.TYPE_VIEW_LONG_CLICKED
+fires AccessibilityEvent.TYPE_VIEW_LONG_CLICKED (standard long-press
+        signal — WhatsApp, Telegram) OR AccessibilityEvent.TYPE_VIEW_SELECTED
+        (fallback for apps whose long-press enters a multi-select mode
+        WITHOUT ever dispatching TYPE_VIEW_LONG_CLICKED — see the
+        "Known limitation / in-progress" note below and
+        accessibility_service_config.xml)
         ▼
 TextGateAccessibilityService.handleLongClick()
-        │  (the ONLY other event type this service subscribes to — see
+        │  (routed here from EITHER of the two event types above — the
+        │   ONLY other event types this service subscribes to; see
         │   accessibility_service_config.xml)
         ▼
 BubbleTranslateGate.evaluate(packageName, node)     ← SECURITY GATE
@@ -196,6 +202,31 @@ Critically, this pipeline **never writes anything back** to the app being
 read — `ACTION_SET_TEXT` is only ever used by the typed-trigger pipeline
 above. The bubble is a read-only, temporary overlay; the message the user
 long-pressed is left completely untouched in its original app.
+
+**Known limitation / in-progress (as of 1.2.4):** real-device testing
+showed the bubble works in Telegram, and (after a fix — see §14 "Amendment
+to Feature update #6") in WhatsApp, but the stock/Google Messages SMS app
+never dispatched `TYPE_VIEW_LONG_CLICKED` at all for a long-press on a
+message. The `TYPE_VIEW_SELECTED` subscription above is an evidence-driven
+*hypothesis*, not a confirmed fix: Google Messages, like many apps,
+implements "long-press to enter multi-select mode" via its own touch/
+gesture handling rather than `View.performLongClick()` — the standard path
+that dispatches `TYPE_VIEW_LONG_CLICKED` — but entering that selection
+state is still expected to mark the row `isSelected` and announce that
+state change to accessibility services, which `TYPE_VIEW_SELECTED` reports.
+This still uses only standard, purpose-built accessibility signals — never
+raw touch/motion tracking (`flagRequestTouchExplorationMode`) and never
+screenshot-based OCR, both of which were considered and rejected: raw
+touch tracking would turn the whole device into TalkBack-style navigation,
+and OCR would (a) still not explain why no event fires at all without ALSO
+adding raw touch tracking, (b) require a new third-party dependency
+(breaking this project's zero-production-dependency principle — see §4),
+(c) read the entire screen instead of one scoped node, and (d) cannot
+reliably exclude password/sensitive on-screen content, which would break
+this app's core security guarantee. This section will be updated once
+real-device testing confirms whether `TYPE_VIEW_SELECTED` actually fires
+for Google Messages; if it does not, SMS support is likely to be
+documented as an accepted limitation rather than pursued further.
 
 ### 2.2 Why the code is organized this way
 
@@ -280,7 +311,7 @@ which is not a runtime/dangerous permission at all.
 **Accessibility** is not a manifest permission — it's a system-mediated
 capability the user grants manually in Settings → Accessibility, and its
 scope is further restricted by `accessibility_service_config.xml`
-(two event types, no window enumeration; see §2 and §8).
+(three event types, no window enumeration; see §2 and §8).
 
 **The long-press translation bubble (§2.1b) still requests no new
 permission.** It is a `WindowManager` overlay of type
@@ -1110,6 +1141,54 @@ different: the long-click event might genuinely never fire there at all
 text the way WhatsApp's did. This needs to be re-confirmed on-device with
 this fix in place before concluding whether it's fixed, unrelated, or a
 platform limitation this app cannot work around.
+
+**Second amendment to Feature update #6: `TYPE_VIEW_SELECTED` added as an
+experimental fallback for SMS (v1.2.4, unconfirmed as of this writing).**
+Confirmed the diagnostic never appearing for the stock/Google Messages SMS
+app (the phone this is being tested on identified itself as a "Pixel"-class
+stock-Android device, i.e. Google's own Messages app) meant
+`handleLongClick()` was never even being invoked there — the OS was not
+dispatching `TYPE_VIEW_LONG_CLICKED` for that app's message list at all, a
+different and deeper problem than WhatsApp's blank-text issue above.
+
+Before reaching for anything invasive, OCR-based screenshot text
+extraction was considered and explicitly rejected, for four reasons: (1)
+it would not, by itself, solve "no event fires at all" — it would still
+need raw touch/motion tracking on top of it to know *when* to run; (2) it
+would require a new third-party dependency (e.g. ML Kit), breaking this
+project's zero-production-dependency principle (§4); (3) it would have to
+read the entire screen rather than one scoped accessibility node; and (4),
+most importantly, it cannot reliably exclude password/sensitive on-screen
+content the way `SensitiveInputGuard` does today, which would break this
+app's core security guarantee. Raw touch/motion-event tracking via
+`flagRequestTouchExplorationMode` was rejected earlier in this project for
+a related reason: it would turn the whole device into TalkBack-style
+screen-reader navigation just to detect one gesture.
+
+The fallback actually implemented instead: subscribing to the standard,
+purpose-built `AccessibilityEvent.TYPE_VIEW_SELECTED` event alongside
+`TYPE_VIEW_LONG_CLICKED` (see `accessibility_service_config.xml`), on the
+hypothesis that Google Messages — like other apps with a custom
+long-press-to-multi-select UI — marks the long-pressed row `isSelected`
+via its own touch handling without ever calling
+`View.performLongClick()`, but that entering that selection state is still
+expected to be announced to accessibility services in the standard way.
+`TextGateAccessibilityService.handleEvent()` now routes both event types
+to the same `handleLongClick()`, which does not need to know or care which
+of the two fired, since `BubbleTranslateGate`'s gating and text-resolution
+logic is identical either way. This is still a standard accessibility
+signal, not raw touch tracking, and still requires no additional
+capability flag or permission.
+
+**This is a hypothesis, not a confirmed fix** — exactly like the WhatsApp
+diagnostic-first approach above, it needs the same evidence-based
+verification: deploy, long-press a message in the Google Messages SMS app
+with the temporary diagnostic (below) still active, and see whether "DIAG:
+long-click seen" or "DIAG blocked: ..." now appears at all. If it does not,
+the honest conclusion will likely be that SMS support is a platform
+limitation this app cannot address without the invasive approaches already
+rejected above, and that will be documented here as an accepted limitation
+rather than pursued further.
 
 **Temporary diagnostic (in progress, not a permanent feature, v2) in
 `handleLongClick()`.** On real devices, the long-press bubble (§2.1b)

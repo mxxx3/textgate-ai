@@ -47,11 +47,18 @@ import java.util.concurrent.atomic.AtomicBoolean
  *     intentionally skips ONLY the editability check, since its entire
  *     purpose is reading non-editable received content — see
  *     BubbleTranslateGate's class doc for why that is safe).
- *   - Only [AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED] and
- *     [AccessibilityEvent.TYPE_VIEW_LONG_CLICKED] are subscribed to (see
+ *   - Only [AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED],
+ *     [AccessibilityEvent.TYPE_VIEW_LONG_CLICKED], and
+ *     [AccessibilityEvent.TYPE_VIEW_SELECTED] are subscribed to (see
  *     accessibility_service_config.xml) — this service never calls
- *     getWindows(), getRootInActiveWindow(), or walks a node tree. It only
- *     ever inspects `event.source` for the event actually delivered.
+ *     getWindows() or getRootInActiveWindow(), and never enumerates any
+ *     window other than the one that raised the event. It only ever
+ *     inspects `event.source` for the event actually delivered, and —
+ *     for the long-press bubble path ONLY, when that node's own text is
+ *     blank — that SAME node's own bounded set of descendants (see
+ *     [BubbleTranslateGate]'s "Where the text actually lives" doc
+ *     section). The typed-trigger path never does even that much: it
+ *     only ever reads `event.source` directly, nothing further.
  *   - No AccessibilityEvent is ever stored past the return of
  *     onAccessibilityEvent(); only a single AccessibilityNodeInfo may be
  *     held briefly (bounded by [DEBOUNCE_MS] plus one network round trip
@@ -139,7 +146,17 @@ class TextGateAccessibilityService : AccessibilityService() {
 
         when (event.eventType) {
             AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED -> handleTextChanged(event)
-            AccessibilityEvent.TYPE_VIEW_LONG_CLICKED -> handleLongClick(event)
+            // Both routed to the same handler: TYPE_VIEW_LONG_CLICKED is the
+            // standard long-press signal (works in WhatsApp/Telegram);
+            // TYPE_VIEW_SELECTED is a fallback for apps (confirmed: the
+            // stock/Google Messages SMS app) whose long-press enters a
+            // multi-select mode instead, without ever dispatching
+            // TYPE_VIEW_LONG_CLICKED — see accessibility_service_config.xml.
+            // handleLongClick() itself doesn't need to know or care which
+            // of the two fired; the gating and text-resolution logic is
+            // identical either way.
+            AccessibilityEvent.TYPE_VIEW_LONG_CLICKED,
+            AccessibilityEvent.TYPE_VIEW_SELECTED -> handleLongClick(event)
             else -> return
         }
     }

@@ -2,12 +2,32 @@
 <!--
     Deliberately minimal accessibility service configuration.
 
-    accessibilityEventTypes="typeViewTextChanged"
-        The ONLY event this service subscribes to. It does not receive
-        typeViewFocused, typeWindowStateChanged, typeWindowContentChanged,
-        typeViewClicked, or any other event type, so it never observes
-        navigation, clicks, scrolling, or which screens the user visits —
-        only "the text in the field currently being edited changed."
+    accessibilityEventTypes="typeViewTextChanged|typeViewLongClicked"
+        The ONLY two event types this service subscribes to.
+
+        typeViewTextChanged powers the typed "?en"/"?pl" trigger pathway:
+        "the text in the field currently being edited changed."
+
+        typeViewLongClicked powers the separate long-press "translate what's
+        under my finger" bubble pathway, added later: "the user long-pressed
+        a view." This is the standard, purpose-built accessibility signal
+        for a long-press and requires no additional capability flag to
+        receive — in particular it does NOT require
+        flagRequestTouchExplorationMode, which would turn the whole device
+        into TalkBack-style screen-reader navigation and was deliberately
+        rejected as a way to detect this gesture. One direct consequence of
+        using this event instead of raw touch tracking: this service cannot
+        observe exactly when the user's finger lifts off the screen, only
+        that a long-press happened — which is why the resulting translation
+        bubble (see TranslationBubble.kt) dismisses itself via an explicit
+        close button, a tap outside the bubble, or an auto-dismiss timer,
+        rather than "on finger release."
+
+        This service still does NOT receive typeViewFocused,
+        typeWindowStateChanged, typeWindowContentChanged, typeViewClicked
+        (a normal, non-long tap), or any other event type — it still never
+        observes navigation, scrolling, or which screens the user visits,
+        only "a field's text changed" and "a view was long-pressed."
 
     We deliberately do NOT set:
       - android:flagRetrieveInteractiveWindows — this service never enumerates
@@ -21,22 +41,26 @@
         TextGateAccessibilityService.onAccessibilityEvent(), which checks
         event.packageName against the user's saved allow-list and the
         built-in block-list and returns immediately for anything not
-        explicitly allowed, before any further processing.
+        explicitly allowed, before any further processing. This is true for
+        BOTH event types: the long-press bubble pathway is gated by
+        BubbleTranslateGate, which enforces the exact same block-list and
+        allow-list as the typed-trigger pathway (see BubbleTranslateGate.kt).
 
     android:canRetrieveWindowContent="true" is required for
     AccessibilityEvent#getSource() to return a usable node at all; without
-    it the service could not read the field being edited even after the
-    user grants permission. This is intentionally the ONLY window-content
-    capability granted — the service never calls
-    AccessibilityService#getWindows() or #getRootInActiveWindow(), and never
-    walks a node tree; it only ever inspects event.getSource() directly.
+    it the service could not read the field being edited, nor the
+    long-pressed message content, even after the user grants permission.
+    This is intentionally the ONLY window-content capability granted — the
+    service never calls AccessibilityService#getWindows() or
+    #getRootInActiveWindow(), and never walks a node tree; it only ever
+    inspects event.getSource() directly, for both event types.
 
     android:notificationTimeout="0" — events are delivered immediately, not
     batched, so no accessibility event is ever buffered/queued by the
     framework on our behalf.
 -->
 <accessibility-service xmlns:android="http://schemas.android.com/apk/res/android"
-    android:accessibilityEventTypes="typeViewTextChanged"
+    android:accessibilityEventTypes="typeViewTextChanged|typeViewLongClicked"
     android:accessibilityFeedbackType="feedbackGeneric"
     android:accessibilityFlags=""
     android:canRetrieveWindowContent="true"

@@ -38,6 +38,28 @@ class AppSettingsStore(context: Context) {
         set(value) = prefs.edit().putString(KEY_MODEL, value.trim()).apply()
 
     /**
+     * Target language for the long-press "translate what's under my
+     * finger" bubble (see [com.textgate.ai.security.BubbleTranslateGate]
+     * and [com.textgate.ai.accessibility.TranslationBubble]) — deliberately
+     * a SEPARATE setting from the `?en`/`?pl` typed triggers, since this
+     * feature has no per-use trigger to encode a language choice in: the
+     * user picks one default once, here, in Settings.
+     */
+    var bubbleTargetLanguage: TriggerDetector.Target
+        get() = when (prefs.getString(KEY_BUBBLE_TARGET_LANGUAGE, null)) {
+            "EN" -> TriggerDetector.Target.ENGLISH
+            "PL" -> TriggerDetector.Target.POLISH
+            else -> DEFAULT_BUBBLE_TARGET_LANGUAGE
+        }
+        set(value) = prefs.edit().putString(
+            KEY_BUBBLE_TARGET_LANGUAGE,
+            when (value) {
+                TriggerDetector.Target.ENGLISH -> "EN"
+                TriggerDetector.Target.POLISH -> "PL"
+            }
+        ).apply()
+
+    /**
      * The allow-list as it stands: the user's own explicit choices once
      * they have made any (even down to an empty set, e.g. after removing
      * every default), or else [DEFAULT_ALLOWED_PACKAGES] as long as the

@@ -2,10 +2,16 @@ package com.textgate.ai.settings
 
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
+import android.graphics.drawable.Drawable
 import com.textgate.ai.security.AppBlocklist
 
-data class LaunchableApp(val packageName: String, val label: String)
+/** [icon] is the app's REAL launcher icon loaded straight from
+ * PackageManager (see [InstalledAppsProvider.listLaunchableApps]) — never a
+ * fabricated or generic graphic. It is null only when the platform itself
+ * could not supply one for that app, in which case the UI falls back to a
+ * neutral placeholder glyph (see `R.drawable.ic_default_app`) rather than
+ * inventing a stand-in that could be mistaken for that app's real icon. */
+data class LaunchableApp(val packageName: String, val label: String, val icon: Drawable?)
 
 /**
  * Lists installed, user-launchable apps using the declarative <queries>
@@ -43,7 +49,19 @@ object InstalledAppsProvider {
                     null
                 } ?: packageName
 
-                LaunchableApp(packageName = packageName, label = label)
+                // Loaded straight from PackageManager's own resolved
+                // ResolveInfo — the same real icon the OS launcher itself
+                // would show for this app. Wrapped in try/catch since icon
+                // resource loading can, in rare cases (a malformed or
+                // uninstalled-mid-query APK), throw; a failure here is not
+                // fatal to listing the app, just to showing its icon.
+                val icon = try {
+                    resolveInfo.loadIcon(packageManager)
+                } catch (_: Exception) {
+                    null
+                }
+
+                LaunchableApp(packageName = packageName, label = label, icon = icon)
             }
             .distinctBy { it.packageName }
             .sortedBy { it.label.lowercase() }

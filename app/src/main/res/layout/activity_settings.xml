@@ -52,6 +52,54 @@
                 android:text="@string/master_switch_description"
                 android:textSize="13sp"
                 android:textColor="@color/tg_text_secondary" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="14dp"
+                android:layout_marginBottom="12dp"
+                android:background="@color/tg_divider" />
+
+            <!-- Default target language for the long-press "translate a
+                 received message" bubble feature. Deliberately placed here,
+                 under AI transformation, rather than as its own separate
+                 card. -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/bubble_language_label"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:textColor="@color/tg_text_primary" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="@string/bubble_language_description"
+                android:textSize="13sp"
+                android:textColor="@color/tg_text_secondary" />
+
+            <RadioGroup
+                android:id="@+id/radioGroupBubbleLanguage"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal">
+
+                <RadioButton
+                    android:id="@+id/radioBubbleEnglish"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/language_english" />
+
+                <RadioButton
+                    android:id="@+id/radioBubblePolish"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="24dp"
+                    android:text="@string/language_polish" />
+            </RadioGroup>
         </LinearLayout>
 
         <!-- Accessibility status -->

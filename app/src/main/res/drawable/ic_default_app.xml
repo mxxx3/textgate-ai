@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Generic placeholder icon shown in the "Allowed apps" list ONLY when the
+    real icon for an installed app could not be loaded from PackageManager
+    (see InstalledAppsProvider.kt / SettingsActivity.renderAppList()). This
+    is a plain, neutral rounded-square glyph — it never claims to represent
+    a specific app, unlike the real per-app icons this list otherwise shows.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="32dp"
+    android:height="32dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24"
+    android:tint="@color/tg_text_secondary">
+    <path
+        android:fillColor="#FF000000"
+        android:pathData="M5,3C3.9,3 3,3.9 3,5L3,19C3,20.1 3.9,21 5,21L19,21C20.1,21 21,20.1 21,19L21,5C21,3.9 20.1,3 19,3L5,3zM5,5L19,5L19,19L5,19L5,5z" />
+    <path
+        android:fillColor="#FF000000"
+        android:pathData="M7,7L17,7L17,9L7,9z" />
+    <path
+        android:fillColor="#FF000000"
+        android:pathData="M7,11L14,11L14,13L7,13z" />
+    <path
+        android:fillColor="#FF000000"
+        android:pathData="M7,15L11,15L11,17L7,17z" />
+</vector>

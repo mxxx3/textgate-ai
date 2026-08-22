@@ -8,4 +8,9 @@
     <color name="tg_text_secondary">#FF5F6368</color>
     <color name="tg_warning">#FFB3261E</color>
     <color name="tg_divider">#FFE0E0E0</color>
+    <!-- Text/icon color for the floating long-press translation bubble.
+         The bubble background is tg_primary (see bg_bubble.xml), so this
+         is fixed white regardless of theme rather than following
+         tg_text_primary, which assumes a light background. -->
+    <color name="tg_bubble_text">#FFFFFFFF</color>
 </resources>

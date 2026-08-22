@@ -41,13 +41,15 @@ TextGateAI/
         │   ├── java/com/textgate/ai/
         │   │   ├── TextGateApplication.kt
         │   │   ├── accessibility/
-        │   │   │   └── TextGateAccessibilityService.kt   ← the whole pipeline
+        │   │   │   ├── TextGateAccessibilityService.kt   ← both pipelines
+        │   │   │   └── TranslationBubble.kt     (the long-press overlay bubble window)
         │   │   ├── security/
         │   │   │   ├── SensitiveInputGuard.kt   (isSensitiveInput — the security gate)
-        │   │   │   ├── EventGate.kt             (whitelist/blacklist/trigger decision chain)
+        │   │   │   ├── EventGate.kt             (typed-trigger decision chain)
+        │   │   │   ├── BubbleTranslateGate.kt   (long-press decision chain — see §2.1b)
         │   │   │   ├── TriggerDetector.kt       (?en/?pl detection + length limit)
         │   │   │   ├── AppBlocklist.kt          (hard-coded never-allow list)
-        │   │   │   ├── AppSettingsStore.kt      (master switch + allow-list, curated default)
+        │   │   │   ├── AppSettingsStore.kt      (master switch + allow-list + bubble language, curated default)
         │   │   │   ├── KeystoreCrypto.kt        (AES-256-GCM via AndroidKeyStore)
         │   │   │   ├── SecureApiKeyStore.kt     (encrypted API key persistence)
         │   │   │   └── ResultPolicy.kt          (only Success may touch the field)
@@ -58,11 +60,14 @@ TextGateAI/
         │   │   │   └── TranslationPrompts.kt    (fixed system prompts, one per trigger)
         │   │   ├── settings/
         │   │   │   ├── SettingsActivity.kt
-        │   │   │   └── InstalledAppsProvider.kt
+        │   │   │   └── InstalledAppsProvider.kt (also loads each app's real icon)
         │   │   └── util/
         │   │       └── Debouncer.kt
-        │   └── res/                              (layouts, strings, xml configs)
-        ├── test/java/com/textgate/ai/            (JVM unit tests — 71 tests)
+        │   └── res/
+        │       ├── values/strings.xml            (English — default/fallback)
+        │       ├── values-pl/strings.xml          (Polish — auto-selected by system language)
+        │       └── ...                            (layouts, other xml configs)
+        ├── test/java/com/textgate/ai/            (JVM unit tests — 82 tests)
         └── androidTest/java/com/textgate/ai/     (on-device Keystore test)
 ```
 
@@ -135,6 +140,63 @@ off mid-request, the whole operation aborts silently — no request is sent,
 or if one was already in flight, its result is discarded and the field is
 left exactly as the user left it.
 
+### 2.1b The second pipeline: long-press "translate a received message"
+
+Added as a feature update after the original spec (see §14) — a second,
+independent pipeline for translating text the user did **not** write: a
+received message or comment, long-pressed and held.
+
+```
+Any on-screen text, in an allowed app (need NOT be editable — a received
+message bubble, a comment, a label — this is the whole point)
+        │  user long-presses it
+        ▼
+fires AccessibilityEvent.TYPE_VIEW_LONG_CLICKED
+        ▼
+TextGateAccessibilityService.handleLongClick()
+        │  (the ONLY other event type this service subscribes to — see
+        │   accessibility_service_config.xml)
+        ▼
+BubbleTranslateGate.evaluate(packageName, node)     ← SECURITY GATE
+        │  1. packageName present?
+        │  2. master AI switch on?           (AppSettingsStore.isAiEnabled)
+        │  3. NOT hard-blocklisted?           (AppBlocklist.isBlocked)
+        │  4. on the allow-list?              (AppSettingsStore.isPackageAllowed —
+        │                                       the SAME list the typed-trigger
+        │                                       pathway uses)
+        │  5. node non-null?
+        │  6. node NOT password/sensitive?    (SensitiveInputGuard.isSensitiveInput
+        │                                       — deliberately NO editability
+        │                                       check here; see BubbleTranslateGate's
+        │                                       class doc for why that's still safe)
+        │  ── only NOW is node.text ever read ──
+        ▼
+   Decision.Ready(text)
+        │  no debounce — a long-press is already one discrete gesture
+        ▼
+GeminiClient.translateBlocking() — same HTTPS call, same host allowlist,
+        │  system prompt chosen by the user's saved
+        │  AppSettingsStore.bubbleTargetLanguage (Settings → under
+        │  "AI transformation")
+        ▼
+Gemini API response
+        │
+        ▼
+TranslationBubble — a WindowManager overlay (TYPE_ACCESSIBILITY_OVERLAY,
+        no extra permission needed — see §3) shown near the long-pressed
+        text. Dynamically sized to the translated text (wrap_content, capped
+        at a max width/height with internal scroll for a very long message —
+        never fixed or full-screen). Dismissed by an explicit X button, a
+        tap anywhere outside the bubble, or an auto-dismiss timer — never by
+        "finger release," which this event type cannot observe (see the doc
+        comment on typeViewLongClicked in accessibility_service_config.xml).
+```
+
+Critically, this pipeline **never writes anything back** to the app being
+read — `ACTION_SET_TEXT` is only ever used by the typed-trigger pipeline
+above. The bubble is a read-only, temporary overlay; the message the user
+long-pressed is left completely untouched in its original app.
+
 ### 2.2 Why the code is organized this way
 
 * **`SensitiveInputGuard.isSensitiveInput(node)`** is the single function
@@ -150,6 +212,18 @@ left exactly as the user left it.
   decision is one reviewable, independently unit-tested class — not
   logic scattered across the accessibility service. The service calls
   this exact class; the unit tests exercise this exact class.
+
+* **`BubbleTranslateGate`** is `EventGate`'s counterpart for the long-press
+  pathway (§2.1b) — kept as its own separate class, not a branch inside
+  `EventGate`, specifically because it protects a fundamentally different
+  kind of read (arbitrary on-screen text the user is *reading*, not a
+  field the user is *editing*) and deliberately omits the editability
+  check that would otherwise reject every legitimate long-press. Keeping
+  the two gates separate makes it possible to see, at a glance and without
+  cross-referencing, exactly what each pathway is and is not allowed to
+  touch. Every other check — block-list, allow-list, master switch, and
+  the password/sensitive-field check — is shared and identical between the
+  two.
 
 * **`ResultPolicy.shouldReplaceText`** exists so "only a successful
   Gemini response may ever change the field" is a single, named,
@@ -172,11 +246,13 @@ left exactly as the user left it.
 | `apiKey` (decrypted) | Local variable for the duration of one `confirmAndProcess` → `GeminiClient.translateBlocking` call; the underlying byte array is zeroed with `Arrays.fill` immediately after use in `SecureApiKeyStore`; the resulting Kotlin `String` cannot be forcibly zeroed (JVM limitation, documented in `SecureApiKeyStore.kt`) |
 | HTTPS request/response bodies | Exist only inside `GeminiClient.translateBlocking`'s stack frame; never logged, never cached (`useCaches = false`), never written to disk |
 | `pendingNode` / `requestInFlight` | A single `AccessibilityNodeInfo` reference, held only from the moment a trigger is detected until that one operation resolves (success, failure, or supersession) — never a history, never more than one at a time |
+| Long-press bubble text (`BubbleTranslateGate.Decision.Ready.text`) | Local variable / lambda capture threaded from `handleLongClick` → `startBubbleTranslation` → the network call → `TranslationBubble.showResult`; the `AccessibilityNodeInfo` itself is recycled immediately after its bounds and text are captured, well before the network call even starts — never held across the request the way the typed-trigger node is |
+| Translated bubble text on screen | Lives only in the `TranslationBubble`'s own inflated `View`, for as long as the bubble is shown (a few seconds, or until closed/tapped-away); removed from the `WindowManager` and discarded on dismiss — never written anywhere |
 
 Nothing above is ever written to disk except the AES-256-GCM-encrypted
-API key ciphertext (see §6) and the plain (non-secret) allow-list/model
-settings, both in app-private `SharedPreferences`, both excluded from
-every backup mechanism Android has.
+API key ciphertext (see §6) and the plain (non-secret) allow-list/model/
+bubble-language settings, all in app-private `SharedPreferences`, all
+excluded from every backup mechanism Android has.
 
 ---
 
@@ -204,7 +280,15 @@ which is not a runtime/dangerous permission at all.
 **Accessibility** is not a manifest permission — it's a system-mediated
 capability the user grants manually in Settings → Accessibility, and its
 scope is further restricted by `accessibility_service_config.xml`
-(one event type, no window enumeration; see §2 and §8).
+(two event types, no window enumeration; see §2 and §8).
+
+**The long-press translation bubble (§2.1b) still requests no new
+permission.** It is a `WindowManager` overlay of type
+`TYPE_ACCESSIBILITY_OVERLAY`, which — unlike `TYPE_APPLICATION_OVERLAY` —
+is available to any bound `AccessibilityService` without the user having
+to separately grant "display over other apps" (`SYSTEM_ALERT_WINDOW`).
+`SYSTEM_ALERT_WINDOW` remains absent from the manifest and unused anywhere
+in this app.
 
 ---
 
@@ -398,6 +482,36 @@ network request, no field write):
   response
 * `ACTION_SET_TEXT` itself fails
 
+**The same checklist, for the long-press translation bubble (§2.1b),
+enforced by `BubbleTranslateGate`:**
+
+* the accessibility node is `null`
+* `node.isPassword` is `true`, or any of the same `inputType`/className/
+  hint checks used by `SensitiveInputGuard.isSensitiveInput` match —
+  **exactly the same sensitivity check as the typed-trigger path**, so a
+  long-pressed password/masked value is refused the same way a typed one
+  would be
+* any exception is raised while inspecting the node
+* the app's package is not on the allow-list — **the same allow-list** the
+  typed-trigger pathway uses; there is no separate "bubble allow-list"
+* the app's package matches the hard-coded block-list — same list, same
+  precedence over the allow-list
+* the master "Enable ?en / ?pl triggers" switch is off — the same switch
+  also gates the bubble pathway; there is no separate bubble on/off switch
+* the long-pressed node's text is empty/blank or exceeds 4000 characters
+* another AI request (of either kind — typed-trigger or long-press) is
+  already in flight (the two pathways share one in-flight guard)
+* no API key is configured, or it fails to decrypt
+* the Gemini request times out, errors, or returns an empty/unparseable
+  response — shown as an error message in the bubble itself, never as a
+  silent failure
+* the overlay window itself fails to add for any platform reason — fails
+  silently; no translation appears, nothing else happens
+
+Note what this path does **not** check: `node.isEditable`. That is the one
+deliberate, documented difference from the typed-trigger checklist — see
+`BubbleTranslateGate`'s class doc for why omitting it here is still safe.
+
 ---
 
 ## 10. Data-flow diagram
@@ -444,11 +558,23 @@ the matched trigger's target language (`?en` → English, `?pl` → Polish) —
 never the package name, device identifiers, model name, prior messages,
 other on-screen text, or clipboard contents.
 
+**The long-press pathway's data flow (§2.1b) is the same shape, with two
+differences:** the source is a `TYPE_VIEW_LONG_CLICKED` event instead of
+`TYPE_VIEW_TEXT_CHANGED`, gated by `BubbleTranslateGate` instead of
+`EventGate` (same block-list/allow-list/master-switch, no editability
+check, same sensitivity check); and a successful response is rendered into
+a temporary `TranslationBubble` overlay instead of calling
+`ACTION_SET_TEXT` — the source app's content is never modified. The only
+place this pathway's text can leave the device is the same
+`GeminiClient.translateBlocking()` call, to the same single allowed host,
+carrying only the long-pressed text and the fixed system prompt for the
+user's saved `bubbleTargetLanguage`.
+
 ---
 
 ## 11. Tests
 
-### Unit tests (`./gradlew test`) — 73 tests, no device required
+### Unit tests (`./gradlew test`) — 82 tests, no device required
 
 | File | Scenarios covered |
 |---|---|
@@ -457,6 +583,7 @@ other on-screen text, or clipboard contents.
 | `AppBlocklistTest` | known password managers/authenticators/system surfaces/crypto wallets & exchanges blocked, keyword heuristic, own-package block, ordinary messaging apps NOT blocked |
 | `AppSettingsStoreTest` | AI disabled by default, allow-list defaults to the curated social/messaging set (not empty), an app outside that set is unallowed until added, disabling a default-allowed package overrides its default, allow/disallow round-trip, persistence |
 | `EventGateTest` | end-to-end (minus network) decision chain: allowed+`?en` → Ready targeting English, allowed+`?pl` → Ready targeting Polish, allowed+trailing space → Ready, allowed+auto-capitalized language code (`? En`) → Ready, no-trigger → NotTriggered, password+trigger → Blocked, **app outside allow-list → Blocked**, master switch off → Blocked, blocklist wins over a mistaken allow-list entry, null node/package → Blocked |
+| `BubbleTranslateGateTest` | end-to-end (minus network) decision chain for the long-press pathway: **non-editable received message in an allowed app → Ready** (the key difference from `EventGateTest`), password field → Blocked even though non-editable, app outside allow-list → Blocked, master switch off → Blocked, blocklist wins over a mistaken allow-list entry, empty text → Blocked, text over the shared length limit → Blocked, null node/package → Blocked |
 | `GeminiClientTest` | model-id validation, blank-key rejection, invalid-model rejection, response parsing (success/empty/malformed/blank), **timeout and I/O exception classification** |
 | `ResultPolicyTest` | Success → may replace text; **every single Failure variant → may NOT replace text** |
 | `NetworkAllowlistTest` | official host allowed; look-alike/subdomain/other hosts rejected |
@@ -491,7 +618,7 @@ key correctly, and that clearing it removes it.
 ### Running the tests
 
 ```
-./gradlew test               # 59 unit tests, JVM only, ~1-2 minutes
+./gradlew test               # 82 unit tests, JVM only, ~1-2 minutes
 ./gradlew connectedAndroidTest   # optional, needs a device/emulator plugged in
 ```
 
@@ -619,8 +746,8 @@ Use this to verify the built APK yourself:
 
 **Included, complete, and ready to open in Android Studio:** every Gradle
 file, the manifest, all XML security configs, all Kotlin source, all
-layouts/strings, the ProGuard rules, and 71 unit tests plus one
-instrumented test.
+layouts/strings (English and Polish), the ProGuard rules, and 82 unit
+tests plus one instrumented test.
 
 **Build verification history.** The project was drafted in an environment
 with no Android SDK and no network path to Google's Maven repository, so
@@ -829,6 +956,115 @@ CI-generated fingerprint the owner registered before this fix,
 `cf217c66eee1a9fac13dc4af7667f11f01aa1aff867b902e6fd1fa1ab17a5eaa`, belonged
 to that one already-downloaded build only and will not recur.)
 
+**Feature update #6 (post-initial delivery, requested by the app's owner):
+a long-press "translate a received message" bubble, a default target
+language for it, full Polish app localization, and Allowed-apps list
+cleanup.** This is the largest single feature added since the original
+delivery — a genuinely new capability, not a bug fix — so it's documented
+in full detail here, including the one deliberate security-scope change it
+makes.
+
+*Why this exists.* Every prior version of this app could only translate
+text the user was actively **typing** (the `?en`/`?pl` triggers). There was
+no way to translate a message someone else **sent** — WhatsApp/SMS/etc.'s
+own long-press menus only offer Copy, and pasting into another app just to
+run `?pl` on it was the best existing workaround. WhatsApp's own native
+"Message Translations" feature was investigated and ruled out as a
+substitute: on Android it supports only English, Spanish, Hindi,
+Portuguese, Russian, and Arabic — not Polish, which is this app owner's
+primary need.
+
+*The scope change, stated plainly.* Every previous read pathway in this
+app was gated on `node.isEditable` — it only ever read a field the user
+was themselves writing into. This feature intentionally reads **received,
+non-editable** content instead — the whole point of a "translate what
+someone sent me" feature. This is a real, deliberate expansion of what the
+app is allowed to read, and it is documented as one rather than glossed
+over. It is scoped as tightly as the typed-trigger pathway in every other
+respect: same master switch, same block-list, same allow-list, same
+password/sensitive-field exclusion (`SensitiveInputGuard.isSensitiveInput`,
+unchanged) — see `BubbleTranslateGate` (§2.1b, §9) for the exact chain, and
+its class doc for the full reasoning on why omitting only the editability
+check is safe here.
+
+*What was built:*
+
+- **`BubbleTranslateGate.kt`** (new) — the security gate for this pathway,
+  structurally parallel to `EventGate` but intentionally a separate class
+  (see §2.2) rather than a branch inside it.
+- **`accessibility_service_config.xml`** — now also subscribes to
+  `AccessibilityEvent.TYPE_VIEW_LONG_CLICKED`, the standard event for a
+  long-press, which requires no additional capability flag and specifically
+  does **not** require `flagRequestTouchExplorationMode` (which would turn
+  the whole device into TalkBack-style screen-reader navigation — rejected
+  as a way to detect this gesture). One consequence of using this event:
+  the service cannot observe exactly when the user's finger lifts off the
+  screen, only that a long-press happened — see the next point for how the
+  bubble's dismissal is designed around that limitation.
+- **`TranslationBubble.kt`** (new) — the floating overlay itself, a
+  `WindowManager` window of type `TYPE_ACCESSIBILITY_OVERLAY` (no new
+  permission needed — see §3). Requirements satisfied:
+  - **Dynamic sizing.** The bubble and every view inside it are
+    `wrap_content`; a short translation produces a small bubble, never a
+    fixed or full-screen one (`overlay_translation_bubble.xml`), with an
+    internal `ScrollView` capping runaway growth for an unusually long
+    translation.
+  - **Three independent ways to dismiss**, since "on finger release" isn't
+    observable here: an explicit **X close button**, a **tap anywhere
+    outside the bubble** (`FLAG_WATCH_OUTSIDE_TOUCH` / `ACTION_OUTSIDE` —
+    the window is otherwise non-modal via `FLAG_NOT_TOUCH_MODAL`, so every
+    other touch passes straight through to the app underneath), and an
+    **auto-dismiss timer** as a fallback (12s for a result, 5s for an
+    error, 15s for the loading state).
+  - Positioned to prefer appearing just **above** the long-pressed text, as
+    requested, falling back to below it if there isn't credible room —
+    see the doc comment on `positionNear()` for the exact heuristic and its
+    one known limitation (the bubble's own height isn't known until after
+    it's laid out, so "room above" is estimated).
+- **`AppSettingsStore.bubbleTargetLanguage`** (new persisted setting) — a
+  single saved default (`TriggerDetector.Target.ENGLISH` or `.POLISH`,
+  default Polish) used for every bubble translation, since a long-press
+  gesture has no per-use way to specify a language the way typing `?en`
+  vs. `?pl` does. Exposed in Settings as a two-option radio group placed
+  directly under the existing "AI transformation" master switch, per the
+  owner's specific request, rather than as a new separate card.
+- **`TextGateAccessibilityService.kt`** — extended with `handleLongClick()`
+  and `startBubbleTranslation()`. No debounce is used on this path (unlike
+  the typed-trigger path) — a long-press is already one discrete gesture,
+  not a stream of rapid-fire events that needs settling. Both pipelines
+  share the single `requestInFlight` guard, so a typed-trigger request and
+  a bubble request can never run concurrently.
+- **Full Polish localization** — every string in `values/strings.xml` (the
+  entire Settings screen, not just this feature's new strings) now has a
+  natural Polish translation in the new `values-pl/strings.xml`, selected
+  automatically by Android's standard resource-qualifier mechanism when
+  the device's system language is Polish. `values/strings.xml` (English)
+  remains the default for every other system language — no code change was
+  needed for this, only the new resource file.
+- **Allowed-apps list cleanup**, both requested changes: the package-name
+  subtext under each app's name (e.g. `com.accuweather.android`) has been
+  removed, leaving only the friendly app name; and each row now shows that
+  app's **real launcher icon**, loaded directly from `PackageManager`
+  (`ResolveInfo.loadIcon`) via the same declarative `<queries>` filter
+  already used to list the apps — never a fabricated or generic graphic.
+  A neutral placeholder glyph (`ic_default_app.xml`) is shown only on the
+  rare occasion the platform itself can't supply an icon for a given app,
+  and never claims to be that app's real icon. `item_app_row.xml` changed
+  from a bare `CheckBox` to a row layout (icon + name + checkbox), with the
+  whole row clickable for a larger, easier tap target.
+- **New tests:** `BubbleTranslateGateTest` (9 cases), covering the same
+  fail-closed scenarios as `EventGateTest` plus the one behavioral
+  difference that matters most — a non-editable node still yields `Ready`
+  here, where it would be `Blocked` under `EventGate`. Total unit tests:
+  82 (see §11).
+
+*What did not change:* the typed-trigger pipeline (§2.1), `EventGate`,
+`SensitiveInputGuard`, `AppBlocklist`, `ResultPolicy`, `NetworkAllowlist`,
+`GeminiClient`, and the API-key/encryption code are all untouched by this
+feature. `ACTION_SET_TEXT` is still only ever called from the typed-trigger
+path — the long-press pathway is read-only and never modifies the app it
+reads from.
+
 ## 15. Verified build result (GitHub Actions)
 
 Confirmed on `https://github.com/mxxx3/textgate-ai`, workflow run
@@ -857,16 +1093,22 @@ The `connectedAndroidTest (manual)` job (real-emulator run of
 can be run any time from the Actions tab ("Run workflow").
 
 **Note:** fixes #4 and #6 above (the cryptocurrency wallet block-list gap,
-and the landscape display-cutout inset fix), and all five feature updates
+and the landscape display-cutout inset fix), and all six feature updates
 (`?pl` trigger + curated default allow-list; keyboard auto-spacing
 tolerance around the trigger; default model changed to
 `gemini-3.5-flash-lite`; keyboard auto-capitalization tolerance for the
 language code; fixed debug-signing key so the fingerprint stays stable
-across builds) described just before this section, all landed *after* run
-#4, so none of them has yet gone through its own green CI run — push them
-like the earlier fixes and treat that run, not this one, as the current
-source of truth for `AppBlocklist.kt`, `SettingsActivity.kt`,
-`TriggerDetector.kt`, `EventGate.kt`, `TranslationPrompts.kt`,
-`AppSettingsStore.kt`, `TextGateAccessibilityService.kt`, and
-`app/build.gradle.kts` (new `signingConfigs.debug` block, plus the new
-tracked `app/debug.keystore` binary file itself).
+across builds; the long-press translation bubble, its default-language
+setting, full Polish localization, and the Allowed-apps icon/label
+cleanup) described just before this section, all landed *after* run #4, so
+none of them has yet gone through its own green CI run — push them like
+the earlier fixes and treat that run, not this one, as the current source
+of truth for `AppBlocklist.kt`, `SettingsActivity.kt`,
+`TriggerDetector.kt`, `EventGate.kt`, `BubbleTranslateGate.kt`,
+`TranslationPrompts.kt`, `AppSettingsStore.kt`,
+`TextGateAccessibilityService.kt`, `TranslationBubble.kt`,
+`InstalledAppsProvider.kt`, `accessibility_service_config.xml`,
+`values-pl/strings.xml` (new), and `app/build.gradle.kts` (new
+`signingConfigs.debug` block, plus the new tracked `app/debug.keystore`
+binary file itself, and the version bump to 1.2.0 / versionCode 7 for this
+feature).

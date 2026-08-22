@@ -1,6 +1,7 @@
 package com.textgate.ai.accessibility
 
 import android.accessibilityservice.AccessibilityService
+import android.graphics.Rect
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -11,6 +12,7 @@ import com.textgate.ai.R
 import com.textgate.ai.model.TranslationPrompts
 import com.textgate.ai.network.GeminiClient
 import com.textgate.ai.security.AppSettingsStore
+import com.textgate.ai.security.BubbleTranslateGate
 import com.textgate.ai.security.EventGate
 import com.textgate.ai.security.ResultPolicy
 import com.textgate.ai.security.SecureApiKeyStore
@@ -22,27 +24,44 @@ import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
- * The entire "read the field, notice ?en, call Gemini, replace the text"
- * pipeline lives in this one service, deliberately. Splitting it apart
- * would make it harder, not easier, to see the full flow that touches a
- * user's typed text.
+ * Two independent read-and-translate pipelines live in this one service,
+ * deliberately kept together rather than split into separate services: the
+ * typed "?en"/"?pl" trigger pipeline (read the field, notice the trigger,
+ * call Gemini, replace the text) and the long-press "translate what's
+ * under my finger" bubble pipeline (long-press a message, call Gemini,
+ * show a floating translation). Splitting them apart would make it harder,
+ * not easier, to see the full set of ways this service ever touches
+ * on-screen text.
  *
  * READ THIS BEFORE MODIFYING:
- *   - Every path that reaches `node.text` MUST have already passed
- *     [AppBlocklist.isBlocked], [AppSettingsStore.isPackageAllowed],
+ *   - Typed-trigger path: every path that reaches `node.text` MUST have
+ *     already passed [AppBlocklist.isBlocked], [AppSettingsStore.isPackageAllowed],
  *     [SensitiveInputGuard.isEditableTextField], and
  *     [SensitiveInputGuard.isSensitiveInput], IN THAT ORDER, with the
- *     sensitivity check happening last and always BEFORE the text read.
- *   - Only [AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED] is subscribed to
- *     (see accessibility_service_config.xml) — this service never calls
+ *     sensitivity check happening last and always BEFORE the text read —
+ *     enforced by [EventGate].
+ *   - Long-press bubble path: every path that reaches `node.text` MUST
+ *     have already passed the equivalent chain in [BubbleTranslateGate] —
+ *     the same block-list, the same allow-list, the same master switch,
+ *     and the same [SensitiveInputGuard.isSensitiveInput] check (this path
+ *     intentionally skips ONLY the editability check, since its entire
+ *     purpose is reading non-editable received content — see
+ *     BubbleTranslateGate's class doc for why that is safe).
+ *   - Only [AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED] and
+ *     [AccessibilityEvent.TYPE_VIEW_LONG_CLICKED] are subscribed to (see
+ *     accessibility_service_config.xml) — this service never calls
  *     getWindows(), getRootInActiveWindow(), or walks a node tree. It only
  *     ever inspects `event.source` for the event actually delivered.
  *   - No AccessibilityEvent is ever stored past the return of
  *     onAccessibilityEvent(); only a single AccessibilityNodeInfo may be
- *     held briefly (bounded by [DEBOUNCE_MS] plus one network round trip)
- *     while a single trigger is being processed, and it is released the
- *     moment that processing ends, succeeds, fails, or is aborted.
- *   - Any exception, anywhere in this pipeline, results in doing nothing
+ *     held briefly (bounded by [DEBOUNCE_MS] plus one network round trip
+ *     for the typed-trigger path, or just one network round trip for the
+ *     long-press path) while a single request is being processed, and it
+ *     is released the moment that processing ends, succeeds, fails, or is
+ *     aborted.
+ *   - Both pipelines share one [requestInFlight] guard — only one AI
+ *     request (of either kind) is ever in flight at a time.
+ *   - Any exception, anywhere in either pipeline, results in doing nothing
  *     further (fail closed) — never in retrying, never in falling back to
  *     a broader read.
  */
@@ -51,8 +70,10 @@ class TextGateAccessibilityService : AccessibilityService() {
     private lateinit var settingsStore: AppSettingsStore
     private lateinit var apiKeyStore: SecureApiKeyStore
     private lateinit var eventGate: EventGate
+    private lateinit var bubbleGate: BubbleTranslateGate
     private val mainHandler = Handler(Looper.getMainLooper())
     private val debouncer = Debouncer(DEBOUNCE_MS)
+    private val bubble by lazy { TranslationBubble(this) }
 
     /** True while a single trigger's network round trip is in flight. Also
      * doubles as the "one operation at a time" guard: a new trigger is
@@ -73,15 +94,18 @@ class TextGateAccessibilityService : AccessibilityService() {
         settingsStore = AppSettingsStore(applicationContext)
         apiKeyStore = SecureApiKeyStore(applicationContext)
         eventGate = EventGate(settingsStore, applicationContext.packageName)
+        bubbleGate = BubbleTranslateGate(settingsStore, applicationContext.packageName)
         networkExecutor = Executors.newSingleThreadExecutor()
     }
 
     override fun onInterrupt() {
         cancelPendingDebounce()
+        bubble.dismiss()
     }
 
     override fun onDestroy() {
         cancelPendingDebounce()
+        bubble.dismiss()
         networkExecutor?.shutdownNow()
         networkExecutor = null
         super.onDestroy()
@@ -109,9 +133,18 @@ class TextGateAccessibilityService : AccessibilityService() {
 
     private fun handleEvent(event: AccessibilityEvent?) {
         if (event == null) return
-        if (!::settingsStore.isInitialized || !::apiKeyStore.isInitialized || !::eventGate.isInitialized) return
-        if (event.eventType != AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED) return
+        if (!::settingsStore.isInitialized || !::apiKeyStore.isInitialized ||
+            !::eventGate.isInitialized || !::bubbleGate.isInitialized
+        ) return
 
+        when (event.eventType) {
+            AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED -> handleTextChanged(event)
+            AccessibilityEvent.TYPE_VIEW_LONG_CLICKED -> handleLongClick(event)
+            else -> return
+        }
+    }
+
+    private fun handleTextChanged(event: AccessibilityEvent) {
         // Cheapest possible short-circuit, before ever touching
         // event.source: only one trigger is processed at a time.
         if (requestInFlight.get()) return
@@ -152,6 +185,98 @@ class TextGateAccessibilityService : AccessibilityService() {
             is EventGate.Decision.Blocked -> {
                 node?.let { recycleSafely(it) }
             }
+        }
+    }
+
+    /**
+     * Handles a long-press on any view, anywhere the service is receiving
+     * events. No debounce is used here (unlike the typed-trigger path) —
+     * a long-press is already a single, deliberate, discrete gesture, not
+     * a stream of rapid-fire events that needs settling.
+     */
+    private fun handleLongClick(event: AccessibilityEvent) {
+        // Same cheap short-circuit as the typed-trigger path: only one AI
+        // request of either kind runs at a time.
+        if (requestInFlight.get()) return
+
+        val packageName = event.packageName?.toString()
+        val node = event.source
+
+        // BubbleTranslateGate performs every remaining check — block-list,
+        // allow-list, master switch, sensitivity (deliberately NOT
+        // editability — see its class doc) — and only reads node.text
+        // internally after all of those pass.
+        when (val decision = bubbleGate.evaluate(packageName, node)) {
+            is BubbleTranslateGate.Decision.Ready -> {
+                // Bounds must be captured before the node is recycled —
+                // they anchor where the bubble appears on screen. This is
+                // screen geometry, not field content, so capturing it does
+                // not itself count as "reading" anything sensitive.
+                val bounds = Rect()
+                try {
+                    node?.getBoundsInScreen(bounds)
+                } catch (_: Exception) {
+                    // Leave bounds as the zero-rect default; the bubble's
+                    // own clamping still keeps it fully on screen.
+                }
+                node?.let { recycleSafely(it) }
+                startBubbleTranslation(decision.text, bounds)
+            }
+            is BubbleTranslateGate.Decision.Blocked -> {
+                node?.let { recycleSafely(it) }
+            }
+        }
+    }
+
+    /** No AccessibilityNodeInfo is held past this point — [text] and
+     * [anchor] are plain values, not a live reference into another app's
+     * window, so there is nothing left here to recycle or refresh. */
+    private fun startBubbleTranslation(text: String, anchor: Rect) {
+        if (!requestInFlight.compareAndSet(false, true)) return
+
+        try {
+            val apiKey = apiKeyStore.getApiKey()
+            if (apiKey.isNullOrBlank()) {
+                requestInFlight.set(false)
+                showToast(getString(R.string.error_no_api_key))
+                return
+            }
+            val model = settingsStore.selectedModel
+            val target = settingsStore.bubbleTargetLanguage
+            val systemPrompt = when (target) {
+                TriggerDetector.Target.ENGLISH -> TranslationPrompts.EN_TRANSLATION_SYSTEM_PROMPT
+                TriggerDetector.Target.POLISH -> TranslationPrompts.PL_TRANSLATION_SYSTEM_PROMPT
+            }
+
+            val executor = networkExecutor
+            if (executor == null || executor.isShutdown) {
+                requestInFlight.set(false)
+                return
+            }
+
+            mainHandler.post { bubble.showLoading(anchor) }
+
+            executor.execute {
+                val result = try {
+                    GeminiClient.translateBlocking(
+                        apiKey = apiKey,
+                        model = model,
+                        systemPrompt = systemPrompt,
+                        userText = text
+                    )
+                } catch (_: Exception) {
+                    GeminiClient.Result.Failure.InvalidResponse
+                }
+                mainHandler.post {
+                    requestInFlight.set(false)
+                    when (result) {
+                        is GeminiClient.Result.Success -> bubble.showResult(anchor, result.translatedText)
+                        is GeminiClient.Result.Failure -> bubble.showError(anchor, mapFailureMessage(result))
+                    }
+                }
+            }
+        } catch (_: Exception) {
+            requestInFlight.set(false)
         }
     }
 

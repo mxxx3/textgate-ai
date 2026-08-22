@@ -1,8 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
-<CheckBox xmlns:android="http://schemas.android.com/apk/res/android"
+<!--
+    One row in the "Allowed apps" advanced picker. The whole row is
+    clickable (toggling the checkbox) for a bigger, easier tap target; the
+    checkbox itself has its own click disabled so a tap is never handled
+    twice. Shows the app's real icon (or a neutral placeholder if none
+    could be loaded — see InstalledAppsProvider.kt) and its friendly name
+    only — no package name is shown here, by design.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
     android:paddingTop="8dp"
     android:paddingBottom="8dp"
-    android:textSize="14sp"
-    android:textColor="@color/tg_text_primary" />
+    android:clickable="true"
+    android:focusable="true">
+
+    <ImageView
+        android:id="@+id/imageAppIcon"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_marginEnd="12dp"
+        android:contentDescription="@null"
+        android:importantForAccessibility="no" />
+
+    <TextView
+        android:id="@+id/textAppLabel"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:textSize="14sp"
+        android:textColor="@color/tg_text_primary" />
+
+    <CheckBox
+        android:id="@+id/checkboxAppAllowed"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:clickable="false"
+        android:focusable="false" />
+</LinearLayout>

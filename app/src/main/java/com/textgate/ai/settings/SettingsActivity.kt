@@ -14,6 +14,7 @@ import android.view.WindowInsets
 import android.view.accessibility.AccessibilityManager
 import android.widget.CheckBox
 import android.widget.CompoundButton
+import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import com.textgate.ai.BuildConfig
@@ -24,6 +25,7 @@ import com.textgate.ai.model.TranslationPrompts
 import com.textgate.ai.network.GeminiClient
 import com.textgate.ai.security.AppSettingsStore
 import com.textgate.ai.security.SecureApiKeyStore
+import com.textgate.ai.security.TriggerDetector
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
@@ -102,6 +104,7 @@ class SettingsActivity : Activity() {
         backgroundExecutor = Executors.newSingleThreadExecutor()
 
         setupMasterSwitch()
+        setupBubbleLanguageSection()
         setupAccessibilitySection()
         setupApiKeySection()
         setupModelSection()
@@ -166,6 +169,33 @@ class SettingsActivity : Activity() {
         binding.switchAiEnabled.isChecked = settingsStore.isAiEnabled
         binding.switchAiEnabled.setOnCheckedChangeListener { _: CompoundButton, isChecked: Boolean ->
             settingsStore.isAiEnabled = isChecked
+        }
+    }
+
+    // ---------------------------------------------------------------
+    // Long-press bubble translation: default target language
+    // ---------------------------------------------------------------
+
+    /**
+     * The "translate a received message into ___" default used by the
+     * long-press bubble feature (see BubbleTranslateGate /
+     * TextGateAccessibilityService.startBubbleTranslation /
+     * TranslationBubble). Deliberately a separate, single persistent
+     * choice — unlike the typed ?en/?pl triggers, a long-press carries no
+     * per-use way to specify a language, so the user picks one default
+     * here and it applies to every bubble translation until changed.
+     */
+    private fun setupBubbleLanguageSection() {
+        when (settingsStore.bubbleTargetLanguage) {
+            TriggerDetector.Target.ENGLISH -> binding.radioBubbleEnglish.isChecked = true
+            TriggerDetector.Target.POLISH -> binding.radioBubblePolish.isChecked = true
+        }
+        binding.radioGroupBubbleLanguage.setOnCheckedChangeListener { _, checkedId ->
+            settingsStore.bubbleTargetLanguage = if (checkedId == R.id.radioBubbleEnglish) {
+                TriggerDetector.Target.ENGLISH
+            } else {
+                TriggerDetector.Target.POLISH
+            }
         }
     }
 
@@ -372,12 +402,31 @@ class SettingsActivity : Activity() {
         }
         val inflater = LayoutInflater.from(this)
         apps.forEach { app ->
-            val row = inflater.inflate(R.layout.item_app_row, binding.layoutAppList, false) as CheckBox
-            row.text = "${app.label}\n${app.packageName}"
-            row.isChecked = settingsStore.isPackageAllowed(app.packageName)
-            row.setOnCheckedChangeListener { _: CompoundButton, isChecked: Boolean ->
+            val row = inflater.inflate(R.layout.item_app_row, binding.layoutAppList, false)
+            val icon = row.findViewById<ImageView>(R.id.imageAppIcon)
+            val label = row.findViewById<TextView>(R.id.textAppLabel)
+            val checkbox = row.findViewById<CheckBox>(R.id.checkboxAppAllowed)
+
+            // Real icon when PackageManager supplied one; otherwise a
+            // neutral placeholder — never a fabricated stand-in (see
+            // LaunchableApp's doc comment in InstalledAppsProvider.kt).
+            if (app.icon != null) {
+                icon.setImageDrawable(app.icon)
+            } else {
+                icon.setImageResource(R.drawable.ic_default_app)
+            }
+            // Friendly app name only — the package name subtext
+            // ("com.example.app") that used to be shown here has been
+            // removed per user request.
+            label.text = app.label
+            checkbox.isChecked = settingsStore.isPackageAllowed(app.packageName)
+            checkbox.setOnCheckedChangeListener { _: CompoundButton, isChecked: Boolean ->
                 settingsStore.setPackageAllowed(app.packageName, isChecked)
             }
+            // The checkbox itself has clicks disabled (see item_app_row.xml)
+            // so the whole row is the tap target, toggling it exactly once.
+            row.setOnClickListener { checkbox.isChecked = !checkbox.isChecked }
+
             binding.layoutAppList.addView(row)
         }
     }

@@ -31,9 +31,10 @@ class TriggerDetectorTest {
     }
 
     @Test
-    fun `pl trigger must be an exact case-sensitive match too`() {
-        assertTrue(TriggerDetector.detect("hello ?PL") is TriggerDetector.Outcome.NoTrigger)
-        assertTrue(TriggerDetector.detect("hello ?Pl") is TriggerDetector.Outcome.NoTrigger)
+    fun `pl trigger tolerates case variation just like en does`() {
+        assertTrue(TriggerDetector.detect("hello ?PL") is TriggerDetector.Outcome.Ready)
+        val ready = TriggerDetector.detect("hello ?Pl") as TriggerDetector.Outcome.Ready
+        assertEquals(TriggerDetector.Target.POLISH, ready.target)
     }
 
     @Test
@@ -72,9 +73,26 @@ class TriggerDetectorTest {
     }
 
     @Test
-    fun `trigger must be an exact case-sensitive match`() {
-        assertTrue(TriggerDetector.detect("hello ?EN") is TriggerDetector.Outcome.NoTrigger)
-        assertTrue(TriggerDetector.detect("hello ?En") is TriggerDetector.Outcome.NoTrigger)
+    fun `trigger tolerates any case of the language code (keyboard auto-capitalization)`() {
+        assertTrue(TriggerDetector.detect("hello ?EN") is TriggerDetector.Outcome.Ready)
+        val ready = TriggerDetector.detect("hello ?En") as TriggerDetector.Outcome.Ready
+        assertEquals("hello ", ready.content)
+        assertEquals(TriggerDetector.Target.ENGLISH, ready.target)
+    }
+
+    @Test
+    fun `internal space plus auto-capitalized language code is tolerated (the reported real-world combo)`() {
+        // This is the specific combination a real keyboard produces: the
+        // optional space after "?" (tolerated on its own already) makes the
+        // keyboard think a new sentence just started, so it capitalizes the
+        // very next letter too — "?en" becomes "? En" / "? Pl" on-device.
+        val enReady = TriggerDetector.detect("hello ? En") as TriggerDetector.Outcome.Ready
+        assertEquals("hello ", enReady.content)
+        assertEquals(TriggerDetector.Target.ENGLISH, enReady.target)
+
+        val plReady = TriggerDetector.detect("hello ? Pl") as TriggerDetector.Outcome.Ready
+        assertEquals("hello ", plReady.content)
+        assertEquals(TriggerDetector.Target.POLISH, plReady.target)
     }
 
     @Test

@@ -90,6 +90,25 @@ class EventGateTest {
     }
 
     @Test
+    fun `scenario 1d - keyboard auto-capitalized language code still yields Ready`() {
+        val (gate, store) = newGate()
+        store.isAiEnabled = true
+        store.setPackageAllowed("org.telegram.messenger", true)
+        // Simulates a keyboard that both auto-inserts the internal space AND
+        // auto-capitalizes the letter right after it (treating "? " as the
+        // start of a new sentence) — the real combination reported on-device.
+        val node = editableNode("nie ma pośpiechu ? En")
+
+        val decision = gate.evaluate("org.telegram.messenger", node)
+
+        assertTrue(decision is EventGate.Decision.Ready)
+        val ready = decision as EventGate.Decision.Ready
+        assertTrue(ready.content == "nie ma pośpiechu ")
+        assertTrue(ready.target == TriggerDetector.Target.ENGLISH)
+        @Suppress("DEPRECATION") node.recycle()
+    }
+
+    @Test
     fun `scenario 2 - normal typing without trigger yields NotTriggered`() {
         val (gate, store) = newGate()
         store.isAiEnabled = true

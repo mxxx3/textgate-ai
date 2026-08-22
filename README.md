@@ -105,7 +105,7 @@ EventGate.evaluate(packageName, node)              ← SECURITY GATE
         │  ── only NOW is node.text ever read ──
         ▼
 TriggerDetector.detect(fullText)
-        │  ends with "?en"/"?pl" (± one keyboard-inserted space, see §14)?
+        │  ends with "?en"/"?pl" (± one keyboard-inserted space, any case, see §14)?
         │  content ≤ 4000 chars? non-empty?
         ▼
    Decision.Ready(content, fullText, target)   ← target: ENGLISH or POLISH
@@ -448,15 +448,15 @@ other on-screen text, or clipboard contents.
 
 ## 11. Tests
 
-### Unit tests (`./gradlew test`) — 71 tests, no device required
+### Unit tests (`./gradlew test`) — 73 tests, no device required
 
 | File | Scenarios covered |
 |---|---|
-| `TriggerDetectorTest` | exact `?en`/`?pl` match & extraction (each targeting the right language), no-trigger, malformed/partial trigger, empty content (both triggers), length limit (at and over 4000 chars), tolerated single trailing/internal space around the trigger, two internal spaces still rejected |
+| `TriggerDetectorTest` | exact `?en`/`?pl` match & extraction (each targeting the right language), no-trigger, malformed/partial trigger, empty content (both triggers), length limit (at and over 4000 chars), tolerated single trailing/internal space around the trigger, two internal spaces still rejected, any case of the language code tolerated (including the internal-space-plus-auto-capitalized-letter combination) |
 | `SensitiveInputGuardTest` | normal field allowed, `isPassword`, all 4 required `inputType` variants, className/hint heuristics, null node, non-editable node, **exception → fail closed** |
 | `AppBlocklistTest` | known password managers/authenticators/system surfaces/crypto wallets & exchanges blocked, keyword heuristic, own-package block, ordinary messaging apps NOT blocked |
 | `AppSettingsStoreTest` | AI disabled by default, allow-list defaults to the curated social/messaging set (not empty), an app outside that set is unallowed until added, disabling a default-allowed package overrides its default, allow/disallow round-trip, persistence |
-| `EventGateTest` | end-to-end (minus network) decision chain: allowed+`?en` → Ready targeting English, allowed+`?pl` → Ready targeting Polish, no-trigger → NotTriggered, password+trigger → Blocked, **app outside allow-list → Blocked**, master switch off → Blocked, blocklist wins over a mistaken allow-list entry, null node/package → Blocked |
+| `EventGateTest` | end-to-end (minus network) decision chain: allowed+`?en` → Ready targeting English, allowed+`?pl` → Ready targeting Polish, allowed+trailing space → Ready, allowed+auto-capitalized language code (`? En`) → Ready, no-trigger → NotTriggered, password+trigger → Blocked, **app outside allow-list → Blocked**, master switch off → Blocked, blocklist wins over a mistaken allow-list entry, null node/package → Blocked |
 | `GeminiClientTest` | model-id validation, blank-key rejection, invalid-model rejection, response parsing (success/empty/malformed/blank), **timeout and I/O exception classification** |
 | `ResultPolicyTest` | Success → may replace text; **every single Failure variant → may NOT replace text** |
 | `NetworkAllowlistTest` | official host allowed; look-alike/subdomain/other hosts rejected |
@@ -755,6 +755,27 @@ text before the trigger, verbatim" guarantee is unaffected. Covered by
 five new `TriggerDetectorTest` cases and one new `EventGateTest`
 end-to-end case; total unit tests: 71.
 
+**Feature update #4 (post-initial delivery, requested by the app's owner):
+tolerate keyboard auto-capitalization of the language code.** Reported from
+real use: typing `?en`/`?pl` sometimes produced no translation, even though
+feature update #2 above already tolerated the keyboard's auto-inserted
+space between `?` and the language code. Root cause: the *same* keyboard
+behavior that inserts that space also treats it as the start of a new
+sentence (since `?` normally ends one) and auto-capitalizes the very next
+letter — so `? en` routinely arrives on-device as `? En`, which the
+previously case-sensitive match rejected outright. Fixed by adding
+`RegexOption.IGNORE_CASE` to both patterns in
+`TriggerDetector.TRIGGER_PATTERNS`, scoped narrowly to just those two small
+regexes so it only ever affects the "en"/"pl" letters themselves — the `?`
+is still required literally, two-or-more internal spaces still fail to
+match, and any real character after the trigger (besides optional trailing
+spaces) still disqualifies it. `Outcome.Ready.content` is unaffected: it is
+still computed from the match's start position, so the case of the trigger
+itself never leaks into the text sent to Gemini. Covered by two new tests —
+one in `TriggerDetectorTest` for the internal-space-plus-capitalized-letter
+combination specifically, one end-to-end in `EventGateTest`
+(`scenario 1d`); total unit tests: 73.
+
 **Feature update #3 (post-initial delivery, requested by the app's
 owner): default model changed to `gemini-3.5-flash-lite`.** The app
 originally defaulted to `gemini-2.5-flash`. The owner's own Google AI
@@ -774,6 +795,39 @@ model ID matching its existing validation regex regardless of this
 default, so nothing else in the pipeline changes. Rate limits are
 account-specific and change over time on Google's side — see the doc
 comment on `DEFAULT_MODEL` for how to re-check and update it later.
+
+**Feature update #5 (post-initial delivery, requested by the app's owner):
+pin a fixed debug-signing key so the debug APK's certificate fingerprint
+stays stable across CI builds.** Discovered while the owner was registering
+the app's package name for Android's (new, 2026) Developer Verification
+program, which asks for the SHA-256 fingerprint of the certificate the APK
+is signed with. Checking the downloaded CI artifact's actual signer
+(`apksigner verify --print-certs`) showed `DN: C=US, O=Android, CN=Android
+Debug` — the fixed distinguished name Android Gradle Plugin always uses for
+its *auto-generated* debug key, backed by a **freshly random key pair**
+whenever `~/.android/debug.keystore` doesn't already exist. Every GitHub
+Actions run starts from a clean image and this repo had nothing that
+persisted that file across runs, so **every CI build was silently signing
+the debug APK with a different key** — a fingerprint registered against one
+build's APK would stop matching the very next one. Fixed by generating one
+fixed debug keystore (`keytool -genkeypair`, same conventions AGP's own
+default uses: alias `androiddebugkey`, both passwords `android`, DN
+`CN=Android Debug,O=Android,C=US`) and checking it into the repo as
+`app/debug.keystore` — `.gitignore` already carried a `!debug.keystore`
+exception to its general `*.keystore` rule, anticipating exactly this. A
+new explicit `signingConfigs.debug` block in `app/build.gradle.kts` points
+`buildTypes.debug` at this file instead of leaving Gradle to fall back to
+its implicit, host-dependent default. This key is intentionally not a
+secret — a debug-only signing key holds no production trust, and a shared,
+checked-in debug keystore purely for reproducible fingerprints is standard
+Android practice; nothing about the release build type or its signing was
+touched. **Practical effect:** the fingerprint the owner registers going
+forward (`DA:A0:84:EF:2F:45:EE:60:9C:76:63:C2:44:0C:31:BE:A9:DB:9C:AF:AE:8D:B5:A8:9C:5B:34:E8:83:3F:12:DF`)
+will now match every future debug build from this repo, in CI or locally,
+indefinitely — no more re-registering after each rebuild. (The very first
+CI-generated fingerprint the owner registered before this fix,
+`cf217c66eee1a9fac13dc4af7667f11f01aa1aff867b902e6fd1fa1ab17a5eaa`, belonged
+to that one already-downloaded build only and will not recur.)
 
 ## 15. Verified build result (GitHub Actions)
 
@@ -803,12 +857,16 @@ The `connectedAndroidTest (manual)` job (real-emulator run of
 can be run any time from the Actions tab ("Run workflow").
 
 **Note:** fixes #4 and #6 above (the cryptocurrency wallet block-list gap,
-and the landscape display-cutout inset fix), and all three feature updates
+and the landscape display-cutout inset fix), and all five feature updates
 (`?pl` trigger + curated default allow-list; keyboard auto-spacing
 tolerance around the trigger; default model changed to
-`gemini-3.5-flash-lite`) described just before this section, all landed
-*after* run #4, so none of them has yet gone through its own green CI run
-— push them like the earlier fixes and treat that run, not this one, as
-the current source of truth for `AppBlocklist.kt`, `SettingsActivity.kt`,
+`gemini-3.5-flash-lite`; keyboard auto-capitalization tolerance for the
+language code; fixed debug-signing key so the fingerprint stays stable
+across builds) described just before this section, all landed *after* run
+#4, so none of them has yet gone through its own green CI run — push them
+like the earlier fixes and treat that run, not this one, as the current
+source of truth for `AppBlocklist.kt`, `SettingsActivity.kt`,
 `TriggerDetector.kt`, `EventGate.kt`, `TranslationPrompts.kt`,
-`AppSettingsStore.kt`, and `TextGateAccessibilityService.kt`.
+`AppSettingsStore.kt`, `TextGateAccessibilityService.kt`, and
+`app/build.gradle.kts` (new `signingConfigs.debug` block, plus the new
+tracked `app/debug.keystore` binary file itself).

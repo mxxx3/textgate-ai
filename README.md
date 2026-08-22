@@ -203,20 +203,27 @@ read — `ACTION_SET_TEXT` is only ever used by the typed-trigger pipeline
 above. The bubble is a read-only, temporary overlay; the message the user
 long-pressed is left completely untouched in its original app.
 
-**Known, accepted limitation (as of 1.2.6): Google Messages (SMS) and
-X (Twitter) do not support the long-press bubble.** Real-device testing
-showed the bubble works in Telegram, and (after a fix — see §14 "Amendment
-to Feature update #6") in WhatsApp, but neither `TYPE_VIEW_LONG_CLICKED`
-nor `TYPE_VIEW_SELECTED` is ever dispatched for a long-press in Google
-Messages or X. A third signal, `TYPE_WINDOW_CONTENT_CHANGED`, was tried
-and confirmed to fire, but far too generically (on almost any UI change,
-in any app) to serve as a specific trigger without reading much more of
-the screen than this app is willing to. The most likely explanation,
-backed by Android's own documentation and researched in full in §14
-("Second amendment to Feature update #6" and after): both apps' relevant
-UI is very likely built with Jetpack Compose, whose `combinedClickable`
+**Known limitation, currently being re-investigated (as of 1.2.7): Google
+Messages (SMS) and X (Twitter) do not (yet) support the long-press
+bubble.** Real-device testing showed the bubble works in Telegram, and
+(after a fix — see §14 "Amendment to Feature update #6") in WhatsApp, but
+neither `TYPE_VIEW_LONG_CLICKED` nor `TYPE_VIEW_SELECTED` is ever
+dispatched for a long-press in Google Messages or X. A third signal,
+`TYPE_WINDOW_CONTENT_CHANGED`, was tried in 1.2.5 and confirmed to fire,
+but that diagnostic only looked at the event's class name and count, not
+the source node's own properties — and, per §14 "Fourth amendment", two
+of the properties it never checked (`isChecked`, and whether
+`event.source` can address one specific node despite a generic
+`className`) turned out, on verification against the actual AndroidX
+Compose source, to be exactly the ones this problem plausibly hinges on.
+1.2.7 re-adds this event type as a narrower diagnostic to test that
+directly (see §14) — the outcome is not yet known. The most likely
+explanation for why the two permanent signals never fire at all, backed
+by Android's own documentation and researched in full in §14 ("Second
+amendment to Feature update #6" and after): both apps' relevant UI is
+very likely built with Jetpack Compose, whose `combinedClickable`
 long-press handling never goes through the classic `View.performLongClick()`
-path any of these signals depend on. Two further alternatives —
+path either signal depends on. Two further alternatives —
 `Intent.ACTION_PROCESS_TEXT` and a clipboard-reading floating button —
 were researched and either ruled out or left unbuilt (see §14 for why).
 Consistent with the reasoning throughout this section, raw touch/motion
@@ -313,8 +320,9 @@ which is not a runtime/dangerous permission at all.
 
 **Accessibility** is not a manifest permission — it's a system-mediated
 capability the user grants manually in Settings → Accessibility, and its
-scope is further restricted by `accessibility_service_config.xml` (three
-event types, no window enumeration; see §2 and §8).
+scope is further restricted by `accessibility_service_config.xml` (four
+event types as of 1.2.7 — three permanent, one temporary diagnostic, see
+§14 "Fourth amendment" — no window enumeration; see §2 and §8).
 
 **The long-press translation bubble (§2.1b) still requests no new
 permission.** It is a `WindowManager` overlay of type
@@ -1312,25 +1320,114 @@ the investigation:
   an uncertain payoff, and the app's own owner chose to stop the
   investigation before it was built.
 
-**Conclusion: SMS (Google Messages) and X (Twitter) are documented as an
-accepted limitation of the long-press bubble feature (§2.1b), not a bug
-being actively chased.** Three independent, standard, non-invasive
-accessibility signals were tried (`TYPE_VIEW_LONG_CLICKED`,
+**Conclusion as of 1.2.6: SMS (Google Messages) and X (Twitter) were
+documented as an accepted limitation of the long-press bubble feature
+(§2.1b), not a bug being actively chased.** Three independent, standard,
+non-invasive accessibility signals were tried (`TYPE_VIEW_LONG_CLICKED`,
 `TYPE_VIEW_SELECTED`, `TYPE_WINDOW_CONTENT_CHANGED`); raw touch/motion
 tracking and OCR were ruled out earlier for solid security/architecture
 reasons (see above); `ACTION_PROCESS_TEXT` and a clipboard-reading
 floating button were researched and either ruled out or left as
 un-pursued future options. All temporary diagnostic code from this
 investigation (`v2`'s "DIAG: long-click seen"/"DIAG blocked" bubbles and
-`v3`'s `TYPE_WINDOW_CONTENT_CHANGED` handler) has been removed as of
-1.2.6 — `accessibility_service_config.xml` is back to exactly the three
+`v3`'s `TYPE_WINDOW_CONTENT_CHANGED` handler) was removed as of 1.2.6 —
+`accessibility_service_config.xml` went back to exactly the three
 permanent event types, and `TextGateAccessibilityService.kt` no longer
-shows anything on screen beyond the real feature's own loading/result/
-error bubble. The long-press bubble continues to work normally in
-Telegram, WhatsApp, and any other app whose UI dispatches standard
-`View`-based accessibility events; the typed `?en`/`?pl` trigger pathway
-is entirely unaffected by any of this, in every app, since it never
-depended on long-press detection at all.
+showed anything on screen beyond the real feature's own loading/result/
+error bubble. This was the closing state of the investigation until it
+was reopened in 1.2.7 — see below.
+
+**Fourth amendment to Feature update #6 (v1.2.7): reopened after new,
+partially source-verified information, with a narrower diagnostic (v4).**
+The app's owner asked ChatGPT to look for alternative approaches to this
+exact problem and shared its response back. That response made several
+specific technical claims about AndroidX Compose's accessibility source
+code. Rather than act on an AI-generated technical claim about internal
+framework behavior at face value, each load-bearing claim was checked
+directly against the real source
+([`AndroidComposeViewAccessibilityDelegateCompat.android.kt`](https://android.googlesource.com/platform/frameworks/support/+/refs/heads/androidx-main/compose/ui/ui/src/androidMain/kotlin/androidx/compose/ui/platform/AndroidComposeViewAccessibilityDelegateCompat.android.kt))
+before any code changed. Results, stated plainly:
+
+* **Confirmed in source:** a selectable element whose Compose `Role` is
+  NOT `Role.Tab` — e.g. a selected chat message row — has its selection
+  state mapped to `AccessibilityNodeInfo.isChecked`, not `isSelected`:
+  `if (role == Role.Tab) { info.isSelected = it } else { info.isChecked =
+  it }`. This means the 1.2.4 `TYPE_VIEW_SELECTED` attempt (see the
+  "Second amendment" above) was checking a property this kind of element
+  would never populate in the first place, independent of whether any
+  event fires for it at all.
+* **Confirmed in source:** Compose addresses a specific virtual semantics
+  node via `event.setSource(view, virtualViewId)`. This means
+  `event.source` can legitimately reference one exact, specific message
+  row even while `event.className` still reports the generic
+  `"android.view.View"` seen in the 1.2.5 diagnostic output. In other
+  words, the 1.2.5 diagnostic's "generic-looking" output did not actually
+  prove the source node itself carries nothing useful — that diagnostic
+  never inspected the node's own properties (`isChecked`, whether `text`
+  is present, `isLongClickable`, etc.), only its class name and the bare
+  fact that some event fired.
+* **NOT verified (fetched source was truncated before the relevant code):**
+  whether Compose's long-click handling (`combinedClickable(onLongClick =
+  ...)`) really never dispatches `TYPE_VIEW_LONG_CLICKED` even when
+  `ACTION_LONG_CLICK` is invoked. This claim is still treated as
+  unconfirmed from source — though it remains consistent with every
+  on-device test result in this investigation, where that event type has
+  never once been observed to fire in Google Messages or X.
+* **NOT verified (not visible in the fetched excerpt):** which exact
+  `AccessibilityEvent` type is dispatched when a non-Tab node's
+  `isChecked` state changes — the ChatGPT response assumed
+  `TYPE_WINDOW_CONTENT_CHANGED`, which is plausible (Compose's
+  accessibility bridge does route most semantics changes through that
+  event type) but not something the fetched source excerpt actually
+  showed.
+
+The clipboard-reading floating-button fallback the same ChatGPT response
+described in full implementation detail (a `TYPE_ACCESSIBILITY_OVERLAY`
+that briefly drops `FLAG_NOT_FOCUSABLE` on a button tap to gain
+`isUidFocused` status and legitimately read a freshly-copied clipboard
+item, with staleness and sensitivity checks) was **not** re-evaluated
+against source and was **not** built — it remains exactly what it was in
+the "Third amendment" above: judged workable in principle, not pursued,
+now for the same reason plus the fact that it's a bigger, more invasive
+feature (a new persistent on-screen button, active window-focus
+manipulation) that only makes sense to build if the smaller diagnostic
+below turns out to be a dead end too.
+
+Given the two confirmed claims materially change what the 1.2.5 result
+actually proved (an unhelpful diagnostic, not proof the node is useless),
+a new temporary diagnostic was built rather than immediately writing a
+production feature on top of unverified assumptions. `v1.2.7` re-adds
+`typeWindowContentChanged` to `accessibility_service_config.xml`,
+routed to `handleComposeSelectionDiagnostic()` in
+`TextGateAccessibilityService.kt`. Unlike `v3`, this handler inspects the
+source node's own `isChecked`, `isSelected`, `isLongClickable`, whether
+its action list contains `ACTION_LONG_CLICK`, its `viewIdResourceName`,
+and its class name — and whether `text`/`contentDescription` are present
+and how long they are (gated behind `SensitiveInputGuard.isSensitiveInput`
+exactly like every other read in this app). It deliberately still never
+displays the actual text/contentDescription content on screen, even
+temporarily — presence and length are enough to confirm or refute the
+hypothesis without ever showing private message content in a diagnostic
+overlay. Like `v3`, rapid-fire events are collapsed via a dedicated
+debounce (`diagnosticDebouncer`, 250&nbsp;ms, entirely separate from the
+typed-trigger pipeline's own debouncer) so only the latest snapshot is
+shown once the stream goes quiet. This is still evidence-gathering only:
+no production behavior changes in 1.2.7, and the long-press bubble's real
+pathways are untouched.
+
+**Status as of 1.2.7: open again, pending on-device test results.** If
+the diagnostic shows `checked=true` and/or a non-trivial `textLen` lining
+up with a real long-press/selection on a message in Google Messages or X,
+that is strong evidence a real (non-diagnostic) extraction path is
+buildable, and the next step would be a `v5` that reads `node.text` (or
+`node.contentDescription`) through the same gates the rest of this app
+already uses. If it instead shows the node carries nothing useful
+(`checked=false`, `textLen=-1`, no long-click action) even on a confirmed
+long-press, that would be stronger, more specific evidence for the
+"accepted limitation" conclusion than `v3` provided — at which point the
+1.2.6 conclusion below would be reinstated with this additional evidence
+folded in, and the clipboard/floating-button fallback would be the only
+remaining unexplored option.
 
 ## 15. Verified build result (GitHub Actions)
 

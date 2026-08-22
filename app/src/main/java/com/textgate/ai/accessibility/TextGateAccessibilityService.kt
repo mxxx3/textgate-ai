@@ -11,6 +11,7 @@ import android.widget.Toast
 import com.textgate.ai.R
 import com.textgate.ai.model.TranslationPrompts
 import com.textgate.ai.network.GeminiClient
+import com.textgate.ai.security.AppBlocklist
 import com.textgate.ai.security.AppSettingsStore
 import com.textgate.ai.security.BubbleTranslateGate
 import com.textgate.ai.security.EventGate
@@ -47,19 +48,26 @@ import java.util.concurrent.atomic.AtomicBoolean
  *     intentionally skips ONLY the editability check, since its entire
  *     purpose is reading non-editable received content — see
  *     BubbleTranslateGate's class doc for why that is safe).
- *   - Three event types are subscribed to:
+ *   - Four event types are currently subscribed to:
  *     [AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED],
- *     [AccessibilityEvent.TYPE_VIEW_LONG_CLICKED], and
- *     [AccessibilityEvent.TYPE_VIEW_SELECTED] (see
- *     accessibility_service_config.xml) — this service never calls
- *     getWindows() or getRootInActiveWindow(), and never enumerates any
- *     window other than the one that raised the event. It only ever
- *     inspects `event.source` for the event actually delivered, and —
- *     for the long-press bubble path ONLY, when that node's own text is
- *     blank — that SAME node's own bounded set of descendants (see
- *     [BubbleTranslateGate]'s "Where the text actually lives" doc
- *     section). The typed-trigger path never does even that much: it
- *     only ever reads `event.source` directly, nothing further.
+ *     [AccessibilityEvent.TYPE_VIEW_LONG_CLICKED],
+ *     [AccessibilityEvent.TYPE_VIEW_SELECTED], and — TEMPORARILY, as of
+ *     v1.2.7, for diagnostics only —
+ *     [AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED] (see
+ *     accessibility_service_config.xml and README.md §14 "Fourth
+ *     amendment") — this service never calls getWindows() or
+ *     getRootInActiveWindow(), and never enumerates any window other than
+ *     the one that raised the event. It only ever inspects `event.source`
+ *     for the event actually delivered, and — for the long-press bubble
+ *     path ONLY, when that node's own text is blank — that SAME node's
+ *     own bounded set of descendants (see [BubbleTranslateGate]'s "Where
+ *     the text actually lives" doc section). The typed-trigger path never
+ *     does even that much: it only ever reads `event.source` directly,
+ *     nothing further. The v4 diagnostic handler for
+ *     TYPE_WINDOW_CONTENT_CHANGED also only ever inspects `event.source`
+ *     — never any other node — and deliberately never displays that
+ *     node's actual text/contentDescription content, only whether each is
+ *     present and how long it is.
  *   - No AccessibilityEvent is ever stored past the return of
  *     onAccessibilityEvent(); only a single AccessibilityNodeInfo may be
  *     held briefly (bounded by [DEBOUNCE_MS] plus one network round trip
@@ -77,9 +85,18 @@ import java.util.concurrent.atomic.AtomicBoolean
  * §14 "Third amendment to Feature update #6" for a full, evidence-based
  * account of the investigation into Google Messages (SMS) and X/Twitter,
  * both of which appear to be built with Jetpack Compose in a way that
- * makes a real physical long-press architecturally invisible to any of the
- * three event types above. That investigation concluded this is an
- * accepted limitation, not a bug to keep chasing with more event types.
+ * makes a real physical long-press architecturally invisible to
+ * [AccessibilityEvent.TYPE_VIEW_LONG_CLICKED] and
+ * [AccessibilityEvent.TYPE_VIEW_SELECTED]. That investigation was
+ * concluded and closed as an accepted limitation in v1.2.6 — then reopened
+ * in v1.2.7 after a new, source-verified lead (see README.md §14 "Fourth
+ * amendment") showed the earlier [AccessibilityEvent.TYPE_VIEW_SELECTED]
+ * hypothesis was testing the wrong signal, and that the previously-tried
+ * [AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED] diagnostic (v1.2.5) may
+ * not have been generic noise after all — it just wasn't inspecting the
+ * right properties of `event.source`. v1.2.7 re-adds a narrower, better
+ * targeted diagnostic to actually test that before drawing any final
+ * conclusion.
  */
 class TextGateAccessibilityService : AccessibilityService() {
 
@@ -89,6 +106,15 @@ class TextGateAccessibilityService : AccessibilityService() {
     private lateinit var bubbleGate: BubbleTranslateGate
     private val mainHandler = Handler(Looper.getMainLooper())
     private val debouncer = Debouncer(DEBOUNCE_MS)
+
+    /** TEMPORARY (v4 diagnostic, v1.2.7) — collapses a burst of rapid-fire
+     * TYPE_WINDOW_CONTENT_CHANGED events (there are usually several per
+     * user interaction) down to just the LAST one's snapshot, shown once
+     * things go quiet for [DIAGNOSTIC_DEBOUNCE_MS]. Entirely separate from
+     * [debouncer] — this one never holds a node, only a plain summary
+     * String, since the node is always recycled before scheduling. */
+    private val diagnosticDebouncer = Debouncer(DIAGNOSTIC_DEBOUNCE_MS)
+
     private val bubble by lazy { TranslationBubble(this) }
 
     /** True while a single trigger's network round trip is in flight. Also
@@ -116,11 +142,13 @@ class TextGateAccessibilityService : AccessibilityService() {
 
     override fun onInterrupt() {
         cancelPendingDebounce()
+        diagnosticDebouncer.cancel()
         bubble.dismiss()
     }
 
     override fun onDestroy() {
         cancelPendingDebounce()
+        diagnosticDebouncer.cancel()
         bubble.dismiss()
         networkExecutor?.shutdownNow()
         networkExecutor = null
@@ -165,6 +193,12 @@ class TextGateAccessibilityService : AccessibilityService() {
             // identical either way.
             AccessibilityEvent.TYPE_VIEW_LONG_CLICKED,
             AccessibilityEvent.TYPE_VIEW_SELECTED -> handleLongClick(event)
+            // TEMPORARY (v4 diagnostic, v1.2.7) — see
+            // handleComposeSelectionDiagnostic()'s doc for the full
+            // rationale. Re-added to test a source-verified hypothesis
+            // after the v1.2.5 attempt was found to have been looking at
+            // the wrong node properties, not necessarily a dead end.
+            AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED -> handleComposeSelectionDiagnostic(event)
             else -> return
         }
     }
@@ -253,6 +287,109 @@ class TextGateAccessibilityService : AccessibilityService() {
             is BubbleTranslateGate.Decision.Blocked -> {
                 node?.let { recycleSafely(it) }
             }
+        }
+    }
+
+    /**
+     * TEMPORARY DIAGNOSTIC (v4, v1.2.7) — see README.md §14 "Fourth
+     * amendment" for the full background. Re-added after directly
+     * verifying (against the actual AndroidX Compose source, not just
+     * trusting an outside claim) two things that change what the v1.2.5
+     * TYPE_WINDOW_CONTENT_CHANGED diagnostic's "generic-looking" output
+     * actually proved:
+     *
+     *   1. `AndroidComposeViewAccessibilityDelegateCompat` maps a
+     *      non-Tab-role selectable element's selection state to
+     *      `isChecked` (via `info.isChecked = it`), NOT `isSelected` —
+     *      confirmed in source as `if (role == Role.Tab) { info.isSelected
+     *      = it } else { info.isChecked = it }`. A selected chat message
+     *      row is not a Tab, so the v1.2.4 TYPE_VIEW_SELECTED attempt was
+     *      testing a signal that this specific kind of element would
+     *      never surface via isSelected in the first place — regardless
+     *      of whether the right event type fires for it.
+     *   2. Compose addresses a specific virtual semantics node via
+     *      `event.setSource(view, virtualViewId)` — confirmed present in
+     *      source. This means `event.source` CAN legitimately reference
+     *      one exact message row even while `event.className` still
+     *      reports the generic "android.view.View" seen in the v1.2.5
+     *      diagnostic output. A generic className alone does not prove
+     *      the source node itself carries no specific information — v3
+     *      never actually checked the node's own properties, only its
+     *      className and the raw fact that *an* event fired.
+     *
+     * This handler tests that directly: it inspects `event.source` — the
+     * one node that raised THIS event, nothing else, no window
+     * enumeration — for `isChecked`, `isSelected`, `isLongClickable`,
+     * whether its action list contains ACTION_LONG_CLICK, and whether
+     * `text`/`contentDescription` are present, all gated behind the same
+     * block-list / allow-list / master-switch checks as every other path,
+     * with [SensitiveInputGuard.isSensitiveInput] checked before even the
+     * *length* of text/contentDescription is read (a sensitive field
+     * reports as unavailable, not as length 0).
+     *
+     * What is deliberately NOT done, even temporarily: the actual text or
+     * contentDescription content is never shown on screen — only whether
+     * each is present, and how long it is. If this diagnostic shows a
+     * non-trivial textLen or descLen lining up with a real long-press on
+     * a message, that alone is strong enough evidence to justify building
+     * a real (non-diagnostic) extraction path next — there is no need to
+     * display the private message text itself just to confirm the
+     * hypothesis.
+     */
+    private fun handleComposeSelectionDiagnostic(event: AccessibilityEvent) {
+        val packageName = event.packageName?.toString()
+        if (packageName.isNullOrBlank()) return
+        if (!::settingsStore.isInitialized) return
+        if (!settingsStore.isAiEnabled) return
+        if (AppBlocklist.isBlocked(packageName, applicationContext.packageName)) return
+        if (!settingsStore.isPackageAllowed(packageName)) return
+
+        val node = event.source ?: return
+        try {
+            val sensitive = try {
+                SensitiveInputGuard.isSensitiveInput(node)
+            } catch (_: Exception) {
+                true // fail closed: if the check itself fails, treat as sensitive
+            }
+            val textLen = if (sensitive) -2 else (node.text?.length ?: -1)
+            val descLen = if (sensitive) -2 else (node.contentDescription?.length ?: -1)
+            val hasLongClickAction = try {
+                node.actionList.any { it.id == AccessibilityNodeInfo.ACTION_LONG_CLICK }
+            } catch (_: Exception) {
+                false
+            }
+            val bounds = Rect()
+            try {
+                node.getBoundsInScreen(bounds)
+            } catch (_: Exception) {
+                // Leave as the zero-rect default; still shown, just
+                // anchored toward the top-left instead of near the node.
+            }
+            val className = node.className?.toString().orEmpty()
+            val viewId = try {
+                node.viewIdResourceName.orEmpty()
+            } catch (_: Exception) {
+                ""
+            }
+
+            val summary = buildString {
+                append("DIAG v4  pkg=").append(packageName).append('\n')
+                append("checked=").append(node.isChecked)
+                append(" selected=").append(node.isSelected)
+                append(" longClk=").append(node.isLongClickable)
+                append(" hasLCAction=").append(hasLongClickAction).append('\n')
+                append("textLen=").append(textLen)
+                append(" descLen=").append(descLen).append('\n')
+                append("id=").append(viewId.ifBlank { "-" }).append('\n')
+                append("cls=").append(className)
+            }
+
+            // The debouncer's own Handler already runs on the main
+            // looper, so this callback can call bubble.showResult()
+            // directly — no extra mainHandler.post() needed.
+            diagnosticDebouncer.schedule { bubble.showResult(bounds, summary) }
+        } finally {
+            recycleSafely(node)
         }
     }
 
@@ -473,5 +610,12 @@ class TextGateAccessibilityService : AccessibilityService() {
 
     companion object {
         private const val DEBOUNCE_MS = 400L
+
+        /** TEMPORARY (v4 diagnostic, v1.2.7) — see
+         * [handleComposeSelectionDiagnostic]'s doc. Short quiet window used
+         * only to collapse a burst of TYPE_WINDOW_CONTENT_CHANGED events
+         * into a single displayed snapshot; not a correctness-critical
+         * value the way [DEBOUNCE_MS] is for the typed-trigger path. */
+        private const val DIAGNOSTIC_DEBOUNCE_MS = 250L
     }
 }

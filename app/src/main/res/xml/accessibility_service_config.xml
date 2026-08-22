@@ -2,8 +2,12 @@
 <!--
     Deliberately minimal accessibility service configuration.
 
-    accessibilityEventTypes="typeViewTextChanged|typeViewLongClicked|typeViewSelected"
-        The ONLY three event types this service subscribes to.
+    accessibilityEventTypes="typeViewTextChanged|typeViewLongClicked|typeViewSelected|typeWindowContentChanged"
+        Four event types, as of v1.2.7. The first three are permanent. The
+        fourth, typeWindowContentChanged, is a TEMPORARY diagnostic re-added
+        in v1.2.7 — see the "Fourth amendment" note below and README.md §14
+        for the full, evidence-based reasoning for why it came back after
+        being removed in v1.2.6.
 
         typeViewTextChanged powers the typed "?en"/"?pl" trigger pathway:
         "the text in the field currently being edited changed."
@@ -49,21 +53,60 @@
         typeWindowContentChanged, was tried as a further experiment (does
         Compose still announce the RESULTING selection-state UI change,
         even if not the gesture itself) and confirmed on-device to fire —
-        but far too generically (on virtually any UI change, in every app,
-        Compose or not) to serve as a reliable, specific trigger without a
-        much broader read of the screen than this app is willing to do (see
-        README.md for the full reasoning). That event type has been
-        removed again; this remains a THREE-event-type service. SMS and
-        X/Twitter are documented as an accepted limitation of the
-        long-press bubble feature — see README.md §14 for the full,
-        evidence-based investigation.
+        but appeared far too generic in its RAW form (on virtually any UI
+        change, in every app, Compose or not) to serve as a reliable,
+        specific trigger. That event type was removed again in v1.2.6, and
+        SMS/X were documented as an accepted limitation.
+
+        Fourth amendment (v1.2.7): typeWindowContentChanged was re-added
+        after directly verifying two claims against the actual AndroidX
+        Compose source (AndroidComposeViewAccessibilityDelegateCompat, not
+        just trusting an outside summary of it):
+          1. A non-Tab-role selectable element (e.g. a selected chat
+             message row, which is not a Tab) has its selection state
+             mapped to isChecked, NOT isSelected — confirmed in source as
+             `if (role == Role.Tab) { info.isSelected = it } else {
+             info.isChecked = it }`. The v1.2.4 typeViewSelected attempt
+             was therefore testing a signal this kind of element would
+             never surface via isSelected regardless of which event type
+             carries the change.
+          2. Compose addresses a specific virtual semantics node via
+             event.setSource(view, virtualViewId) — confirmed present in
+             source — meaning event.source CAN legitimately reference one
+             exact message row even while event.className still reports
+             the generic "android.view.View" seen in the v1.2.5 diagnostic
+             output. The v1.2.5 diagnostic never actually inspected the
+             source node's own properties (isChecked, text presence,
+             isLongClickable, etc.) — only its className and the bare fact
+             an event fired — so "the output looked generic" did not
+             actually rule out the node itself carrying specific info.
+        v1.2.7's diagnostic (see TextGateAccessibilityService.kt's
+        handleComposeSelectionDiagnostic()) tests this directly by
+        inspecting event.source's own isChecked/isSelected/isLongClickable
+        state and whether text/contentDescription are present (never their
+        actual content) — still touching only that one node, still no
+        window enumeration. If it confirms the source node DOES carry
+        specific, identifying state for a long-pressed/selected message,
+        this becomes the basis for a real (non-diagnostic) extraction
+        path; if it shows the node genuinely carries nothing useful, that
+        is stronger, more specific evidence for the "accepted limitation"
+        conclusion than v1.2.5's cruder diagnostic provided. See README.md
+        §14 "Fourth amendment to Feature update #6" for the complete
+        writeup, including the two claims from the ChatGPT-assisted
+        research that could NOT be verified against source (whether
+        Compose's long-click handling ever dispatches typeViewLongClicked,
+        and which exact event type carries a Selected-state change) —
+        this diagnostic is partly how those remaining open questions get
+        answered empirically instead of by further, unverifiable source
+        reading.
 
         This service still does NOT receive typeViewFocused,
-        typeWindowStateChanged, typeWindowContentChanged, typeViewClicked
-        (a normal, non-long tap), or any other event type — it still never
-        observes navigation, scrolling, or which screens the user visits,
-        only "a field's text changed," "a view was long-pressed," and "a
-        view became selected."
+        typeWindowStateChanged, typeViewClicked (a normal, non-long tap),
+        or any other event type — it still never observes navigation,
+        scrolling, or which screens the user visits, only "a field's text
+        changed," "a view was long-pressed," "a view became selected," and
+        — temporarily — "something changed somewhere in the current
+        window."
 
     We deliberately do NOT set:
       - android:flagRetrieveInteractiveWindows — this service never enumerates
@@ -78,10 +121,12 @@
         event.packageName against the user's saved allow-list and the
         built-in block-list and returns immediately for anything not
         explicitly allowed, before any further processing. This is true for
-        ALL THREE event types: the long-press bubble pathway (long-click AND
+        ALL FOUR event types: the long-press bubble pathway (long-click AND
         selected) is gated by BubbleTranslateGate, which enforces the exact
         same block-list and allow-list as the typed-trigger pathway (see
-        BubbleTranslateGate.kt).
+        BubbleTranslateGate.kt); the v1.2.7 content-changed diagnostic
+        pathway enforces the same block-list/allow-list/master-switch gate
+        directly in handleComposeSelectionDiagnostic() itself.
 
     android:canRetrieveWindowContent="true" is required for
     AccessibilityEvent#getSource() to return a usable node at all; without
@@ -103,7 +148,7 @@
     framework on our behalf.
 -->
 <accessibility-service xmlns:android="http://schemas.android.com/apk/res/android"
-    android:accessibilityEventTypes="typeViewTextChanged|typeViewLongClicked|typeViewSelected"
+    android:accessibilityEventTypes="typeViewTextChanged|typeViewLongClicked|typeViewSelected|typeWindowContentChanged"
     android:accessibilityFeedbackType="feedbackGeneric"
     android:accessibilityFlags=""
     android:canRetrieveWindowContent="true"

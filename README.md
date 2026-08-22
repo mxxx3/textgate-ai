@@ -151,17 +151,18 @@ Any on-screen text, in an allowed app (need NOT be editable — a received
 message bubble, a comment, a label — this is the whole point)
         │  user long-presses it
         ▼
-fires AccessibilityEvent.TYPE_VIEW_LONG_CLICKED (standard long-press
-        signal — WhatsApp, Telegram) OR AccessibilityEvent.TYPE_VIEW_SELECTED
-        (fallback for apps whose long-press enters a multi-select mode
-        WITHOUT ever dispatching TYPE_VIEW_LONG_CLICKED — see the
-        "Known, accepted limitation" note below and
-        accessibility_service_config.xml)
+fires AccessibilityEvent.TYPE_VIEW_LONG_CLICKED (the standard long-press
+        signal — WhatsApp, Telegram; the ONLY other event type this
+        service subscribes to besides typeViewTextChanged — see
+        accessibility_service_config.xml). A second event type,
+        TYPE_VIEW_SELECTED, was tried as a fallback from v1.2.4 through
+        v1.2.9 and permanently removed in v1.2.10 after it was confirmed
+        to cause real, unwanted translations on ordinary taps in other
+        apps without ever once helping the app it was added for — see the
+        "Known, accepted limitation" note below and README.md §14
+        "Seventh amendment" for the full story.
         ▼
 TextGateAccessibilityService.handleLongClick()
-        │  (routed here from EITHER of the two event types above — the
-        │   ONLY other event types this service subscribes to; see
-        │   accessibility_service_config.xml)
         ▼
 BubbleTranslateGate.evaluate(packageName, node)     ← SECURITY GATE
         │  1. packageName present?
@@ -203,25 +204,30 @@ read — `ACTION_SET_TEXT` is only ever used by the typed-trigger pipeline
 above. The bubble is a read-only, temporary overlay; the message the user
 long-pressed is left completely untouched in its original app.
 
-**Known, accepted limitation (as of 1.2.9): Google Messages (SMS) and
+**Known, accepted limitation (as of 1.2.10): Google Messages (SMS) and
 X (Twitter) do not support the long-press bubble.** Real-device testing
 showed the bubble works in Telegram, and (after a fix — see §14
-"Amendment to Feature update #6") in WhatsApp, but neither
-`TYPE_VIEW_LONG_CLICKED` nor `TYPE_VIEW_SELECTED` is ever dispatched for
-a long-press in Google Messages or X. A third signal,
-`TYPE_WINDOW_CONTENT_CHANGED`, was tried twice (1.2.5, then again more
-narrowly in 1.2.7/1.2.8 after two related claims were confirmed directly
-against the AndroidX Compose source — see §14 "Fourth" and "Fifth
-amendment") and both times confirmed to fire, but never conclusively
-shown to carry anything a real feature could use — the second attempt was
-closed by the app's owner (§14 "Sixth amendment") before it reached a
-verdict either way. The most likely
-explanation for why the two permanent signals never fire at all, backed
-by Android's own documentation and researched in full in §14 ("Second
-amendment to Feature update #6" and after): both apps' relevant UI is
+"Amendment to Feature update #6") in WhatsApp, but
+`TYPE_VIEW_LONG_CLICKED` — the only long-press signal this service still
+subscribes to as of 1.2.10 — is never dispatched for a long-press in
+Google Messages or X. A second signal, `TYPE_VIEW_SELECTED`, was tried as
+a fallback from 1.2.4 through 1.2.9, never once worked for this purpose,
+and was permanently removed in 1.2.10 after being confirmed to cause
+unwanted real translations in an unrelated app (TikTok) — see §14
+"Seventh amendment". A third signal, `TYPE_WINDOW_CONTENT_CHANGED`, was
+tried twice as a diagnostic (1.2.5, then again more narrowly in
+1.2.7/1.2.8 after two related claims were confirmed directly against the
+AndroidX Compose source — see §14 "Fourth" and "Fifth amendment") and
+both times confirmed to fire, but never conclusively shown to carry
+anything a real feature could use — the second attempt was closed by the
+app's owner (§14 "Sixth amendment") before it reached a verdict either
+way. The most likely explanation for why `TYPE_VIEW_LONG_CLICKED` never
+fires at all, backed by Android's own documentation and researched in
+full in §14 ("Second amendment to Feature update #6" and after): both
+apps' relevant UI is
 very likely built with Jetpack Compose, whose `combinedClickable`
 long-press handling never goes through the classic `View.performLongClick()`
-path either signal depends on. Two further alternatives —
+path that signal depends on. Two further alternatives —
 `Intent.ACTION_PROCESS_TEXT` and a clipboard-reading floating button —
 were researched and either ruled out or left unbuilt (see §14 for why).
 Consistent with the reasoning throughout this section, raw touch/motion
@@ -318,8 +324,8 @@ which is not a runtime/dangerous permission at all.
 
 **Accessibility** is not a manifest permission — it's a system-mediated
 capability the user grants manually in Settings → Accessibility, and its
-scope is further restricted by `accessibility_service_config.xml` (three
-event types, no window enumeration; see §2 and §8).
+scope is further restricted by `accessibility_service_config.xml` (two
+event types as of 1.2.10, no window enumeration; see §2 and §8).
 
 **The long-press translation bubble (§2.1b) still requests no new
 permission.** It is a `WindowManager` overlay of type
@@ -1511,16 +1517,87 @@ useful but secondary, since the diagnostic approach tests the practical
 outcome directly regardless of which specific event type turns out to be
 responsible.
 
-**Conclusion, final (as of 1.2.9): SMS (Google Messages) and X (Twitter)
-do not support the long-press bubble, and the investigation into why is
-closed at the app owner's request — not because every avenue was
-exhausted, but because the owner decided the remaining avenues (a fuller
-`v5` diagnostic pass, or the clipboard/floating-button fallback) were not
-worth pursuing further right now.** The long-press bubble continues to
-work normally in Telegram, WhatsApp, and any other app whose UI dispatches
-standard `View`-based accessibility events; the typed `?en`/`?pl` trigger
-pathway is entirely unaffected by any of this, in every app, since it
-never depended on long-press detection at all.
+**Conclusion as of 1.2.9 (superseded — see "Seventh amendment" below): SMS
+(Google Messages) and X (Twitter) do not support the long-press bubble,
+and the investigation into why is closed at the app owner's request —
+not because every avenue was exhausted, but because the owner decided the
+remaining avenues (a fuller `v5` diagnostic pass, or the
+clipboard/floating-button fallback) were not worth pursuing further right
+now.** The long-press bubble continues to work normally in Telegram,
+WhatsApp, and any other app whose UI dispatches standard `View`-based
+accessibility events; the typed `?en`/`?pl` trigger pathway is entirely
+unaffected by any of this, in every app, since it never depended on
+long-press detection at all.
+
+**Seventh amendment to Feature update #6 (v1.2.10): `TYPE_VIEW_SELECTED`
+itself — the other event type this whole investigation had been chasing
+since v1.2.4 — turned out to be a real, active bug in a completely
+different app, and was permanently removed.**
+
+Right after the second closure (1.2.9), the app's owner reported that a
+translation bubble — a **real** one, "wygląda realnie jak tłumaczenie"
+("looks like a real translation"), not diagnostic text — kept appearing
+in TikTok whenever they tapped a button, e.g. on the home screen. This
+was confirmed to still happen on 1.2.9, i.e. **after** every diagnostic
+code path from the "Fourth" through "Sixth amendment" had already been
+fully removed — proving this was not diagnostic leftovers, but the real,
+production `BubbleTranslateGate` translation pathway firing for real.
+
+**Root cause:** `TYPE_VIEW_SELECTED` was added in v1.2.4 as a long-press
+fallback specifically for Google Messages, on the hypothesis that a
+long-press there enters a multi-select mode that marks the row
+`isSelected` even without dispatching `TYPE_VIEW_LONG_CLICKED`. That
+hypothesis was disproven on-device back in v1.2.4 (§14 "Second amendment")
+— the event never fires for Google Messages either — but the event type
+was left subscribed anyway, on the reasoning that it was "a standard,
+zero-cost signal that might help other apps." `handleEvent()` routed
+`TYPE_VIEW_SELECTED` to the exact same `handleLongClick()` as a genuine
+long-press, with no way to tell them apart.
+
+That reasoning turned out to be wrong on both counts. `TYPE_VIEW_SELECTED`
+is not zero-cost: Jetpack Compose legitimately dispatches it for its own
+built-in `Role.Tab` elements whenever their selected state changes —
+which is exactly what happens on an ordinary, single tap of a bottom
+navigation tab, a "For You"/"Following" feed toggle, or any similar
+selectable UI element, all common, unremarkable patterns in a modern app
+like TikTok. This is Compose's accessibility bridge working exactly as
+designed — it is a real, on-purpose signal for real Tab UI, just entirely
+unrelated to the "long-press to multi-select" scenario it was added here
+to detect. Since `handleLongClick()` could not distinguish "a message row
+just entered multi-select mode via long-press" from "a completely
+ordinary single tap just changed which tab is selected," every such tap
+on TikTok (an app already on the user's own allow-list, for the unrelated
+`?en`/`?pl` typed-trigger feature) triggered a real `BubbleTranslateGate`
+evaluation, and — whenever the tapped element's label/content passed the
+usual checks — a real network call to Gemini and a real, on-screen
+translation bubble for a button label, out of nowhere.
+
+**Fix:** `typeViewSelected` is removed from
+`accessibility_service_config.xml`'s `accessibilityEventTypes`, and
+`TYPE_VIEW_SELECTED` is no longer routed to `handleLongClick()` (or
+handled at all) in `TextGateAccessibilityService.kt`. This is a
+permanent removal, not another temporary experiment: across the entire
+investigation (v1.2.4 through v1.2.9), this event type produced zero
+working translations in the app it was added for, and it is now confirmed
+to actively cause unwanted, real translation attempts in at least one
+other, unrelated app. There is no remaining justification to keep
+subscribing to it. `TYPE_VIEW_LONG_CLICKED` — the pathway that actually
+works, in Telegram and WhatsApp — is completely unaffected; only the
+never-successful fallback is gone.
+
+**Conclusion, final (as of 1.2.10): the long-press bubble now subscribes
+to exactly one event type, `TYPE_VIEW_LONG_CLICKED`, plus
+`TYPE_VIEW_TEXT_CHANGED` for the unrelated typed-trigger pathway.** SMS
+(Google Messages) and X (Twitter) still do not support the long-press
+bubble, and that investigation remains closed per the "Sixth amendment"
+above. What changed in 1.2.10 is unrelated to that investigation's
+outcome: it is the removal of a signal that never contributed a single
+working translation anywhere, once it was shown to actively cause
+unwanted ones elsewhere. The long-press bubble continues to work normally
+in Telegram, WhatsApp, and any other app whose UI dispatches
+`TYPE_VIEW_LONG_CLICKED` for a real physical long-press; the typed
+`?en`/`?pl` trigger pathway is entirely unaffected by any of this, in
+every app, since it never depended on long-press detection at all.
 
 ## 15. Verified build result (GitHub Actions)
 

@@ -47,18 +47,17 @@ import java.util.concurrent.atomic.AtomicBoolean
  *     intentionally skips ONLY the editability check, since its entire
  *     purpose is reading non-editable received content — see
  *     BubbleTranslateGate's class doc for why that is safe).
- *   - Only [AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED],
- *     [AccessibilityEvent.TYPE_VIEW_LONG_CLICKED], and
- *     [AccessibilityEvent.TYPE_VIEW_SELECTED] are subscribed to (see
- *     accessibility_service_config.xml) — this service never calls
- *     getWindows() or getRootInActiveWindow(), and never enumerates any
- *     window other than the one that raised the event. It only ever
- *     inspects `event.source` for the event actually delivered, and —
- *     for the long-press bubble path ONLY, when that node's own text is
- *     blank — that SAME node's own bounded set of descendants (see
- *     [BubbleTranslateGate]'s "Where the text actually lives" doc
- *     section). The typed-trigger path never does even that much: it
- *     only ever reads `event.source` directly, nothing further.
+ *   - Only [AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED] and
+ *     [AccessibilityEvent.TYPE_VIEW_LONG_CLICKED] are subscribed to as of
+ *     v1.2.10 (see accessibility_service_config.xml) — this service
+ *     never calls getWindows() or getRootInActiveWindow(), and never
+ *     enumerates any window other than the one that raised the event. It
+ *     only ever inspects `event.source` for the event actually
+ *     delivered, and — for the long-press bubble path ONLY, when that
+ *     node's own text is blank — that SAME node's own bounded set of
+ *     descendants (see [BubbleTranslateGate]'s "Where the text actually
+ *     lives" doc section). The typed-trigger path never does even that
+ *     much: it only ever reads `event.source` directly, nothing further.
  *   - No AccessibilityEvent is ever stored past the return of
  *     onAccessibilityEvent(); only a single AccessibilityNodeInfo may be
  *     held briefly (bounded by [DEBOUNCE_MS] plus one network round trip
@@ -77,14 +76,23 @@ import java.util.concurrent.atomic.AtomicBoolean
  * evidence-based account of the investigation into Google Messages (SMS)
  * and X/Twitter, both of which appear to be built with Jetpack Compose in
  * a way that makes a real physical long-press architecturally invisible
- * to any of the three event types above. This was closed as an accepted
- * limitation in v1.2.6, reopened in v1.2.7 on a new, partially
+ * to [AccessibilityEvent.TYPE_VIEW_LONG_CLICKED]. This was closed as an
+ * accepted limitation in v1.2.6, reopened in v1.2.7 on a new, partially
  * source-verified lead, and closed again — for the second time, at the
  * app owner's explicit request — in v1.2.9, once on-device testing showed
- * the more targeted v4 diagnostic still didn't translate to a working
- * feature in either app. See README.md §14 "Sixth amendment" for the
- * full final writeup and what this investigation would need to move
- * forward if ever revisited.
+ * a more targeted diagnostic still didn't translate to a working feature
+ * in either app.
+ *
+ * v1.2.10 then removed [AccessibilityEvent.TYPE_VIEW_SELECTED] entirely —
+ * it was the OTHER event type this whole investigation had been trying
+ * since v1.2.4, and it turned out to have a real cost: on-device testing
+ * confirmed it fires for ordinary (non-long-press) taps on tab/toggle-style
+ * buttons in other Compose-based apps, e.g. TikTok's bottom navigation,
+ * triggering real, unwanted `BubbleTranslateGate` translation requests —
+ * while never once, across the entire investigation, producing a working
+ * translation in Google Messages or X, the only app it was ever added
+ * for. See README.md §14 "Sixth" and "Seventh amendment" for the full
+ * writeup.
  */
 class TextGateAccessibilityService : AccessibilityService() {
 
@@ -160,16 +168,17 @@ class TextGateAccessibilityService : AccessibilityService() {
 
         when (event.eventType) {
             AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED -> handleTextChanged(event)
-            // Both routed to the same handler: TYPE_VIEW_LONG_CLICKED is the
-            // standard long-press signal (works in WhatsApp/Telegram);
-            // TYPE_VIEW_SELECTED is a fallback for apps whose long-press
-            // enters a multi-select mode instead, without ever dispatching
-            // TYPE_VIEW_LONG_CLICKED — see accessibility_service_config.xml.
-            // handleLongClick() itself doesn't need to know or care which
-            // of the two fired; the gating and text-resolution logic is
-            // identical either way.
-            AccessibilityEvent.TYPE_VIEW_LONG_CLICKED,
-            AccessibilityEvent.TYPE_VIEW_SELECTED -> handleLongClick(event)
+            // TYPE_VIEW_LONG_CLICKED is the standard, purpose-built
+            // long-press signal (works in WhatsApp/Telegram). As of
+            // v1.2.10, TYPE_VIEW_SELECTED is no longer routed here (or
+            // subscribed to at all) — see accessibility_service_config.xml
+            // and README.md §14 "Seventh amendment" for why: it never once
+            // produced a working translation for the app it was added for
+            // (Google Messages), and was confirmed on-device to fire on
+            // ordinary, non-long-press taps in other allow-listed apps
+            // (TikTok's tab/toggle-style buttons), causing real, unwanted
+            // Gemini translation requests on button labels.
+            AccessibilityEvent.TYPE_VIEW_LONG_CLICKED -> handleLongClick(event)
             else -> return
         }
     }

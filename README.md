@@ -203,24 +203,19 @@ read — `ACTION_SET_TEXT` is only ever used by the typed-trigger pipeline
 above. The bubble is a read-only, temporary overlay; the message the user
 long-pressed is left completely untouched in its original app.
 
-**Known limitation, currently being re-investigated (as of 1.2.8): Google
-Messages (SMS) and X (Twitter) do not (yet) support the long-press
-bubble.** Real-device testing showed the bubble works in Telegram, and
-(after a fix — see §14 "Amendment to Feature update #6") in WhatsApp, but
-neither `TYPE_VIEW_LONG_CLICKED` nor `TYPE_VIEW_SELECTED` is ever
-dispatched for a long-press in Google Messages or X. A third signal,
-`TYPE_WINDOW_CONTENT_CHANGED`, was tried in 1.2.5 and confirmed to fire,
-but that diagnostic only looked at the event's class name and count, not
-the source node's own properties — and, per §14 "Fourth amendment", two
-of the properties it never checked (`isChecked`, and whether
-`event.source` can address one specific node despite a generic
-`className`) turned out, on verification against the actual AndroidX
-Compose source, to be exactly the ones this problem plausibly hinges on.
-1.2.7 re-adds this event type as a narrower diagnostic to test that
-directly (see §14) — the outcome is not yet known. As of 1.2.8, this
-diagnostic is hard-restricted to fire only for Google Messages and X
-(see §14 "Fifth amendment") after it was found, on-device, to also fire
-disruptively in TikTok. The most likely
+**Known, accepted limitation (as of 1.2.9): Google Messages (SMS) and
+X (Twitter) do not support the long-press bubble.** Real-device testing
+showed the bubble works in Telegram, and (after a fix — see §14
+"Amendment to Feature update #6") in WhatsApp, but neither
+`TYPE_VIEW_LONG_CLICKED` nor `TYPE_VIEW_SELECTED` is ever dispatched for
+a long-press in Google Messages or X. A third signal,
+`TYPE_WINDOW_CONTENT_CHANGED`, was tried twice (1.2.5, then again more
+narrowly in 1.2.7/1.2.8 after two related claims were confirmed directly
+against the AndroidX Compose source — see §14 "Fourth" and "Fifth
+amendment") and both times confirmed to fire, but never conclusively
+shown to carry anything a real feature could use — the second attempt was
+closed by the app's owner (§14 "Sixth amendment") before it reached a
+verdict either way. The most likely
 explanation for why the two permanent signals never fire at all, backed
 by Android's own documentation and researched in full in §14 ("Second
 amendment to Feature update #6" and after): both apps' relevant UI is
@@ -323,11 +318,8 @@ which is not a runtime/dangerous permission at all.
 
 **Accessibility** is not a manifest permission — it's a system-mediated
 capability the user grants manually in Settings → Accessibility, and its
-scope is further restricted by `accessibility_service_config.xml` (four
-event types as of 1.2.7/1.2.8 — three permanent, one temporary diagnostic
-restricted in code to firing only for Google Messages and X, see §14
-"Fourth amendment" and "Fifth amendment" — no window enumeration; see §2
-and §8).
+scope is further restricted by `accessibility_service_config.xml` (three
+event types, no window enumeration; see §2 and §8).
 
 **The long-press translation bubble (§2.1b) still requests no new
 permission.** It is a `WindowManager` overlay of type
@@ -1420,19 +1412,17 @@ shown once the stream goes quiet. This is still evidence-gathering only:
 no production behavior changes in 1.2.7, and the long-press bubble's real
 pathways are untouched.
 
-**Status as of 1.2.7: open again, pending on-device test results.** If
-the diagnostic shows `checked=true` and/or a non-trivial `textLen` lining
-up with a real long-press/selection on a message in Google Messages or X,
-that is strong evidence a real (non-diagnostic) extraction path is
+**Status as of 1.2.7 (superseded — see "Sixth amendment" below): open
+again, pending on-device test results.** The plan at the time: if the
+diagnostic showed `checked=true` and/or a non-trivial `textLen` lining up
+with a real long-press/selection on a message in Google Messages or X,
+that would be strong evidence a real (non-diagnostic) extraction path is
 buildable, and the next step would be a `v5` that reads `node.text` (or
 `node.contentDescription`) through the same gates the rest of this app
-already uses. If it instead shows the node carries nothing useful
+already uses. If it instead showed the node carrying nothing useful
 (`checked=false`, `textLen=-1`, no long-click action) even on a confirmed
 long-press, that would be stronger, more specific evidence for the
-"accepted limitation" conclusion than `v3` provided — at which point the
-1.2.6 conclusion below would be reinstated with this additional evidence
-folded in, and the clipboard/floating-button fallback would be the only
-remaining unexplored option.
+"accepted limitation" conclusion than `v3` provided.
 
 **Fifth amendment (v1.2.8): a real regression, found and fixed the same
 day, from on-device use rather than deliberate testing.** After
@@ -1477,6 +1467,60 @@ doc comment and the class-level KDoc in
 restriction. No other behavior changed: the diagnostic's internal logic,
 the real translation pathways, and every other gate are exactly as
 described in the "Fourth amendment" above.
+
+**Sixth amendment to Feature update #6 (v1.2.9): investigation closed a
+second time, at the app owner's explicit request, before the diagnostic
+produced a verdict.** After installing the fixed 1.2.8 build, the app's
+owner tested the v4 diagnostic on Google Messages and X and reported that
+long-press translation still did not work in either app — and asked to
+drop the investigation ("nie wysłałem zrzutu bo nic to nie pomogło bo
+nadal nie ma tłumaczeń w Google Messages/X więc to odpuszczam"). No
+diagnostic screenshot was ever captured or shared, so the specific
+question the v4 diagnostic was built to answer — whether `event.source`
+for a long-pressed/selected message in these apps actually carries
+`isChecked=true` and/or non-trivial `textLen`/`descLen` — was never
+actually resolved either way. This is stated plainly rather than implied:
+the investigation is closed because the app's owner chose to stop
+pursuing it, not because the evidence pointed to a firm dead end. The
+`v3`/`v4` diagnostic code (`typeWindowContentChanged` subscription,
+`handleComposeSelectionDiagnostic()`, `diagnosticDebouncer`,
+`DIAGNOSTIC_TARGET_PACKAGES`) has been fully removed as of 1.2.9,
+including the TikTok-specific restriction added in 1.2.8 — with the
+diagnostic itself gone, that restriction has nothing left to guard.
+`accessibility_service_config.xml` is back to exactly the three permanent
+event types, and `TextGateAccessibilityService.kt` no longer shows
+anything on screen beyond the real feature's own loading/result/error
+bubble — the same end state as after the first closure in 1.2.6.
+
+**What this round of the investigation actually added, net of the
+back-and-forth:** two specific claims about AndroidX Compose's
+accessibility source code were checked against the real source rather
+than taken on faith from an AI-generated summary, and one — that
+non-Tab-role elements map selection state to `isChecked` rather than
+`isSelected` — retroactively explains why the 1.2.4 `TYPE_VIEW_SELECTED`
+attempt could never have worked, independent of whatever caused the
+final `v4` result. The `v4` diagnostic itself, and whether `event.source`
+in these two specific apps carries anything a real feature could use,
+remains untested to a conclusion. If this is ever revisited, re-running
+the fixed (1.2.8-style) diagnostic — scoped to Messages/X only from the
+start this time — and actually capturing what it shows on a real
+long-press is the concrete next step; re-verifying the two still-open
+AndroidX claims from the "Fourth amendment" (long-click's event
+dispatch, and which event type carries an `isChecked` change) would be
+useful but secondary, since the diagnostic approach tests the practical
+outcome directly regardless of which specific event type turns out to be
+responsible.
+
+**Conclusion, final (as of 1.2.9): SMS (Google Messages) and X (Twitter)
+do not support the long-press bubble, and the investigation into why is
+closed at the app owner's request — not because every avenue was
+exhausted, but because the owner decided the remaining avenues (a fuller
+`v5` diagnostic pass, or the clipboard/floating-button fallback) were not
+worth pursuing further right now.** The long-press bubble continues to
+work normally in Telegram, WhatsApp, and any other app whose UI dispatches
+standard `View`-based accessibility events; the typed `?en`/`?pl` trigger
+pathway is entirely unaffected by any of this, in every app, since it
+never depended on long-press detection at all.
 
 ## 15. Verified build result (GitHub Actions)
 

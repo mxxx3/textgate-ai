@@ -67,7 +67,7 @@ TextGateAI/
         │       ├── values/strings.xml            (English — default/fallback)
         │       ├── values-pl/strings.xml          (Polish — auto-selected by system language)
         │       └── ...                            (layouts, other xml configs)
-        ├── test/java/com/textgate/ai/            (JVM unit tests — 82 tests)
+        ├── test/java/com/textgate/ai/            (JVM unit tests — 87 tests)
         └── androidTest/java/com/textgate/ai/     (on-device Keystore test)
 ```
 
@@ -574,7 +574,7 @@ user's saved `bubbleTargetLanguage`.
 
 ## 11. Tests
 
-### Unit tests (`./gradlew test`) — 82 tests, no device required
+### Unit tests (`./gradlew test`) — 87 tests, no device required
 
 | File | Scenarios covered |
 |---|---|
@@ -583,7 +583,7 @@ user's saved `bubbleTargetLanguage`.
 | `AppBlocklistTest` | known password managers/authenticators/system surfaces/crypto wallets & exchanges blocked, keyword heuristic, own-package block, ordinary messaging apps NOT blocked |
 | `AppSettingsStoreTest` | AI disabled by default, allow-list defaults to the curated social/messaging set (not empty), an app outside that set is unallowed until added, disabling a default-allowed package overrides its default, allow/disallow round-trip, persistence |
 | `EventGateTest` | end-to-end (minus network) decision chain: allowed+`?en` → Ready targeting English, allowed+`?pl` → Ready targeting Polish, allowed+trailing space → Ready, allowed+auto-capitalized language code (`? En`) → Ready, no-trigger → NotTriggered, password+trigger → Blocked, **app outside allow-list → Blocked**, master switch off → Blocked, blocklist wins over a mistaken allow-list entry, null node/package → Blocked |
-| `BubbleTranslateGateTest` | end-to-end (minus network) decision chain for the long-press pathway: **non-editable received message in an allowed app → Ready** (the key difference from `EventGateTest`), password field → Blocked even though non-editable, app outside allow-list → Blocked, master switch off → Blocked, blocklist wins over a mistaken allow-list entry, empty text → Blocked, text over the shared length limit → Blocked, null node/package → Blocked |
+| `BubbleTranslateGateTest` | end-to-end (minus network) decision chain for the long-press pathway: **non-editable received message in an allowed app → Ready** (the key difference from `EventGateTest`), password field → Blocked even though non-editable, app outside allow-list → Blocked, master switch off → Blocked, blocklist wins over a mistaken allow-list entry, empty text → Blocked, text over the shared length limit → Blocked, null node/package → Blocked, **the WhatsApp-shaped child-text search**: message text in a single child → Ready with the child's text, longest-safe-child-wins over a shorter sibling (timestamp), a sensitive child skipped even when it would otherwise be the longest candidate, a container with only a sensitive child → Blocked (not the sensitive value), a childless/textless container → Blocked |
 | `GeminiClientTest` | model-id validation, blank-key rejection, invalid-model rejection, response parsing (success/empty/malformed/blank), **timeout and I/O exception classification** |
 | `ResultPolicyTest` | Success → may replace text; **every single Failure variant → may NOT replace text** |
 | `NetworkAllowlistTest` | official host allowed; look-alike/subdomain/other hosts rejected |
@@ -618,7 +618,7 @@ key correctly, and that clearing it removes it.
 ### Running the tests
 
 ```
-./gradlew test               # 82 unit tests, JVM only, ~1-2 minutes
+./gradlew test               # 87 unit tests, JVM only, ~1-2 minutes
 ./gradlew connectedAndroidTest   # optional, needs a device/emulator plugged in
 ```
 
@@ -746,7 +746,7 @@ Use this to verify the built APK yourself:
 
 **Included, complete, and ready to open in Android Studio:** every Gradle
 file, the manifest, all XML security configs, all Kotlin source, all
-layouts/strings (English and Polish), the ProGuard rules, and 82 unit
+layouts/strings (English and Polish), the ProGuard rules, and 87 unit
 tests plus one instrumented test.
 
 **Build verification history.** The project was drafted in an environment
@@ -1064,6 +1064,52 @@ check is safe here.
 feature. `ACTION_SET_TEXT` is still only ever called from the typed-trigger
 path — the long-press pathway is read-only and never modifies the app it
 reads from.
+
+**Amendment to Feature update #6: the long-press bubble's node-text search
+now walks the long-pressed node's own children (WhatsApp fix).**
+Real-device testing (via the temporary diagnostic described just below)
+confirmed the root cause of the bubble not appearing in WhatsApp: the node
+the OS reports as the long-press target there is the message's outer
+container row, not the text itself — its own `text` is blank, while the
+actual message body lives in one of its child nodes, alongside other short
+text like a timestamp or sender name. Telegram, by contrast, reports a
+node whose own `text` already IS the message, which is why it worked
+there from the start.
+
+Fixed in `BubbleTranslateGate.evaluate()`: when the long-pressed node's own
+text is blank, it now falls back to `findLongestSafeText()`, a
+breadth-first search of that SAME node's own descendants only — never
+siblings, never ancestors, and never a different window; this app still
+never calls `getWindows()`/`getRootInActiveWindow()` anywhere. The search
+is bounded (max depth 6, max 60 nodes visited) so it can never become an
+unbounded walk, and every node it visits — not just the top-level one — is
+still run through `SensitiveInputGuard.isSensitiveInput()` before its text
+is read, so a sensitive child is skipped exactly as it would be at the top
+level; nothing bypasses that check just by being nested. Among all safe,
+non-blank candidates found, the LONGEST text wins — the practical
+heuristic that a message body is reliably longer than a timestamp or a
+short sender label. Every `AccessibilityNodeInfo` obtained during the
+search (via `getChild()`) is recycled before the function returns,
+including any left unvisited because the node cap was hit — nothing
+leaks. Five new `BubbleTranslateGateTest` cases cover this: the
+WhatsApp-shaped case (message in a single child), the longest-wins case
+(a short timestamp sibling losing to the real message), a sensitive child
+being skipped even when its text would otherwise be the longest candidate,
+a container with ONLY a sensitive child correctly Blocked rather than
+falling through to it, and a childless/textless container correctly
+Blocked. Total unit tests: 87.
+
+This does NOT touch `EventGate` or the typed-trigger pipeline at all — it
+only ever reads node.text directly, exactly as before; this fallback
+search is scoped entirely to `BubbleTranslateGate`.
+
+**Still open:** the SMS/Messages app showed no diagnostic bubble at all
+(not even a "blocked" one), unlike WhatsApp — meaning its problem may be
+different: the long-click event might genuinely never fire there at all
+(matching the original hypothesis below), rather than firing with blank
+text the way WhatsApp's did. This needs to be re-confirmed on-device with
+this fix in place before concluding whether it's fixed, unrelated, or a
+platform limitation this app cannot work around.
 
 **Temporary diagnostic (in progress, not a permanent feature, v2) in
 `handleLongClick()`.** On real devices, the long-press bubble (§2.1b)

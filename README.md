@@ -1065,6 +1065,22 @@ feature. `ACTION_SET_TEXT` is still only ever called from the typed-trigger
 path — the long-press pathway is read-only and never modifies the app it
 reads from.
 
+**Temporary diagnostic (in progress, not a permanent feature): two extra
+Toasts in `handleLongClick()`.** On real devices, the long-press bubble
+(§2.1b) works in Telegram but does not trigger in WhatsApp or the SMS app.
+The most likely explanation is that those apps implement long-press
+detection with their own custom touch/gesture handling (for their own
+message-selection UI) rather than through the standard `View.performLongClick()`
+path that dispatches `AccessibilityEvent.TYPE_VIEW_LONG_CLICKED` — the
+event this feature relies on — but that hasn't been confirmed on-device
+yet. To confirm it without guessing, `handleLongClick()` temporarily shows
+a `Toast` the moment a long-click event is received (package name only)
+and another if `BubbleTranslateGate` blocks it (the abstract block reason
+only, e.g. `"empty text"` or `"not allow-listed"`). Neither toast ever
+shows message content. Both are marked `TEMPORARY DIAGNOSTIC` in the code
+and will be removed once the root cause is confirmed and the real fix (if
+any is possible from this app's side) is implemented.
+
 ## 15. Verified build result (GitHub Actions)
 
 Confirmed on `https://github.com/mxxx3/textgate-ai`, workflow run

@@ -202,6 +202,17 @@ class TextGateAccessibilityService : AccessibilityService() {
         val packageName = event.packageName?.toString()
         val node = event.source
 
+        // ============================================================
+        // TEMPORARY DIAGNOSTIC — added to investigate why the bubble
+        // appears in Telegram but not in WhatsApp/SMS. Shows ONLY the
+        // package name (not sensitive — already used everywhere for
+        // gating) and, if blocked, BubbleTranslateGate's abstract block
+        // reason string (e.g. "empty text", "not allow-listed") — NEVER
+        // the message content itself. Remove both toast lines below (and
+        // this comment block) once the root cause is confirmed and fixed.
+        showToast("DIAG: long-click received, package=$packageName")
+        // ============================================================
+
         // BubbleTranslateGate performs every remaining check — block-list,
         // allow-list, master switch, sensitivity (deliberately NOT
         // editability — see its class doc) — and only reads node.text
@@ -223,6 +234,8 @@ class TextGateAccessibilityService : AccessibilityService() {
                 startBubbleTranslation(decision.text, bounds)
             }
             is BubbleTranslateGate.Decision.Blocked -> {
+                // TEMPORARY DIAGNOSTIC — see comment above; remove with it.
+                showToast("DIAG: blocked - ${decision.reason}")
                 node?.let { recycleSafely(it) }
             }
         }

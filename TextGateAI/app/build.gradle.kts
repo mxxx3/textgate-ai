@@ -11,10 +11,42 @@ android {
         applicationId = "com.textgate.ai"
         minSdk = 26
         targetSdk = 35
-        versionCode = 5
-        versionName = "1.1.3"
+        versionCode = 6
+        versionName = "1.1.4"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    signingConfigs {
+        getByName("debug") {
+            // A FIXED debug-signing key, checked into the repo as
+            // app/debug.keystore (see .gitignore's `!debug.keystore`
+            // exception to the general `*.keystore` rule — this file is
+            // deliberately tracked). Without this override, Android Gradle
+            // Plugin falls back to `~/.android/debug.keystore`, which it
+            // silently auto-generates WITH A FRESH RANDOM KEY the first
+            // time it's missing — true on every GitHub Actions run, since
+            // CI runners start from a clean image and nothing here ever
+            // persisted one. That meant every CI build produced a debug
+            // APK signed with a different key, so a signing-key fingerprint
+            // registered once (e.g. for Android Developer Verification's
+            // limited-distribution device authorization) would silently
+            // stop matching the very next build.
+            //
+            // This key is intentionally NOT a secret: it is a debug-only
+            // signing key, never used for the release build type, holds no
+            // production trust, and committing a shared debug keystore for
+            // exactly this reproducibility reason is standard, widely-used
+            // Android practice. `storePassword`/`keyAlias`/`keyPassword`
+            // below match the values every default AGP-generated debug
+            // keystore already uses — nothing here is a new secret to
+            // protect, only a fixed replacement for a value that used to
+            // be random.
+            storeFile = file("debug.keystore")
+            storePassword = "android"
+            keyAlias = "androiddebugkey"
+            keyPassword = "android"
+        }
     }
 
     buildTypes {
@@ -32,6 +64,7 @@ android {
             // side-by-side with a release build without colliding.
             applicationIdSuffix = ".debug"
             isDebuggable = true
+            signingConfig = signingConfigs.getByName("debug")
         }
     }
 

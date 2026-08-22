@@ -796,6 +796,39 @@ default, so nothing else in the pipeline changes. Rate limits are
 account-specific and change over time on Google's side — see the doc
 comment on `DEFAULT_MODEL` for how to re-check and update it later.
 
+**Feature update #5 (post-initial delivery, requested by the app's owner):
+pin a fixed debug-signing key so the debug APK's certificate fingerprint
+stays stable across CI builds.** Discovered while the owner was registering
+the app's package name for Android's (new, 2026) Developer Verification
+program, which asks for the SHA-256 fingerprint of the certificate the APK
+is signed with. Checking the downloaded CI artifact's actual signer
+(`apksigner verify --print-certs`) showed `DN: C=US, O=Android, CN=Android
+Debug` — the fixed distinguished name Android Gradle Plugin always uses for
+its *auto-generated* debug key, backed by a **freshly random key pair**
+whenever `~/.android/debug.keystore` doesn't already exist. Every GitHub
+Actions run starts from a clean image and this repo had nothing that
+persisted that file across runs, so **every CI build was silently signing
+the debug APK with a different key** — a fingerprint registered against one
+build's APK would stop matching the very next one. Fixed by generating one
+fixed debug keystore (`keytool -genkeypair`, same conventions AGP's own
+default uses: alias `androiddebugkey`, both passwords `android`, DN
+`CN=Android Debug,O=Android,C=US`) and checking it into the repo as
+`app/debug.keystore` — `.gitignore` already carried a `!debug.keystore`
+exception to its general `*.keystore` rule, anticipating exactly this. A
+new explicit `signingConfigs.debug` block in `app/build.gradle.kts` points
+`buildTypes.debug` at this file instead of leaving Gradle to fall back to
+its implicit, host-dependent default. This key is intentionally not a
+secret — a debug-only signing key holds no production trust, and a shared,
+checked-in debug keystore purely for reproducible fingerprints is standard
+Android practice; nothing about the release build type or its signing was
+touched. **Practical effect:** the fingerprint the owner registers going
+forward (`DA:A0:84:EF:2F:45:EE:60:9C:76:63:C2:44:0C:31:BE:A9:DB:9C:AF:AE:8D:B5:A8:9C:5B:34:E8:83:3F:12:DF`)
+will now match every future debug build from this repo, in CI or locally,
+indefinitely — no more re-registering after each rebuild. (The very first
+CI-generated fingerprint the owner registered before this fix,
+`cf217c66eee1a9fac13dc4af7667f11f01aa1aff867b902e6fd1fa1ab17a5eaa`, belonged
+to that one already-downloaded build only and will not recur.)
+
 ## 15. Verified build result (GitHub Actions)
 
 Confirmed on `https://github.com/mxxx3/textgate-ai`, workflow run
@@ -824,13 +857,16 @@ The `connectedAndroidTest (manual)` job (real-emulator run of
 can be run any time from the Actions tab ("Run workflow").
 
 **Note:** fixes #4 and #6 above (the cryptocurrency wallet block-list gap,
-and the landscape display-cutout inset fix), and all four feature updates
+and the landscape display-cutout inset fix), and all five feature updates
 (`?pl` trigger + curated default allow-list; keyboard auto-spacing
 tolerance around the trigger; default model changed to
 `gemini-3.5-flash-lite`; keyboard auto-capitalization tolerance for the
-language code) described just before this section, all landed *after* run
+language code; fixed debug-signing key so the fingerprint stays stable
+across builds) described just before this section, all landed *after* run
 #4, so none of them has yet gone through its own green CI run — push them
 like the earlier fixes and treat that run, not this one, as the current
 source of truth for `AppBlocklist.kt`, `SettingsActivity.kt`,
 `TriggerDetector.kt`, `EventGate.kt`, `TranslationPrompts.kt`,
-`AppSettingsStore.kt`, and `TextGateAccessibilityService.kt`.
+`AppSettingsStore.kt`, `TextGateAccessibilityService.kt`, and
+`app/build.gradle.kts` (new `signingConfigs.debug` block, plus the new
+tracked `app/debug.keystore` binary file itself).

@@ -310,8 +310,10 @@ which is not a runtime/dangerous permission at all.
 
 **Accessibility** is not a manifest permission — it's a system-mediated
 capability the user grants manually in Settings → Accessibility, and its
-scope is further restricted by `accessibility_service_config.xml`
-(three event types, no window enumeration; see §2 and §8).
+scope is further restricted by `accessibility_service_config.xml` (three
+permanent event types plus one temporary diagnostic-only event type as of
+1.2.5 — see §14 "Third amendment to Feature update #6" — no window
+enumeration; see §2 and §8).
 
 **The long-press translation bubble (§2.1b) still requests no new
 permission.** It is a `WindowManager` overlay of type
@@ -1189,6 +1191,88 @@ the honest conclusion will likely be that SMS support is a platform
 limitation this app cannot address without the invasive approaches already
 rejected above, and that will be documented here as an accepted limitation
 rather than pursued further.
+
+**Result (1.2.4, confirmed on-device): the hypothesis was wrong.**
+`TYPE_VIEW_SELECTED` does not fire for Google Messages either — neither
+"DIAG: long-click seen" nor "DIAG blocked: ..." appeared. This ruled out
+"the row just isn't marked `isSelected` the standard way" as the
+explanation, and prompted the deeper architectural research below.
+
+**Third amendment to Feature update #6: researching WHY, not just guessing
+again (v1.2.5).** Rather than trying a third event type blind, this round
+started from Android's own documentation. Two searches were done: (1)
+whether Compose apps' long-press/selection semantics reach a classic
+`AccessibilityService.onAccessibilityEvent()` callback the way View-based
+apps' do, and (2) whether Google Messages' message list is known to be
+built with Jetpack Compose.
+
+Android's official Compose accessibility documentation
+([developer.android.com/develop/ui/compose/accessibility/api-defaults](https://developer.android.com/develop/ui/compose/accessibility/api-defaults))
+shows that `Modifier.combinedClickable(onLongClick = ...)` exposes the
+long-click as an **action** on the node (what TalkBack announces as
+"Double tap and hold to <label>"), not as a legacy `AccessibilityEvent`.
+That matters because of how Compose actually handles a real, physical
+long-press: `combinedClickable`'s pointer-input handling runs entirely
+inside Compose's own gesture-detection system and invokes the
+`onLongClick` lambda directly — it never calls `View.performLongClick()`,
+which is the one and only code path that dispatches
+`TYPE_VIEW_LONG_CLICKED`. TalkBack instead triggers the SAME long-click
+action by calling `AccessibilityNodeInfo.performAction(ACTION_LONG_CLICK)`
+on the node itself — a service-*initiated* action, fundamentally different
+from observing a user's real gesture, and not something this app does or
+should do (this app only ever reads events, never performs actions on
+other apps' nodes — see the fail-closed checklist in §9).
+
+This is a plausible, documented explanation for BOTH failed attempts at
+once: if Google Messages' message list is Compose-based (a redesign Google
+has been rolling out across the app), a real long-press there would be
+architecturally invisible to `TYPE_VIEW_LONG_CLICKED` — and if the
+resulting "row selected" state is represented only as a Compose semantics
+property rather than a legacy `View.isSelected` flip, it would be
+architecturally invisible to `TYPE_VIEW_SELECTED` too, exactly matching
+what was observed.
+
+**What might still work, and the new temporary diagnostic (v3):** if
+Compose's semantics for the *resulting* UI change (a toolbar label
+changing to "1 selected", a checkmark appearing) are wired up correctly on
+Google's side, Compose's accessibility bridge should still emit
+`AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED` for that change, even
+though it emits nothing for the long-press gesture itself. This is a
+standard, purpose-built accessibility event — not raw touch tracking — so
+it does not conflict with the reasoning that ruled out
+`flagRequestTouchExplorationMode` and OCR earlier in this investigation.
+`accessibility_service_config.xml` now also subscribes to
+`typeWindowContentChanged`, routed to the new
+`handleContentChangedDiagnostic()` in
+`TextGateAccessibilityService.kt`. This handler is diagnostic-only: it
+never reads `node.text`, never starts a translation, and shows only
+abstract, non-sensitive data (the app's package name, the source node's
+class name — useful for confirming whether it looks like a Compose node —
+and the raw `contentChangeTypes` bitmask). Because this event type fires
+very frequently during ordinary use (scrolling, incoming messages, cursor
+blink), individual events are never shown directly; they're counted and
+batched behind a dedicated 700&nbsp;ms debounce (`diagnosticDebouncer`,
+deliberately separate from the typed-trigger pipeline's own debouncer so
+the two can never interfere with each other), and only the most recent
+event's details are shown once the stream goes quiet, as "DIAG
+content-changed x&lt;count&gt;\npackage=...\nclass=...\ntypes=...".
+
+**This is, again, a hypothesis to be evidence-checked on-device, not a
+confirmed fix.** If long-pressing a message in Google Messages now
+produces this diagnostic bubble, that confirms the theory and the next
+step is turning the content-changed signal into a real trigger (likely
+scoped much more narrowly than "any content change," e.g. only when
+`contentChangeTypes` and the resulting node's `isSelected`/checked state
+indicate a genuine selection). If nothing appears even now, that is strong
+evidence Google Messages' selection UI does not surface ANY
+accessibility-observable signal for a physical long-press in this build —
+at which point, having now tried three independent standard accessibility
+signals (`TYPE_VIEW_LONG_CLICKED`, `TYPE_VIEW_SELECTED`,
+`TYPE_WINDOW_CONTENT_CHANGED`) without success, and having already ruled
+out raw touch/motion tracking and OCR for solid security/architecture
+reasons (see above), the honest recommendation will be to document SMS as
+an accepted limitation of this feature rather than continue searching for
+a fourth signal.
 
 **Temporary diagnostic (in progress, not a permanent feature, v2) in
 `handleLongClick()`.** On real devices, the long-press bubble (§2.1b)

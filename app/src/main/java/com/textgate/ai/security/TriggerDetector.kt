@@ -1,12 +1,16 @@
 package com.textgate.ai.security
 
+import com.textgate.ai.model.Languages
+
 /**
  * Detects and extracts a translation trigger from the current full text of
- * a field. Two triggers are supported, matched at the end of the current
- * text — a trigger must sit at the very end, so no matching mid-sentence is
- * performed here:
- *   - "?en" — translate the preceding text into English.
- *   - "?pl" — translate the preceding text into Polish.
+ * a field. One trigger is generated per language in [Languages.ALL] (40 as
+ * of v1.4.0 — see that object for the full list and the reasoning behind
+ * each language's code), matched at the end of the current text — a
+ * trigger must sit at the very end, so no matching mid-sentence is
+ * performed here. For example "?en" translates the preceding text into
+ * English, "?de" into German, "?pt-rBR" into Brazilian Portuguese, and so
+ * on for every code in [Languages.ALL].
  *
  * Several narrow, deliberate tolerances exist around the literal suffix, all
  * added after real on-device use surfaced them — some Android keyboards'
@@ -38,15 +42,29 @@ package com.textgate.ai.security
  */
 object TriggerDetector {
 
-    /** Which language the matched trigger asks the text to be translated into. */
-    enum class Target {
-        ENGLISH,
-        POLISH
+    /**
+     * Which language the matched trigger asks the text to be translated
+     * into — a thin wrapper around a [Languages] code rather than a fixed
+     * enum, so any language in [Languages.ALL] can be a target without
+     * this type needing to change. [ENGLISH] and [POLISH] are kept as
+     * named constants purely for source compatibility with existing
+     * callers/tests written before multi-language support (v1.4.0) — they
+     * are ordinary [Target] values equal to `Target("en")`/`Target("pl")`,
+     * nothing more special than any other language's `Target`.
+     */
+    @JvmInline
+    value class Target(val code: String) {
+        companion object {
+            val ENGLISH = Target("en")
+            val POLISH = Target("pl")
+        }
     }
 
-    /** Canonical (no-space) form of each trigger — used in UI copy, docs,
-     * and as a literal test fixture. Matching itself goes through
-     * [TRIGGER_PATTERNS], which also accepts the tolerances described above. */
+    /** Canonical (no-space) form of the original two triggers — kept for
+     * source compatibility with existing callers/tests that only ever
+     * cared about them. Matching itself goes through [TRIGGER_PATTERNS],
+     * generated from [Languages.ALL], which also accepts the tolerances
+     * described above for every supported language, not just these two. */
     const val TRIGGER_EN: String = "?en"
     const val TRIGGER_PL: String = "?pl"
 
@@ -61,14 +79,23 @@ object TriggerDetector {
      * true, absolute end of the text — the same "trigger must be the very
      * last thing typed" guarantee the original exact-suffix check had.
      *
-     * [RegexOption.IGNORE_CASE] is scoped to exactly these two small
-     * patterns, so it only ever affects the "en"/"pl" letters themselves —
-     * see the class doc for why a real keyboard routinely capitalizes them.
+     * [RegexOption.IGNORE_CASE] is scoped to exactly the language code
+     * itself (via [Regex.escape], so a code containing "-" like "pt-rBR"
+     * is matched literally, not as a regex range) — the same tolerance the
+     * original two hand-written patterns had, now generated for every
+     * language in [Languages.ALL] instead of just two. There is no
+     * ambiguity between codes that share a prefix (e.g. "pt" vs.
+     * "pt-rBR"): each pattern requires the code to be followed only by
+     * optional trailing spaces before the absolute end of the text, so a
+     * field ending in "?pt-rbr" cannot also satisfy the plain "pt"
+     * pattern.
      */
-    private val TRIGGER_PATTERNS: Map<Regex, Target> = linkedMapOf(
-        Regex("\\?[ ]?en[ ]*\\z", RegexOption.IGNORE_CASE) to Target.ENGLISH,
-        Regex("\\?[ ]?pl[ ]*\\z", RegexOption.IGNORE_CASE) to Target.POLISH
-    )
+    private val TRIGGER_PATTERNS: List<Pair<Regex, Target>> = Languages.ALL.map { language ->
+        Regex(
+            "\\?[ ]?${Regex.escape(language.code)}[ ]*\\z",
+            RegexOption.IGNORE_CASE
+        ) to Target(language.code)
+    }
 
     const val MAX_INPUT_LENGTH: Int = 4000
 
@@ -96,7 +123,7 @@ object TriggerDetector {
         if (fullText.isNullOrEmpty()) return Outcome.NoTrigger
         val text = fullText.toString()
 
-        val (match, target) = TRIGGER_PATTERNS.entries.firstNotNullOfOrNull { (pattern, target) ->
+        val (match, target) = TRIGGER_PATTERNS.firstNotNullOfOrNull { (pattern, target) ->
             pattern.find(text)?.let { it to target }
         } ?: return Outcome.NoTrigger
 

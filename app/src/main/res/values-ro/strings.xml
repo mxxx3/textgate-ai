@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">TextGate AI</string>
+
+    <string name="accessibility_service_description">TextGate AI citește textul în două moduri, ambele strict limitate. Primul: câmpul de text pe care îl editați în prezent, doar pentru a căuta un sufix declanșator exact (precum \"?en\" sau \"?de\" — câte unul pentru fiecare limbă, consultați lista completă din Setări) la sfârșitul a ceea ce ați scris. Al doilea: un mesaj sau un comentariu pe care apăsați lung, pentru a afișa o traducere plutitoare în limba implicită pe care o alegeți din Setări. Niciuna dintre aceste două metode nu citește vreodată câmpurile de parolă, nu funcționează niciodată în aplicații pe care nu le-ați permis explicit și nu păstrează niciodată un istoric al a ceea ce a fost citit. Când este detectat un declanșator, sau când apăsați lung pe un mesaj, într-o aplicație permisă, textul relevant este trimis prin HTTPS către API-ul Gemini pe care l-ați configurat și tradus. Rezultatul declanșatorului scris înlocuiește conținutul câmpului; rezultatul apăsării lungi este afișat doar într-o bulă plutitoare temporară și nu afectează niciodată aplicația originală. Nimic nu este trimis nicăieri, decât dacă scrieți unul dintre acești declanșatori exacți sau apăsați lung pe un mesaj într-o aplicație care este activată în setările TextGate AI.</string>
+
+    <!-- Settings screen -->
+    <string name="settings_title">TextGate AI</string>
+
+    <string name="section_master_switch">Transformare prin AI</string>
+    <string name="master_switch_label">Activați traducerea prin declanșator scris</string>
+    <string name="master_switch_description">Comutator principal. Scrieți un declanșator precum ?en sau ?de la sfârșitul unui mesaj pentru a-l traduce în acea limbă (consultați lista completă mai jos). Controlează, de asemenea, bula de traducere la apăsare lungă. Când este dezactivat, TextGate AI nu citește niciodată niciun câmp sau mesaj și nu face nicio solicitare de rețea, indiferent de orice altă setare.</string>
+
+    <string name="bubble_language_label">Limba aplicației și a traducerii</string>
+    <string name="bubble_language_description">Alegeți limba o singură dată aici. Aceasta stabilește limba implicită pentru bula de traducere la apăsare lungă ȘI limba în care sunt afișate ecranele proprii ale TextGate AI — ambele se schimbă împreună.</string>
+
+    <string name="section_accessibility_status">Serviciul de accesibilitate</string>
+    <string name="accessibility_status_enabled">Activat</string>
+    <string name="accessibility_status_disabled">Neactivat — TextGate AI nu poate face nimic până când nu îl activați</string>
+    <string name="btn_open_accessibility_settings">Deschideți setările de accesibilitate</string>
+
+    <string name="section_gemini_api">API Gemini</string>
+    <string name="label_api_key">Cheie API Gemini</string>
+    <string name="hint_api_key">Lipiți cheia API Gemini</string>
+    <string name="btn_get_api_key">Obțineți o cheie API gratuită</string>
+    <string name="btn_show_api_key_instructions">Cum fac asta? (ghid pas cu pas)</string>
+    <string name="btn_hide_api_key_instructions">Ascundeți ghidul</string>
+    <string name="api_key_instructions_body">1. Atingeți \"Obțineți o cheie API gratuită\" de mai sus — aceasta deschide Google AI Studio în browser.\n2. Conectați-vă cu contul dvs. Google (cel pe care îl folosiți zilnic).\n3. Acceptați Termenii și condițiile, dacă vi se solicită.\n4. Atingeți \"Create API key\" pe pagină.\n5. Copiați cheia care apare — un șir lung de litere și cifre.\n6. Reveniți la această aplicație, lipiți cheia în câmpul de mai jos și atingeți \"Salvați cheia\".\n\nCheia este gratuită în limitele nivelului gratuit oferit de Google și nu părăsește niciodată telefonul, decât pentru a comunica direct cu Gemini — este criptată și stocată doar pe acest dispozitiv.</string>
+    <string name="btn_save_api_key">Salvați cheia (criptată)</string>
+    <string name="api_key_saved">Cheie API salvată, criptată cu Android Keystore</string>
+    <string name="api_key_cleared">Cheie API eliminată</string>
+    <string name="btn_clear_api_key">Eliminați cheia salvată</string>
+    <string name="api_key_status_present">O cheie este salvată (criptată). Nu mai este afișată niciodată pe ecran.</string>
+    <string name="api_key_status_absent">Nicio cheie salvată încă</string>
+
+    <string name="label_model">Model Gemini</string>
+    <string name="hint_model">de ex., gemini-3.5-flash-lite</string>
+    <string name="model_suggestions_label">Sugestii (atingeți pentru a folosi):</string>
+
+    <string name="btn_test_api">Testați conexiunea API</string>
+    <string name="test_api_running">Se testează…</string>
+    <string name="test_api_success">Succes — Gemini a răspuns corect.</string>
+    <string name="test_api_failure">Eșuat: %1$s</string>
+
+    <string name="section_allowed_apps">Aplicații permise</string>
+    <string name="allowed_apps_description">TextGate AI este activat implicit doar pentru aplicații obișnuite de rețele sociale și mesagerie — de exemplu WhatsApp, Messenger, Instagram, Telegram, Signal, Discord, Snapchat, TikTok, X, Threads, LinkedIn și SMS/Messages — astfel încât nu este nimic de configurat. Această listă controlează atât declanșatorii de traducere scriși (?en, ?de, ?fr și așa mai departe), cât și bula de traducere la apăsare lungă. Managerii de parole, aplicațiile bancare, de autentificare și de securitate a sistemului cunoscute nu sunt niciodată afișate aici și nu pot fi niciodată activate; portofelele și platformele de criptomonede sunt blocate în același mod.</string>
+    <string name="allowed_apps_advanced_hint">Doriți o altă aplicație, sau să eliminați una dintre cele implicite? Alegeți aplicațiile manual.</string>
+    <string name="btn_show_advanced_apps">Afișați opțiuni avansate: alegeți aplicațiile manual</string>
+    <string name="btn_hide_advanced_apps">Ascundeți opțiunile avansate</string>
+    <string name="allowed_apps_empty">Nu au fost găsite aplicații instalate cu pictogramă de lansare.</string>
+    <string name="allowed_apps_loading">Se încarcă aplicațiile instalate…</string>
+
+    <string name="section_privacy">Confidențialitate</string>
+    <string name="privacy_notice_headline">Textul este trimis către Google Gemini doar atunci când scrieți explicit un declanșator de traducere (precum ?en sau ?de) sau apăsați lung pe un mesaj.</string>
+    <string name="privacy_notice_body">TextGate AI nu colectează date analitice, rapoarte de eroare sau date de utilizare de niciun fel și nu conține SDK-uri terțe. Singurele solicitări de rețea pe care le face vreodată această aplicație sunt solicitările de traducere pe care le declanșați chiar dvs., trimise direct către API-ul Gemini al Google prin HTTPS. Cheia dvs. API este criptată pe dispozitiv folosind Android Keystore și este exclusă din copiile de rezervă. Câmpurile de parolă și alte date sensibile nu sunt citite niciodată, în nicio circumstanță. Atingeți \"Politica de confidențialitate completă\" de mai jos pentru toate detaliile.</string>
+    <string name="btn_full_privacy_policy">Politica de confidențialitate completă</string>
+    <string name="btn_close_dialog">Închideți</string>
+    <string name="privacy_full_policy_title">Politica de confidențialitate completă</string>
+    <string name="privacy_full_policy_body">Ce citește TextGate AI:\n• Câmpul de text în care scrieți în prezent — doar pentru a verifica existența unui declanșator de traducere exact (precum \"?en\" sau \"?de\") la sfârșit.\n• Un mesaj sau un comentariu pe care apăsați lung — doar în aplicațiile pe care le-ați activat în \"Aplicații permise\".\n\nCe nu citește niciodată: câmpuri de parolă, introducerea codului PIN sau orice câmp pe care aplicația îl recunoaște ca fiind sensibil — fără excepții, în nicio aplicație.\n\nCe se trimite și unde: doar textul pe care l-ați declanșat, trimis o singură dată, direct prin HTTPS către API-ul Gemini al Google, folosind cheia pe care o furnizați chiar dvs. Nu se trimite nimic decât dacă scrieți chiar dvs. un declanșator sau apăsați lung pe un mesaj.\n\nCe este stocat pe telefonul dvs.: cheia dvs. API Gemini, criptată cu Android Keystore (aceeași securitate bazată pe hardware pe care Android o folosește pentru datele de acreditare de pe ecranul de blocare), și setările dvs. simple (ce aplicații sunt permise, limba aleasă, modelul Gemini ales). Niciuna dintre acestea nu este inclusă în copiile de rezervă ale telefonului.\n\nCe NU face TextGate AI: fără analize, fără raportare a erorilor, fără urmărire a utilizării, fără publicitate, fără biblioteci terțe de niciun fel, fără istoric al a ceea ce ați tradus și fără citirea vreunei aplicații pe care nu ați permis-o explicit.\n\nDeții controlul: dezactivați întreaga funcție oricând, cu ajutorul comutatorului principal, și adăugați sau eliminați orice aplicație din lista celor permise oricând doriți.</string>
+
+    <string name="section_about">Despre</string>
+    <string name="about_version_label">Versiune</string>
+
+    <!-- Toasts / runtime messages (never include user text) -->
+    <string name="toast_sending_to_gemini">Se trimite textul selectat către Gemini</string>
+    <string name="toast_translation_failed">Traducerea a eșuat — textul original a rămas neschimbat</string>
+    <string name="toast_field_changed_aborted">Câmpul a fost modificat înainte de sosirea rezultatului — nu a fost înlocuit nimic</string>
+    <string name="toast_service_disabled">Transformarea prin AI este dezactivată în Setări</string>
+
+    <!-- Long-press translation bubble -->
+    <string name="bubble_loading">Se traduce…</string>
+    <string name="bubble_close_content_description">Închideți</string>
+
+    <!-- Errors -->
+    <string name="error_no_api_key">Introduceți și salvați mai întâi o cheie API Gemini</string>
+    <string name="error_text_too_long">Textul este prea lung pentru a fi trimis automat (limită: %1$d caractere)</string>
+    <string name="error_generic">A apărut o problemă. Vă rugăm să încercați din nou.</string>
+    <string name="error_timeout">Solicitarea a expirat.</string>
+    <string name="error_network">Nu s-a putut contacta Gemini. Verificați conexiunea.</string>
+    <string name="error_http">Gemini a returnat o eroare (cod %1$d).</string>
+    <string name="error_empty_response">Gemini a returnat un răspuns gol.</string>
+</resources>

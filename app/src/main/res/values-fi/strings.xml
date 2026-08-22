@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">TextGate AI</string>
+
+    <string name="accessibility_service_description">TextGate AI lukee tekstiä kahdella tavalla, molemmat tiukasti rajattuja. Ensinnäkin: tekstikenttä, jota parhaillaan muokkaat, ja vain etsiäkseen kirjoittamasi tekstin lopusta yhtä tarkkaa liipaisinpäätettä (kuten \"?en\" tai \"?de\" — yksi kutakin kieltä kohden, katso täydellinen luettelo Asetuksista). Toiseksi: viesti tai kommentti, jota painat pitkään, jotta näytettäisiin kelluva käännös oletuskielelle, jonka valitset Asetuksista. Kumpikaan tapa ei koskaan lue salasanakenttiä, ei koskaan toimi sovelluksissa, joita et ole nimenomaisesti sallinut, eikä koskaan säilytä historiaa mistään luetusta. Kun liipaisin havaitaan tai kun painat viestiä pitkään sallitussa sovelluksessa, kyseinen teksti lähetetään HTTPS:n kautta määrittämääsi Gemini-rajapintaan ja käännetään. Kirjoitetun liipaisimen tulos korvaa kentän sisällön; pitkän painalluksen tulos näytetään vain väliaikaisessa kelluvassa kuplassa eikä se koskaan kosketa alkuperäistä sovellusta. Mitään ei lähetetä minnekään, ellet kirjoita jotakin näistä tarkoista liipaisimista tai paina pitkään viestiä sovelluksessa, joka on kytketty päälle TextGate AI:n asetuksissa.</string>
+
+    <!-- Settings screen -->
+    <string name="settings_title">TextGate AI</string>
+
+    <string name="section_master_switch">Tekoälymuunnos</string>
+    <string name="master_switch_label">Ota käyttöön kirjoitetun liipaisimen käännös</string>
+    <string name="master_switch_description">Pääkytkin. Kirjoita liipaisin, kuten ?en tai ?de, viestin loppuun kääntääksesi sen kyseiselle kielelle (katso täydellinen luettelo alla). Ohjaa myös pitkän painalluksen käännöskuplaa. Kun tämä on pois päältä, TextGate AI ei koskaan lue mitään kenttää tai viestiä eikä koskaan tee verkkopyyntöjä, riippumatta muista asetuksista.</string>
+
+    <string name="bubble_language_label">Sovellus- ja käännöskieli</string>
+    <string name="bubble_language_description">Valitse kielesi täällä kerran. Se määrittää sekä pitkän painalluksen käännöskuplan oletuskielen että kielen, jolla TextGate AI:n omat näytöt näytetään — molemmat muuttuvat yhdessä.</string>
+
+    <string name="section_accessibility_status">Esteettömyyspalvelu</string>
+    <string name="accessibility_status_enabled">Käytössä</string>
+    <string name="accessibility_status_disabled">Ei käytössä — TextGate AI ei voi tehdä mitään, ennen kuin otat sen käyttöön</string>
+    <string name="btn_open_accessibility_settings">Avaa esteettömyysasetukset</string>
+
+    <string name="section_gemini_api">Gemini API</string>
+    <string name="label_api_key">Gemini API -avain</string>
+    <string name="hint_api_key">Liitä Gemini API -avaimesi</string>
+    <string name="btn_get_api_key">Hanki ilmainen API-avain</string>
+    <string name="btn_show_api_key_instructions">Miten teen tämän? (vaiheittainen opas)</string>
+    <string name="btn_hide_api_key_instructions">Piilota opas</string>
+    <string name="api_key_instructions_body">1. Napauta yllä olevaa \"Hanki ilmainen API-avain\" -painiketta — tämä avaa Google AI Studion selaimessasi.\n2. Kirjaudu sisään Google-tilillä (sillä, jota käytät päivittäin).\n3. Hyväksy käyttöehdot, jos sinulta niitä pyydetään.\n4. Napauta sivulla \"Create API key\" -painiketta.\n5. Kopioi näkyviin tuleva avain — pitkä kirjain- ja numerosarja.\n6. Palaa tähän sovellukseen, liitä avain alla olevaan kenttään ja napauta \"Tallenna avain\".\n\nAvain on ilmainen Googlen ilmaistason rajoissa eikä koskaan poistu puhelimestasi muuten kuin ollakseen suoraan yhteydessä Geminiin — se on salattu ja tallennettu vain tälle laitteelle.</string>
+    <string name="btn_save_api_key">Tallenna avain (salattu)</string>
+    <string name="api_key_saved">API-avain tallennettu, salattu Android Keystorella</string>
+    <string name="api_key_cleared">API-avain poistettu</string>
+    <string name="btn_clear_api_key">Poista tallennettu avain</string>
+    <string name="api_key_status_present">Avain on tallennettu (salattu). Sitä ei koskaan näytetä enää ruudulla.</string>
+    <string name="api_key_status_absent">Avainta ei ole vielä tallennettu</string>
+
+    <string name="label_model">Gemini-malli</string>
+    <string name="hint_model">esim. gemini-3.5-flash-lite</string>
+    <string name="model_suggestions_label">Ehdotukset (napauta käyttääksesi):</string>
+
+    <string name="btn_test_api">Testaa API-yhteys</string>
+    <string name="test_api_running">Testataan…</string>
+    <string name="test_api_success">Onnistui — Gemini vastasi oikein.</string>
+    <string name="test_api_failure">Epäonnistui: %1$s</string>
+
+    <string name="section_allowed_apps">Sallitut sovellukset</string>
+    <string name="allowed_apps_description">TextGate AI on oletuksena käytössä vain yleisissä sosiaalisen median ja viestisovelluksissa — esimerkiksi WhatsAppissa, Messengerissä, Instagramissa, Telegramissa, Signalissa, Discordissa, Snapchatissa, TikTokissa, X:ssä, Threadsissa, LinkedInissä sekä tekstiviesteissä/Messages-sovelluksessa — joten mitään ei tarvitse asettaa. Tämä luettelo ohjaa sekä kirjoitettuja käännösliipaisimia (?en, ?de, ?fr ja niin edelleen) että pitkän painalluksen käännöskuplaa. Tunnettuja salasananhallintaohjelmia, pankki-, todennus- ja järjestelmän turvallisuussovelluksia ei koskaan näytetä täällä eikä niitä voi koskaan ottaa käyttöön; kryptovaluuttalompakot ja -pörssit on estetty samalla tavalla.</string>
+    <string name="allowed_apps_advanced_hint">Haluatko toisen sovelluksen tai poistaa jonkin oletussovelluksista? Valitse sovellukset sen sijaan käsin.</string>
+    <string name="btn_show_advanced_apps">Näytä lisäasetukset: valitse sovellukset manuaalisesti</string>
+    <string name="btn_hide_advanced_apps">Piilota lisäasetukset</string>
+    <string name="allowed_apps_empty">Käynnistyskuvakkeella varustettuja asennettuja sovelluksia ei löytynyt.</string>
+    <string name="allowed_apps_loading">Ladataan asennettuja sovelluksia…</string>
+
+    <string name="section_privacy">Tietosuoja</string>
+    <string name="privacy_notice_headline">Tekstiä lähetetään Google Geminille vain, kun kirjoitat nimenomaisesti käännösliipaisimen (kuten ?en tai ?de) tai painat viestiä pitkään.</string>
+    <string name="privacy_notice_body">TextGate AI ei kerää analytiikkaa, kaatumisraportteja eikä minkäänlaista käyttödataa, eikä siinä ole kolmannen osapuolen SDK:ita. Ainoat verkkopyynnöt, joita tämä sovellus koskaan tekee, ovat itse käynnistämiäsi käännöspyyntöjä, jotka lähetetään suoraan Googlen Gemini-rajapintaan HTTPS:n kautta. API-avaimesi on salattu laitteessa Android Keystorella eikä sitä sisällytetä varmuuskopioihin. Salasanakenttiä ja muita arkaluonteisia syötteitä ei koskaan lueta, missään tilanteessa. Napauta alla olevaa \"Täydellinen tietosuojakäytäntö\" nähdäksesi kaikki yksityiskohdat.</string>
+    <string name="btn_full_privacy_policy">Täydellinen tietosuojakäytäntö</string>
+    <string name="btn_close_dialog">Sulje</string>
+    <string name="privacy_full_policy_title">Täydellinen tietosuojakäytäntö</string>
+    <string name="privacy_full_policy_body">Mitä TextGate AI lukee:\n• Tekstikentän, johon parhaillaan kirjoitat — vain tarkistaakseen sen lopusta yhden tarkan käännösliipaisimen (kuten \"?en\" tai \"?de\").\n• Viestin tai kommentin, jota painat pitkään — vain sovelluksissa, jotka olet kytkenyt päälle kohdassa \"Sallitut sovellukset\".\n\nMitä se ei koskaan lue: salasanakenttiä, PIN-koodin syöttöä tai mitään kenttää, jonka sovellus tunnistaa arkaluonteiseksi — ei poikkeuksia, missään sovelluksessa.\n\nMitä lähetetään ja minne: vain liipaisemasi teksti, lähetetty kerran, suoraan HTTPS:n kautta Googlen Gemini-rajapintaan käyttäen avainta, jonka olet itse antanut. Mitään ei koskaan lähetetä, ellet itse kirjoita liipaisinta tai paina viestiä pitkään.\n\nMitä puhelimeesi tallennetaan: Gemini API -avaimesi, salattu Android Keystorella (samalla laitteistopohjaisella suojauksella, jota Android käyttää lukitusnäytön tunnistetietoihisi), sekä yksinkertaiset asetuksesi (mitkä sovellukset ovat sallittuja, valitsemasi kieli, valitsemasi Gemini-malli). Mikään näistä ei sisälly puhelimen varmuuskopioihin.\n\nMitä TextGate AI EI tee: ei analytiikkaa, ei kaatumisraportointia, ei käytön seurantaa, ei mainontaa, ei minkäänlaisia kolmannen osapuolen kirjastoja, ei historiaa mistään kääntämästäsi, eikä minkään sovelluksen lukemista, jota et ole nimenomaisesti sallinut.\n\nSinä pysyt hallinnassa: kytke koko ominaisuus pois päältä milloin tahansa pääkytkimellä ja lisää tai poista mikä tahansa sovellus sallittujen luettelosta milloin haluat.</string>
+
+    <string name="section_about">Tietoja</string>
+    <string name="about_version_label">Versio</string>
+
+    <!-- Toasts / runtime messages (never include user text) -->
+    <string name="toast_sending_to_gemini">Lähetetään valittua tekstiä Geminille</string>
+    <string name="toast_translation_failed">Kääntäminen epäonnistui — alkuperäinen teksti ennallaan</string>
+    <string name="toast_field_changed_aborted">Kenttä muuttui ennen tuloksen saapumista — mitään ei korvattu</string>
+    <string name="toast_service_disabled">Tekoälymuunnos on pois päältä Asetuksissa</string>
+
+    <!-- Long-press translation bubble -->
+    <string name="bubble_loading">Käännetään…</string>
+    <string name="bubble_close_content_description">Sulje</string>
+
+    <!-- Errors -->
+    <string name="error_no_api_key">Anna ja tallenna ensin Gemini API -avain</string>
+    <string name="error_text_too_long">Teksti on liian pitkä lähetettäväksi automaattisesti (raja: %1$d merkkiä)</string>
+    <string name="error_generic">Jokin meni pieleen. Yritä uudelleen.</string>
+    <string name="error_timeout">Pyyntö aikakatkaistiin.</string>
+    <string name="error_network">Geminiä ei tavoitettu. Tarkista yhteytesi.</string>
+    <string name="error_http">Gemini palautti virheen (koodi %1$d).</string>
+    <string name="error_empty_response">Gemini palautti tyhjän vastauksen.</string>
+</resources>

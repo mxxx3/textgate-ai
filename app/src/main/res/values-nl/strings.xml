@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">TextGate AI</string>
+
+    <string name="accessibility_service_description">TextGate AI leest tekst op twee manieren, beide strikt beperkt. Ten eerste: het tekstveld dat je op dat moment bewerkt, en alleen om te controleren op één exact triggersuffix (zoals \"?en\" of \"?de\" — één per taal, zie de volledige lijst in Instellingen) aan het einde van wat je hebt getypt. Ten tweede: een bericht of reactie waarop je lang drukt en vasthoudt, om een zwevende vertaling te tonen in de standaardtaal die je in Instellingen kiest. Beide methoden lezen nooit wachtwoordvelden, werken nooit in apps die je niet expliciet hebt toegestaan, en houden nooit een geschiedenis bij van wat er is gelezen. Wanneer een trigger wordt gedetecteerd, of wanneer je lang op een bericht drukt, in een toegestane app, wordt de betreffende tekst via HTTPS verzonden naar de Gemini API die je hebt geconfigureerd en vertaald. Het resultaat van de typtrigger vervangt de inhoud van het veld; het resultaat van lang drukken wordt uitsluitend getoond in een tijdelijke zwevende bel en raakt de oorspronkelijke app nooit. Er wordt nergens iets verzonden, tenzij je een van deze exacte triggers typt of lang op een bericht drukt in een app die is ingeschakeld in de instellingen van TextGate AI.</string>
+
+    <!-- Settings screen -->
+    <string name="settings_title">TextGate AI</string>
+
+    <string name="section_master_switch">AI-transformatie</string>
+    <string name="master_switch_label">Vertaling via typtrigger inschakelen</string>
+    <string name="master_switch_description">Hoofdschakelaar. Typ een trigger zoals ?en of ?de aan het einde van een bericht om het naar die taal te vertalen (zie de volledige lijst hieronder). Regelt ook de vertaalbel bij lang drukken. Als deze is uitgeschakeld, leest TextGate AI nooit een veld of bericht en doet het nooit een netwerkverzoek, ongeacht andere instellingen.</string>
+
+    <string name="bubble_language_label">App- en vertaaltaal</string>
+    <string name="bubble_language_description">Kies hier eenmalig je taal. Dit stelt zowel de standaardtaal in voor de vertaalbel bij lang drukken ALS de taal waarin de schermen van TextGate AI zelf worden weergegeven — beide veranderen samen.</string>
+
+    <string name="section_accessibility_status">Toegankelijkheidsservice</string>
+    <string name="accessibility_status_enabled">Ingeschakeld</string>
+    <string name="accessibility_status_disabled">Niet ingeschakeld — TextGate AI kan niets doen totdat je het inschakelt</string>
+    <string name="btn_open_accessibility_settings">Toegankelijkheidsinstellingen openen</string>
+
+    <string name="section_gemini_api">Gemini-API</string>
+    <string name="label_api_key">Gemini API-sleutel</string>
+    <string name="hint_api_key">Plak je Gemini API-sleutel</string>
+    <string name="btn_get_api_key">Gratis API-sleutel aanvragen</string>
+    <string name="btn_show_api_key_instructions">Hoe doe ik dit? (stapsgewijze handleiding)</string>
+    <string name="btn_hide_api_key_instructions">Handleiding verbergen</string>
+    <string name="api_key_instructions_body">1. Tik hierboven op \"Gratis API-sleutel aanvragen\" — dit opent Google AI Studio in je browser.\n2. Log in met je Google-account (het account dat je dagelijks gebruikt).\n3. Accepteer de Servicevoorwaarden als daarom wordt gevraagd.\n4. Tik op de pagina op \"Create API key\".\n5. Kopieer de sleutel die verschijnt — een lange reeks letters en cijfers.\n6. Ga terug naar deze app, plak de sleutel in het veld hieronder en tik op \"Sleutel opslaan\".\n\nDe sleutel is gratis binnen de gratis limieten van Google en verlaat je telefoon nooit, behalve om rechtstreeks met Gemini te communiceren — hij wordt versleuteld en uitsluitend op dit apparaat opgeslagen.</string>
+    <string name="btn_save_api_key">Sleutel opslaan (versleuteld)</string>
+    <string name="api_key_saved">API-sleutel opgeslagen, versleuteld met Android Keystore</string>
+    <string name="api_key_cleared">API-sleutel verwijderd</string>
+    <string name="btn_clear_api_key">Opgeslagen sleutel verwijderen</string>
+    <string name="api_key_status_present">Er is een sleutel opgeslagen (versleuteld). Deze wordt nooit meer op het scherm getoond.</string>
+    <string name="api_key_status_absent">Nog geen sleutel opgeslagen</string>
+
+    <string name="label_model">Gemini-model</string>
+    <string name="hint_model">bijv. gemini-3.5-flash-lite</string>
+    <string name="model_suggestions_label">Suggesties (tik om te gebruiken):</string>
+
+    <string name="btn_test_api">API-verbinding testen</string>
+    <string name="test_api_running">Bezig met testen…</string>
+    <string name="test_api_success">Gelukt — Gemini heeft correct gereageerd.</string>
+    <string name="test_api_failure">Mislukt: %1$s</string>
+
+    <string name="section_allowed_apps">Toegestane apps</string>
+    <string name="allowed_apps_description">TextGate AI is standaard alleen ingeschakeld voor veelgebruikte sociale media- en berichten-apps — bijvoorbeeld WhatsApp, Messenger, Instagram, Telegram, Signal, Discord, Snapchat, TikTok, X, Threads, LinkedIn en SMS/Messages — dus je hoeft niets in te stellen. Deze lijst regelt zowel de typtriggers voor vertaling (?en, ?de, ?fr, enzovoort) als de vertaalbel bij lang drukken. Bekende wachtwoordbeheerders, bank-apps, authenticator-apps en systeembeveiligingsapps worden hier nooit getoond en kunnen nooit worden ingeschakeld; cryptovaluta-wallets en -beurzen worden op dezelfde manier geblokkeerd.</string>
+    <string name="allowed_apps_advanced_hint">Wil je een andere app gebruiken, of een van de standaardapps verwijderen? Kies apps handmatig.</string>
+    <string name="btn_show_advanced_apps">Geavanceerd tonen: apps handmatig kiezen</string>
+    <string name="btn_hide_advanced_apps">Geavanceerde opties verbergen</string>
+    <string name="allowed_apps_empty">Er zijn geen geïnstalleerde apps met een startpictogram gevonden.</string>
+    <string name="allowed_apps_loading">Geïnstalleerde apps laden…</string>
+
+    <string name="section_privacy">Privacy</string>
+    <string name="privacy_notice_headline">Tekst wordt alleen naar Google Gemini gestuurd wanneer je expliciet een vertaaltrigger typt (zoals ?en of ?de), of lang op een bericht drukt.</string>
+    <string name="privacy_notice_body">TextGate AI verzamelt geen analytische gegevens, crashrapporten of gebruiksgegevens van welke aard dan ook, en bevat geen SDK\'s van derden. De enige netwerkverzoeken die deze app ooit doet, zijn de vertaalverzoeken die je zelf activeert, rechtstreeks verzonden naar de Gemini API van Google via HTTPS. Je API-sleutel wordt op het apparaat versleuteld met de Android Keystore en is uitgesloten van back-ups. Wachtwoordvelden en andere gevoelige invoervelden worden onder geen enkele omstandigheid gelezen. Tik hieronder op \"Volledig privacybeleid\" voor alle details.</string>
+    <string name="btn_full_privacy_policy">Volledig privacybeleid</string>
+    <string name="btn_close_dialog">Sluiten</string>
+    <string name="privacy_full_policy_title">Volledig privacybeleid</string>
+    <string name="privacy_full_policy_body">Wat TextGate AI leest:\n• Het tekstveld waarin je op dat moment typt — alleen om te controleren op één exacte vertaaltrigger (zoals \"?en\" of \"?de\") aan het einde.\n• Een bericht of reactie waarop je lang drukt — alleen in apps die je hebt ingeschakeld bij \"Toegestane apps\".\n\nWat het nooit leest, onder geen beding: wachtwoordvelden, pincode-invoer, of elk veld dat de app als gevoelig herkent — zonder uitzondering, in elke app.\n\nWat er wordt verzonden, en waarheen: alleen de tekst die je hebt geactiveerd, eenmalig verzonden, rechtstreeks via HTTPS naar de Gemini API van Google, met de sleutel die je zelf hebt opgegeven. Er wordt nooit iets verzonden, tenzij je zelf een trigger typt of lang op een bericht drukt.\n\nWat er op je telefoon wordt opgeslagen: je Gemini API-sleutel, versleuteld met de Android Keystore (dezelfde hardwarematig beveiligde technologie die Android gebruikt voor de gegevens van je vergrendelscherm), en je eenvoudige instellingen (welke apps zijn toegestaan, je gekozen taal, je gekozen Gemini-model). Niets hiervan wordt opgenomen in telefoonback-ups.\n\nWat TextGate AI NIET doet: geen analyses, geen crashrapportage, geen gebruikstracking, geen advertenties, geen bibliotheken van derden van welke aard dan ook, geen geschiedenis van wat je hebt vertaald, en geen enkele app lezen die je niet expliciet hebt toegestaan.\n\nJij houdt de controle: schakel de hele functie op elk moment uit met de hoofdschakelaar, en voeg apps toe aan of verwijder ze uit de toegestane lijst wanneer je maar wilt.</string>
+
+    <string name="section_about">Over</string>
+    <string name="about_version_label">Versie</string>
+
+    <!-- Toasts / runtime messages (never include user text) -->
+    <string name="toast_sending_to_gemini">Geselecteerde tekst wordt naar Gemini gestuurd</string>
+    <string name="toast_translation_failed">Vertaling mislukt — oorspronkelijke tekst ongewijzigd</string>
+    <string name="toast_field_changed_aborted">Veld gewijzigd voordat het resultaat binnenkwam — er is niets vervangen</string>
+    <string name="toast_service_disabled">AI-transformatie is uitgeschakeld in Instellingen</string>
+
+    <!-- Long-press translation bubble -->
+    <string name="bubble_loading">Bezig met vertalen…</string>
+    <string name="bubble_close_content_description">Sluiten</string>
+
+    <!-- Errors -->
+    <string name="error_no_api_key">Voer eerst een Gemini API-sleutel in en sla deze op</string>
+    <string name="error_text_too_long">Tekst is te lang om automatisch te versturen (limiet: %1$d tekens)</string>
+    <string name="error_generic">Er is iets misgegaan. Probeer het opnieuw.</string>
+    <string name="error_timeout">De aanvraag is verlopen.</string>
+    <string name="error_network">Kon geen verbinding maken met Gemini. Controleer je internetverbinding.</string>
+    <string name="error_http">Gemini heeft een fout geretourneerd (code %1$d).</string>
+    <string name="error_empty_response">Gemini heeft een leeg antwoord geretourneerd.</string>
+</resources>

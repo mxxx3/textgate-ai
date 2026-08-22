@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">TextGate AI</string>
+
+    <string name="accessibility_service_description">TextGate AI číta text len dvoma prísne obmedzenými spôsobmi. Po prvé: textové pole, ktoré práve upravujete, a to iba na vyhľadanie jednej presnej spúšťacej prípony (napríklad „?en“ alebo „?de“ — jedna pre každý jazyk, celý zoznam nájdete v nastaveniach) na konci toho, čo ste napísali. Po druhé: správu alebo komentár, na ktorý dlho podržíte prst, aby sa zobrazil plávajúci preklad do predvoleného jazyka, ktorý si zvolíte v nastaveniach. Ani jeden z týchto spôsobov nikdy nečíta polia s heslami, nikdy nefunguje v aplikáciách, ktoré ste výslovne nepovolili, a nikdy si neuchováva históriu ničoho prečítaného. Keď sa zistí spúšťač alebo keď dlho podržíte správu v povolenej aplikácii, príslušný text sa odošle cez HTTPS do vami nakonfigurovaného API Gemini a preloží sa. Výsledok zadaného spúšťača nahradí obsah poľa; výsledok dlhého podržania sa zobrazí iba v dočasnej plávajúcej bubline a nikdy sa nedotkne pôvodnej aplikácie. Nič sa nikam neodošle, pokiaľ nezadáte jeden z týchto presných spúšťačov alebo dlho nepodržíte správu v aplikácii, ktorá je zapnutá v nastaveniach TextGate AI.</string>
+
+    <!-- Settings screen -->
+    <string name="settings_title">TextGate AI</string>
+
+    <string name="section_master_switch">Transformácia pomocou AI</string>
+    <string name="master_switch_label">Povoliť preklad pomocou spúšťača</string>
+    <string name="master_switch_description">Hlavný prepínač. Na konci správy napíšte spúšťač, napríklad ?en alebo ?de, aby sa preložila do daného jazyka (celý zoznam nájdete nižšie). Ovláda aj bublinu prekladu pri dlhom podržaní. Keď je vypnutý, TextGate AI nikdy nečíta žiadne pole ani správu a nikdy neodosiela žiadnu sieťovú požiadavku, bez ohľadu na akékoľvek iné nastavenie.</string>
+
+    <string name="bubble_language_label">Jazyk aplikácie &amp; prekladu</string>
+    <string name="bubble_language_description">Tu si raz zvoľte svoj jazyk. Nastavuje predvolený jazyk pre bublinu prekladu pri dlhom podržaní A zároveň jazyk, v ktorom sa zobrazujú vlastné obrazovky TextGate AI — obe sa menia spoločne.</string>
+
+    <string name="section_accessibility_status">Služba zjednodušenia ovládania</string>
+    <string name="accessibility_status_enabled">Zapnuté</string>
+    <string name="accessibility_status_disabled">Nezapnuté — TextGate AI nemôže nič robiť, kým ju nezapnete</string>
+    <string name="btn_open_accessibility_settings">Otvoriť nastavenia zjednodušenia ovládania</string>
+
+    <string name="section_gemini_api">Gemini API</string>
+    <string name="label_api_key">Kľúč API Gemini</string>
+    <string name="hint_api_key">Vložte svoj kľúč API Gemini</string>
+    <string name="btn_get_api_key">Získať bezplatný kľúč API</string>
+    <string name="btn_show_api_key_instructions">Ako to mám urobiť? (podrobný návod)</string>
+    <string name="btn_hide_api_key_instructions">Skryť návod</string>
+    <string name="api_key_instructions_body">1. Ťuknite vyššie na „Získať bezplatný kľúč API“ — otvorí sa Google AI Studio vo vašom prehliadači.\n2. Prihláste sa pomocou svojho účtu Google (toho, ktorý používate každý deň).\n3. Ak sa zobrazí výzva, prijmite zmluvné podmienky.\n4. Na stránke ťuknite na „Create API key“.\n5. Skopírujte kľúč, ktorý sa zobrazí — dlhý reťazec písmen a číslic.\n6. Vráťte sa do tejto aplikácie, vložte kľúč do poľa nižšie a ťuknite na „Uložiť kľúč“.\n\nKľúč je bezplatný v rámci limitov bezplatnej úrovne Google a nikdy neopustí váš telefón, okrem priamej komunikácie s Gemini — je zašifrovaný a uložený iba na tomto zariadení.</string>
+    <string name="btn_save_api_key">Uložiť kľúč (zašifrovane)</string>
+    <string name="api_key_saved">Kľúč API uložený, zašifrovaný pomocou Android Keystore</string>
+    <string name="api_key_cleared">Kľúč API odstránený</string>
+    <string name="btn_clear_api_key">Odstrániť uložený kľúč</string>
+    <string name="api_key_status_present">Kľúč je uložený (zašifrovaný). Na obrazovke sa už nikdy nezobrazí.</string>
+    <string name="api_key_status_absent">Zatiaľ nie je uložený žiadny kľúč</string>
+
+    <string name="label_model">Model Gemini</string>
+    <string name="hint_model">napr. gemini-3.5-flash-lite</string>
+    <string name="model_suggestions_label">Návrhy (použite ťuknutím):</string>
+
+    <string name="btn_test_api">Otestovať pripojenie API</string>
+    <string name="test_api_running">Testuje sa…</string>
+    <string name="test_api_success">Úspech — Gemini odpovedal správne.</string>
+    <string name="test_api_failure">Zlyhalo: %1$s</string>
+
+    <string name="section_allowed_apps">Povolené aplikácie</string>
+    <string name="allowed_apps_description">TextGate AI je predvolene zapnutá len pre bežné aplikácie sociálnych sietí a na odosielanie správ — napríklad WhatsApp, Messenger, Instagram, Telegram, Signal, Discord, Snapchat, TikTok, X, Threads, LinkedIn a SMS/Správy — takže netreba nič nastavovať. Tento zoznam ovláda ako spúšťače prekladu pri zadávaní (?en, ?de, ?fr atď.), tak aj bublinu prekladu pri dlhom podržaní. Známe správcovia hesiel, bankové, autentifikačné a systémové bezpečnostné aplikácie sa tu nikdy nezobrazujú a nemožno ich povoliť; kryptomenové peňaženky a burzy sú blokované rovnakým spôsobom.</string>
+    <string name="allowed_apps_advanced_hint">Chcete inú aplikáciu alebo chcete odstrániť niektorú z predvolených? Namiesto toho si aplikácie vyberte ručne.</string>
+    <string name="btn_show_advanced_apps">Zobraziť pokročilé: vybrať aplikácie ručne</string>
+    <string name="btn_hide_advanced_apps">Skryť pokročilé možnosti</string>
+    <string name="allowed_apps_empty">Nenašli sa žiadne nainštalované aplikácie s ikonou spúšťača.</string>
+    <string name="allowed_apps_loading">Načítavajú sa nainštalované aplikácie…</string>
+
+    <string name="section_privacy">Súkromie</string>
+    <string name="privacy_notice_headline">Text sa odošle do Google Gemini len vtedy, keď výslovne zadáte spúšťač prekladu (napríklad ?en alebo ?de) alebo dlho podržíte správu.</string>
+    <string name="privacy_notice_body">TextGate AI nezhromažďuje analytické údaje, správy o zlyhaniach ani žiadne údaje o používaní a neobsahuje žiadne SDK tretích strán. Jediné sieťové požiadavky, ktoré táto aplikácia kedy vykoná, sú žiadosti o preklad, ktoré sami vyvoláte a ktoré sa odosielajú priamo do Gemini API spoločnosti Google cez HTTPS. Váš kľúč API je zašifrovaný priamo v zariadení pomocou Android Keystore a je vylúčený zo zálohovania. Polia s heslami a iné citlivé vstupy sa za žiadnych okolností nikdy nečítajú. Podrobnosti nájdete po ťuknutí na „Úplné zásady ochrany osobných údajov“ nižšie.</string>
+    <string name="btn_full_privacy_policy">Úplné zásady ochrany osobných údajov</string>
+    <string name="btn_close_dialog">Zavrieť</string>
+    <string name="privacy_full_policy_title">Úplné zásady ochrany osobných údajov</string>
+    <string name="privacy_full_policy_body">Čo TextGate AI číta:\n• Textové pole, do ktorého práve píšete — iba na kontrolu jedného presného spúšťača prekladu (napríklad „?en“ alebo „?de“) na konci.\n• Správu alebo komentár, na ktorý dlho podržíte prst — iba v aplikáciách, ktoré ste zapli v časti „Povolené aplikácie“.\n\nČo nikdy nečíta: polia s heslami, zadávanie PIN kódu ani žiadne pole, ktoré aplikácia rozpozná ako citlivé — bez výnimky, v žiadnej aplikácii.\n\nČo sa odosiela a kam: iba text, pre ktorý ste vyvolali spúšťač, odoslaný jedenkrát priamo cez HTTPS do Gemini API spoločnosti Google pomocou kľúča, ktorý ste sami poskytli. Nič sa nikdy neodošle, pokiaľ sami nezadáte spúšťač alebo dlho nepodržíte správu.\n\nČo je uložené vo vašom telefóne: váš kľúč API Gemini, zašifrovaný pomocou Android Keystore (to isté hardvérovo zabezpečené riešenie, ktoré Android používa pre poverenia zamykacej obrazovky), a vaše jednoduché nastavenia (ktoré aplikácie sú povolené, zvolený jazyk, zvolený model Gemini). Nič z toho nie je súčasťou zálohy telefónu.\n\nČo TextGate AI NEROBÍ: žiadna analytika, žiadne hlásenie zlyhaní, žiadne sledovanie používania, žiadna reklama, žiadne knižnice tretích strán akéhokoľvek druhu, žiadna história ničoho, čo ste preložili, a žiadne čítanie žiadnej aplikácie, ktorú ste výslovne nepovolili.\n\nMáte veci pod kontrolou: celú funkciu môžete kedykoľvek vypnúť hlavným prepínačom a kedykoľvek podľa potreby pridať alebo odstrániť ľubovoľnú aplikáciu zo zoznamu povolených.</string>
+
+    <string name="section_about">Informácie</string>
+    <string name="about_version_label">Verzia</string>
+
+    <!-- Toasts / runtime messages (never include user text) -->
+    <string name="toast_sending_to_gemini">Odosielanie vybratého textu do Gemini</string>
+    <string name="toast_translation_failed">Preklad zlyhal — pôvodný text zostal nezmenený</string>
+    <string name="toast_field_changed_aborted">Pole sa zmenilo skôr, než prišiel výsledok — nič sa nenahradilo</string>
+    <string name="toast_service_disabled">Transformácia pomocou AI je v nastaveniach vypnutá</string>
+
+    <!-- Long-press translation bubble -->
+    <string name="bubble_loading">Prekladá sa…</string>
+    <string name="bubble_close_content_description">Zavrieť</string>
+
+    <!-- Errors -->
+    <string name="error_no_api_key">Najprv zadajte a uložte kľúč API Gemini</string>
+    <string name="error_text_too_long">Text je príliš dlhý na automatické odoslanie (limit: %1$d znakov)</string>
+    <string name="error_generic">Niečo sa pokazilo. Skúste to prosím znova.</string>
+    <string name="error_timeout">Vypršal časový limit požiadavky.</string>
+    <string name="error_network">Nepodarilo sa spojiť s Gemini. Skontrolujte pripojenie.</string>
+    <string name="error_http">Gemini vrátil chybu (kód %1$d).</string>
+    <string name="error_empty_response">Gemini vrátil prázdnu odpoveď.</string>
+</resources>

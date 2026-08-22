@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">TextGate AI</string>
+
+    <string name="accessibility_service_description">TextGate AI loeb teksti kahel viisil, mõlemad rangelt piiratud. Esiteks: tekstiväli, mida te parasjagu redigeerite, ja seda ainult selleks, et otsida selle lõpust ühte täpset päästiku-sufiksit (näiteks \"?en\" või \"?de\" — üks iga keele kohta, vaadake täielikku loendit Seadetes) sellest, mida olete kirjutanud. Teiseks: sõnum või kommentaar, millel te pikalt vajutate ja hoiate, et kuvada hõljuv tõlge vaikekeelde, mille valite Seadetes. Kumbki tegevusviis ei loe kunagi paroolivälju, ei tööta kunagi rakendustes, mida te ei ole sõnaselgelt lubanud, ega säilita kunagi ajalugu loetust. Kui lubatud rakenduses tuvastatakse päästik või kui te vajutate sõnumil pikalt, saadetakse asjakohane tekst üle HTTPS-i teie seadistatud Gemini API-sse ja tõlgitakse. Kirjutatud päästiku tulemus asendab välja sisu; pikavajutuse tulemust näidatakse ainult ajutises hõljuvas mullis ja see ei puuduta kunagi algset rakendust. Midagi ei saadeta kuhugi, kui te ei kirjuta üht neist täpsetest päästikutest ega vajuta pikalt sõnumil rakenduses, mis on TextGate AI seadetes sisse lülitatud.</string>
+
+    <!-- Settings screen -->
+    <string name="settings_title">TextGate AI</string>
+
+    <string name="section_master_switch">AI-teisendus</string>
+    <string name="master_switch_label">Luba kirjutatud päästikuga tõlkimine</string>
+    <string name="master_switch_description">Pealüliti. Kirjutage sõnumi lõppu päästik, näiteks ?en või ?de, et tõlkida see vastavasse keelde (vaadake täielikku loendit allpool). Reguleerib ka pikavajutuse tõlkemulli. Kui see on välja lülitatud, ei loe TextGate AI kunagi ühtegi välja ega sõnumit ega tee kunagi ühtegi võrgupäringut, sõltumata muudest seadetest.</string>
+
+    <string name="bubble_language_label">Rakenduse ja tõlke keel</string>
+    <string name="bubble_language_description">Valige oma keel siin ainult üks kord. See määrab nii pikavajutuse tõlkemulli vaikekeele kui ka keele, milles kuvatakse TextGate AI enda ekraanid — mõlemad muutuvad koos.</string>
+
+    <string name="section_accessibility_status">Hõlbustusteenus</string>
+    <string name="accessibility_status_enabled">Lubatud</string>
+    <string name="accessibility_status_disabled">Ei ole lubatud — TextGate AI ei saa midagi teha, kuni te selle lubate</string>
+    <string name="btn_open_accessibility_settings">Ava hõlbustusteenuse seaded</string>
+
+    <string name="section_gemini_api">Gemini API</string>
+    <string name="label_api_key">Gemini API võti</string>
+    <string name="hint_api_key">Kleepige oma Gemini API võti</string>
+    <string name="btn_get_api_key">Hangi tasuta API võti</string>
+    <string name="btn_show_api_key_instructions">Kuidas seda teha? (samm-sammuline juhend)</string>
+    <string name="btn_hide_api_key_instructions">Peida juhend</string>
+    <string name="api_key_instructions_body">1. Puudutage ülal nuppu \"Hangi tasuta API võti\" — see avab Google AI Studio teie brauseris.\n2. Logige sisse oma Google\'i kontoga (see, mida kasutate iga päev).\n3. Nõustuge kasutustingimustega, kui teil seda küsitakse.\n4. Puudutage lehel nuppu \"Create API key\".\n5. Kopeerige kuvatav võti — pikk tähtede ja numbrite jada.\n6. Tulge tagasi selle rakenduse juurde, kleepige võti allolevale väljale ja puudutage \"Salvesta võti\".\n\nVõti on tasuta Google\'i tasuta taseme piirides ning ei lahku kunagi teie telefonist, välja arvatud otseühenduseks Geminiga — see on krüpteeritud ja salvestatud ainult sellesse seadmesse.</string>
+    <string name="btn_save_api_key">Salvesta võti (krüpteeritud)</string>
+    <string name="api_key_saved">API võti salvestatud, krüpteeritud Android Keystore\'iga</string>
+    <string name="api_key_cleared">API võti eemaldatud</string>
+    <string name="btn_clear_api_key">Eemalda salvestatud võti</string>
+    <string name="api_key_status_present">Võti on salvestatud (krüpteeritud). Seda ei kuvata enam kunagi ekraanil.</string>
+    <string name="api_key_status_absent">Võtit pole veel salvestatud</string>
+
+    <string name="label_model">Gemini mudel</string>
+    <string name="hint_model">nt gemini-3.5-flash-lite</string>
+    <string name="model_suggestions_label">Soovitused (puudutage kasutamiseks):</string>
+
+    <string name="btn_test_api">Testi API ühendust</string>
+    <string name="test_api_running">Testimine…</string>
+    <string name="test_api_success">Õnnestus — Gemini vastas korrektselt.</string>
+    <string name="test_api_failure">Ebaõnnestus: %1$s</string>
+
+    <string name="section_allowed_apps">Lubatud rakendused</string>
+    <string name="allowed_apps_description">TextGate AI on vaikimisi lubatud ainult levinud sotsiaalmeedia- ja sõnumirakendustes — näiteks WhatsApp, Messenger, Instagram, Telegram, Signal, Discord, Snapchat, TikTok, X, Threads, LinkedIn ja SMS/Sõnumid —, seega ei ole midagi seadistada. See loend reguleerib nii kirjutatud tõlkepäästikuid (?en, ?de, ?fr jne) kui ka pikavajutuse tõlkemulli. Teadaolevaid paroolihaldureid, panga-, autentimis- ja süsteemi turvarakendusi siin kunagi ei kuvata ja neid ei saa kunagi lubada; samamoodi on blokeeritud krüptorahakotid ja -börsid.</string>
+    <string name="allowed_apps_advanced_hint">Soovite mõnda muud rakendust või mõne vaikerakenduse eemaldada? Valige rakendused selle asemel käsitsi.</string>
+    <string name="btn_show_advanced_apps">Näita täpsemat: vali rakendused käsitsi</string>
+    <string name="btn_hide_advanced_apps">Peida täpsemad valikud</string>
+    <string name="allowed_apps_empty">Käivitusikooniga rakendusi ei leitud.</string>
+    <string name="allowed_apps_loading">Installitud rakenduste laadimine…</string>
+
+    <string name="section_privacy">Privaatsus</string>
+    <string name="privacy_notice_headline">Teksti saadetakse Google Geminile ainult siis, kui kirjutate sõnaselgelt tõlkepäästiku (näiteks ?en või ?de) või vajutate sõnumil pikalt.</string>
+    <string name="privacy_notice_body">TextGate AI ei kogu analüütikat, veaaruandeid ega mistahes kasutusandmeid ning ei sisalda ühtegi kolmanda osapoole SDK-d. Ainsad võrgupäringud, mida see rakendus kunagi teeb, on tõlkepäringud, mille käivitate ise ja mis saadetakse otse Google\'i Gemini API-sse üle HTTPS-i. Teie API võti on seadmes krüpteeritud Android Keystore\'i abil ja on varukoopiatest välja jäetud. Paroolivälju ja muid tundlikke sisendeid ei loeta kunagi, mitte mingil juhul. Puudutage allpool \"Täielik privaatsuspoliitika\", et näha kõiki üksikasju.</string>
+    <string name="btn_full_privacy_policy">Täielik privaatsuspoliitika</string>
+    <string name="btn_close_dialog">Sulge</string>
+    <string name="privacy_full_policy_title">Täielik privaatsuspoliitika</string>
+    <string name="privacy_full_policy_body">Mida TextGate AI loeb:\n• Tekstivälja, kuhu te parasjagu kirjutate — ainult selleks, et kontrollida selle lõpus ühte täpset tõlkepäästikut (näiteks \"?en\" või \"?de\").\n• Sõnumit või kommentaari, millel te pikalt vajutate — ainult rakendustes, mille olete sisse lülitanud jaotises \"Lubatud rakendused\".\n\nMida see ei loe kunagi, mitte mingil juhul: paroolivälju, PIN-koodi sisestust ega ühtegi välja, mida rakendus tunnistab tundlikuks — erandeid ei ole üheski rakenduses.\n\nMis saadetakse ja kuhu: ainult tekst, mille te käivitasite, saadetud üks kord, otse üle HTTPS-i Google\'i Gemini API-sse, kasutades võtit, mille te ise sisestasite. Midagi ei saadeta kunagi, kui te ise ei kirjuta päästikut ega vajuta sõnumil pikalt.\n\nMida teie telefonis salvestatakse: teie Gemini API võti, krüpteeritud Android Keystore\'iga (sama riistvaraliselt kaitstud turvalisus, mida Android kasutab teie lukustuskuva mandaatide jaoks), ning teie lihtsad seaded (millised rakendused on lubatud, teie valitud keel, teie valitud Gemini mudel). Midagi sellest ei kuulu telefoni varukoopiatesse.\n\nMida TextGate AI EI TEE: mitte mingit analüütikat, veaaruandlust ega kasutuse jälgimist, mitte mingit reklaami, mitte mingeid kolmanda osapoole teeke, mitte mingit ajalugu sellest, mida olete tõlkinud, ega ühegi rakenduse lugemist, mida te pole sõnaselgelt lubanud.\n\nTeie kontrollite kõike: lülitage kogu funktsioon igal ajal pealülitiga välja ning lisage või eemaldage lubatud rakenduste loendist mistahes rakendus, millal iganes soovite.</string>
+
+    <string name="section_about">Teave</string>
+    <string name="about_version_label">Versioon</string>
+
+    <!-- Toasts / runtime messages (never include user text) -->
+    <string name="toast_sending_to_gemini">Valitud teksti saatmine Geminile</string>
+    <string name="toast_translation_failed">Tõlkimine ebaõnnestus — algne tekst jäi muutmata</string>
+    <string name="toast_field_changed_aborted">Väli muutus enne tulemuse saabumist — midagi ei asendatud</string>
+    <string name="toast_service_disabled">AI-teisendus on Seadetes välja lülitatud</string>
+
+    <!-- Long-press translation bubble -->
+    <string name="bubble_loading">Tõlkimine…</string>
+    <string name="bubble_close_content_description">Sulge</string>
+
+    <!-- Errors -->
+    <string name="error_no_api_key">Sisestage ja salvestage esmalt Gemini API võti</string>
+    <string name="error_text_too_long">Tekst on automaatseks saatmiseks liiga pikk (piirang: %1$d tähemärki)</string>
+    <string name="error_generic">Midagi läks valesti. Proovige uuesti.</string>
+    <string name="error_timeout">Päring aegus.</string>
+    <string name="error_network">Geminiga ei õnnestunud ühendust luua. Kontrollige oma internetiühendust.</string>
+    <string name="error_http">Gemini tagastas vea (kood %1$d).</string>
+    <string name="error_empty_response">Gemini tagastas tühja vastuse.</string>
+</resources>

@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">TextGate AI</string>
+
+    <string name="accessibility_service_description">TextGate AI, metinleri yalnızca sıkı biçimde sınırlandırılmış iki yolla okur. Birincisi: şu anda düzenlemekte olduğunuz metin alanı ve yalnızca yazdığınız metnin sonunda tam olarak eşleşen tek bir tetikleyici ek (örneğin \"?en\" veya \"?de\" — dil başına bir tane, tam listeyi Ayarlar\'da bulabilirsiniz) arar. İkincisi: uzun basılı tuttuğunuz bir mesaj veya yorum; bu, Ayarlar\'da seçtiğiniz varsayılan dile yapılan çeviriyi yüzen bir baloncukta göstermek içindir. Her iki yol da parola alanlarını asla okumaz, açıkça izin vermediğiniz uygulamalarda asla çalışmaz ve okunan hiçbir şeyin geçmişini tutmaz. İzin verilen bir uygulamada bir tetikleyici algılandığında veya bir mesaja uzun bastığınızda, ilgili metin HTTPS üzerinden yapılandırdığınız Gemini API\'sine gönderilir ve çevrilir. Yazılı tetikleyici sonucu, alanın içeriğinin yerini alır; uzun basma sonucu ise yalnızca geçici bir yüzen baloncukta gösterilir ve orijinal uygulamaya asla dokunmaz. Bu tam tetikleyicilerden birini yazmadığınız veya TextGate AI\'nin ayarlarında açık olan bir uygulamada bir mesaja uzun basmadığınız sürece hiçbir şey hiçbir yere gönderilmez.</string>
+
+    <!-- Settings screen -->
+    <string name="settings_title">TextGate AI</string>
+
+    <string name="section_master_switch">Yapay zeka dönüştürme</string>
+    <string name="master_switch_label">Yazılı tetikleyiciyle çeviriyi etkinleştir</string>
+    <string name="master_switch_description">Ana anahtar. Bir mesajı o dile çevirmek için sonuna ?en veya ?de gibi bir tetikleyici yazın (tüm liste aşağıda). Bu ayrıca uzun basma çeviri baloncuğunu da yönetir. Kapalıyken TextGate AI hiçbir alanı veya mesajı okumaz ve diğer ayarlar ne olursa olsun hiçbir ağ isteği göndermez.</string>
+
+    <string name="bubble_language_label">Uygulama ve çeviri dili</string>
+    <string name="bubble_language_description">Dilinizi burada bir kez seçin. Bu seçim hem uzun basma çeviri baloncuğunun varsayılan dilini hem de TextGate AI\'nin kendi ekranlarının görüntülendiği dili belirler — ikisi birlikte değişir.</string>
+
+    <string name="section_accessibility_status">Erişilebilirlik Hizmeti</string>
+    <string name="accessibility_status_enabled">Etkin</string>
+    <string name="accessibility_status_disabled">Etkin değil — siz etkinleştirene kadar TextGate AI hiçbir şey yapamaz</string>
+    <string name="btn_open_accessibility_settings">Erişilebilirlik Ayarlarını Aç</string>
+
+    <string name="section_gemini_api">Gemini API</string>
+    <string name="label_api_key">Gemini API anahtarı</string>
+    <string name="hint_api_key">Gemini API anahtarınızı yapıştırın</string>
+    <string name="btn_get_api_key">Ücretsiz API anahtarı al</string>
+    <string name="btn_show_api_key_instructions">Bunu nasıl yaparım? (adım adım kılavuz)</string>
+    <string name="btn_hide_api_key_instructions">Kılavuzu gizle</string>
+    <string name="api_key_instructions_body">1. Yukarıdaki \"Ücretsiz API anahtarı al\" seçeneğine dokunun — bu, tarayıcınızda Google AI Studio\'yu açar.\n2. Google hesabınızla oturum açın (her gün kullandığınız hesap).\n3. İstenirse Hizmet Şartları\'nı kabul edin.\n4. Sayfada \"Create API key\" seçeneğine dokunun.\n5. Görünen anahtarı kopyalayın — uzun bir harf ve sayı dizisi.\n6. Bu uygulamaya geri dönün, anahtarı aşağıdaki alana yapıştırın ve \"Anahtarı kaydet\" seçeneğine dokunun.\n\nBu anahtar, Google\'ın ücretsiz katman sınırları dahilinde ücretsizdir ve doğrudan Gemini ile iletişim kurmak dışında telefonunuzdan asla çıkmaz — şifrelenir ve yalnızca bu cihazda saklanır.</string>
+    <string name="btn_save_api_key">Anahtarı kaydet (şifreli)</string>
+    <string name="api_key_saved">API anahtarı kaydedildi, Android Keystore ile şifrelendi</string>
+    <string name="api_key_cleared">API anahtarı kaldırıldı</string>
+    <string name="btn_clear_api_key">Kaydedilen anahtarı kaldır</string>
+    <string name="api_key_status_present">Kaydedilmiş bir anahtar var (şifreli). Bu anahtar ekranda bir daha asla gösterilmez.</string>
+    <string name="api_key_status_absent">Henüz kaydedilmiş bir anahtar yok</string>
+
+    <string name="label_model">Gemini modeli</string>
+    <string name="hint_model">örn. gemini-3.5-flash-lite</string>
+    <string name="model_suggestions_label">Öneriler (kullanmak için dokunun):</string>
+
+    <string name="btn_test_api">API bağlantısını test et</string>
+    <string name="test_api_running">Test ediliyor…</string>
+    <string name="test_api_success">Başarılı — Gemini doğru yanıt verdi.</string>
+    <string name="test_api_failure">Başarısız: %1$s</string>
+
+    <string name="section_allowed_apps">İzin verilen uygulamalar</string>
+    <string name="allowed_apps_description">TextGate AI, varsayılan olarak yalnızca WhatsApp, Messenger, Instagram, Telegram, Signal, Discord, Snapchat, TikTok, X, Threads, LinkedIn ve SMS/Mesajlar gibi yaygın sosyal medya ve mesajlaşma uygulamaları için etkindir — bu yüzden herhangi bir kurulum yapmanız gerekmez. Bu liste hem yazılı çeviri tetikleyicilerini (?en, ?de, ?fr ve benzerleri) hem de uzun basma çeviri baloncuğunu yönetir. Bilinen parola yöneticileri, bankacılık, kimlik doğrulama ve sistem güvenliği uygulamaları bu listede asla gösterilmez ve asla etkinleştirilemez; kripto para cüzdanları ve borsaları da aynı şekilde engellenir.</string>
+    <string name="allowed_apps_advanced_hint">Farklı bir uygulama mı istiyorsunuz, yoksa varsayılanlardan birini mi kaldırmak istiyorsunuz? Bunun yerine uygulamaları elle seçin.</string>
+    <string name="btn_show_advanced_apps">Gelişmiş seçenekleri göster: uygulamaları elle seçin</string>
+    <string name="btn_hide_advanced_apps">Gelişmiş seçenekleri gizle</string>
+    <string name="allowed_apps_empty">Başlatıcı simgesi olan yüklü bir uygulama bulunamadı.</string>
+    <string name="allowed_apps_loading">Yüklü uygulamalar yükleniyor…</string>
+
+    <string name="section_privacy">Gizlilik</string>
+    <string name="privacy_notice_headline">Metin, Google Gemini\'ye yalnızca açıkça bir çeviri tetikleyicisi yazdığınızda (örneğin ?en veya ?de) veya bir mesaja uzun bastığınızda gönderilir.</string>
+    <string name="privacy_notice_body">TextGate AI herhangi bir analiz verisi, çökme raporu veya kullanım verisi toplamaz ve hiçbir üçüncü taraf SDK\'sı içermez. Bu uygulamanın yaptığı tek ağ istekleri, sizin kendinizin tetiklediği ve doğrudan HTTPS üzerinden Google\'ın Gemini API\'sine gönderilen çeviri istekleridir. API anahtarınız, Android Keystore kullanılarak cihaz üzerinde şifrelenir ve yedeklemelere dahil edilmez. Parola alanları ve diğer hassas girişler hiçbir koşulda asla okunmaz. Ayrıntılı bilgi için aşağıdaki \"Tam gizlilik politikası\" seçeneğine dokunun.</string>
+    <string name="btn_full_privacy_policy">Tam gizlilik politikası</string>
+    <string name="btn_close_dialog">Kapat</string>
+    <string name="privacy_full_policy_title">Tam gizlilik politikası</string>
+    <string name="privacy_full_policy_body">TextGate AI\'nin okuduğu şeyler:\n• Şu anda yazmakta olduğunuz metin alanı — yalnızca sonunda tam olarak tek bir çeviri tetikleyicisi (örneğin \"?en\" veya \"?de\") olup olmadığını kontrol etmek için.\n• Uzun bastığınız bir mesaj veya yorum — yalnızca \"İzin verilen uygulamalar\" bölümünde açtığınız uygulamalarda.\n\nHiçbir zaman okunmayanlar: parola alanları, PIN girişi veya uygulamanın hassas olarak tanıdığı herhangi bir alan — hiçbir uygulamada, istisnasız.\n\nNeler gönderilir ve nereye: yalnızca sizin tetiklediğiniz metin, yalnızca bir kez, doğrudan HTTPS üzerinden, sizin sağladığınız anahtar kullanılarak Google\'ın Gemini API\'sine gönderilir. Siz kendiniz bir tetikleyici yazmadıkça veya bir mesaja uzun basmadıkça hiçbir şey gönderilmez.\n\nTelefonunuzda ne saklanır: Android Keystore ile şifrelenmiş Gemini API anahtarınız (Android\'in kilit ekranı kimlik bilgileriniz için kullandığı donanım destekli güvenlikle aynısı) ve basit ayarlarınız (hangi uygulamalara izin verildiği, seçtiğiniz dil, seçtiğiniz Gemini modeli). Bunların hiçbiri telefon yedeklemelerine dahil edilmez.\n\nTextGate AI\'nin YAPMADIKLARI: analiz yok, çökme raporlama yok, kullanım takibi yok, reklam yok, hiçbir türde üçüncü taraf kitaplığı yok, çevirdiğiniz hiçbir şeyin geçmişi yok ve açıkça izin vermediğiniz hiçbir uygulamayı okuma yok.\n\nKontrol her zaman sizde: ana anahtar ile özelliğin tamamını istediğiniz zaman kapatabilir, izin verilen listeye istediğiniz zaman uygulama ekleyip çıkarabilirsiniz.</string>
+
+    <string name="section_about">Hakkında</string>
+    <string name="about_version_label">Sürüm</string>
+
+    <!-- Toasts / runtime messages (never include user text) -->
+    <string name="toast_sending_to_gemini">Seçilen metin Gemini\'ye gönderiliyor</string>
+    <string name="toast_translation_failed">Çeviri başarısız oldu — orijinal metin değiştirilmedi</string>
+    <string name="toast_field_changed_aborted">Sonuç gelmeden önce alan değişti — hiçbir şey değiştirilmedi</string>
+    <string name="toast_service_disabled">Yapay zeka dönüştürme, Ayarlar\'da kapalı</string>
+
+    <!-- Long-press translation bubble -->
+    <string name="bubble_loading">Çevriliyor…</string>
+    <string name="bubble_close_content_description">Kapat</string>
+
+    <!-- Errors -->
+    <string name="error_no_api_key">Önce bir Gemini API anahtarı girip kaydedin</string>
+    <string name="error_text_too_long">Metin otomatik olarak gönderilemeyecek kadar uzun (sınır: %1$d karakter)</string>
+    <string name="error_generic">Bir şeyler ters gitti. Lütfen tekrar deneyin.</string>
+    <string name="error_timeout">İstek zaman aşımına uğradı.</string>
+    <string name="error_network">Gemini\'ye ulaşılamadı. Bağlantınızı kontrol edin.</string>
+    <string name="error_http">Gemini bir hata döndürdü (kod %1$d).</string>
+    <string name="error_empty_response">Gemini boş bir yanıt döndürdü.</string>
+</resources>

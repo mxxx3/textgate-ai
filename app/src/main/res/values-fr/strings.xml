@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">TextGate AI</string>
+
+    <string name="accessibility_service_description">TextGate AI lit le texte de deux façons, toutes deux strictement limitées. Premièrement : le champ de texte que vous êtes en train de modifier, et seulement pour rechercher un suffixe déclencheur exact (comme « ?en » ou « ?de » — un par langue, voir la liste complète dans les Paramètres) à la fin de ce que vous avez saisi. Deuxièmement : un message ou un commentaire sur lequel vous effectuez un appui long, pour afficher une traduction flottante dans la langue par défaut que vous choisissez dans les Paramètres. Aucun de ces deux mécanismes ne lit jamais les champs de mot de passe, ne fonctionne jamais dans des applications que vous n\'avez pas explicitement autorisées, et ne conserve jamais d\'historique de ce qui a été lu. Lorsqu\'un déclencheur est détecté, ou lorsque vous effectuez un appui long sur un message, dans une application autorisée, le texte concerné est envoyé via HTTPS à l\'API Gemini que vous avez configurée, puis traduit. Le résultat du déclencheur saisi remplace le contenu du champ ; le résultat de l\'appui long n\'est jamais affiché que dans une bulle flottante temporaire et ne touche jamais l\'application d\'origine. Rien n\'est envoyé nulle part, sauf si vous saisissez l\'un de ces déclencheurs exacts ou effectuez un appui long sur un message dans une application activée dans les paramètres de TextGate AI.</string>
+
+    <!-- Settings screen -->
+    <string name="settings_title">TextGate AI</string>
+
+    <string name="section_master_switch">Transformation par IA</string>
+    <string name="master_switch_label">Activer la traduction par déclencheur saisi</string>
+    <string name="master_switch_description">Interrupteur principal. Saisissez un déclencheur comme ?en ou ?de à la fin d\'un message pour le traduire dans cette langue (voir la liste complète ci-dessous). Contrôle également la bulle de traduction de l\'appui long. Lorsqu\'il est désactivé, TextGate AI ne lit jamais aucun champ ni aucun message et n\'effectue jamais de requête réseau, quel que soit le reste des paramètres.</string>
+
+    <string name="bubble_language_label">Langue de l\'application et de traduction</string>
+    <string name="bubble_language_description">Choisissez votre langue une seule fois ici. Cela définit à la fois la langue par défaut de la bulle de traduction de l\'appui long ET la langue dans laquelle les écrans de TextGate AI sont affichés — les deux changent ensemble.</string>
+
+    <string name="section_accessibility_status">Service d\'accessibilité</string>
+    <string name="accessibility_status_enabled">Activé</string>
+    <string name="accessibility_status_disabled">Non activé — TextGate AI ne peut rien faire tant que vous ne l\'activez pas</string>
+    <string name="btn_open_accessibility_settings">Ouvrir les paramètres d\'accessibilité</string>
+
+    <string name="section_gemini_api">API Gemini</string>
+    <string name="label_api_key">Clé API Gemini</string>
+    <string name="hint_api_key">Collez votre clé API Gemini</string>
+    <string name="btn_get_api_key">Obtenir une clé API gratuite</string>
+    <string name="btn_show_api_key_instructions">Comment faire ? (guide étape par étape)</string>
+    <string name="btn_hide_api_key_instructions">Masquer le guide</string>
+    <string name="api_key_instructions_body">1. Appuyez sur « Obtenir une clé API gratuite » ci-dessus — cela ouvre Google AI Studio dans votre navigateur.\n2. Connectez-vous avec votre compte Google (celui que vous utilisez tous les jours).\n3. Acceptez les conditions d\'utilisation si cela vous est demandé.\n4. Appuyez sur « Create API key » sur la page.\n5. Copiez la clé qui apparaît — une longue chaîne de lettres et de chiffres.\n6. Revenez dans cette application, collez la clé dans le champ ci-dessous, puis appuyez sur « Enregistrer la clé ».\n\nLa clé est gratuite dans les limites du niveau gratuit de Google et ne quitte jamais votre téléphone, sauf pour communiquer directement avec Gemini — elle est chiffrée et stockée uniquement sur cet appareil.</string>
+    <string name="btn_save_api_key">Enregistrer la clé (chiffrée)</string>
+    <string name="api_key_saved">Clé API enregistrée, chiffrée avec Android Keystore</string>
+    <string name="api_key_cleared">Clé API supprimée</string>
+    <string name="btn_clear_api_key">Supprimer la clé enregistrée</string>
+    <string name="api_key_status_present">Une clé est enregistrée (chiffrée). Elle ne s\'affiche plus jamais à l\'écran.</string>
+    <string name="api_key_status_absent">Aucune clé enregistrée pour le moment</string>
+
+    <string name="label_model">Modèle Gemini</string>
+    <string name="hint_model">par ex. gemini-3.5-flash-lite</string>
+    <string name="model_suggestions_label">Suggestions (appuyez pour utiliser) :</string>
+
+    <string name="btn_test_api">Tester la connexion à l\'API</string>
+    <string name="test_api_running">Test en cours…</string>
+    <string name="test_api_success">Succès — Gemini a répondu correctement.</string>
+    <string name="test_api_failure">Échec : %1$s</string>
+
+    <string name="section_allowed_apps">Applications autorisées</string>
+    <string name="allowed_apps_description">TextGate AI est activé par défaut uniquement pour les applications courantes de réseaux sociaux et de messagerie — par exemple WhatsApp, Messenger, Instagram, Telegram, Signal, Discord, Snapchat, TikTok, X, Threads, LinkedIn et SMS/Messages — il n\'y a donc rien à configurer. Cette liste régit à la fois les déclencheurs de traduction saisis (?en, ?de, ?fr, etc.) et la bulle de traduction de l\'appui long. Les gestionnaires de mots de passe connus, les applications bancaires, d\'authentification et de sécurité système ne sont jamais affichés ici et ne peuvent jamais être activés ; les portefeuilles et plateformes d\'échange de cryptomonnaies sont bloqués de la même façon.</string>
+    <string name="allowed_apps_advanced_hint">Vous souhaitez une autre application, ou retirer l\'une des applications par défaut ? Choisissez plutôt les applications manuellement.</string>
+    <string name="btn_show_advanced_apps">Afficher les options avancées : choisir les applications manuellement</string>
+    <string name="btn_hide_advanced_apps">Masquer les options avancées</string>
+    <string name="allowed_apps_empty">Aucune application installée avec une icône de lancement n\'a été trouvée.</string>
+    <string name="allowed_apps_loading">Chargement des applications installées…</string>
+
+    <string name="section_privacy">Confidentialité</string>
+    <string name="privacy_notice_headline">Le texte n\'est envoyé à Google Gemini que lorsque vous saisissez explicitement un déclencheur de traduction (comme ?en ou ?de), ou que vous effectuez un appui long sur un message.</string>
+    <string name="privacy_notice_body">TextGate AI ne collecte aucune donnée analytique, aucun rapport de plantage ni aucune donnée d\'utilisation, quelle qu\'elle soit, et ne contient aucun SDK tiers. Les seules requêtes réseau que cette application effectue jamais sont les requêtes de traduction que vous déclenchez vous-même, envoyées directement à l\'API Gemini de Google via HTTPS. Votre clé API est chiffrée sur l\'appareil à l\'aide d\'Android Keystore et est exclue des sauvegardes. Les champs de mot de passe et autres saisies sensibles ne sont jamais lus, en aucune circonstance. Appuyez sur « Politique de confidentialité complète » ci-dessous pour tous les détails.</string>
+    <string name="btn_full_privacy_policy">Politique de confidentialité complète</string>
+    <string name="btn_close_dialog">Fermer</string>
+    <string name="privacy_full_policy_title">Politique de confidentialité complète</string>
+    <string name="privacy_full_policy_body">Ce que TextGate AI lit :\n• Le champ de texte dans lequel vous êtes en train de saisir du texte — uniquement pour vérifier la présence d\'un déclencheur de traduction exact (comme « ?en » ou « ?de ») à la fin.\n• Un message ou un commentaire sur lequel vous effectuez un appui long — uniquement dans les applications que vous avez activées dans « Applications autorisées ».\n\nCe qu\'elle ne lit jamais, en aucun cas : les champs de mot de passe, la saisie de code PIN, ou tout champ que l\'application reconnaît comme sensible — sans exception, dans quelque application que ce soit.\n\nCe qui est envoyé, et où : uniquement le texte que vous avez déclenché, envoyé une seule fois, directement via HTTPS à l\'API Gemini de Google, en utilisant la clé que vous avez vous-même fournie. Rien n\'est jamais envoyé, sauf si vous saisissez vous-même un déclencheur ou effectuez un appui long sur un message.\n\nCe qui est stocké sur votre téléphone : votre clé API Gemini, chiffrée avec Android Keystore (la même sécurité matérielle qu\'Android utilise pour les identifiants de votre écran de verrouillage), et vos paramètres simples (quelles applications sont autorisées, la langue que vous avez choisie, le modèle Gemini que vous avez choisi). Rien de tout cela n\'est inclus dans les sauvegardes du téléphone.\n\nCe que TextGate AI NE fait PAS : aucune analytique, aucun rapport de plantage, aucun suivi d\'utilisation, aucune publicité, aucune bibliothèque tierce d\'aucune sorte, aucun historique de ce que vous avez traduit, et aucune lecture d\'une application que vous n\'avez pas explicitement autorisée.\n\nVous gardez le contrôle : désactivez la fonctionnalité entière à tout moment grâce à l\'interrupteur principal, et ajoutez ou retirez n\'importe quelle application de la liste autorisée quand vous le souhaitez.</string>
+
+    <string name="section_about">À propos</string>
+    <string name="about_version_label">Version</string>
+
+    <!-- Toasts / runtime messages (never include user text) -->
+    <string name="toast_sending_to_gemini">Envoi du texte sélectionné à Gemini</string>
+    <string name="toast_translation_failed">Échec de la traduction — le texte d\'origine n\'a pas été modifié</string>
+    <string name="toast_field_changed_aborted">Le champ a changé avant l\'arrivée du résultat — rien n\'a été remplacé</string>
+    <string name="toast_service_disabled">La transformation par IA est désactivée dans les Paramètres</string>
+
+    <!-- Long-press translation bubble -->
+    <string name="bubble_loading">Traduction en cours…</string>
+    <string name="bubble_close_content_description">Fermer</string>
+
+    <!-- Errors -->
+    <string name="error_no_api_key">Saisissez et enregistrez d\'abord une clé API Gemini</string>
+    <string name="error_text_too_long">Le texte est trop long pour être envoyé automatiquement (limite : %1$d caractères)</string>
+    <string name="error_generic">Un problème est survenu. Veuillez réessayer.</string>
+    <string name="error_timeout">La requête a expiré.</string>
+    <string name="error_network">Impossible de contacter Gemini. Vérifiez votre connexion.</string>
+    <string name="error_http">Gemini a renvoyé une erreur (code %1$d).</string>
+    <string name="error_empty_response">Gemini a renvoyé une réponse vide.</string>
+</resources>

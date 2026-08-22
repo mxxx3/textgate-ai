@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">TextGate AI</string>
+
+    <string name="accessibility_service_description">تقرأ TextGate AI النص بطريقتين فقط، وكلتاهما مقيدتان بشكل صارم. الأولى: حقل النص الذي تحرّره حاليًا، وذلك فقط للبحث عن لاحقة مشغّل واحدة محددة بدقة (مثل \"?en\" أو \"?de\" — واحدة لكل لغة، راجع القائمة الكاملة في الإعدادات) في نهاية ما كتبته. الثانية: رسالة أو تعليق تضغط عليه ضغطًا مطوّلًا، لعرض ترجمة عائمة إلى اللغة الافتراضية التي تختارها في الإعدادات. لا يقرأ أي من المسارين حقول كلمات المرور مطلقًا، ولا يعمل في تطبيقات لم تسمح بها صراحةً، ولا يحتفظ بأي سجل لما تمت قراءته. عند اكتشاف مشغّل، أو عند الضغط المطوّل على رسالة، في تطبيق مسموح به، يُرسَل النص المعني عبر HTTPS إلى واجهة Gemini API التي قمت بتهيئتها ليُترجم. تحل نتيجة المشغّل المكتوب محل محتوى الحقل؛ أما نتيجة الضغط المطوّل فلا تظهر إلا في فقاعة عائمة مؤقتة ولا تلمس التطبيق الأصلي إطلاقًا. لا يُرسَل شيء إلى أي جهة ما لم تكتب أحد هذه المشغّلات بالضبط أو تضغط ضغطًا مطوّلًا على رسالة في تطبيق مُفعَّل في إعدادات TextGate AI.</string>
+
+    <!-- Settings screen -->
+    <string name="settings_title">TextGate AI</string>
+
+    <string name="section_master_switch">تحويل الذكاء الاصطناعي</string>
+    <string name="master_switch_label">تفعيل الترجمة بمشغّل مكتوب</string>
+    <string name="master_switch_description">المفتاح الرئيسي. اكتب مشغّلًا مثل ?en أو ?de في نهاية رسالة لترجمتها إلى تلك اللغة (راجع القائمة الكاملة أدناه). يتحكم هذا أيضًا في فقاعة ترجمة الضغط المطوّل. عند إيقافه، لن تقرأ TextGate AI أي حقل أو رسالة مطلقًا ولن تُجري أي طلب شبكة، بصرف النظر عن أي إعداد آخر.</string>
+
+    <string name="bubble_language_label">لغة التطبيق والترجمة</string>
+    <string name="bubble_language_description">اختر لغتك مرة واحدة هنا. تحدد هذه اللغة الافتراضية لفقاعة ترجمة الضغط المطوّل وأيضًا اللغة التي تُعرض بها شاشات TextGate AI نفسها — يتغيّر الاثنان معًا.</string>
+
+    <string name="section_accessibility_status">خدمة إمكانية الوصول</string>
+    <string name="accessibility_status_enabled">مفعّلة</string>
+    <string name="accessibility_status_disabled">غير مفعّلة — لا يمكن لـ TextGate AI فعل أي شيء حتى تُفعّلها</string>
+    <string name="btn_open_accessibility_settings">فتح إعدادات إمكانية الوصول</string>
+
+    <string name="section_gemini_api">واجهة Gemini API</string>
+    <string name="label_api_key">مفتاح Gemini API</string>
+    <string name="hint_api_key">الصق مفتاح Gemini API الخاص بك</string>
+    <string name="btn_get_api_key">الحصول على مفتاح API مجاني</string>
+    <string name="btn_show_api_key_instructions">كيف أفعل ذلك؟ (دليل خطوة بخطوة)</string>
+    <string name="btn_hide_api_key_instructions">إخفاء الدليل</string>
+    <string name="api_key_instructions_body">١. اضغط على \"الحصول على مفتاح API مجاني\" أعلاه — سيفتح هذا Google AI Studio في متصفحك.\n٢. سجّل الدخول بحساب Google الخاص بك (الحساب الذي تستخدمه يوميًا).\n٣. اقبل شروط الخدمة إذا طُلب منك ذلك.\n٤. اضغط على \"إنشاء مفتاح API\" في الصفحة.\n٥. انسخ المفتاح الذي يظهر — سلسلة طويلة من الحروف والأرقام.\n٦. عد إلى هذا التطبيق، والصق المفتاح في الحقل أدناه، ثم اضغط على \"حفظ المفتاح\".\n\nالمفتاح مجاني ضمن حدود الفئة المجانية من Google ولا يغادر هاتفك أبدًا إلا للتواصل مع Gemini مباشرة — فهو مشفّر ومخزّن على هذا الجهاز فقط.</string>
+    <string name="btn_save_api_key">حفظ المفتاح (مشفّر)</string>
+    <string name="api_key_saved">تم حفظ مفتاح API، مشفّرًا باستخدام Android Keystore</string>
+    <string name="api_key_cleared">تمت إزالة مفتاح API</string>
+    <string name="btn_clear_api_key">إزالة المفتاح المحفوظ</string>
+    <string name="api_key_status_present">تم حفظ مفتاح (مشفّر). لن يُعرض على الشاشة مرة أخرى أبدًا.</string>
+    <string name="api_key_status_absent">لا يوجد مفتاح محفوظ بعد</string>
+
+    <string name="label_model">نموذج Gemini</string>
+    <string name="hint_model">مثال: gemini-3.5-flash-lite</string>
+    <string name="model_suggestions_label">اقتراحات (اضغط للاستخدام):</string>
+
+    <string name="btn_test_api">اختبار الاتصال بواجهة API</string>
+    <string name="test_api_running">جارٍ الاختبار…</string>
+    <string name="test_api_success">نجاح — استجاب Gemini بشكل صحيح.</string>
+    <string name="test_api_failure">فشل: %1$s</string>
+
+    <string name="section_allowed_apps">التطبيقات المسموح بها</string>
+    <string name="allowed_apps_description">تُفعَّل TextGate AI افتراضيًا لتطبيقات التواصل الاجتماعي والمراسلة الشائعة فقط — مثل WhatsApp وMessenger وInstagram وTelegram وSignal وDiscord وSnapchat وTikTok وX وThreads وLinkedIn والرسائل النصية القصيرة/Messages — لذا لا حاجة لإعداد أي شيء. تتحكم هذه القائمة في كل من مشغّلات الترجمة المكتوبة (?en و?de و?fr وما إلى ذلك) وفقاعة ترجمة الضغط المطوّل. لا تُعرض هنا أبدًا تطبيقات إدارة كلمات المرور المعروفة، أو تطبيقات الخدمات المصرفية، أو تطبيقات المصادقة، أو تطبيقات أمان النظام، ولا يمكن تفعيلها مطلقًا؛ كما تُحظر محافظ ومنصات تداول العملات الرقمية بالطريقة نفسها.</string>
+    <string name="allowed_apps_advanced_hint">تريد تطبيقًا مختلفًا، أو إزالة أحد التطبيقات الافتراضية؟ اختر التطبيقات يدويًا بدلاً من ذلك.</string>
+    <string name="btn_show_advanced_apps">إظهار الخيارات المتقدمة: اختيار التطبيقات يدويًا</string>
+    <string name="btn_hide_advanced_apps">إخفاء الخيارات المتقدمة</string>
+    <string name="allowed_apps_empty">لم يُعثر على أي تطبيقات مثبّتة لها أيقونة مشغِّل.</string>
+    <string name="allowed_apps_loading">جارٍ تحميل التطبيقات المثبّتة…</string>
+
+    <string name="section_privacy">الخصوصية</string>
+    <string name="privacy_notice_headline">لا يُرسَل النص إلى Google Gemini إلا عندما تكتب صراحةً مشغّل ترجمة (مثل ?en أو ?de)، أو تضغط ضغطًا مطوّلًا على رسالة.</string>
+    <string name="privacy_notice_body">لا تجمع TextGate AI أي بيانات تحليلية، أو تقارير أعطال، أو بيانات استخدام من أي نوع، ولا تحتوي على أي حزم تطوير برمجية من جهات خارجية. طلبات الشبكة الوحيدة التي يجريها هذا التطبيق هي طلبات الترجمة التي تُطلقها أنت بنفسك، والمرسلة مباشرة إلى واجهة Gemini API من Google عبر HTTPS. مفتاح API الخاص بك مشفّر على الجهاز باستخدام Android Keystore ومُستبعد من النسخ الاحتياطية. لا تُقرأ حقول كلمات المرور وغيرها من المدخلات الحساسة مطلقًا، تحت أي ظرف. اضغط على \"سياسة الخصوصية الكاملة\" أدناه للاطلاع على كل التفاصيل.</string>
+    <string name="btn_full_privacy_policy">سياسة الخصوصية الكاملة</string>
+    <string name="btn_close_dialog">إغلاق</string>
+    <string name="privacy_full_policy_title">سياسة الخصوصية الكاملة</string>
+    <string name="privacy_full_policy_body">ما تقرؤه TextGate AI:\n• حقل النص الذي تكتب فيه حاليًا — فقط للتحقق من وجود مشغّل ترجمة واحد محدد بدقة (مثل \"?en\" أو \"?de\") في النهاية.\n• رسالة أو تعليق تضغط عليه ضغطًا مطوّلًا — فقط في التطبيقات التي فعّلتها في \"التطبيقات المسموح بها\".\n\nما لا تقرؤه أبدًا: حقول كلمات المرور، أو إدخال رمز PIN، أو أي حقل يتعرف عليه التطبيق كحقل حساس — بلا استثناءات، في أي تطبيق.\n\nما يُرسَل، وإلى أين: فقط النص الذي أطلقته أنت، يُرسَل مرة واحدة، مباشرة عبر HTTPS إلى واجهة Gemini API من Google باستخدام المفتاح الذي توفره بنفسك. لا يُرسَل شيء أبدًا ما لم تكتب مشغّلًا أو تضغط ضغطًا مطوّلًا على رسالة بنفسك.\n\nما يُخزَّن على هاتفك: مفتاح Gemini API الخاص بك، مشفّرًا باستخدام Android Keystore (نفس الحماية المدعومة بالعتاد التي يستخدمها Android لبيانات اعتماد شاشة القفل)، وإعداداتك البسيطة (التطبيقات المسموح بها، لغتك المختارة، نموذج Gemini الذي اخترته). لا شيء من هذا يُدرج في النسخ الاحتياطية للهاتف.\n\nما لا تفعله TextGate AI: لا تحليلات، لا تقارير أعطال، لا تتبع للاستخدام، لا إعلانات، لا مكتبات من جهات خارجية من أي نوع، لا سجل لأي شيء ترجمته، ولا قراءة لأي تطبيق لم تسمح به صراحةً.\n\nتبقى أنت المتحكم: أوقف الميزة بالكامل في أي وقت عبر المفتاح الرئيسي، وأضف أو أزل أي تطبيق من القائمة المسموح بها متى شئت.</string>
+
+    <string name="section_about">حول التطبيق</string>
+    <string name="about_version_label">الإصدار</string>
+
+    <!-- Toasts / runtime messages (never include user text) -->
+    <string name="toast_sending_to_gemini">جارٍ إرسال النص المحدد إلى Gemini</string>
+    <string name="toast_translation_failed">فشلت الترجمة — بقي النص الأصلي دون تغيير</string>
+    <string name="toast_field_changed_aborted">تغيّر الحقل قبل وصول النتيجة — لم يُستبدل شيء</string>
+    <string name="toast_service_disabled">تحويل الذكاء الاصطناعي مُوقَف في الإعدادات</string>
+
+    <!-- Long-press translation bubble -->
+    <string name="bubble_loading">جارٍ الترجمة…</string>
+    <string name="bubble_close_content_description">إغلاق</string>
+
+    <!-- Errors -->
+    <string name="error_no_api_key">أدخل مفتاح Gemini API واحفظه أولاً</string>
+    <string name="error_text_too_long">النص طويل جدًا لإرساله تلقائيًا (الحد الأقصى: %1$d حرفًا)</string>
+    <string name="error_generic">حدث خطأ ما. يُرجى المحاولة مرة أخرى.</string>
+    <string name="error_timeout">انتهت مهلة الطلب.</string>
+    <string name="error_network">تعذّر الوصول إلى Gemini. تحقق من اتصالك.</string>
+    <string name="error_http">أعاد Gemini خطأً (الرمز %1$d).</string>
+    <string name="error_empty_response">أعاد Gemini استجابة فارغة.</string>
+</resources>

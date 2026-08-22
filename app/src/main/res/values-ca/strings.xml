@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">TextGate AI</string>
+
+    <string name="accessibility_service_description">TextGate AI llegeix el text de dues maneres, totes dues estrictament limitades. Primera: el camp de text que estàs editant en aquest moment, i només per buscar un sufix de disparador exacte (com ara \"?en\" o \"?de\" — un per idioma, consulta la llista completa a Configuració) al final del que has escrit. Segona: un missatge o comentari que mantens premut, per mostrar una traducció flotant a l\'idioma predeterminat que triïs a Configuració. Cap de les dues vies llegeix mai camps de contrasenya, no s\'executa mai en aplicacions que no hagis permès explícitament, i no manté mai cap historial del que s\'ha llegit. Quan es detecta un disparador, o quan mantens premut un missatge, en una aplicació permesa, el text corresponent s\'envia per HTTPS a l\'API de Gemini que has configurat i es tradueix. El resultat del disparador escrit substitueix el contingut del camp; el resultat de mantenir premut només es mostra en una bombolla flotant temporal i mai no toca l\'aplicació original. No s\'envia res enlloc llevat que escriguis exactament un d\'aquests disparadors o mantinguis premut un missatge en una aplicació activada a la configuració de TextGate AI.</string>
+
+    <!-- Settings screen -->
+    <string name="settings_title">TextGate AI</string>
+
+    <string name="section_master_switch">Transformació amb IA</string>
+    <string name="master_switch_label">Activa la traducció per disparador escrit</string>
+    <string name="master_switch_description">Interruptor principal. Escriu un disparador com ara ?en o ?de al final d\'un missatge per traduir-lo a aquest idioma (consulta la llista completa a continuació). També controla la bombolla de traducció en mantenir premut. Quan està desactivat, TextGate AI no llegeix mai cap camp ni missatge i no fa mai cap sol·licitud de xarxa, independentment de qualsevol altra configuració.</string>
+
+    <string name="bubble_language_label">Idioma de l\'aplicació i la traducció</string>
+    <string name="bubble_language_description">Tria el teu idioma una vegada aquí. Estableix l\'idioma predeterminat per a la bombolla de traducció en mantenir premut I l\'idioma en què es mostren les pantalles pròpies de TextGate AI — tots dos canvien alhora.</string>
+
+    <string name="section_accessibility_status">Servei d\'accessibilitat</string>
+    <string name="accessibility_status_enabled">Activat</string>
+    <string name="accessibility_status_disabled">No activat — TextGate AI no pot fer res fins que l\'activis</string>
+    <string name="btn_open_accessibility_settings">Obre la configuració d\'accessibilitat</string>
+
+    <string name="section_gemini_api">API de Gemini</string>
+    <string name="label_api_key">Clau d\'API de Gemini</string>
+    <string name="hint_api_key">Enganxa la teva clau d\'API de Gemini</string>
+    <string name="btn_get_api_key">Obtén una clau d\'API gratuïta</string>
+    <string name="btn_show_api_key_instructions">Com ho faig? (guia pas a pas)</string>
+    <string name="btn_hide_api_key_instructions">Amaga la guia</string>
+    <string name="api_key_instructions_body">1. Toca \"Obtén una clau d\'API gratuïta\" a dalt — això obre Google AI Studio al teu navegador.\n2. Inicia sessió amb el teu compte de Google (el que utilitzes cada dia).\n3. Accepta les condicions del servei si t\'ho demanen.\n4. Toca \"Crea una clau d\'API\" a la pàgina.\n5. Copia la clau que apareix — una cadena llarga de lletres i números.\n6. Torna a aquesta aplicació, enganxa la clau al camp de sota i toca \"Desa la clau\".\n\nLa clau és gratuïta dins dels límits del nivell gratuït de Google i mai no surt del teu telèfon excepte per comunicar-se directament amb Gemini — està xifrada i s\'emmagatzema només en aquest dispositiu.</string>
+    <string name="btn_save_api_key">Desa la clau (xifrada)</string>
+    <string name="api_key_saved">Clau d\'API desada, xifrada amb Android Keystore</string>
+    <string name="api_key_cleared">Clau d\'API eliminada</string>
+    <string name="btn_clear_api_key">Elimina la clau desada</string>
+    <string name="api_key_status_present">Hi ha una clau desada (xifrada). No es torna a mostrar mai a la pantalla.</string>
+    <string name="api_key_status_absent">Encara no hi ha cap clau desada</string>
+
+    <string name="label_model">Model de Gemini</string>
+    <string name="hint_model">p. ex. gemini-3.5-flash-lite</string>
+    <string name="model_suggestions_label">Suggeriments (toca per utilitzar-los):</string>
+
+    <string name="btn_test_api">Prova la connexió amb l\'API</string>
+    <string name="test_api_running">Provant…</string>
+    <string name="test_api_success">Èxit — Gemini ha respost correctament.</string>
+    <string name="test_api_failure">Ha fallat: %1$s</string>
+
+    <string name="section_allowed_apps">Aplicacions permeses</string>
+    <string name="allowed_apps_description">TextGate AI està activat per defecte només per a aplicacions habituals de xarxes socials i missatgeria — per exemple WhatsApp, Messenger, Instagram, Telegram, Signal, Discord, Snapchat, TikTok, X, Threads, LinkedIn i SMS/Missatges — de manera que no cal configurar res. Aquesta llista regeix tant els disparadors de traducció escrits (?en, ?de, ?fr, etc.) com la bombolla de traducció en mantenir premut. Les aplicacions conegudes de gestió de contrasenyes, banca, autenticació i seguretat del sistema no es mostren mai aquí i no es poden activar; els moneders i les plataformes d\'intercanvi de criptomonedes es bloquegen de la mateixa manera.</string>
+    <string name="allowed_apps_advanced_hint">Vols una aplicació diferent, o eliminar-ne una de les predeterminades? Tria les aplicacions manualment.</string>
+    <string name="btn_show_advanced_apps">Mostra opcions avançades: tria les aplicacions manualment</string>
+    <string name="btn_hide_advanced_apps">Amaga les opcions avançades</string>
+    <string name="allowed_apps_empty">No s\'ha trobat cap aplicació instal·lada amb icona de llançador.</string>
+    <string name="allowed_apps_loading">Carregant les aplicacions instal·lades…</string>
+
+    <string name="section_privacy">Privadesa</string>
+    <string name="privacy_notice_headline">El text només s\'envia a Google Gemini quan escrius explícitament un disparador de traducció (com ara ?en o ?de), o mantens premut un missatge.</string>
+    <string name="privacy_notice_body">TextGate AI no recull dades analítiques, informes d\'errors ni dades d\'ús de cap mena, i no conté cap SDK de tercers. Les úniques sol·licituds de xarxa que fa aquesta aplicació són les sol·licituds de traducció que tu mateix inicies, enviades directament a l\'API de Gemini de Google mitjançant HTTPS. La teva clau d\'API es xifra al dispositiu amb Android Keystore i queda exclosa de les còpies de seguretat. Els camps de contrasenya i altres entrades sensibles no es llegeixen mai, en cap circumstància. Toca \"Política de privadesa completa\" a continuació per a tots els detalls.</string>
+    <string name="btn_full_privacy_policy">Política de privadesa completa</string>
+    <string name="btn_close_dialog">Tanca</string>
+    <string name="privacy_full_policy_title">Política de privadesa completa</string>
+    <string name="privacy_full_policy_body">Què llegeix TextGate AI:\n• El camp de text on estàs escrivint — només per comprovar si hi ha un disparador de traducció exacte (com ara \"?en\" o \"?de\") al final.\n• Un missatge o comentari que mantens premut — només en aplicacions que has activat a \"Aplicacions permeses\".\n\nQuè no llegeix mai: camps de contrasenya, entrada de PIN, o qualsevol camp que l\'aplicació reconegui com a sensible — sense excepcions, en cap aplicació.\n\nQuè s\'envia, i on: només el text que has activat, enviat una vegada, directament per HTTPS a l\'API de Gemini de Google mitjançant la clau que tu mateix proporciones. No s\'envia mai res llevat que escriguis un disparador o mantinguis premut un missatge tu mateix.\n\nQuè s\'emmagatzema al teu telèfon: la teva clau d\'API de Gemini, xifrada amb Android Keystore (la mateixa seguretat basada en maquinari que utilitza Android per a les credencials de la pantalla de bloqueig), i la teva configuració senzilla (quines aplicacions estan permeses, l\'idioma triat, el model de Gemini triat). Res d\'això s\'inclou a les còpies de seguretat del telèfon.\n\nQuè NO fa TextGate AI: cap analítica, cap informe d\'errors, cap seguiment d\'ús, cap publicitat, cap biblioteca de tercers de cap mena, cap historial del que has traduït, ni lectura de cap aplicació que no hagis permès explícitament.\n\nTu tens el control: desactiva tota la funció en qualsevol moment amb l\'interruptor principal, i afegeix o elimina qualsevol aplicació de la llista permesa quan vulguis.</string>
+
+    <string name="section_about">Quant a</string>
+    <string name="about_version_label">Versió</string>
+
+    <!-- Toasts / runtime messages (never include user text) -->
+    <string name="toast_sending_to_gemini">Enviant el text seleccionat a Gemini</string>
+    <string name="toast_translation_failed">La traducció ha fallat — el text original no ha canviat</string>
+    <string name="toast_field_changed_aborted">El camp ha canviat abans que arribés el resultat — no s\'ha substituït res</string>
+    <string name="toast_service_disabled">La transformació amb IA està desactivada a Configuració</string>
+
+    <!-- Long-press translation bubble -->
+    <string name="bubble_loading">Traduint…</string>
+    <string name="bubble_close_content_description">Tanca</string>
+
+    <!-- Errors -->
+    <string name="error_no_api_key">Introdueix i desa primer una clau d\'API de Gemini</string>
+    <string name="error_text_too_long">El text és massa llarg per enviar-lo automàticament (límit: %1$d caràcters)</string>
+    <string name="error_generic">S\'ha produït un error. Torna-ho a provar.</string>
+    <string name="error_timeout">La sol·licitud ha superat el temps d\'espera.</string>
+    <string name="error_network">No s\'ha pogut connectar amb Gemini. Comprova la teva connexió.</string>
+    <string name="error_http">Gemini ha retornat un error (codi %1$d).</string>
+    <string name="error_empty_response">Gemini ha retornat una resposta buida.</string>
+</resources>

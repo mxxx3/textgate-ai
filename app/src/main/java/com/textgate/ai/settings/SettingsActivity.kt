@@ -2,7 +2,9 @@ package com.textgate.ai.settings
 
 import android.accessibilityservice.AccessibilityServiceInfo
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -12,15 +14,20 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.WindowInsets
 import android.view.accessibility.AccessibilityManager
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import android.widget.CheckBox
 import android.widget.CompoundButton
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import com.textgate.ai.BuildConfig
+import com.textgate.ai.LocaleHelper
 import com.textgate.ai.R
 import com.textgate.ai.accessibility.TextGateAccessibilityService
 import com.textgate.ai.databinding.ActivitySettingsBinding
+import com.textgate.ai.model.Languages
+import com.textgate.ai.model.SupportedLanguage
 import com.textgate.ai.model.TranslationPrompts
 import com.textgate.ai.network.GeminiClient
 import com.textgate.ai.security.AppSettingsStore
@@ -59,6 +66,25 @@ class SettingsActivity : Activity() {
         "gemini-2.5-flash",
         "gemini-3.7-flash"
     )
+
+    companion object {
+        /** Google AI Studio's "API keys" page — the exact place a
+         * first-time user needs to land to create a free key, confirmed
+         * against ai.google.dev/gemini-api/docs/api-key. */
+        private const val GEMINI_API_KEY_URL = "https://aistudio.google.com/apikey"
+    }
+
+    /**
+     * Applies the user's chosen "App interface language" (see
+     * [LocaleHelper]) to this Activity's own Context — an Activity can be
+     * individually re-created by the system with a fresh Configuration
+     * (e.g. after rotation), so relying on the override applied once in
+     * [com.textgate.ai.TextGateApplication] alone is not reliable here on
+     * every Android version.
+     */
+    override fun attachBaseContext(newBase: Context) {
+        super.attachBaseContext(LocaleHelper.applyOverride(newBase))
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -104,12 +130,13 @@ class SettingsActivity : Activity() {
         backgroundExecutor = Executors.newSingleThreadExecutor()
 
         setupMasterSwitch()
-        setupBubbleLanguageSection()
+        setupLanguageSection()
         setupAccessibilitySection()
         setupApiKeySection()
         setupModelSection()
         setupTestApiButton()
         setupAllowedAppsSection()
+        setupPrivacySection()
         setupAboutSection()
     }
 
@@ -173,28 +200,66 @@ class SettingsActivity : Activity() {
     }
 
     // ---------------------------------------------------------------
-    // Long-press bubble translation: default target language
+    // Language: one collapsible list driving both the long-press bubble's
+    // default target language AND the app's own interface language
     // ---------------------------------------------------------------
 
     /**
-     * The "translate a received message into ___" default used by the
-     * long-press bubble feature (see BubbleTranslateGate /
-     * TextGateAccessibilityService.startBubbleTranslation /
-     * TranslationBubble). Deliberately a separate, single persistent
-     * choice — unlike the typed ?en/?pl triggers, a long-press carries no
-     * per-use way to specify a language, so the user picks one default
-     * here and it applies to every bubble translation until changed.
+     * As of v1.4.0 this single dropdown (a platform [android.widget.Spinner]
+     * — the "zwinięta lista", collapsed list, the user asked for) replaces
+     * the old two-radio-button English/Polish picker and covers all 40
+     * languages in [Languages.ALL]. Each entry is shown by
+     * [SupportedLanguage.nativeName] (that language's own name, in its own
+     * script — exactly like every native OS language picker), never
+     * translated, so it reads correctly to its own speaker regardless of
+     * what the app's current interface language happens to be.
+     *
+     * Picking a language here changes BOTH settings at once — the
+     * long-press bubble's default translation target
+     * ([AppSettingsStore.bubbleTargetLanguage]) and the app's own interface
+     * language ([AppSettingsStore.appInterfaceLanguage]) — per the user's
+     * explicit answer ("Jedno i drugie", both) when this was clarified
+     * during the v1.4.0 rebuild: one list, one choice, the whole app
+     * follows. [recreate] is called immediately afterward so every string
+     * on screen updates without the user needing to leave and reopen
+     * Settings.
      */
-    private fun setupBubbleLanguageSection() {
-        when (settingsStore.bubbleTargetLanguage) {
-            TriggerDetector.Target.ENGLISH -> binding.radioBubbleEnglish.isChecked = true
-            TriggerDetector.Target.POLISH -> binding.radioBubblePolish.isChecked = true
-        }
-        binding.radioGroupBubbleLanguage.setOnCheckedChangeListener { _, checkedId ->
-            settingsStore.bubbleTargetLanguage = if (checkedId == R.id.radioBubbleEnglish) {
-                TriggerDetector.Target.ENGLISH
-            } else {
-                TriggerDetector.Target.POLISH
+    private fun setupLanguageSection() {
+        val languages = Languages.ALL
+        val adapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_spinner_item,
+            languages.map { it.nativeName }
+        )
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        binding.spinnerAppLanguage.adapter = adapter
+
+        val currentCode = settingsStore.bubbleTargetLanguage.code
+        val currentIndex = languages.indexOfFirst { it.code == currentCode }.let { if (it >= 0) it else 0 }
+        binding.spinnerAppLanguage.setSelection(currentIndex, false)
+
+        // The listener is attached only after the initial layout pass
+        // (via post{}) rather than right away — Spinner fires
+        // onItemSelected for the programmatic setSelection() call above
+        // too, and attaching the listener beforehand would immediately
+        // re-save the already-current language and call recreate() on
+        // every Settings screen open, which is both wasteful and (on some
+        // OEM builds) visibly janky.
+        binding.spinnerAppLanguage.post {
+            binding.spinnerAppLanguage.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                    val selected = languages.getOrNull(position) ?: return
+                    if (selected.code == settingsStore.bubbleTargetLanguage.code &&
+                        selected.code == settingsStore.appInterfaceLanguage
+                    ) {
+                        return
+                    }
+                    settingsStore.bubbleTargetLanguage = TriggerDetector.Target(selected.code)
+                    settingsStore.appInterfaceLanguage = selected.code
+                    recreate()
+                }
+
+                override fun onNothingSelected(parent: AdapterView<*>?) = Unit
             }
         }
     }
@@ -244,6 +309,25 @@ class SettingsActivity : Activity() {
     private fun setupApiKeySection() {
         refreshApiKeyStatus()
 
+        // Opens Google AI Studio's "Create API key" page directly in the
+        // browser — the exact page a first-time user needs, so they are
+        // never left guessing which of Google's many developer sites is
+        // the right one. Wrapped in try/catch like every other
+        // startActivity() call in this screen: if no browser can handle
+        // the intent (unlikely, but not impossible on a stripped-down
+        // device), fail with a toast rather than crash.
+        binding.buttonGetApiKey.setOnClickListener {
+            try {
+                startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(GEMINI_API_KEY_URL)))
+            } catch (_: Exception) {
+                Toast.makeText(this, R.string.error_generic, Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        binding.textToggleApiKeyInstructions.setOnClickListener {
+            toggleApiKeyInstructionsVisibility()
+        }
+
         binding.buttonSaveApiKey.setOnClickListener {
             val chars = CharArray(binding.editApiKey.text.length)
             binding.editApiKey.text.getChars(0, chars.size, chars, 0)
@@ -269,6 +353,18 @@ class SettingsActivity : Activity() {
     private fun refreshApiKeyStatus() {
         binding.textApiKeyStatus.text = getString(
             if (apiKeyStore.hasApiKey()) R.string.api_key_status_present else R.string.api_key_status_absent
+        )
+    }
+
+    /** Same expand/collapse pattern as [toggleAdvancedAppsVisibility] below,
+     * reused here for the "how do I get an API key" step-by-step guide —
+     * collapsed by default so the screen isn't overwhelming for anyone who
+     * already knows what to do. */
+    private fun toggleApiKeyInstructionsVisibility() {
+        val nowExpanded = binding.textApiKeyInstructionsBody.visibility != View.VISIBLE
+        binding.textApiKeyInstructionsBody.visibility = if (nowExpanded) View.VISIBLE else View.GONE
+        binding.textToggleApiKeyInstructions.text = getString(
+            if (nowExpanded) R.string.btn_hide_api_key_instructions else R.string.btn_show_api_key_instructions
         )
     }
 
@@ -428,6 +524,30 @@ class SettingsActivity : Activity() {
             row.setOnClickListener { checkbox.isChecked = !checkbox.isChecked }
 
             binding.layoutAppList.addView(row)
+        }
+    }
+
+    // ---------------------------------------------------------------
+    // Privacy
+    // ---------------------------------------------------------------
+
+    /**
+     * The short, always-visible privacy_notice_body text used to end with
+     * "see the README for the exact rules" — but README.md is a repo-only
+     * developer document, never packaged into the APK, so a real user
+     * tapping that had nowhere to go. This button replaces that dead
+     * pointer with an actual, in-app, plain-language full explanation
+     * (privacy_full_policy_body), shown in a simple platform AlertDialog —
+     * no new dependency needed, consistent with this app's zero-production-
+     * dependency principle (see build.gradle.kts).
+     */
+    private fun setupPrivacySection() {
+        binding.buttonFullPrivacyPolicy.setOnClickListener {
+            android.app.AlertDialog.Builder(this)
+                .setTitle(R.string.privacy_full_policy_title)
+                .setMessage(R.string.privacy_full_policy_body)
+                .setPositiveButton(R.string.btn_close_dialog, null)
+                .show()
         }
     }
 

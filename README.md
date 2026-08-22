@@ -456,6 +456,11 @@ in this codebase (verified by the same grep).
 * Removing the key (Settings → "Remove saved key") deletes the
   ciphertext **and** destroys the Keystore wrapping key itself, so any
   ciphertext that somehow survived is permanently undecryptable.
+* As of v1.3.0, Settings also has a **"Get a free API key"** button right
+  above the key field, which opens Google AI Studio's API-keys page
+  (`aistudio.google.com/apikey`) directly in the browser, plus a
+  collapsible step-by-step guide for a first-time user — see "Getting a
+  Gemini API key" in §12.
 
 **Known, documented limitation:** once decrypted into a Kotlin `String`
 for the outgoing HTTPS request, that String cannot be forcibly zeroed —
@@ -760,10 +765,14 @@ the log or download the artifacts.
 
 ### Getting a Gemini API key
 
-Create one at Google AI Studio (`aistudio.google.com`) → "Get API key."
-Paste it into TextGate AI's Settings screen — it is encrypted on-device
-immediately (see §6) and never leaves the device except inside the
-HTTPS requests you trigger yourself.
+As of v1.3.0, Settings has a **"Get a free API key"** button that opens
+`aistudio.google.com/apikey` directly in the browser, plus a collapsible
+**"How do I do this? (step-by-step guide)"** section with plain-language
+instructions for a first-time user — no need to know in advance which of
+Google's developer sites is the right one. Paste the resulting key into
+TextGate AI's Settings screen — it is encrypted on-device immediately
+(see §6) and never leaves the device except inside the HTTPS requests you
+trigger yourself.
 
 ---
 
@@ -791,8 +800,9 @@ Use this to verify the built APK yourself:
 
 **Included, complete, and ready to open in Android Studio:** every Gradle
 file, the manifest, all XML security configs, all Kotlin source, all
-layouts/strings (English and Polish), the ProGuard rules, and 87 unit
-tests plus one instrumented test.
+layouts and strings (as of v1.4.0: 40 languages — see §14 "Multi-language
+rebuild"), the ProGuard rules, and 87 unit tests plus one instrumented
+test.
 
 **Build verification history.** The project was drafted in an environment
 with no Android SDK and no network path to Google's Maven repository, so
@@ -1598,6 +1608,141 @@ in Telegram, WhatsApp, and any other app whose UI dispatches
 `TYPE_VIEW_LONG_CLICKED` for a real physical long-press; the typed
 `?en`/`?pl` trigger pathway is entirely unaffected by any of this, in
 every app, since it never depended on long-press detection at all.
+
+**Onboarding and privacy-text fixes (v1.3.0), unrelated to the SMS/X
+investigation above.** Two separate, smaller issues were fixed together
+in this release, both about making Settings clearer for a first-time
+user rather than about the accessibility-event architecture discussed
+throughout this section:
+
+* **"Get a free API key" button + step-by-step guide.** Previously,
+  getting a Gemini API key required already knowing to go to
+  `aistudio.google.com` — now Settings has a button that opens the
+  correct page (`aistudio.google.com/apikey`, confirmed against Google's
+  own `ai.google.dev/gemini-api/docs/api-key` documentation) directly in
+  the browser, plus a collapsible plain-language guide covering every
+  step from "sign in with your Google account" to "paste the key back
+  into this app." See §6 and §12 "Getting a Gemini API key."
+* **Privacy section no longer points to a file the app doesn't ship.**
+  `privacy_notice_body` used to end with "see the README for the exact
+  rules this app follows" — but `README.md` is a repo-only developer
+  document, never packaged into the APK, so a real end user had nowhere
+  to actually go. It's replaced with a "Full privacy policy" button that
+  opens an in-app dialog with the complete, plain-language explanation
+  (what's read, what's never read, what's sent and where, what's stored,
+  what TextGate AI deliberately does not do) — no external reference, no
+  new dependency (a platform `AlertDialog`, consistent with §4's
+  zero-production-dependency principle).
+
+**Multi-language rebuild (v1.4.0), unrelated to the SMS/X investigation
+above.** Before publishing to Google Play, the app's owner asked for a
+much larger set of translation languages, for the typed-trigger picker,
+the long-press bubble's target language, and the app's own interface to
+all be rebuilt around one shared list rather than the original hardcoded
+English/Polish pair. Requested and delivered as three explicit design
+answers: the typed triggers AND the bubble's language list both expand
+together ("Dymek + nowe triggery"); picking a language changes BOTH the
+default translation target AND the app's own interface language ("Jedno
+i drugie" — one list, one choice, the whole app follows); and the exact
+40-language list was supplied by the app's owner directly, using
+Android's own legacy resource-qualifier code spelling in a few places
+(`in` for Indonesian, `iw` for Hebrew, `nb` for Norwegian Bokmål, `pt-rBR`
+/ `zh-rCN` for the region-qualified Brazilian Portuguese / Simplified
+Chinese variants) rather than the more modern ISO codes those languages
+are otherwise known by, since those codes now serve triple duty as the
+typed-trigger suffix, the persisted Settings value, and the Android
+`values-<code>` resource folder suffix, all at once.
+
+* **`Languages.kt` (new) — single source of truth.** A `SupportedLanguage`
+  data class (`code`, `nativeName`, `englishName`, `localeLanguageTag`)
+  plus `Languages.ALL` (the full 40-entry list), `Languages.byCode()`, and
+  `Languages.DEFAULT` (Polish, matching the app's original default).
+  Every other language-aware piece of the app — the trigger patterns, the
+  translation prompt, the Settings picker, the locale override — reads
+  from this one list rather than maintaining its own copy.
+* **`TriggerDetector.Target` redesigned.** Went from a closed, 2-value
+  `enum class` to a `@JvmInline value class Target(val code: String)`,
+  so any of the 40 `Languages.ALL` codes can be a typed-trigger target
+  (`?en`, `?de`, `?pt-rBR`, and so on for every code) without the type
+  itself needing to change again for a future language addition.
+  `Target.ENGLISH` and `Target.POLISH` are kept as companion-object
+  constants purely for source compatibility with code and tests written
+  before this rebuild — they are ordinary `Target("en")`/`Target("pl")`
+  values, nothing more special than any other language's `Target`, and
+  every existing unit test (`TriggerDetectorTest.kt`, `EventGateTest.kt`)
+  continues to compile and pass unchanged, since value-class equality
+  compares by the wrapped `code` string. `TRIGGER_PATTERNS` is now
+  generated from `Languages.ALL` (one regex per language) instead of two
+  hand-written patterns, preserving every existing tolerance rule
+  (optional single space after `?`, trailing spaces, case-insensitivity,
+  the `\z` absolute-end anchor) for all 40 languages — including
+  hyphenated codes like `pt-rBR`, which are literal-escaped so they can
+  never be ambiguous with the plain `pt` trigger.
+* **`TranslationPrompts.kt` made generic.** The two hardcoded
+  `EN_TRANSLATION_SYSTEM_PROMPT`/`PL_TRANSLATION_SYSTEM_PROMPT` constants
+  (kept only as compatibility wrappers, e.g. for the "Test API connection"
+  button) are replaced by `systemPromptFor(target)`, which resolves the
+  target's English display name via `Languages.byCode(target.code)` and
+  builds the same auto-detect-source / preserve-tone / idiomatic /
+  no-commentary prompt template for any of the 40 languages.
+* **`LocaleHelper.kt` (new) — the "whole app" language override.** This
+  app has zero third-party dependencies (§4), so the usual AndroidX
+  shortcut (`AppCompatDelegate.setApplicationLocales`) isn't available;
+  this is the same effect hand-rolled with only platform APIs, using the
+  standard `attachBaseContext` + `createConfigurationContext` pattern.
+  Applied in three places, each independently, since a Service or an
+  Activity can be given its own fresh Configuration by the system without
+  necessarily inheriting an override applied only once at the
+  `Application` level: `TextGateApplication.attachBaseContext`,
+  `SettingsActivity.attachBaseContext`, and
+  `TextGateAccessibilityService.attachBaseContext` (covering that
+  service's own toast/notification text). A `null`
+  `appInterfaceLanguage` setting (the default, until the user picks a
+  language) means "follow the device's own system language," identical
+  to this app's original, pre-1.4.0 behavior.
+* **Settings screen: one collapsible list, not two radio buttons.** The
+  old two-`RadioButton` English/Polish picker is replaced by a single
+  `Spinner` (a zero-dependency platform widget — the "zwinięta lista,"
+  collapsed list, that was asked for) listing all 40 `Languages.ALL`
+  entries by `nativeName` (each language's own name, in its own script,
+  never translated — exactly like every native OS language picker, so a
+  Polish speaker and a Japanese speaker both see "日本語" for Japanese,
+  not a translation of the word). Picking a language sets BOTH
+  `AppSettingsStore.bubbleTargetLanguage` and
+  `AppSettingsStore.appInterfaceLanguage` in one action and immediately
+  calls `recreate()`, per the "Jedno i drugie" answer above.
+* **`AppSettingsStore.kt`: `bubbleTargetLanguage` now stores the raw
+  language code directly** (validated against `Languages.byCode()`,
+  falling back to `Languages.DEFAULT` if unrecognized) instead of a
+  closed `"EN"`/`"PL"` string pair — and since `Languages.byCode()` does
+  a case-insensitive fallback lookup, an existing install upgrading from
+  1.3.0 with `"EN"` or `"PL"` already stored keeps working with no
+  migration code needed. A new, independent `appInterfaceLanguage: String?`
+  setting was added alongside it.
+* **38 new translated `values-<code>/strings.xml` locale files**, one per
+  `Languages.ALL` entry other than `en` (the existing default `values/`
+  folder) and `pl` (the existing `values-pl/`). Generated by having every
+  one of this app's 61 Settings-screen strings translated per language,
+  with the app name, the "Gemini"/"Google AI Studio"/"Android Keystore"
+  product names, the literal trigger examples, the `%1$s`/`%1$d`
+  placeholders, and third-party app/brand names (WhatsApp, Instagram,
+  etc.) deliberately left untranslated in every locale, and verified
+  afterward — every one of the 38 files was checked for well-formed XML,
+  for containing exactly the same 61 string keys in the same order as the
+  English source, and for retaining every untranslatable token intact.
+  **Known, accepted limitation:** this app does not declare
+  `android:supportsRtl`, so the three right-to-left languages on the list
+  (Arabic, Persian, Hebrew) get correctly translated text but the
+  Settings screen's own layout does not mirror to a right-to-left flow —
+  a cosmetic gap, not a functional one, left for a future release rather
+  than blocking this one.
+* **Two remaining user-facing strings were also generalized while this
+  work was in progress**, since they still hardcoded "?en"/"?pl" and
+  would have read as inaccurate once 40 triggers existed:
+  `accessibility_service_description` (the system-level Accessibility
+  Settings description Android shows the user) and the master-switch /
+  privacy-notice copy — all now describe "a translation trigger like ?en
+  or ?de" generically instead of naming only the original two.
 
 ## 15. Verified build result (GitHub Actions)
 

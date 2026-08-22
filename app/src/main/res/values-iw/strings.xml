@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">TextGate AI</string>
+
+    <string name="accessibility_service_description">TextGate AI קורא טקסט בשתי דרכים בלבד, שתיהן מוגבלות באופן קפדני. הראשונה: שדה הטקסט שבו אתם עורכים כרגע, ורק כדי לחפש סיומת הפעלה (trigger) מדויקת אחת (כמו \"?en\" או \"?de\" — אחת לכל שפה, ראו את הרשימה המלאה בהגדרות) בסוף מה שהקלדתם. השנייה: הודעה או תגובה שעליה אתם לוחצים לחיצה ארוכה, כדי להציג תרגום צף לשפת ברירת המחדל שבחרתם בהגדרות. שני המסלולים האלה אף פעם לא קוראים שדות סיסמה, אף פעם לא פועלים באפליקציות שלא אישרתם במפורש, ואף פעם לא שומרים היסטוריה של דבר שנקרא. כאשר מזוהה טריגר, או כאשר אתם לוחצים לחיצה ארוכה על הודעה, באפליקציה מורשית, הטקסט הרלוונטי נשלח דרך HTTPS אל ה-API של Gemini שהגדרתם, ומתורגם. תוצאת הטריגר המוקלד מחליפה את תוכן השדה; תוצאת הלחיצה הארוכה מוצגת רק בבועה צפה זמנית ואף פעם לא נוגעת באפליקציה המקורית. שום דבר לא נשלח לשום מקום אלא אם כן הקלדתם אחד מהטריגרים המדויקים האלה או לחצתם לחיצה ארוכה על הודעה באפליקציה שמופעלת בהגדרות של TextGate AI.</string>
+
+    <!-- Settings screen -->
+    <string name="settings_title">TextGate AI</string>
+
+    <string name="section_master_switch">טרנספורמציית בינה מלאכותית</string>
+    <string name="master_switch_label">הפעלת תרגום באמצעות טריגר מוקלד</string>
+    <string name="master_switch_description">מתג ראשי. הקלידו טריגר כמו ?en או ?de בסוף הודעה כדי לתרגם אותה לשפה הזו (ראו את הרשימה המלאה למטה). המתג הזה שולט גם בבועת התרגום בלחיצה ארוכה. כשהוא כבוי, TextGate AI אף פעם לא קורא שום שדה או הודעה ואף פעם לא שולח שום בקשת רשת, ללא קשר לכל הגדרה אחרת.</string>
+
+    <string name="bubble_language_label">שפת האפליקציה והתרגום</string>
+    <string name="bubble_language_description">בחרו כאן את השפה שלכם פעם אחת. היא קובעת גם את שפת ברירת המחדל לבועת התרגום בלחיצה ארוכה וגם את השפה שבה מוצגים המסכים של TextGate AI עצמה — שתיהן משתנות יחד.</string>
+
+    <string name="section_accessibility_status">שירות הנגישות</string>
+    <string name="accessibility_status_enabled">מופעל</string>
+    <string name="accessibility_status_disabled">לא מופעל — TextGate AI לא יכולה לעשות דבר עד שתפעילו אותה</string>
+    <string name="btn_open_accessibility_settings">פתיחת הגדרות הנגישות</string>
+
+    <string name="section_gemini_api">Gemini API</string>
+    <string name="label_api_key">מפתח API של Gemini</string>
+    <string name="hint_api_key">הדביקו כאן את מפתח ה-API של Gemini שלכם</string>
+    <string name="btn_get_api_key">קבלת מפתח API בחינם</string>
+    <string name="btn_show_api_key_instructions">איך עושים את זה? (מדריך שלב-אחר-שלב)</string>
+    <string name="btn_hide_api_key_instructions">הסתרת המדריך</string>
+    <string name="api_key_instructions_body">1. הקישו על \"קבלת מפתח API בחינם\" למעלה — פעולה זו פותחת את Google AI Studio בדפדפן שלכם.\n2. התחברו עם חשבון Google שלכם (זה שבו אתם משתמשים כל יום).\n3. אשרו את תנאי השימוש אם תתבקשו לכך.\n4. הקישו על \"Create API key\" בעמוד.\n5. העתיקו את המפתח שמופיע — מחרוזת ארוכה של אותיות ומספרים.\n6. חזרו לאפליקציה הזו, הדביקו את המפתח בשדה שלמטה, והקישו על \"שמירת מפתח\".\n\nהמפתח חינמי במסגרת המגבלות של רמת החינם של Google ואף פעם לא יוצא מהטלפון שלכם אלא כדי לתקשר ישירות עם Gemini — הוא מוצפן ונשמר רק על המכשיר הזה.</string>
+    <string name="btn_save_api_key">שמירת מפתח (מוצפן)</string>
+    <string name="api_key_saved">מפתח ה-API נשמר, מוצפן באמצעות Android Keystore</string>
+    <string name="api_key_cleared">מפתח ה-API הוסר</string>
+    <string name="btn_clear_api_key">הסרת המפתח השמור</string>
+    <string name="api_key_status_present">מפתח שמור (מוצפן). הוא לא יוצג שוב על המסך.</string>
+    <string name="api_key_status_absent">עדיין לא נשמר מפתח</string>
+
+    <string name="label_model">מודל Gemini</string>
+    <string name="hint_model">לדוגמה: gemini-3.5-flash-lite</string>
+    <string name="model_suggestions_label">הצעות (הקישו כדי להשתמש):</string>
+
+    <string name="btn_test_api">בדיקת חיבור ה-API</string>
+    <string name="test_api_running">בודק…</string>
+    <string name="test_api_success">הצלחה — Gemini הגיב כראוי.</string>
+    <string name="test_api_failure">נכשל: %1$s</string>
+
+    <string name="section_allowed_apps">אפליקציות מורשות</string>
+    <string name="allowed_apps_description">TextGate AI מופעלת כברירת מחדל רק עבור אפליקציות רשתות חברתיות והודעות נפוצות — לדוגמה WhatsApp, Messenger, Instagram, Telegram, Signal, Discord, Snapchat, TikTok, X, Threads, LinkedIn ו-SMS/הודעות — כך שאין מה להגדיר. הרשימה הזו שולטת גם בטריגרים של תרגום מוקלד (?en, ?de, ?fr וכן הלאה) וגם בבועת התרגום בלחיצה ארוכה. מנהלי סיסמאות ידועים, אפליקציות בנקאות, אימות ואבטחת מערכת ידועות אף פעם לא מוצגות כאן ולעולם לא ניתן להפעיל אותן; ארנקים ובורסות של מטבעות קריפטוגרפיים חסומים באותו אופן.</string>
+    <string name="allowed_apps_advanced_hint">רוצים אפליקציה אחרת, או להסיר אחת מברירות המחדל? בחרו אפליקציות ידנית במקום זאת.</string>
+    <string name="btn_show_advanced_apps">הצגת אפשרויות מתקדמות: בחירת אפליקציות ידנית</string>
+    <string name="btn_hide_advanced_apps">הסתרת אפשרויות מתקדמות</string>
+    <string name="allowed_apps_empty">לא נמצאו אפליקציות מותקנות עם סמל הפעלה.</string>
+    <string name="allowed_apps_loading">טוען אפליקציות מותקנות…</string>
+
+    <string name="section_privacy">פרטיות</string>
+    <string name="privacy_notice_headline">טקסט נשלח אל Google Gemini רק כאשר אתם מקלידים במפורש טריגר תרגום (כמו ?en או ?de), או לוחצים לחיצה ארוכה על הודעה.</string>
+    <string name="privacy_notice_body">TextGate AI לא אוספת נתוני שימוש, דוחות קריסה או כל נתון אחר, ואינה מכילה ערכות פיתוח (SDK) של צד שלישי. בקשות הרשת היחידות שהאפליקציה הזו אי פעם שולחת הן בקשות התרגום שאתם יוזמים בעצמכם, הנשלחות ישירות אל ה-API של Google Gemini דרך HTTPS. מפתח ה-API שלכם מוצפן במכשיר באמצעות Android Keystore ואינו כלול בגיבויים. שדות סיסמה וקלטים רגישים אחרים אף פעם לא נקראים, בשום מצב. הקישו על \"מדיניות פרטיות מלאה\" למטה לפרטים המלאים.</string>
+    <string name="btn_full_privacy_policy">מדיניות פרטיות מלאה</string>
+    <string name="btn_close_dialog">סגירה</string>
+    <string name="privacy_full_policy_title">מדיניות פרטיות מלאה</string>
+    <string name="privacy_full_policy_body">מה TextGate AI קוראת:\n• שדה הטקסט שבו אתם מקלידים כרגע — רק כדי לבדוק אם יש טריגר תרגום מדויק אחד (כמו \"?en\" או \"?de\") בסוף.\n• הודעה או תגובה שעליה אתם לוחצים לחיצה ארוכה — רק באפליקציות שהפעלתם ב\"אפליקציות מורשות\".\n\nמה שהיא אף פעם לא קוראת, בשום מצב: שדות סיסמה, הזנת קוד PIN, או כל שדה שהאפליקציה מזהה כרגיש — ללא יוצא מן הכלל, בכל אפליקציה.\n\nמה נשלח, ולאן: רק הטקסט שהפעלתם באמצעות טריגר, נשלח פעם אחת, ישירות דרך HTTPS אל ה-API של Google Gemini, באמצעות המפתח שאתם מספקים בעצמכם. שום דבר לעולם לא נשלח אלא אם כן אתם עצמכם מקלידים טריגר או לוחצים לחיצה ארוכה על הודעה.\n\nמה נשמר בטלפון שלכם: מפתח ה-API של Gemini שלכם, מוצפן באמצעות Android Keystore (אותה אבטחה מבוססת חומרה שבה Android משתמש עבור פרטי מסך הנעילה שלכם), וההגדרות הפשוטות שלכם (אילו אפליקציות מורשות, השפה שבחרתם, מודל ה-Gemini שבחרתם). אף אחד מאלה אינו כלול בגיבויי הטלפון.\n\nמה TextGate AI לא עושה: ללא איסוף נתוני שימוש, ללא דיווח על קריסות, ללא מעקב שימוש, ללא פרסום, ללא ספריות צד שלישי מכל סוג, ללא היסטוריה של דברים שתרגמתם, וללא קריאה של אפליקציה שלא אישרתם במפורש.\n\nאתם נשארים בשליטה: כבו את כל התכונה בכל עת באמצעות המתג הראשי, והוסיפו או הסירו כל אפליקציה מהרשימה המורשית מתי שתרצו.</string>
+
+    <string name="section_about">אודות</string>
+    <string name="about_version_label">גרסה</string>
+
+    <!-- Toasts / runtime messages (never include user text) -->
+    <string name="toast_sending_to_gemini">שולח את הטקסט הנבחר אל Gemini</string>
+    <string name="toast_translation_failed">התרגום נכשל — הטקסט המקורי נשאר ללא שינוי</string>
+    <string name="toast_field_changed_aborted">השדה השתנה לפני שהתקבלה התוצאה — שום דבר לא הוחלף</string>
+    <string name="toast_service_disabled">טרנספורמציית הבינה המלאכותית כבויה בהגדרות</string>
+
+    <!-- Long-press translation bubble -->
+    <string name="bubble_loading">מתרגם…</string>
+    <string name="bubble_close_content_description">סגירה</string>
+
+    <!-- Errors -->
+    <string name="error_no_api_key">הזינו ושמרו תחילה מפתח API של Gemini</string>
+    <string name="error_text_too_long">הטקסט ארוך מדי לשליחה אוטומטית (מגבלה: %1$d תווים)</string>
+    <string name="error_generic">משהו השתבש. נסו שוב.</string>
+    <string name="error_timeout">הבקשה חרגה מזמן ההמתנה.</string>
+    <string name="error_network">לא ניתן להתחבר אל Gemini. בדקו את החיבור שלכם.</string>
+    <string name="error_http">Gemini החזירה שגיאה (קוד %1$d).</string>
+    <string name="error_empty_response">Gemini החזירה תגובה ריקה.</string>
+</resources>

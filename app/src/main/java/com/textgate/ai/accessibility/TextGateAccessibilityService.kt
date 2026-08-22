@@ -1,6 +1,7 @@
 package com.textgate.ai.accessibility
 
 import android.accessibilityservice.AccessibilityService
+import android.content.Context
 import android.graphics.Rect
 import android.os.Bundle
 import android.os.Handler
@@ -8,6 +9,7 @@ import android.os.Looper
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
 import android.widget.Toast
+import com.textgate.ai.LocaleHelper
 import com.textgate.ai.R
 import com.textgate.ai.model.TranslationPrompts
 import com.textgate.ai.network.GeminiClient
@@ -117,6 +119,20 @@ class TextGateAccessibilityService : AccessibilityService() {
     private var pendingNode: AccessibilityNodeInfo? = null
 
     private var networkExecutor: ExecutorService? = null
+
+    /**
+     * Applies the user's chosen "App interface language" (see
+     * [LocaleHelper]) to this service's own Context as well — an
+     * AccessibilityService is given its own Context by the system,
+     * separate from the Application's, so it does not reliably inherit an
+     * override applied only in [com.textgate.ai.TextGateApplication] on
+     * every Android version. This is what the toast/notification text this
+     * service shows (e.g. [R.string.toast_sending_to_gemini]) is drawn
+     * through.
+     */
+    override fun attachBaseContext(newBase: Context) {
+        super.attachBaseContext(LocaleHelper.applyOverride(newBase))
+    }
 
     override fun onServiceConnected() {
         super.onServiceConnected()
@@ -285,10 +301,7 @@ class TextGateAccessibilityService : AccessibilityService() {
             }
             val model = settingsStore.selectedModel
             val target = settingsStore.bubbleTargetLanguage
-            val systemPrompt = when (target) {
-                TriggerDetector.Target.ENGLISH -> TranslationPrompts.EN_TRANSLATION_SYSTEM_PROMPT
-                TriggerDetector.Target.POLISH -> TranslationPrompts.PL_TRANSLATION_SYSTEM_PROMPT
-            }
+            val systemPrompt = TranslationPrompts.systemPromptFor(target)
 
             val executor = networkExecutor
             if (executor == null || executor.isShutdown) {
@@ -375,10 +388,7 @@ class TextGateAccessibilityService : AccessibilityService() {
 
             showToast(getString(R.string.toast_sending_to_gemini))
 
-            val systemPrompt = when (target) {
-                TriggerDetector.Target.ENGLISH -> TranslationPrompts.EN_TRANSLATION_SYSTEM_PROMPT
-                TriggerDetector.Target.POLISH -> TranslationPrompts.PL_TRANSLATION_SYSTEM_PROMPT
-            }
+            val systemPrompt = TranslationPrompts.systemPromptFor(target)
 
             executor.execute {
                 val result = try {

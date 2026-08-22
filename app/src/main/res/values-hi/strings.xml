@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">TextGate AI</string>
+
+    <string name="accessibility_service_description">TextGate AI टेक्स्ट को दो तरीकों से पढ़ता है, और दोनों ही सख्ती से सीमित हैं। पहला: जिस टेक्स्ट फ़ील्ड में आप फ़िलहाल टाइप कर रहे हैं, और वह भी केवल यह देखने के लिए कि आपने जो टाइप किया है उसके अंत में कोई एक निश्चित ट्रिगर प्रत्यय (जैसे \"?en\" या \"?de\" — हर भाषा के लिए एक, पूरी सूची Settings में देखें) है या नहीं। दूसरा: कोई संदेश या टिप्पणी जिसे आप देर तक दबाकर (long-press) रखते हैं, ताकि Settings में आपकी चुनी हुई डिफ़ॉल्ट भाषा में एक फ़्लोटिंग अनुवाद दिखाया जा सके। दोनों ही तरीके कभी भी पासवर्ड फ़ील्ड नहीं पढ़ते, कभी भी उन ऐप्स में काम नहीं करते जिन्हें आपने स्पष्ट रूप से अनुमति नहीं दी है, और पढ़ी गई किसी भी चीज़ का कोई इतिहास कभी नहीं रखते। जब कोई ट्रिगर पहचाना जाता है, या जब आप किसी अनुमति प्राप्त ऐप में किसी संदेश को देर तक दबाते हैं, तो संबंधित टेक्स्ट को HTTPS के ज़रिए आपके द्वारा कॉन्फ़िगर किए गए Gemini API को भेजा जाता है और अनुवादित किया जाता है। टाइप किए गए ट्रिगर का परिणाम फ़ील्ड की सामग्री की जगह ले लेता है; देर तक दबाने का परिणाम केवल एक अस्थायी फ़्लोटिंग बबल में दिखाया जाता है और मूल ऐप को कभी नहीं छूता। जब तक आप इनमें से कोई एक सटीक ट्रिगर टाइप नहीं करते या TextGate AI की सेटिंग्स में चालू किए गए किसी ऐप में किसी संदेश को देर तक नहीं दबाते, तब तक कहीं कुछ भी नहीं भेजा जाता।</string>
+
+    <!-- Settings screen -->
+    <string name="settings_title">TextGate AI</string>
+
+    <string name="section_master_switch">AI परिवर्तन</string>
+    <string name="master_switch_label">टाइप किए गए ट्रिगर से अनुवाद सक्षम करें</string>
+    <string name="master_switch_description">मुख्य स्विच। किसी संदेश के अंत में ?en या ?de जैसा कोई ट्रिगर टाइप करके उसे उस भाषा में अनुवाद करें (पूरी सूची नीचे देखें)। यह देर तक दबाने पर दिखने वाले अनुवाद बबल को भी नियंत्रित करता है। बंद होने पर, TextGate AI कभी भी कोई फ़ील्ड या संदेश नहीं पढ़ता और किसी अन्य सेटिंग की परवाह किए बिना कभी कोई नेटवर्क रिक्वेस्ट नहीं भेजता।</string>
+
+    <string name="bubble_language_label">ऐप और अनुवाद की भाषा</string>
+    <string name="bubble_language_description">अपनी भाषा यहाँ एक बार चुनें। यह देर तक दबाने पर दिखने वाले अनुवाद बबल की डिफ़ॉल्ट भाषा और TextGate AI की अपनी स्क्रीन जिस भाषा में दिखाई जाती हैं, दोनों तय करती है — दोनों साथ-साथ बदलती हैं।</string>
+
+    <string name="section_accessibility_status">एक्सेसिबिलिटी सेवा</string>
+    <string name="accessibility_status_enabled">सक्षम है</string>
+    <string name="accessibility_status_disabled">सक्षम नहीं है — जब तक आप इसे सक्षम नहीं करते, TextGate AI कुछ भी नहीं कर सकता</string>
+    <string name="btn_open_accessibility_settings">एक्सेसिबिलिटी सेटिंग्स खोलें</string>
+
+    <string name="section_gemini_api">Gemini API</string>
+    <string name="label_api_key">Gemini API कुंजी</string>
+    <string name="hint_api_key">अपनी Gemini API कुंजी पेस्ट करें</string>
+    <string name="btn_get_api_key">मुफ़्त API कुंजी प्राप्त करें</string>
+    <string name="btn_show_api_key_instructions">यह कैसे करें? (चरण-दर-चरण गाइड)</string>
+    <string name="btn_hide_api_key_instructions">गाइड छिपाएं</string>
+    <string name="api_key_instructions_body">1. ऊपर \"मुफ़्त API कुंजी प्राप्त करें\" पर टैप करें — इससे आपके ब्राउज़र में Google AI Studio खुल जाएगा।\n2. अपने Google खाते से साइन इन करें (वही जिसका आप रोज़ इस्तेमाल करते हैं)।\n3. अगर पूछा जाए तो सेवा की शर्तें स्वीकार करें।\n4. पेज पर \"Create API key\" पर टैप करें।\n5. दिखाई देने वाली कुंजी को कॉपी करें — यह अक्षरों और अंकों की एक लंबी स्ट्रिंग होती है।\n6. इस ऐप में वापस आएं, नीचे दिए गए फ़ील्ड में कुंजी पेस्ट करें, और \"कुंजी सहेजें\" पर टैप करें।\n\nयह कुंजी Google की मुफ़्त सीमा के भीतर निःशुल्क है और Gemini से सीधे संपर्क करने के अलावा कभी आपके फ़ोन से बाहर नहीं जाती — यह एन्क्रिप्टेड है और केवल इसी डिवाइस पर संग्रहीत होती है।</string>
+    <string name="btn_save_api_key">कुंजी सहेजें (एन्क्रिप्टेड)</string>
+    <string name="api_key_saved">API कुंजी सहेजी गई, Android Keystore से एन्क्रिप्टेड</string>
+    <string name="api_key_cleared">API कुंजी हटा दी गई</string>
+    <string name="btn_clear_api_key">सहेजी गई कुंजी हटाएं</string>
+    <string name="api_key_status_present">एक कुंजी सहेजी गई है (एन्क्रिप्टेड)। यह स्क्रीन पर दोबारा कभी नहीं दिखाई जाती।</string>
+    <string name="api_key_status_absent">अभी तक कोई कुंजी सहेजी नहीं गई है</string>
+
+    <string name="label_model">Gemini मॉडल</string>
+    <string name="hint_model">जैसे gemini-3.5-flash-lite</string>
+    <string name="model_suggestions_label">सुझाव (इस्तेमाल करने के लिए टैप करें):</string>
+
+    <string name="btn_test_api">API कनेक्शन जांचें</string>
+    <string name="test_api_running">जांच की जा रही है…</string>
+    <string name="test_api_success">सफल — Gemini ने सही तरीके से जवाब दिया।</string>
+    <string name="test_api_failure">विफल: %1$s</string>
+
+    <string name="section_allowed_apps">अनुमति प्राप्त ऐप्स</string>
+    <string name="allowed_apps_description">TextGate AI डिफ़ॉल्ट रूप से केवल सामान्य सोशल मीडिया और मैसेजिंग ऐप्स के लिए सक्षम है — उदाहरण के लिए WhatsApp, Messenger, Instagram, Telegram, Signal, Discord, Snapchat, TikTok, X, Threads, LinkedIn और SMS/Messages — इसलिए कुछ भी सेट अप करने की ज़रूरत नहीं है। यह सूची टाइप किए गए अनुवाद ट्रिगर (?en, ?de, ?fr, आदि) और देर तक दबाने पर दिखने वाले अनुवाद बबल, दोनों को नियंत्रित करती है। जाने-माने पासवर्ड मैनेजर, बैंकिंग, ऑथेंटिकेटर और सिस्टम सुरक्षा ऐप्स कभी यहाँ नहीं दिखाए जाते और इन्हें कभी सक्षम नहीं किया जा सकता; क्रिप्टोकरेंसी वॉलेट और एक्सचेंज को भी उसी तरह ब्लॉक किया गया है।</string>
+    <string name="allowed_apps_advanced_hint">कोई अलग ऐप चाहिए, या डिफ़ॉल्ट में से किसी को हटाना है? इसके बजाय ऐप्स को खुद चुनें।</string>
+    <string name="btn_show_advanced_apps">एडवांस्ड दिखाएं: ऐप्स खुद चुनें</string>
+    <string name="btn_hide_advanced_apps">एडवांस्ड विकल्प छिपाएं</string>
+    <string name="allowed_apps_empty">लॉन्चर आइकन वाला कोई इंस्टॉल किया गया ऐप नहीं मिला।</string>
+    <string name="allowed_apps_loading">इंस्टॉल किए गए ऐप्स लोड हो रहे हैं…</string>
+
+    <string name="section_privacy">गोपनीयता</string>
+    <string name="privacy_notice_headline">टेक्स्ट Google Gemini को तभी भेजा जाता है जब आप स्पष्ट रूप से कोई अनुवाद ट्रिगर टाइप करते हैं (जैसे ?en या ?de), या किसी संदेश को देर तक दबाते हैं।</string>
+    <string name="privacy_notice_body">TextGate AI किसी भी तरह का एनालिटिक्स, क्रैश रिपोर्ट या उपयोग डेटा एकत्र नहीं करता, और इसमें कोई थर्ड-पार्टी SDK शामिल नहीं है। यह ऐप जो एकमात्र नेटवर्क रिक्वेस्ट कभी भेजता है, वे वही अनुवाद रिक्वेस्ट हैं जिन्हें आप खुद ट्रिगर करते हैं, जो सीधे HTTPS के ज़रिए Google के Gemini API को भेजी जाती हैं। आपकी API कुंजी को डिवाइस पर ही Android Keystore का उपयोग करके एन्क्रिप्ट किया जाता है और इसे बैकअप से बाहर रखा जाता है। पासवर्ड फ़ील्ड और अन्य संवेदनशील इनपुट किसी भी परिस्थिति में कभी नहीं पढ़े जाते। पूरी जानकारी के लिए नीचे \"पूर्ण गोपनीयता नीति\" पर टैप करें।</string>
+    <string name="btn_full_privacy_policy">पूर्ण गोपनीयता नीति</string>
+    <string name="btn_close_dialog">बंद करें</string>
+    <string name="privacy_full_policy_title">पूर्ण गोपनीयता नीति</string>
+    <string name="privacy_full_policy_body">TextGate AI क्या पढ़ता है:\n• जिस टेक्स्ट फ़ील्ड में आप फ़िलहाल टाइप कर रहे हैं — केवल यह जांचने के लिए कि अंत में कोई एक निश्चित अनुवाद ट्रिगर (जैसे \"?en\" या \"?de\") है या नहीं।\n• कोई संदेश या टिप्पणी जिसे आप देर तक दबाते हैं — केवल उन ऐप्स में जिन्हें आपने \"अनुमति प्राप्त ऐप्स\" में चालू किया है।\n\nयह क्या कभी नहीं पढ़ता: पासवर्ड फ़ील्ड, पिन प्रविष्टि, या कोई भी ऐसा फ़ील्ड जिसे ऐप संवेदनशील मानता है — किसी भी ऐप में, बिना किसी अपवाद के।\n\nक्या भेजा जाता है, और कहाँ: केवल वह टेक्स्ट जिसे आपने ट्रिगर किया, एक बार भेजा जाता है, सीधे HTTPS के ज़रिए Google के Gemini API को, आपके द्वारा दी गई कुंजी का उपयोग करते हुए। जब तक आप खुद कोई ट्रिगर टाइप नहीं करते या किसी संदेश को देर तक नहीं दबाते, तब तक कुछ भी कभी नहीं भेजा जाता।\n\nआपके फ़ोन पर क्या संग्रहीत होता है: आपकी Gemini API कुंजी, Android Keystore से एन्क्रिप्टेड (वही हार्डवेयर-समर्थित सुरक्षा जिसका उपयोग Android आपके लॉक स्क्रीन क्रेडेंशियल्स के लिए करता है), और आपकी सामान्य सेटिंग्स (कौन से ऐप्स अनुमति प्राप्त हैं, आपकी चुनी हुई भाषा, आपका चुना हुआ Gemini मॉडल)। इनमें से कुछ भी फ़ोन बैकअप में शामिल नहीं है।\n\nTextGate AI क्या नहीं करता: कोई एनालिटिक्स नहीं, कोई क्रैश रिपोर्टिंग नहीं, कोई उपयोग ट्रैकिंग नहीं, कोई विज्ञापन नहीं, किसी भी तरह की कोई थर्ड-पार्टी लाइब्रेरी नहीं, आपके द्वारा अनुवादित किसी भी चीज़ का कोई इतिहास नहीं, और आपके द्वारा स्पष्ट रूप से अनुमति न दिए गए किसी भी ऐप को पढ़ना नहीं।\n\nनियंत्रण आपके हाथ में रहता है: किसी भी समय मुख्य स्विच से पूरी सुविधा बंद करें, और जब चाहें अनुमति प्राप्त सूची में से किसी भी ऐप को जोड़ें या हटाएं।</string>
+
+    <string name="section_about">परिचय</string>
+    <string name="about_version_label">संस्करण</string>
+
+    <!-- Toasts / runtime messages (never include user text) -->
+    <string name="toast_sending_to_gemini">चयनित टेक्स्ट Gemini को भेजा जा रहा है</string>
+    <string name="toast_translation_failed">अनुवाद विफल — मूल टेक्स्ट अपरिवर्तित रहा</string>
+    <string name="toast_field_changed_aborted">परिणाम आने से पहले फ़ील्ड बदल गई — कुछ भी बदला नहीं गया</string>
+    <string name="toast_service_disabled">AI परिवर्तन Settings में बंद है</string>
+
+    <!-- Long-press translation bubble -->
+    <string name="bubble_loading">अनुवाद हो रहा है…</string>
+    <string name="bubble_close_content_description">बंद करें</string>
+
+    <!-- Errors -->
+    <string name="error_no_api_key">पहले एक Gemini API कुंजी दर्ज करके सहेजें</string>
+    <string name="error_text_too_long">टेक्स्ट अपने आप भेजे जाने के लिए बहुत लंबा है (सीमा: %1$d अक्षर)</string>
+    <string name="error_generic">कुछ गड़बड़ हो गई। कृपया फिर से कोशिश करें।</string>
+    <string name="error_timeout">रिक्वेस्ट का समय समाप्त हो गया।</string>
+    <string name="error_network">Gemini तक नहीं पहुंचा जा सका। अपना कनेक्शन जांचें।</string>
+    <string name="error_http">Gemini ने एक त्रुटि लौटाई (कोड %1$d)।</string>
+    <string name="error_empty_response">Gemini ने एक खाली जवाब लौटाया।</string>
+</resources>

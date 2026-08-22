@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">TextGate AI</string>
+
+    <string name="accessibility_service_description">TextGate AI 通过两种方式读取文本,且都受到严格限制。第一种:读取您当前正在编辑的文本框,且仅用于查找您输入内容末尾是否存在一个精确的触发后缀(例如“?en”或“?de”——每种语言对应一个,完整列表请见“设置”页面)。第二种:您长按住的一条消息或评论,用于以悬浮窗形式显示翻译为您在“设置”中选择的默认语言的结果。这两种方式都绝不会读取密码字段,绝不会在您未明确允许的应用中运行,也绝不会保留任何已读取内容的记录。当在已允许的应用中检测到触发后缀,或您长按某条消息时,相关文本会通过 HTTPS 发送到您配置的 Gemini API 进行翻译。输入触发的翻译结果会替换文本框中的内容;长按翻译的结果则只会显示在一个临时悬浮气泡中,绝不会触及原应用。只有当您输入这些精确触发后缀之一,或在 TextGate AI 设置中已开启的应用内长按某条消息时,系统才会发送任何内容。</string>
+
+    <!-- Settings screen -->
+    <string name="settings_title">TextGate AI</string>
+
+    <string name="section_master_switch">AI 转换</string>
+    <string name="master_switch_label">启用输入触发翻译</string>
+    <string name="master_switch_description">总开关。在消息末尾输入类似 ?en 或 ?de 的触发后缀,即可将其翻译为对应语言(完整列表见下方)。此开关同时控制长按翻译气泡功能。关闭时,无论其他设置如何,TextGate AI 都绝不会读取任何字段或消息,也绝不会发起任何网络请求。</string>
+
+    <string name="bubble_language_label">应用和翻译语言</string>
+    <string name="bubble_language_description">只需在此处选择一次您的语言。它会同时设置长按翻译气泡使用的默认语言,以及 TextGate AI 自身界面所使用的显示语言——两者会一起改变。</string>
+
+    <string name="section_accessibility_status">无障碍服务</string>
+    <string name="accessibility_status_enabled">已启用</string>
+    <string name="accessibility_status_disabled">未启用——在您启用之前,TextGate AI 无法执行任何操作</string>
+    <string name="btn_open_accessibility_settings">打开无障碍设置</string>
+
+    <string name="section_gemini_api">Gemini API</string>
+    <string name="label_api_key">Gemini API 密钥</string>
+    <string name="hint_api_key">粘贴您的 Gemini API 密钥</string>
+    <string name="btn_get_api_key">获取免费 API 密钥</string>
+    <string name="btn_show_api_key_instructions">该如何操作?(分步指南)</string>
+    <string name="btn_hide_api_key_instructions">隐藏指南</string>
+    <string name="api_key_instructions_body">1. 点击上方的“获取免费 API 密钥”——这会在您的浏览器中打开 Google AI Studio。\n2. 使用您的 Google 账号登录(即您日常使用的那个账号)。\n3. 如果系统要求,请接受服务条款。\n4. 在页面上点击“创建 API 密钥”。\n5. 复制出现的密钥——一长串字母和数字组成的字符串。\n6. 返回本应用,将密钥粘贴到下方的输入框中,然后点击“保存密钥”。\n\n该密钥在 Google 免费额度范围内是免费的,除了与 Gemini 直接通信外,绝不会离开您的手机——它会被加密,且仅存储在本设备上。</string>
+    <string name="btn_save_api_key">保存密钥(已加密)</string>
+    <string name="api_key_saved">API 密钥已保存,并使用 Android Keystore 加密</string>
+    <string name="api_key_cleared">API 密钥已移除</string>
+    <string name="btn_clear_api_key">移除已保存的密钥</string>
+    <string name="api_key_status_present">已保存密钥(已加密)。该密钥不会再次显示在屏幕上。</string>
+    <string name="api_key_status_absent">尚未保存密钥</string>
+
+    <string name="label_model">Gemini 模型</string>
+    <string name="hint_model">例如 gemini-3.5-flash-lite</string>
+    <string name="model_suggestions_label">建议(点击即可使用):</string>
+
+    <string name="btn_test_api">测试 API 连接</string>
+    <string name="test_api_running">正在测试…</string>
+    <string name="test_api_success">成功——Gemini 已正确响应。</string>
+    <string name="test_api_failure">失败:%1$s</string>
+
+    <string name="section_allowed_apps">允许的应用</string>
+    <string name="allowed_apps_description">TextGate AI 默认仅对常见的社交媒体和消息应用启用——例如 WhatsApp、Messenger、Instagram、Telegram、Signal、Discord、Snapchat、TikTok、X、Threads、LinkedIn 以及短信/信息应用——因此无需进行任何设置。此列表同时控制输入触发翻译(?en、?de、?fr 等)和长按翻译气泡功能。已知的密码管理器、银行、身份验证器及系统安全类应用绝不会在此处显示,也绝不能被启用;加密货币钱包与交易所同样会被屏蔽。</string>
+    <string name="allowed_apps_advanced_hint">想使用其他应用,或移除某个默认应用?可以手动选择应用。</string>
+    <string name="btn_show_advanced_apps">显示高级选项:手动选择应用</string>
+    <string name="btn_hide_advanced_apps">隐藏高级选项</string>
+    <string name="allowed_apps_empty">未找到任何带有启动图标的已安装应用。</string>
+    <string name="allowed_apps_loading">正在加载已安装的应用…</string>
+
+    <string name="section_privacy">隐私</string>
+    <string name="privacy_notice_headline">只有当您明确输入翻译触发后缀(例如 ?en 或 ?de),或长按某条消息时,文本才会被发送给 Google Gemini。</string>
+    <string name="privacy_notice_body">TextGate AI 不会收集任何分析数据、崩溃报告或使用数据,也不包含任何第三方 SDK。本应用发出的唯一网络请求,就是由您自己触发的翻译请求,这些请求会通过 HTTPS 直接发送到 Google 的 Gemini API。您的 API 密钥会使用 Android Keystore 在设备本地加密,并且不会包含在备份中。在任何情况下,密码字段及其他敏感输入内容都绝不会被读取。点击下方的“完整隐私政策”查看详细信息。</string>
+    <string name="btn_full_privacy_policy">完整隐私政策</string>
+    <string name="btn_close_dialog">关闭</string>
+    <string name="privacy_full_policy_title">完整隐私政策</string>
+    <string name="privacy_full_policy_body">TextGate AI 会读取的内容:\n• 您当前正在输入的文本框——仅用于检查末尾是否存在一个精确的翻译触发后缀(例如“?en”或“?de”)。\n• 您长按的一条消息或评论——仅限于您在“允许的应用”中已开启的应用。\n\n绝不会读取的内容:密码字段、PIN 输入框,或应用识别为敏感信息的任何字段——在任何应用中都没有例外。\n\n发送的内容及去向:仅发送您触发的那段文本,发送一次,使用您自己提供的密钥,通过 HTTPS 直接发送到 Google 的 Gemini API。除非您自己输入触发后缀或长按某条消息,否则绝不会发送任何内容。\n\n存储在您手机上的内容:您的 Gemini API 密钥(使用 Android Keystore 加密,即 Android 用于保护您锁屏凭据的同一套硬件级安全机制),以及您的简单设置(允许哪些应用、您选择的语言、您选择的 Gemini 模型)。以上内容均不会包含在手机备份中。\n\nTextGate AI 不会做的事:不收集分析数据、不上报崩溃信息、不追踪使用情况、不投放广告、不使用任何第三方库、不保留您翻译过内容的任何记录,也不会读取您未明确允许的任何应用。\n\n掌控权始终在您手中:您可以随时通过总开关关闭整个功能,也可以随时在允许列表中添加或移除任何应用。</string>
+
+    <string name="section_about">关于</string>
+    <string name="about_version_label">版本</string>
+
+    <!-- Toasts / runtime messages (never include user text) -->
+    <string name="toast_sending_to_gemini">正在将选中的文本发送给 Gemini</string>
+    <string name="toast_translation_failed">翻译失败——原文本保持不变</string>
+    <string name="toast_field_changed_aborted">在结果返回前字段内容已发生变化——未替换任何内容</string>
+    <string name="toast_service_disabled">AI 转换功能在设置中已关闭</string>
+
+    <!-- Long-press translation bubble -->
+    <string name="bubble_loading">正在翻译…</string>
+    <string name="bubble_close_content_description">关闭</string>
+
+    <!-- Errors -->
+    <string name="error_no_api_key">请先输入并保存 Gemini API 密钥</string>
+    <string name="error_text_too_long">文本过长,无法自动发送(限制:%1$d 个字符)</string>
+    <string name="error_generic">出现问题,请重试。</string>
+    <string name="error_timeout">请求超时。</string>
+    <string name="error_network">无法连接到 Gemini,请检查您的网络连接。</string>
+    <string name="error_http">Gemini 返回了一个错误(代码 %1$d)。</string>
+    <string name="error_empty_response">Gemini 返回了空响应。</string>
+</resources>

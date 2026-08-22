@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">TextGate AI</string>
+
+    <string name="accessibility_service_description">TextGate AI čita tekst na dva načina, oba strogo ograničena. Prvo: polje za tekst koje trenutačno uređujete, i to samo kako bi potražio jedan točno određeni okidački sufiks (npr. \"?en\" ili \"?de\" — po jedan za svaki jezik, cijeli popis potražite u postavkama) na kraju onoga što ste utipkali. Drugo: poruku ili komentar koji dugo pritisnete i držite, kako bi se prikazao plutajući prijevod na zadani jezik koji odaberete u postavkama. Nijedan od ova dva načina nikada ne čita polja za lozinke, nikada ne radi u aplikacijama koje niste izričito dopustili i nikada ne pamti povijest ičega pročitanog. Kada se otkrije okidač ili kada dugo pritisnete poruku u dopuštenoj aplikaciji, dotični se tekst putem HTTPS-a šalje na Gemini API koji ste konfigurirali i prevodi se. Rezultat upisanog okidača zamjenjuje sadržaj polja; rezultat dugog pritiska prikazuje se isključivo u privremenom plutajućem oblačiću i nikada ne dira izvornu aplikaciju. Ništa se nikamo ne šalje osim ako sami ne utipkate jedan od ovih točno određenih okidača ili dugo pritisnete poruku u aplikaciji koja je uključena u postavkama aplikacije TextGate AI.</string>
+
+    <!-- Settings screen -->
+    <string name="settings_title">TextGate AI</string>
+
+    <string name="section_master_switch">AI preobrazba</string>
+    <string name="master_switch_label">Omogući prijevod pomoću upisanog okidača</string>
+    <string name="master_switch_description">Glavni prekidač. Utipkajte okidač poput ?en ili ?de na kraju poruke kako biste je preveli na taj jezik (cijeli popis potražite niže). Ovaj prekidač upravlja i plutajućim oblačićem za prijevod pri dugom pritisku. Kada je isključen, TextGate AI nikada ne čita nijedno polje ni poruku i nikada ne šalje mrežni zahtjev, neovisno o bilo kojoj drugoj postavci.</string>
+
+    <string name="bubble_language_label">Jezik aplikacije i prijevoda</string>
+    <string name="bubble_language_description">Ovdje jednom odaberite svoj jezik. Time se određuje i zadani jezik za plutajući oblačić prijevoda pri dugom pritisku I jezik na kojem se prikazuju vlastiti zasloni aplikacije TextGate AI — oba se mijenjaju zajedno.</string>
+
+    <string name="section_accessibility_status">Usluga pristupačnosti</string>
+    <string name="accessibility_status_enabled">Omogućeno</string>
+    <string name="accessibility_status_disabled">Nije omogućeno — TextGate AI ne može ništa učiniti dok je ne omogućite</string>
+    <string name="btn_open_accessibility_settings">Otvori postavke pristupačnosti</string>
+
+    <string name="section_gemini_api">Gemini API</string>
+    <string name="label_api_key">Gemini API ključ</string>
+    <string name="hint_api_key">Zalijepite svoj Gemini API ključ</string>
+    <string name="btn_get_api_key">Nabavi besplatni API ključ</string>
+    <string name="btn_show_api_key_instructions">Kako to napraviti? (vodič korak po korak)</string>
+    <string name="btn_hide_api_key_instructions">Sakrij vodič</string>
+    <string name="api_key_instructions_body">1. Dodirnite \"Nabavi besplatni API ključ\" iznad — time se u vašem pregledniku otvara Google AI Studio.\n2. Prijavite se svojim Google računom (onim koji svakodnevno koristite).\n3. Ako se od vas zatraži, prihvatite Uvjete pružanja usluge.\n4. Na stranici dodirnite \"Create API key\".\n5. Kopirajte ključ koji se pojavi — dugi niz slova i brojki.\n6. Vratite se u ovu aplikaciju, zalijepite ključ u polje niže i dodirnite \"Spremi ključ\".\n\nKljuč je besplatan u okviru Googleovih besplatnih ograničenja i nikada ne napušta vaš telefon osim za izravnu komunikaciju s Geminijem — šifriran je i pohranjen isključivo na ovom uređaju.</string>
+    <string name="btn_save_api_key">Spremi ključ (šifrirano)</string>
+    <string name="api_key_saved">API ključ spremljen, šifriran pomoću Android Keystorea</string>
+    <string name="api_key_cleared">API ključ uklonjen</string>
+    <string name="btn_clear_api_key">Ukloni spremljeni ključ</string>
+    <string name="api_key_status_present">Ključ je spremljen (šifriran). Nikada se više ne prikazuje na zaslonu.</string>
+    <string name="api_key_status_absent">Još nije spremljen nijedan ključ</string>
+
+    <string name="label_model">Gemini model</string>
+    <string name="hint_model">npr. gemini-3.5-flash-lite</string>
+    <string name="model_suggestions_label">Prijedlozi (dodirnite za odabir):</string>
+
+    <string name="btn_test_api">Testiraj API vezu</string>
+    <string name="test_api_running">Testiranje u tijeku…</string>
+    <string name="test_api_success">Uspjeh — Gemini je ispravno odgovorio.</string>
+    <string name="test_api_failure">Neuspješno: %1$s</string>
+
+    <string name="section_allowed_apps">Dopuštene aplikacije</string>
+    <string name="allowed_apps_description">TextGate AI je prema zadanim postavkama omogućen samo za uobičajene aplikacije za društvene mreže i razmjenu poruka — na primjer WhatsApp, Messenger, Instagram, Telegram, Signal, Discord, Snapchat, TikTok, X, Threads, LinkedIn i SMS/Poruke — pa nema potrebe za dodatnim postavljanjem. Ovaj popis upravlja i upisanim okidačima za prijevod (?en, ?de, ?fr i tako dalje) i plutajućim oblačićem za prijevod pri dugom pritisku. Poznati upravitelji lozinkama, bankovne aplikacije, aplikacije za autentifikaciju i sustavske sigurnosne aplikacije nikada se ovdje ne prikazuju i nikada se ne mogu omogućiti; kripto novčanici i burze blokirani su na isti način.</string>
+    <string name="allowed_apps_advanced_hint">Želite drugu aplikaciju ili uklanjanje neke od zadanih? Umjesto toga odaberite aplikacije ručno.</string>
+    <string name="btn_show_advanced_apps">Prikaži napredno: ručni odabir aplikacija</string>
+    <string name="btn_hide_advanced_apps">Sakrij napredne opcije</string>
+    <string name="allowed_apps_empty">Nije pronađena nijedna instalirana aplikacija s ikonom pokretača.</string>
+    <string name="allowed_apps_loading">Učitavanje instaliranih aplikacija…</string>
+
+    <string name="section_privacy">Privatnost</string>
+    <string name="privacy_notice_headline">Tekst se šalje Google Geminiju samo kada izričito utipkate okidač za prijevod (npr. ?en ili ?de) ili dugo pritisnete poruku.</string>
+    <string name="privacy_notice_body">TextGate AI ne prikuplja analitiku, izvješća o rušenju ni bilo kakve podatke o korištenju te ne sadrži nikakve SDK-ove trećih strana. Jedini mrežni zahtjevi koje ova aplikacija ikada šalje jesu zahtjevi za prijevod koje sami pokrenete, poslani izravno Googleovom Gemini API-ju putem HTTPS-a. Vaš API ključ šifriran je na uređaju pomoću Android Keystorea i isključen je iz sigurnosnih kopija. Polja za lozinke i drugi osjetljivi unosi nikada se ne čitaju, ni pod kojim okolnostima. Dodirnite \"Cjelovita pravila privatnosti\" niže za sve pojedinosti.</string>
+    <string name="btn_full_privacy_policy">Cjelovita pravila privatnosti</string>
+    <string name="btn_close_dialog">Zatvori</string>
+    <string name="privacy_full_policy_title">Cjelovita pravila privatnosti</string>
+    <string name="privacy_full_policy_body">Što TextGate AI čita:\n• Polje za tekst u koje trenutačno upisujete tekst — samo kako bi provjerio postoji li na kraju jedan točno određeni okidač za prijevod (npr. \"?en\" ili \"?de\").\n• Poruku ili komentar koji dugo pritisnete — samo u aplikacijama koje ste uključili u odjeljku \"Dopuštene aplikacije\".\n\nŠto nikada ne čita: polja za lozinke, unos PIN-a ili bilo koje polje koje aplikacija prepoznaje kao osjetljivo — bez iznimke, u bilo kojoj aplikaciji.\n\nŠto se šalje i kamo: samo tekst koji ste pokrenuli, poslan jednom, izravno putem HTTPS-a na Googleov Gemini API pomoću ključa koji sami unesete. Ništa se nikada ne šalje osim ako sami ne utipkate okidač ili dugo pritisnete poruku.\n\nŠto se pohranjuje na vašem telefonu: vaš Gemini API ključ, šifriran pomoću Android Keystorea (ista hardverski podržana sigurnost koju Android koristi za vjerodajnice zaključanog zaslona), te vaše jednostavne postavke (koje su aplikacije dopuštene, vaš odabrani jezik, vaš odabrani Gemini model). Ništa od toga nije uključeno u sigurnosne kopije telefona.\n\nŠto TextGate AI NE radi: nema analitike, nema izvješćivanja o rušenju, nema praćenja korištenja, nema oglašavanja, nema nikakvih biblioteka trećih strana, nema povijesti ičega što ste preveli i ne čita se nijedna aplikacija koju niste izričito dopustili.\n\nKontrola ostaje u vašim rukama: cijelu značajku možete u bilo kojem trenutku isključiti glavnim prekidačem te dodati ili ukloniti bilo koju aplikaciju s popisa dopuštenih kad god poželite.</string>
+
+    <string name="section_about">O aplikaciji</string>
+    <string name="about_version_label">Verzija</string>
+
+    <!-- Toasts / runtime messages (never include user text) -->
+    <string name="toast_sending_to_gemini">Odabrani tekst se šalje Geminiju</string>
+    <string name="toast_translation_failed">Prijevod nije uspio — izvorni tekst nepromijenjen</string>
+    <string name="toast_field_changed_aborted">Polje se promijenilo prije nego što je stigao rezultat — ništa nije zamijenjeno</string>
+    <string name="toast_service_disabled">AI preobrazba je isključena u postavkama</string>
+
+    <!-- Long-press translation bubble -->
+    <string name="bubble_loading">Prevođenje u tijeku…</string>
+    <string name="bubble_close_content_description">Zatvori</string>
+
+    <!-- Errors -->
+    <string name="error_no_api_key">Najprije unesite i spremite Gemini API ključ</string>
+    <string name="error_text_too_long">Tekst je predug za automatsko slanje (ograničenje: %1$d znakova)</string>
+    <string name="error_generic">Nešto je pošlo po zlu. Pokušajte ponovno.</string>
+    <string name="error_timeout">Isteklo je vrijeme čekanja na zahtjev.</string>
+    <string name="error_network">Nije moguće doći do Geminija. Provjerite vezu.</string>
+    <string name="error_http">Gemini je vratio pogrešku (kod %1$d).</string>
+    <string name="error_empty_response">Gemini je vratio prazan odgovor.</string>
+</resources>

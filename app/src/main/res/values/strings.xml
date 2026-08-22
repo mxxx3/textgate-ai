@@ -2,19 +2,17 @@
 <resources>
     <string name="app_name">TextGate AI</string>
 
-    <string name="accessibility_service_description">TextGate AI reads text in two ways, both strictly limited. First: the text field you are currently editing, and only to look for the exact suffix \"?en\" or \"?pl\" at the end of what you\'ve typed. Second: a message or comment you long-press and hold, to show a floating translation into the default language you choose in Settings. Both pathways never read password fields, never run in apps you have not explicitly allowed, and never keep a history of anything read. When \"?en\" or \"?pl\" is detected, or when you long-press a message, in an allowed app, the relevant text is sent over HTTPS to the Gemini API you have configured and translated. The typed-trigger result replaces the field\'s contents; the long-press result is only ever shown in a temporary floating bubble and never touches the original app. Nothing is sent anywhere unless you type one of these exact triggers or long-press a message in an app that is switched on in TextGate AI\'s settings.</string>
+    <string name="accessibility_service_description">TextGate AI reads text in two ways, both strictly limited. First: the text field you are currently editing, and only to look for one exact trigger suffix (like \"?en\" or \"?de\" — one per language, see the full list in Settings) at the end of what you\'ve typed. Second: a message or comment you long-press and hold, to show a floating translation into the default language you choose in Settings. Both pathways never read password fields, never run in apps you have not explicitly allowed, and never keep a history of anything read. When a trigger is detected, or when you long-press a message, in an allowed app, the relevant text is sent over HTTPS to the Gemini API you have configured and translated. The typed-trigger result replaces the field\'s contents; the long-press result is only ever shown in a temporary floating bubble and never touches the original app. Nothing is sent anywhere unless you type one of these exact triggers or long-press a message in an app that is switched on in TextGate AI\'s settings.</string>
 
     <!-- Settings screen -->
     <string name="settings_title">TextGate AI</string>
 
     <string name="section_master_switch">AI transformation</string>
-    <string name="master_switch_label">Enable ?en / ?pl triggers</string>
-    <string name="master_switch_description">Master switch. Type ?en at the end of a message to translate it to English, or ?pl to translate it to Polish. Also governs the long-press translation bubble below. When off, TextGate AI never reads any field or message and never makes any network request, regardless of any other setting.</string>
+    <string name="master_switch_label">Enable typed-trigger translation</string>
+    <string name="master_switch_description">Master switch. Type a trigger like ?en or ?de at the end of a message to translate it into that language (see the full list below). Also governs the long-press translation bubble. When off, TextGate AI never reads any field or message and never makes any network request, regardless of any other setting.</string>
 
-    <string name="bubble_language_label">Long-press translation language</string>
-    <string name="bubble_language_description">Long-press and hold a message in an allowed app to see a floating translation into this language. Nothing in the original app is changed.</string>
-    <string name="language_english">English</string>
-    <string name="language_polish">Polish</string>
+    <string name="bubble_language_label">App &amp; translation language</string>
+    <string name="bubble_language_description">Choose your language once here. It sets the default language for the long-press translation bubble AND the language TextGate AI\'s own screens are shown in — both change together.</string>
 
     <string name="section_accessibility_status">Accessibility Service</string>
     <string name="accessibility_status_enabled">Enabled</string>
@@ -24,6 +22,10 @@
     <string name="section_gemini_api">Gemini API</string>
     <string name="label_api_key">Gemini API key</string>
     <string name="hint_api_key">Paste your Gemini API key</string>
+    <string name="btn_get_api_key">Get a free API key</string>
+    <string name="btn_show_api_key_instructions">How do I do this? (step-by-step guide)</string>
+    <string name="btn_hide_api_key_instructions">Hide the guide</string>
+    <string name="api_key_instructions_body">1. Tap \"Get a free API key\" above — this opens Google AI Studio in your browser.\n2. Sign in with your Google account (the one you use every day).\n3. Accept the Terms of Service if you\'re asked to.\n4. Tap \"Create API key\" on the page.\n5. Copy the key that appears — a long string of letters and numbers.\n6. Come back to this app, paste the key into the field below, and tap \"Save key\".\n\nThe key is free within Google\'s free-tier limits and never leaves your phone except to talk to Gemini directly — it is encrypted and stored only on this device.</string>
     <string name="btn_save_api_key">Save key (encrypted)</string>
     <string name="api_key_saved">API key saved, encrypted with Android Keystore</string>
     <string name="api_key_cleared">API key removed</string>
@@ -41,7 +43,7 @@
     <string name="test_api_failure">Failed: %1$s</string>
 
     <string name="section_allowed_apps">Allowed apps</string>
-    <string name="allowed_apps_description">TextGate AI is enabled by default for common social media and messaging apps only — for example WhatsApp, Messenger, Instagram, Telegram, Signal, Discord, Snapchat, TikTok, X, Threads, LinkedIn, and SMS/Messages — so there is nothing to set up. This list governs both the typed ?en/?pl triggers and the long-press translation bubble. Known password managers, banking, authenticator, and system security apps are never shown here and can never be enabled; cryptocurrency wallets and exchanges are blocked the same way.</string>
+    <string name="allowed_apps_description">TextGate AI is enabled by default for common social media and messaging apps only — for example WhatsApp, Messenger, Instagram, Telegram, Signal, Discord, Snapchat, TikTok, X, Threads, LinkedIn, and SMS/Messages — so there is nothing to set up. This list governs both the typed translation triggers (?en, ?de, ?fr, and so on) and the long-press translation bubble. Known password managers, banking, authenticator, and system security apps are never shown here and can never be enabled; cryptocurrency wallets and exchanges are blocked the same way.</string>
     <string name="allowed_apps_advanced_hint">Want a different app, or to remove one of the defaults? Choose apps by hand instead.</string>
     <string name="btn_show_advanced_apps">Show advanced: choose apps manually</string>
     <string name="btn_hide_advanced_apps">Hide advanced options</string>
@@ -49,8 +51,12 @@
     <string name="allowed_apps_loading">Loading installed apps…</string>
 
     <string name="section_privacy">Privacy</string>
-    <string name="privacy_notice_headline">Text is sent to Google Gemini only when you explicitly use the ?en or ?pl trigger, or long-press a message.</string>
-    <string name="privacy_notice_body">TextGate AI does not collect analytics, crash reports, or usage data of any kind, and contains no third-party SDKs. The only network requests this app ever makes are the translation requests you trigger yourself, sent directly to Google\'s Gemini API over HTTPS. Your API key is encrypted on-device using the Android Keystore and is excluded from backups. Password fields and other sensitive inputs are never read, under any circumstance — see the README for the exact rules this app follows.</string>
+    <string name="privacy_notice_headline">Text is sent to Google Gemini only when you explicitly type a translation trigger (like ?en or ?de), or long-press a message.</string>
+    <string name="privacy_notice_body">TextGate AI does not collect analytics, crash reports, or usage data of any kind, and contains no third-party SDKs. The only network requests this app ever makes are the translation requests you trigger yourself, sent directly to Google\'s Gemini API over HTTPS. Your API key is encrypted on-device using the Android Keystore and is excluded from backups. Password fields and other sensitive inputs are never read, under any circumstance. Tap \"Full privacy policy\" below for the complete details.</string>
+    <string name="btn_full_privacy_policy">Full privacy policy</string>
+    <string name="btn_close_dialog">Close</string>
+    <string name="privacy_full_policy_title">Full privacy policy</string>
+    <string name="privacy_full_policy_body">What TextGate AI reads:\n• The text field you\'re currently typing in — only to check for one exact translation trigger (like \"?en\" or \"?de\") at the end.\n• A message or comment you long-press — only in apps you\'ve switched on in \"Allowed apps\".\n\nWhat it never reads, ever: password fields, PIN entry, or any field the app recognizes as sensitive — no exceptions, in any app.\n\nWhat gets sent, and where: only the text you triggered, sent once, directly over HTTPS to Google\'s Gemini API using the key you provide yourself. Nothing is ever sent unless you type a trigger or long-press a message yourself.\n\nWhat\'s stored on your phone: your Gemini API key, encrypted with the Android Keystore (the same hardware-backed security Android uses for your lock screen credentials), and your simple settings (which apps are allowed, your chosen language, your chosen Gemini model). None of this is included in phone backups.\n\nWhat TextGate AI does NOT do: no analytics, no crash reporting, no usage tracking, no advertising, no third-party libraries of any kind, no history of anything you\'ve translated, and no reading of any app you haven\'t explicitly allowed.\n\nYou stay in control: turn the whole feature off at any time with the master switch, and add or remove any app from the allowed list whenever you like.</string>
 
     <string name="section_about">About</string>
     <string name="about_version_label">Version</string>

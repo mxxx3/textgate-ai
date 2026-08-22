@@ -60,8 +60,10 @@
                 android:layout_marginBottom="12dp"
                 android:background="@color/tg_divider" />
 
-            <!-- Default target language for the long-press "translate a
-                 received message" bubble feature. Deliberately placed here,
+            <!-- Single language picker (v1.4.0+): choosing a language here
+                 changes BOTH the long-press "translate a received message"
+                 bubble's default target language AND the app's own
+                 interface language together. Deliberately placed here,
                  under AI transformation, rather than as its own separate
                  card. -->
             <TextView
@@ -80,26 +82,11 @@
                 android:textSize="13sp"
                 android:textColor="@color/tg_text_secondary" />
 
-            <RadioGroup
-                android:id="@+id/radioGroupBubbleLanguage"
+            <Spinner
+                android:id="@+id/spinnerAppLanguage"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:orientation="horizontal">
-
-                <RadioButton
-                    android:id="@+id/radioBubbleEnglish"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/language_english" />
-
-                <RadioButton
-                    android:id="@+id/radioBubblePolish"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="24dp"
-                    android:text="@string/language_polish" />
-            </RadioGroup>
+                android:layout_marginTop="8dp" />
         </LinearLayout>
 
         <!-- Accessibility status -->
@@ -143,10 +130,39 @@
                 style="@style/TgSectionTitle"
                 android:text="@string/section_gemini_api" />
 
+            <Button
+                android:id="@+id/buttonGetApiKey"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="@string/btn_get_api_key" />
+
+            <TextView
+                android:id="@+id/textToggleApiKeyInstructions"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text="@string/btn_show_api_key_instructions"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:textColor="@color/tg_primary"
+                android:clickable="true"
+                android:focusable="true" />
+
+            <TextView
+                android:id="@+id/textApiKeyInstructionsBody"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text="@string/api_key_instructions_body"
+                android:textSize="13sp"
+                android:textColor="@color/tg_text_secondary"
+                android:visibility="gone" />
+
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="12dp"
                 android:text="@string/label_api_key"
                 android:textSize="13sp"
                 android:textColor="@color/tg_text_secondary" />
@@ -327,6 +343,13 @@
                 android:text="@string/privacy_notice_body"
                 android:textSize="13sp"
                 android:textColor="@color/tg_text_secondary" />
+
+            <Button
+                android:id="@+id/buttonFullPrivacyPolicy"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="@string/btn_full_privacy_policy" />
         </LinearLayout>
 
         <!-- About -->

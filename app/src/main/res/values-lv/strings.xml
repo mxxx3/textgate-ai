@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">TextGate AI</string>
+
+    <string name="accessibility_service_description">TextGate AI lasa tekstu tikai divos stingri ierobežotos veidos. Pirmkārt: teksta lauku, kuru pašlaik rediģējat, un tikai lai meklētu vienu precīzu izraisītājsufiksu (piemēram, \"?en\" vai \"?de\" — pa vienam katrai valodai, pilnu sarakstu skatiet Iestatījumos) ievadītā teksta beigās. Otrkārt: ziņu vai komentāru, kuru turat nospiestu, lai parādītu peldošu tulkojumu noklusējuma valodā, ko izvēlaties Iestatījumos. Neviens no šiem veidiem nekad nelasa paroles laukus, nekad nedarbojas lietotnēs, kurām neesat to skaidri atļāvis, un nekad nesaglabā nekādu izlasītā teksta vēsturi. Kad tiek atklāts izraisītājs vai kad turat nospiestu ziņu atļautā lietotnē, attiecīgais teksts tiek nosūtīts pa HTTPS uz jūsu konfigurēto Gemini API un iztulkots. Ievadītā izraisītāja rezultāts aizstāj lauka saturu; ilgas piespiešanas rezultāts tiek parādīts tikai īslaicīgā peldošā burbulī un nekad neietekmē pašu lietotni. Nekas nekur netiek nosūtīts, ja vien neievadāt kādu no šiem precīzajiem izraisītājiem vai neturat nospiestu ziņu lietotnē, kas ir ieslēgta TextGate AI iestatījumos.</string>
+
+    <!-- Settings screen -->
+    <string name="settings_title">TextGate AI</string>
+
+    <string name="section_master_switch">MI tulkošana</string>
+    <string name="master_switch_label">Iespējot tulkošanu, ievadot izraisītāju</string>
+    <string name="master_switch_description">Galvenais slēdzis. Ievadiet izraisītāju, piemēram, ?en vai ?de, ziņas beigās, lai to iztulkotu attiecīgajā valodā (pilnu sarakstu skatiet zemāk). Tas kontrolē arī ilgas piespiešanas tulkošanas burbuli. Kad izslēgts, TextGate AI nekad nelasa nevienu lauku vai ziņu un nekad neveic nekādu tīkla pieprasījumu neatkarīgi no citiem iestatījumiem.</string>
+
+    <string name="bubble_language_label">Lietotnes un tulkošanas valoda</string>
+    <string name="bubble_language_description">Izvēlieties savu valodu šeit vienu reizi. Tā iestata noklusējuma valodu gan ilgas piespiešanas tulkošanas burbulim, gan valodu, kādā tiek rādīti paši TextGate AI ekrāni — abas mainās vienlaikus.</string>
+
+    <string name="section_accessibility_status">Pieejamības pakalpojums</string>
+    <string name="accessibility_status_enabled">Iespējots</string>
+    <string name="accessibility_status_disabled">Nav iespējots — TextGate AI nevar neko darīt, kamēr to neiespējosiet</string>
+    <string name="btn_open_accessibility_settings">Atvērt pieejamības iestatījumus</string>
+
+    <string name="section_gemini_api">Gemini API</string>
+    <string name="label_api_key">Gemini API atslēga</string>
+    <string name="hint_api_key">Ielīmējiet savu Gemini API atslēgu</string>
+    <string name="btn_get_api_key">Iegūt bezmaksas API atslēgu</string>
+    <string name="btn_show_api_key_instructions">Kā to izdarīt? (soli pa solim)</string>
+    <string name="btn_hide_api_key_instructions">Slēpt pamācību</string>
+    <string name="api_key_instructions_body">1. Pieskarieties iepriekš esošajai pogai \"Iegūt bezmaksas API atslēgu\" — pārlūkprogrammā atvērsies Google AI Studio.\n2. Pierakstieties ar savu Google kontu (to, ko lietojat ikdienā).\n3. Ja tiek prasīts, piekrītiet pakalpojuma sniegšanas noteikumiem.\n4. Lapā pieskarieties \"Create API key\".\n5. Nokopējiet parādīto atslēgu — garu burtu un ciparu virkni.\n6. Atgriezieties šajā lietotnē, ielīmējiet atslēgu zemāk esošajā laukā un pieskarieties \"Saglabāt atslēgu\".\n\nAtslēga ir bezmaksas Google bezmaksas plāna ietvaros un nekad nepamet jūsu tālruni, izņemot tiešu saziņu ar Gemini — tā tiek šifrēta un glabāta tikai šajā ierīcē.</string>
+    <string name="btn_save_api_key">Saglabāt atslēgu (šifrētu)</string>
+    <string name="api_key_saved">API atslēga saglabāta, šifrēta ar Android Keystore</string>
+    <string name="api_key_cleared">API atslēga noņemta</string>
+    <string name="btn_clear_api_key">Noņemt saglabāto atslēgu</string>
+    <string name="api_key_status_present">Atslēga ir saglabāta (šifrēta). Tā vairs netiek rādīta ekrānā.</string>
+    <string name="api_key_status_absent">Atslēga vēl nav saglabāta</string>
+
+    <string name="label_model">Gemini modelis</string>
+    <string name="hint_model">piem., gemini-3.5-flash-lite</string>
+    <string name="model_suggestions_label">Ieteikumi (pieskarieties, lai izmantotu):</string>
+
+    <string name="btn_test_api">Pārbaudīt API savienojumu</string>
+    <string name="test_api_running">Notiek pārbaude…</string>
+    <string name="test_api_success">Izdevās — Gemini atbildēja pareizi.</string>
+    <string name="test_api_failure">Neizdevās: %1$s</string>
+
+    <string name="section_allowed_apps">Atļautās lietotnes</string>
+    <string name="allowed_apps_description">TextGate AI pēc noklusējuma ir iespējota tikai izplatītākajām sociālo mediju un ziņojumapmaiņas lietotnēm — piemēram, WhatsApp, Messenger, Instagram, Telegram, Signal, Discord, Snapchat, TikTok, X, Threads, LinkedIn un SMS/Messages — tāpēc nekas papildus nav jāiestata. Šis saraksts kontrolē gan ievadītos tulkošanas izraisītājus (?en, ?de, ?fr un tā tālāk), gan ilgas piespiešanas tulkošanas burbuli. Zināmas paroļu pārvaldības, banku, autentifikācijas un sistēmas drošības lietotnes šeit nekad netiek rādītas un tās nekad nevar iespējot; kriptovalūtu makus un biržas bloķē tāpat.</string>
+    <string name="allowed_apps_advanced_hint">Vēlaties citu lietotni vai vēlaties noņemt kādu no noklusējuma lietotnēm? Izvēlieties lietotnes manuāli.</string>
+    <string name="btn_show_advanced_apps">Rādīt papildu iespējas: izvēlēties lietotnes manuāli</string>
+    <string name="btn_hide_advanced_apps">Slēpt papildu iespējas</string>
+    <string name="allowed_apps_empty">Netika atrasta neviena instalēta lietotne ar palaišanas ikonu.</string>
+    <string name="allowed_apps_loading">Notiek instalēto lietotņu ielāde…</string>
+
+    <string name="section_privacy">Konfidencialitāte</string>
+    <string name="privacy_notice_headline">Teksts tiek nosūtīts uz Google Gemini tikai tad, kad skaidri ievadāt tulkošanas izraisītāju (piemēram, ?en vai ?de) vai turat nospiestu ziņu.</string>
+    <string name="privacy_notice_body">TextGate AI nevāc analītikas datus, avāriju pārskatus vai lietojuma datus, un tajā nav iekļauts neviens trešās puses SDK. Vienīgie tīkla pieprasījumi, ko šī lietotne jebkad veic, ir jūsu pašu ierosinātie tulkošanas pieprasījumi, kas tiek sūtīti tieši uz Google Gemini API pa HTTPS. Jūsu API atslēga tiek šifrēta ierīcē, izmantojot Android Keystore, un netiek iekļauta dublējumos. Paroles lauki un citi sensitīvi ievades lauki nekad, nekādos apstākļos, netiek lasīti. Pieskarieties \"Pilnā konfidencialitātes politika\" zemāk, lai uzzinātu visas detaļas.</string>
+    <string name="btn_full_privacy_policy">Pilnā konfidencialitātes politika</string>
+    <string name="btn_close_dialog">Aizvērt</string>
+    <string name="privacy_full_policy_title">Pilnā konfidencialitātes politika</string>
+    <string name="privacy_full_policy_body">Ko TextGate AI lasa:\n• Teksta lauku, kurā pašlaik rakstāt — tikai lai pārbaudītu, vai beigās ir viens precīzs tulkošanas izraisītājs (piemēram, \"?en\" vai \"?de\").\n• Ziņu vai komentāru, kuru turat nospiestu — tikai lietotnēs, kuras esat iespējojis sadaļā \"Atļautās lietotnes\".\n\nKo tā nekad nelasa: paroles laukus, PIN koda ievadi vai jebkuru lauku, ko lietotne atpazīst kā sensitīvu — bez izņēmumiem, jebkurā lietotnē.\n\nKas tiek nosūtīts un kur: tikai teksts, ko esat ierosinājis, nosūtīts vienu reizi, tieši pa HTTPS uz Google Gemini API, izmantojot jūsu pašu norādīto atslēgu. Nekas nekad netiek nosūtīts, ja vien pats neievadāt izraisītāju vai neturat nospiestu ziņu.\n\nKas tiek glabāts jūsu tālrunī: jūsu Gemini API atslēga, šifrēta ar Android Keystore (to pašu aparatūrā balstīto drošību, ko Android izmanto jūsu ekrāna bloķēšanas datiem), un jūsu vienkāršie iestatījumi (kuras lietotnes ir atļautas, jūsu izvēlētā valoda, jūsu izvēlētais Gemini modelis). Nekas no tā netiek iekļauts tālruņa dublējumos.\n\nKo TextGate AI NEDARA: nekādu analītiku, nekādus avāriju pārskatus, nekādu lietojuma izsekošanu, nekādu reklāmu, nekādas trešo pušu bibliotēkas, nekādu iztulkotā satura vēsturi un nekādu lasīšanu lietotnēs, kuras neesat skaidri atļāvis.\n\nJūs saglabājat kontroli: jebkurā laikā izslēdziet visu funkciju ar galveno slēdzi un jebkurā laikā pievienojiet vai noņemiet jebkuru lietotni no atļauto saraksta.</string>
+
+    <string name="section_about">Par lietotni</string>
+    <string name="about_version_label">Versija</string>
+
+    <!-- Toasts / runtime messages (never include user text) -->
+    <string name="toast_sending_to_gemini">Izvēlētais teksts tiek sūtīts uz Gemini</string>
+    <string name="toast_translation_failed">Tulkošana neizdevās — sākotnējais teksts nav mainīts</string>
+    <string name="toast_field_changed_aborted">Lauks tika mainīts pirms rezultāta saņemšanas — nekas netika aizstāts</string>
+    <string name="toast_service_disabled">MI tulkošana ir izslēgta Iestatījumos</string>
+
+    <!-- Long-press translation bubble -->
+    <string name="bubble_loading">Notiek tulkošana…</string>
+    <string name="bubble_close_content_description">Aizvērt</string>
+
+    <!-- Errors -->
+    <string name="error_no_api_key">Vispirms ievadiet un saglabājiet Gemini API atslēgu</string>
+    <string name="error_text_too_long">Teksts ir pārāk garš, lai to nosūtītu automātiski (ierobežojums: %1$d rakstzīmes)</string>
+    <string name="error_generic">Kaut kas nogāja greizi. Lūdzu, mēģiniet vēlreiz.</string>
+    <string name="error_timeout">Iestājās pieprasījuma noildze.</string>
+    <string name="error_network">Neizdevās sasniegt Gemini. Pārbaudiet savienojumu.</string>
+    <string name="error_http">Gemini atgrieza kļūdu (kods %1$d).</string>
+    <string name="error_empty_response">Gemini atgrieza tukšu atbildi.</string>
+</resources>

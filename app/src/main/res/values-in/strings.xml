@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">TextGate AI</string>
+
+    <string name="accessibility_service_description">TextGate AI membaca teks dengan dua cara, dan keduanya dibatasi secara ketat. Pertama: kolom teks yang sedang Anda edit, dan hanya untuk mencari satu akhiran pemicu yang persis (seperti \"?en\" atau \"?de\" — satu untuk setiap bahasa, lihat daftar lengkapnya di Pengaturan) di akhir apa yang Anda ketik. Kedua: pesan atau komentar yang Anda tekan lama, untuk menampilkan terjemahan mengambang ke bahasa default yang Anda pilih di Pengaturan. Kedua cara ini tidak pernah membaca kolom kata sandi, tidak pernah berjalan di aplikasi yang belum Anda izinkan secara eksplisit, dan tidak pernah menyimpan riwayat apa pun yang dibaca. Ketika sebuah pemicu terdeteksi, atau ketika Anda menekan lama sebuah pesan, di aplikasi yang diizinkan, teks terkait dikirim melalui HTTPS ke Gemini API yang telah Anda konfigurasi dan diterjemahkan. Hasil dari pemicu yang diketik akan menggantikan isi kolom tersebut; hasil dari tekan lama hanya akan ditampilkan dalam gelembung mengambang sementara dan tidak pernah menyentuh aplikasi aslinya. Tidak ada apa pun yang dikirim ke mana pun kecuali Anda mengetikkan salah satu pemicu persis ini atau menekan lama sebuah pesan di aplikasi yang diaktifkan dalam pengaturan TextGate AI.</string>
+
+    <!-- Settings screen -->
+    <string name="settings_title">TextGate AI</string>
+
+    <string name="section_master_switch">Transformasi AI</string>
+    <string name="master_switch_label">Aktifkan terjemahan pemicu ketik</string>
+    <string name="master_switch_description">Sakelar utama. Ketik pemicu seperti ?en atau ?de di akhir pesan untuk menerjemahkannya ke bahasa tersebut (lihat daftar lengkap di bawah). Sakelar ini juga mengatur gelembung terjemahan tekan lama. Saat dimatikan, TextGate AI tidak pernah membaca kolom atau pesan apa pun dan tidak pernah membuat permintaan jaringan apa pun, terlepas dari pengaturan lainnya.</string>
+
+    <string name="bubble_language_label">Bahasa aplikasi &amp; terjemahan</string>
+    <string name="bubble_language_description">Pilih bahasa Anda sekali di sini. Pengaturan ini menentukan bahasa default untuk gelembung terjemahan tekan lama DAN bahasa yang digunakan untuk menampilkan layar TextGate AI sendiri — keduanya berubah bersamaan.</string>
+
+    <string name="section_accessibility_status">Layanan Aksesibilitas</string>
+    <string name="accessibility_status_enabled">Diaktifkan</string>
+    <string name="accessibility_status_disabled">Belum diaktifkan — TextGate AI tidak dapat melakukan apa pun sampai Anda mengaktifkannya</string>
+    <string name="btn_open_accessibility_settings">Buka Pengaturan Aksesibilitas</string>
+
+    <string name="section_gemini_api">Gemini API</string>
+    <string name="label_api_key">Kunci API Gemini</string>
+    <string name="hint_api_key">Tempel kunci API Gemini Anda</string>
+    <string name="btn_get_api_key">Dapatkan kunci API gratis</string>
+    <string name="btn_show_api_key_instructions">Bagaimana caranya? (panduan langkah demi langkah)</string>
+    <string name="btn_hide_api_key_instructions">Sembunyikan panduan</string>
+    <string name="api_key_instructions_body">1. Ketuk \"Dapatkan kunci API gratis\" di atas — ini akan membuka Google AI Studio di peramban Anda.\n2. Masuk dengan akun Google Anda (yang biasa Anda gunakan sehari-hari).\n3. Setujui Persyaratan Layanan jika diminta.\n4. Ketuk \"Create API key\" pada halaman tersebut.\n5. Salin kunci yang muncul — berupa rangkaian huruf dan angka yang panjang.\n6. Kembali ke aplikasi ini, tempel kunci tersebut ke kolom di bawah, lalu ketuk \"Simpan kunci\".\n\nKunci ini gratis dalam batas tingkat gratis Google dan tidak pernah meninggalkan ponsel Anda kecuali untuk berkomunikasi langsung dengan Gemini — kunci ini dienkripsi dan hanya disimpan di perangkat ini.</string>
+    <string name="btn_save_api_key">Simpan kunci (terenkripsi)</string>
+    <string name="api_key_saved">Kunci API disimpan, dienkripsi dengan Android Keystore</string>
+    <string name="api_key_cleared">Kunci API dihapus</string>
+    <string name="btn_clear_api_key">Hapus kunci tersimpan</string>
+    <string name="api_key_status_present">Sebuah kunci telah tersimpan (terenkripsi). Kunci ini tidak akan pernah ditampilkan lagi di layar.</string>
+    <string name="api_key_status_absent">Belum ada kunci yang tersimpan</string>
+
+    <string name="label_model">Model Gemini</string>
+    <string name="hint_model">mis. gemini-3.5-flash-lite</string>
+    <string name="model_suggestions_label">Saran (ketuk untuk menggunakan):</string>
+
+    <string name="btn_test_api">Uji koneksi API</string>
+    <string name="test_api_running">Menguji…</string>
+    <string name="test_api_success">Berhasil — Gemini merespons dengan benar.</string>
+    <string name="test_api_failure">Gagal: %1$s</string>
+
+    <string name="section_allowed_apps">Aplikasi yang diizinkan</string>
+    <string name="allowed_apps_description">TextGate AI secara default diaktifkan hanya untuk aplikasi media sosial dan perpesanan umum — misalnya WhatsApp, Messenger, Instagram, Telegram, Signal, Discord, Snapchat, TikTok, X, Threads, LinkedIn, dan SMS/Pesan — jadi tidak ada yang perlu diatur. Daftar ini mengatur baik pemicu terjemahan yang diketik (?en, ?de, ?fr, dan sebagainya) maupun gelembung terjemahan tekan lama. Pengelola kata sandi, aplikasi perbankan, autentikator, dan aplikasi keamanan sistem yang dikenal tidak pernah ditampilkan di sini dan tidak pernah dapat diaktifkan; dompet dan bursa mata uang kripto juga diblokir dengan cara yang sama.</string>
+    <string name="allowed_apps_advanced_hint">Ingin aplikasi lain, atau menghapus salah satu aplikasi default? Pilih aplikasi secara manual sebagai gantinya.</string>
+    <string name="btn_show_advanced_apps">Tampilkan lanjutan: pilih aplikasi secara manual</string>
+    <string name="btn_hide_advanced_apps">Sembunyikan opsi lanjutan</string>
+    <string name="allowed_apps_empty">Tidak ditemukan aplikasi terpasang dengan ikon peluncur.</string>
+    <string name="allowed_apps_loading">Memuat aplikasi yang terpasang…</string>
+
+    <string name="section_privacy">Privasi</string>
+    <string name="privacy_notice_headline">Teks hanya dikirim ke Google Gemini saat Anda secara eksplisit mengetik pemicu terjemahan (seperti ?en atau ?de), atau menekan lama sebuah pesan.</string>
+    <string name="privacy_notice_body">TextGate AI tidak mengumpulkan analitik, laporan crash, atau data penggunaan dalam bentuk apa pun, dan tidak berisi SDK pihak ketiga apa pun. Satu-satunya permintaan jaringan yang pernah dibuat aplikasi ini adalah permintaan terjemahan yang Anda picu sendiri, yang dikirim langsung ke Gemini API milik Google melalui HTTPS. Kunci API Anda dienkripsi di perangkat menggunakan Android Keystore dan dikecualikan dari pencadangan. Kolom kata sandi dan input sensitif lainnya tidak pernah dibaca, dalam keadaan apa pun. Ketuk \"Kebijakan privasi lengkap\" di bawah untuk detail selengkapnya.</string>
+    <string name="btn_full_privacy_policy">Kebijakan privasi lengkap</string>
+    <string name="btn_close_dialog">Tutup</string>
+    <string name="privacy_full_policy_title">Kebijakan privasi lengkap</string>
+    <string name="privacy_full_policy_body">Apa yang dibaca TextGate AI:\n• Kolom teks yang sedang Anda ketik — hanya untuk memeriksa satu pemicu terjemahan yang persis (seperti \"?en\" atau \"?de\") di bagian akhir.\n• Pesan atau komentar yang Anda tekan lama — hanya di aplikasi yang telah Anda aktifkan di \"Aplikasi yang diizinkan\".\n\nApa yang tidak pernah dibaca, sama sekali: kolom kata sandi, entri PIN, atau kolom apa pun yang dikenali aplikasi sebagai sensitif — tanpa pengecualian, di aplikasi mana pun.\n\nApa yang dikirim, dan ke mana: hanya teks yang Anda picu, dikirim satu kali, langsung melalui HTTPS ke Gemini API milik Google menggunakan kunci yang Anda berikan sendiri. Tidak ada apa pun yang pernah dikirim kecuali Anda sendiri mengetikkan pemicu atau menekan lama sebuah pesan.\n\nApa yang disimpan di ponsel Anda: kunci API Gemini Anda, dienkripsi dengan Android Keystore (keamanan berbasis perangkat keras yang sama yang digunakan Android untuk kredensial layar kunci Anda), dan pengaturan sederhana Anda (aplikasi mana yang diizinkan, bahasa pilihan Anda, model Gemini pilihan Anda). Tidak satu pun dari ini disertakan dalam pencadangan ponsel.\n\nApa yang TIDAK dilakukan TextGate AI: tidak ada analitik, tidak ada pelaporan crash, tidak ada pelacakan penggunaan, tidak ada iklan, tidak ada pustaka pihak ketiga dalam bentuk apa pun, tidak ada riwayat apa pun yang pernah Anda terjemahkan, dan tidak ada pembacaan aplikasi apa pun yang belum Anda izinkan secara eksplisit.\n\nAnda tetap memegang kendali: matikan seluruh fitur ini kapan saja dengan sakelar utama, dan tambahkan atau hapus aplikasi apa pun dari daftar yang diizinkan kapan pun Anda mau.</string>
+
+    <string name="section_about">Tentang</string>
+    <string name="about_version_label">Versi</string>
+
+    <!-- Toasts / runtime messages (never include user text) -->
+    <string name="toast_sending_to_gemini">Mengirim teks yang dipilih ke Gemini</string>
+    <string name="toast_translation_failed">Terjemahan gagal — teks asli tidak berubah</string>
+    <string name="toast_field_changed_aborted">Kolom berubah sebelum hasil tiba — tidak ada yang diganti</string>
+    <string name="toast_service_disabled">Transformasi AI dimatikan di Pengaturan</string>
+
+    <!-- Long-press translation bubble -->
+    <string name="bubble_loading">Menerjemahkan…</string>
+    <string name="bubble_close_content_description">Tutup</string>
+
+    <!-- Errors -->
+    <string name="error_no_api_key">Masukkan dan simpan kunci API Gemini terlebih dahulu</string>
+    <string name="error_text_too_long">Teks terlalu panjang untuk dikirim secara otomatis (batas: %1$d karakter)</string>
+    <string name="error_generic">Terjadi kesalahan. Silakan coba lagi.</string>
+    <string name="error_timeout">Permintaan telah melewati batas waktu.</string>
+    <string name="error_network">Tidak dapat menjangkau Gemini. Periksa koneksi Anda.</string>
+    <string name="error_http">Gemini mengembalikan kesalahan (kode %1$d).</string>
+    <string name="error_empty_response">Gemini mengembalikan respons kosong.</string>
+</resources>

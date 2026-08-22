@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">TextGate AI</string>
+
+    <string name="accessibility_service_description">TextGate AI skaito tekstą tik dviem griežtai ribojamais būdais. Pirma: teksto lauką, kurį šiuo metu redaguojate, ir tik tam, kad surastų vieną tikslų suveikimo priesagą (pvz., \"?en\" arba \"?de\" — po vieną kiekvienai kalbai, visą sąrašą rasite Nustatymuose) įvesto teksto pabaigoje. Antra: pranešimą ar komentarą, kurį paspaudžiate ir laikote nuspaudę, kad būtų parodytas plaukiojantis vertimas į numatytąją kalbą, kurią pasirenkate Nustatymuose. Abu būdai niekada neskaito slaptažodžių laukų, niekada neveikia programose, kurių aiškiai neleidote, ir niekada nesaugo jokios perskaityto teksto istorijos. Kai aptinkamas suveikimo ženklas arba kai laikote nuspaudę pranešimą leidžiamoje programoje, atitinkamas tekstas per HTTPS siunčiamas į jūsų sukonfigūruotą Gemini API ir išverčiamas. Įvesto suveikimo ženklo rezultatas pakeičia lauko turinį; ilgo paspaudimo rezultatas rodomas tik laikinajame plaukiojančiame burbule ir niekada nepaliečia pačios programos. Niekas niekur nesiunčiama, nebent įvedate vieną iš šių tikslių suveikimo ženklų arba laikote nuspaudę pranešimą programoje, kuri įjungta TextGate AI nustatymuose.</string>
+
+    <!-- Settings screen -->
+    <string name="settings_title">TextGate AI</string>
+
+    <string name="section_master_switch">DI vertimas</string>
+    <string name="master_switch_label">Įjungti vertimą pagal suveikimo ženklą</string>
+    <string name="master_switch_description">Pagrindinis jungiklis. Žinutės pabaigoje įveskite suveikimo ženklą, pvz., ?en arba ?de, kad išverstumėte ją į tą kalbą (visą sąrašą rasite žemiau). Taip pat valdo ilgo paspaudimo vertimo burbulą. Kai išjungtas, TextGate AI niekada neskaito jokio lauko ar žinutės ir niekada nesiunčia jokios užklausos tinklu, nepaisant kitų nustatymų.</string>
+
+    <string name="bubble_language_label">Programos ir vertimo kalba</string>
+    <string name="bubble_language_description">Kalbą pasirinkite čia vieną kartą. Ji nustato numatytąją ilgo paspaudimo vertimo burbulo kalbą IR kalbą, kuria rodomi patys TextGate AI ekranai — abi keičiasi kartu.</string>
+
+    <string name="section_accessibility_status">Pritaikymo neįgaliesiems paslauga</string>
+    <string name="accessibility_status_enabled">Įjungta</string>
+    <string name="accessibility_status_disabled">Neįjungta — TextGate AI negalės nieko atlikti, kol jos neįjungsite</string>
+    <string name="btn_open_accessibility_settings">Atidaryti pritaikymo neįgaliesiems nustatymus</string>
+
+    <string name="section_gemini_api">Gemini API</string>
+    <string name="label_api_key">Gemini API raktas</string>
+    <string name="hint_api_key">Įklijuokite savo Gemini API raktą</string>
+    <string name="btn_get_api_key">Gauti nemokamą API raktą</string>
+    <string name="btn_show_api_key_instructions">Kaip tai padaryti? (nuoseklus vadovas)</string>
+    <string name="btn_hide_api_key_instructions">Slėpti vadovą</string>
+    <string name="api_key_instructions_body">1. Paspauskite \"Gauti nemokamą API raktą\" aukščiau — naršyklėje atsivers Google AI Studio.\n2. Prisijunkite su savo Google paskyra (ta, kurią naudojate kasdien).\n3. Jei paprašys, sutikite su paslaugų teikimo sąlygomis.\n4. Puslapyje paspauskite \"Create API key\".\n5. Nukopijuokite pasirodžiusį raktą — ilgą raidžių ir skaičių eilutę.\n6. Grįžkite į šią programą, įklijuokite raktą į žemiau esantį lauką ir paspauskite \"Išsaugoti raktą\".\n\nRaktas nemokamas neviršijant Google nemokamo plano ribų ir niekada nepalieka jūsų telefono, išskyrus tiesioginį bendravimą su Gemini — jis šifruojamas ir saugomas tik šiame įrenginyje.</string>
+    <string name="btn_save_api_key">Išsaugoti raktą (šifruotą)</string>
+    <string name="api_key_saved">API raktas išsaugotas, užšifruotas naudojant Android Keystore</string>
+    <string name="api_key_cleared">API raktas pašalintas</string>
+    <string name="btn_clear_api_key">Pašalinti išsaugotą raktą</string>
+    <string name="api_key_status_present">Raktas išsaugotas (užšifruotas). Jis daugiau niekada nerodomas ekrane.</string>
+    <string name="api_key_status_absent">Kol kas raktas neišsaugotas</string>
+
+    <string name="label_model">Gemini modelis</string>
+    <string name="hint_model">pvz., gemini-3.5-flash-lite</string>
+    <string name="model_suggestions_label">Pasiūlymai (bakstelėkite, kad naudotumėte):</string>
+
+    <string name="btn_test_api">Tikrinti API ryšį</string>
+    <string name="test_api_running">Tikrinama…</string>
+    <string name="test_api_success">Pavyko — Gemini atsakė teisingai.</string>
+    <string name="test_api_failure">Nepavyko: %1$s</string>
+
+    <string name="section_allowed_apps">Leidžiamos programos</string>
+    <string name="allowed_apps_description">TextGate AI pagal numatytuosius nustatymus įjungta tik populiariausioms socialinių tinklų ir susirašinėjimo programoms — pavyzdžiui, WhatsApp, Messenger, Instagram, Telegram, Signal, Discord, Snapchat, TikTok, X, Threads, LinkedIn ir SMS/Messages — todėl papildomai nieko konfigūruoti nereikia. Šis sąrašas valdo tiek įvesties suveikimo ženklus (?en, ?de, ?fr ir t. t.), tiek ilgo paspaudimo vertimo burbulą. Žinomos slaptažodžių tvarkyklės, bankininkystės, autentifikavimo ir sistemos saugos programos čia niekada nerodomos ir jų niekada negalima įjungti; kriptovaliutų piniginės ir biržos blokuojamos taip pat.</string>
+    <string name="allowed_apps_advanced_hint">Norite kitos programos arba pašalinti vieną iš numatytųjų? Pasirinkite programas rankiniu būdu.</string>
+    <string name="btn_show_advanced_apps">Rodyti išsamiau: pasirinkti programas rankiniu būdu</string>
+    <string name="btn_hide_advanced_apps">Slėpti išsamius nustatymus</string>
+    <string name="allowed_apps_empty">Nerasta įdiegtų programų su paleidiklio piktograma.</string>
+    <string name="allowed_apps_loading">Įkeliamos įdiegtos programos…</string>
+
+    <string name="section_privacy">Privatumas</string>
+    <string name="privacy_notice_headline">Tekstas siunčiamas Google Gemini tik tada, kai aiškiai įvedate vertimo suveikimo ženklą (pvz., ?en arba ?de) arba laikote nuspaudę žinutę.</string>
+    <string name="privacy_notice_body">TextGate AI nerenka jokių analitikos duomenų, gedimų ataskaitų ar naudojimo statistikos ir nenaudoja jokių trečiųjų šalių SDK. Vienintelės šios programos siunčiamos tinklo užklausos yra jūsų pačių inicijuotos vertimo užklausos, siunčiamos tiesiai į Google Gemini API per HTTPS. Jūsų API raktas šifruojamas įrenginyje naudojant Android Keystore ir neįtraukiamas į atsargines kopijas. Slaptažodžių laukai ir kiti jautrūs įvesties laukai niekada, jokiomis aplinkybėmis, neskaitomi. Norėdami sužinoti visas išsamias sąlygas, bakstelėkite \"Visa privatumo politika\" žemiau.</string>
+    <string name="btn_full_privacy_policy">Visa privatumo politika</string>
+    <string name="btn_close_dialog">Uždaryti</string>
+    <string name="privacy_full_policy_title">Visa privatumo politika</string>
+    <string name="privacy_full_policy_body">Ką TextGate AI skaito:\n• Teksto lauką, kurį šiuo metu rašote — tik tam, kad patikrintų, ar pabaigoje yra vienas tikslus vertimo suveikimo ženklas (pvz., \"?en\" arba \"?de\").\n• Pranešimą ar komentarą, kurį laikote nuspaudę — tik programose, kurias esate įjungę skiltyje \"Leidžiamos programos\".\n\nKo ji niekada neskaito: slaptažodžių laukų, PIN kodo įvesties ar bet kurio lauko, kurį programa atpažįsta kaip jautrų — jokių išimčių, jokioje programoje.\n\nKas siunčiama ir kur: tik tekstas, kurį suaktyvinote, siunčiamas vieną kartą, tiesiai per HTTPS į Google Gemini API, naudojant jūsų pačių pateiktą raktą. Niekas niekada nesiunčiama, nebent patys įvedate suveikimo ženklą arba laikote nuspaudę žinutę.\n\nKas saugoma jūsų telefone: jūsų Gemini API raktas, užšifruotas naudojant Android Keystore (tą pačią aparatine įranga paremtą apsaugą, kurią Android naudoja jūsų ekrano užrakto duomenims), ir jūsų paprasti nustatymai (kurios programos leidžiamos, pasirinkta kalba, pasirinktas Gemini modelis). Nieko iš to neįtraukiama į telefono atsargines kopijas.\n\nKo TextGate AI NEDARO: jokios analitikos, jokių gedimų ataskaitų, jokio naudojimo sekimo, jokios reklamos, jokių trečiųjų šalių bibliotekų, jokios išverstų tekstų istorijos ir jokio skaitymo programose, kurių aiškiai neleidote.\n\nJūs viską valdote: bet kada visą funkciją galite išjungti pagrindiniu jungikliu ir bet kada pridėti ar pašalinti bet kurią programą iš leidžiamų sąrašo.</string>
+
+    <string name="section_about">Apie</string>
+    <string name="about_version_label">Versija</string>
+
+    <!-- Toasts / runtime messages (never include user text) -->
+    <string name="toast_sending_to_gemini">Pasirinktas tekstas siunčiamas į Gemini</string>
+    <string name="toast_translation_failed">Vertimas nepavyko — originalus tekstas nepakeistas</string>
+    <string name="toast_field_changed_aborted">Laukas pakeistas prieš gaunant rezultatą — niekas nepakeista</string>
+    <string name="toast_service_disabled">DI vertimas išjungtas Nustatymuose</string>
+
+    <!-- Long-press translation bubble -->
+    <string name="bubble_loading">Verčiama…</string>
+    <string name="bubble_close_content_description">Uždaryti</string>
+
+    <!-- Errors -->
+    <string name="error_no_api_key">Pirmiausia įveskite ir išsaugokite Gemini API raktą</string>
+    <string name="error_text_too_long">Tekstas per ilgas, kad būtų išsiųstas automatiškai (riba: %1$d simbolių)</string>
+    <string name="error_generic">Kažkas nutiko ne taip. Bandykite dar kartą.</string>
+    <string name="error_timeout">Baigėsi užklausos laukimo laikas.</string>
+    <string name="error_network">Nepavyko pasiekti Gemini. Patikrinkite ryšį.</string>
+    <string name="error_http">Gemini grąžino klaidą (kodas %1$d).</string>
+    <string name="error_empty_response">Gemini grąžino tuščią atsakymą.</string>
+</resources>

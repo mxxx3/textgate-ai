@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">TextGate AI</string>
+
+    <string name="accessibility_service_description">TextGate AI leser tekst på to strengt begrensede måter. Først: tekstfeltet du redigerer akkurat nå, og bare for å se etter én bestemt utløsersuffiks (som \"?en\" eller \"?de\" — én per språk, se hele listen i Innstillinger) på slutten av det du har skrevet. For det andre: en melding eller kommentar du trykker og holder inne på, for å vise en flytende oversettelse til standardspråket du velger i Innstillinger. Ingen av disse to metodene leser noensinne passordfelt, kjører aldri i apper du ikke uttrykkelig har tillatt, og lagrer aldri noen historikk over noe som er lest. Når en utløser oppdages, eller når du trykker og holder inne på en melding, i en tillatt app, sendes den aktuelle teksten over HTTPS til Gemini-API-et du har konfigurert, og oversettes. Resultatet fra den skrevne utløseren erstatter innholdet i feltet; resultatet fra trykk-og-hold vises bare i en midlertidig flytende boble og berører aldri den opprinnelige appen. Ingenting sendes noe sted med mindre du skriver en av disse eksakte utløserne eller trykker og holder inne på en melding i en app som er slått på i TextGate AIs innstillinger.</string>
+
+    <!-- Settings screen -->
+    <string name="settings_title">TextGate AI</string>
+
+    <string name="section_master_switch">KI-oversettelse</string>
+    <string name="master_switch_label">Aktiver oversettelse med skrevet utløser</string>
+    <string name="master_switch_description">Hovedbryter. Skriv en utløser som ?en eller ?de på slutten av en melding for å oversette den til det språket (se hele listen nedenfor). Styrer også oversettelsesboblen for trykk-og-hold. Når den er av, leser TextGate AI aldri noe felt eller noen melding, og sender aldri noen nettverksforespørsel, uansett andre innstillinger.</string>
+
+    <string name="bubble_language_label">App- og oversettelsesspråk</string>
+    <string name="bubble_language_description">Velg språket ditt én gang her. Det setter standardspråket for oversettelsesboblen ved trykk-og-hold OG språket TextGate AIs egne skjermer vises på — begge endres sammen.</string>
+
+    <string name="section_accessibility_status">Tilgjengelighetstjeneste</string>
+    <string name="accessibility_status_enabled">Aktivert</string>
+    <string name="accessibility_status_disabled">Ikke aktivert — TextGate AI kan ikke gjøre noe før du aktiverer den</string>
+    <string name="btn_open_accessibility_settings">Åpne tilgjengelighetsinnstillinger</string>
+
+    <string name="section_gemini_api">Gemini-API</string>
+    <string name="label_api_key">Gemini API-nøkkel</string>
+    <string name="hint_api_key">Lim inn Gemini API-nøkkelen din</string>
+    <string name="btn_get_api_key">Få en gratis API-nøkkel</string>
+    <string name="btn_show_api_key_instructions">Hvordan gjør jeg dette? (steg-for-steg-veiledning)</string>
+    <string name="btn_hide_api_key_instructions">Skjul veiledningen</string>
+    <string name="api_key_instructions_body">1. Trykk på \"Få en gratis API-nøkkel\" ovenfor — dette åpner Google AI Studio i nettleseren din.\n2. Logg inn med Google-kontoen din (den du bruker hver dag).\n3. Godta vilkårene for bruk hvis du blir bedt om det.\n4. Trykk på \"Create API key\" på siden.\n5. Kopier nøkkelen som vises — en lang streng med bokstaver og tall.\n6. Kom tilbake til denne appen, lim inn nøkkelen i feltet nedenfor, og trykk på \"Lagre nøkkel\".\n\nNøkkelen er gratis innenfor Googles grenser for gratisnivået, og forlater aldri telefonen din bortsett fra for å snakke direkte med Gemini — den krypteres og lagres kun på denne enheten.</string>
+    <string name="btn_save_api_key">Lagre nøkkel (kryptert)</string>
+    <string name="api_key_saved">API-nøkkel lagret, kryptert med Android Keystore</string>
+    <string name="api_key_cleared">API-nøkkel fjernet</string>
+    <string name="btn_clear_api_key">Fjern lagret nøkkel</string>
+    <string name="api_key_status_present">En nøkkel er lagret (kryptert). Den vises aldri på skjermen igjen.</string>
+    <string name="api_key_status_absent">Ingen nøkkel lagret ennå</string>
+
+    <string name="label_model">Gemini-modell</string>
+    <string name="hint_model">f.eks. gemini-3.5-flash-lite</string>
+    <string name="model_suggestions_label">Forslag (trykk for å bruke):</string>
+
+    <string name="btn_test_api">Test API-tilkobling</string>
+    <string name="test_api_running">Tester…</string>
+    <string name="test_api_success">Vellykket — Gemini svarte korrekt.</string>
+    <string name="test_api_failure">Mislyktes: %1$s</string>
+
+    <string name="section_allowed_apps">Tillatte apper</string>
+    <string name="allowed_apps_description">TextGate AI er som standard aktivert bare for vanlige sosiale medier- og meldingsapper — for eksempel WhatsApp, Messenger, Instagram, Telegram, Signal, Discord, Snapchat, TikTok, X, Threads, LinkedIn og SMS/Messages — så det er ingenting du trenger å sette opp. Denne listen styrer både de skrevne oversettelsesutløserne (?en, ?de, ?fr og så videre) og oversettelsesboblen for trykk-og-hold. Kjente passordbehandlere, bank-, autentiserings- og systemsikkerhetsapper vises aldri her og kan aldri aktiveres; kryptolommebøker og -børser blokkeres på samme måte.</string>
+    <string name="allowed_apps_advanced_hint">Vil du ha en annen app, eller fjerne en av standardappene? Velg apper manuelt i stedet.</string>
+    <string name="btn_show_advanced_apps">Vis avansert: velg apper manuelt</string>
+    <string name="btn_hide_advanced_apps">Skjul avanserte alternativer</string>
+    <string name="allowed_apps_empty">Fant ingen installerte apper med et startikon.</string>
+    <string name="allowed_apps_loading">Laster installerte apper…</string>
+
+    <string name="section_privacy">Personvern</string>
+    <string name="privacy_notice_headline">Tekst sendes til Google Gemini bare når du uttrykkelig skriver en oversettelsesutløser (som ?en eller ?de), eller trykker og holder inne på en melding.</string>
+    <string name="privacy_notice_body">TextGate AI samler ikke inn analyser, feilrapporter eller bruksdata av noe slag, og inneholder ingen tredjeparts-SDK-er. De eneste nettverksforespørslene denne appen noensinne gjør, er oversettelsesforespørslene du selv utløser, sendt direkte til Googles Gemini-API over HTTPS. API-nøkkelen din krypteres på enheten ved hjelp av Android Keystore og er ekskludert fra sikkerhetskopier. Passordfelt og andre sensitive inndata leses aldri, uansett omstendighet. Trykk på \"Fullstendig personvernerklæring\" nedenfor for alle detaljer.</string>
+    <string name="btn_full_privacy_policy">Fullstendig personvernerklæring</string>
+    <string name="btn_close_dialog">Lukk</string>
+    <string name="privacy_full_policy_title">Fullstendig personvernerklæring</string>
+    <string name="privacy_full_policy_body">Hva TextGate AI leser:\n• Tekstfeltet du skriver i akkurat nå — bare for å sjekke etter én bestemt oversettelsesutløser (som \"?en\" eller \"?de\") på slutten.\n• En melding eller kommentar du trykker og holder inne på — bare i apper du har slått på under \"Tillatte apper\".\n\nHva den aldri leser, uansett: passordfelt, PIN-inntasting, eller ethvert felt appen gjenkjenner som sensitivt — ingen unntak, i noen app.\n\nHva som sendes, og hvor: bare teksten du utløste, sendt én gang, direkte over HTTPS til Googles Gemini-API ved hjelp av nøkkelen du selv oppgir. Ingenting sendes noensinne med mindre du selv skriver en utløser eller trykker og holder inne på en melding.\n\nHva som lagres på telefonen din: Gemini API-nøkkelen din, kryptert med Android Keystore (den samme maskinvarebaserte sikkerheten Android bruker for påloggingsinformasjonen til låseskjermen din), og dine enkle innstillinger (hvilke apper som er tillatt, valgt språk, valgt Gemini-modell). Ingenting av dette inkluderes i telefonens sikkerhetskopier.\n\nHva TextGate AI IKKE gjør: ingen analyser, ingen feilrapportering, ingen bruksporing, ingen reklame, ingen tredjepartsbiblioteker av noe slag, ingen historikk over noe du har oversatt, og ingen lesing av apper du ikke uttrykkelig har tillatt.\n\nDu har full kontroll: slå av hele funksjonen når som helst med hovedbryteren, og legg til eller fjern en hvilken som helst app fra den tillatte listen når du vil.</string>
+
+    <string name="section_about">Om</string>
+    <string name="about_version_label">Versjon</string>
+
+    <!-- Toasts / runtime messages (never include user text) -->
+    <string name="toast_sending_to_gemini">Sender valgt tekst til Gemini</string>
+    <string name="toast_translation_failed">Oversettelse mislyktes — original tekst er uendret</string>
+    <string name="toast_field_changed_aborted">Feltet ble endret før resultatet kom — ingenting ble erstattet</string>
+    <string name="toast_service_disabled">KI-oversettelse er slått av i Innstillinger</string>
+
+    <!-- Long-press translation bubble -->
+    <string name="bubble_loading">Oversetter…</string>
+    <string name="bubble_close_content_description">Lukk</string>
+
+    <!-- Errors -->
+    <string name="error_no_api_key">Angi og lagre en Gemini API-nøkkel først</string>
+    <string name="error_text_too_long">Teksten er for lang til å sendes automatisk (grense: %1$d tegn)</string>
+    <string name="error_generic">Noe gikk galt. Prøv igjen.</string>
+    <string name="error_timeout">Forespørselen tok for lang tid (tidsavbrudd).</string>
+    <string name="error_network">Kunne ikke nå Gemini. Sjekk tilkoblingen din.</string>
+    <string name="error_http">Gemini returnerte en feil (kode %1$d).</string>
+    <string name="error_empty_response">Gemini returnerte et tomt svar.</string>
+</resources>

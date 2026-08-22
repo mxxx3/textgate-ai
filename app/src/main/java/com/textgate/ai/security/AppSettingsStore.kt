@@ -2,6 +2,7 @@ package com.textgate.ai.security
 
 import android.content.Context
 import android.content.SharedPreferences
+import com.textgate.ai.model.Languages
 
 /**
  * Non-secret configuration: the master on/off switch, the user's allow-list
@@ -41,23 +42,60 @@ class AppSettingsStore(context: Context) {
      * Target language for the long-press "translate what's under my
      * finger" bubble (see [com.textgate.ai.security.BubbleTranslateGate]
      * and [com.textgate.ai.accessibility.TranslationBubble]) — deliberately
-     * a SEPARATE setting from the `?en`/`?pl` typed triggers, since this
-     * feature has no per-use trigger to encode a language choice in: the
-     * user picks one default once, here, in Settings.
+     * a SEPARATE setting from the typed `?xx` triggers, since this feature
+     * has no per-use trigger to encode a language choice in: the user picks
+     * one default once, here, in Settings.
+     *
+     * Stored as the raw [com.textgate.ai.model.SupportedLanguage.code]
+     * string directly (e.g. "en", "de", "pt-rBR") rather than an enum-style
+     * tag, since as of v1.4.0 there are 40 possible values, one per
+     * [Languages.ALL] entry, and this way a language added to that list in
+     * the future needs no matching change here. A value that is missing or
+     * no longer recognized (e.g. a downgrade from a future version that
+     * added more languages) falls back to [Languages.DEFAULT] rather than
+     * crashing.
      */
     var bubbleTargetLanguage: TriggerDetector.Target
-        get() = when (prefs.getString(KEY_BUBBLE_TARGET_LANGUAGE, null)) {
-            "EN" -> TriggerDetector.Target.ENGLISH
-            "PL" -> TriggerDetector.Target.POLISH
-            else -> DEFAULT_BUBBLE_TARGET_LANGUAGE
+        get() {
+            val storedCode = prefs.getString(KEY_BUBBLE_TARGET_LANGUAGE, null)
+            val resolved = storedCode?.let { Languages.byCode(it) } ?: Languages.DEFAULT
+            return TriggerDetector.Target(resolved.code)
         }
-        set(value) = prefs.edit().putString(
-            KEY_BUBBLE_TARGET_LANGUAGE,
-            when (value) {
-                TriggerDetector.Target.ENGLISH -> "EN"
-                TriggerDetector.Target.POLISH -> "PL"
+        set(value) {
+            val resolvedCode = Languages.byCode(value.code)?.code ?: Languages.DEFAULT.code
+            prefs.edit().putString(KEY_BUBBLE_TARGET_LANGUAGE, resolvedCode).apply()
+        }
+
+    /**
+     * The app's own interface language — what every Activity and the
+     * accessibility service's user-visible strings (toasts, notification
+     * text) are shown in, applied via [com.textgate.ai.LocaleHelper]. Null
+     * means "follow the device's system language" (this app's original,
+     * pre-v1.4.0 behavior — it always just used whatever locale Android
+     * picked); a non-null value is one of [Languages.ALL]'s codes and forces
+     * that specific language regardless of the device's own setting.
+     *
+     * Deliberately separate from [bubbleTargetLanguage]: the user answered
+     * "Jedno i drugie" (both) when asked whether choosing a language from
+     * the bubble's list should change the translation target, the app's own
+     * UI language, or both — so the bubble's picker updates both settings
+     * together (see SettingsActivity), but they remain independently
+     * readable/settable here since a user might later want the app's UI in
+     * one language while still translating into another.
+     */
+    var appInterfaceLanguage: String?
+        get() {
+            val storedCode = prefs.getString(KEY_APP_INTERFACE_LANGUAGE, null) ?: return null
+            return Languages.byCode(storedCode)?.code
+        }
+        set(value) {
+            val resolvedCode = value?.let { Languages.byCode(it)?.code }
+            if (resolvedCode == null) {
+                prefs.edit().remove(KEY_APP_INTERFACE_LANGUAGE).apply()
+            } else {
+                prefs.edit().putString(KEY_APP_INTERFACE_LANGUAGE, resolvedCode).apply()
             }
-        ).apply()
+        }
 
     /**
      * The allow-list as it stands: the user's own explicit choices once
@@ -89,12 +127,7 @@ class AppSettingsStore(context: Context) {
         private const val KEY_MODEL = "selected_model"
         private const val KEY_ALLOWED_PACKAGES = "allowed_packages"
         private const val KEY_BUBBLE_TARGET_LANGUAGE = "bubble_target_language"
-
-        /** Polish, since that is this app's owner's primary translation
-         * need for received messages — see the long-press bubble feature
-         * (BubbleTranslateGate / TranslationBubble). The user can change
-         * this at any time in Settings. */
-        val DEFAULT_BUBBLE_TARGET_LANGUAGE: TriggerDetector.Target = TriggerDetector.Target.POLISH
+        private const val KEY_APP_INTERFACE_LANGUAGE = "app_interface_language"
 
         /**
          * Chosen from the app owner's own Google AI Studio rate-limit

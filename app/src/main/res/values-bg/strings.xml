@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">TextGate AI</string>
+
+    <string name="accessibility_service_description">TextGate AI чете текст по два строго ограничени начина. Първо: текстовото поле, което редактирате в момента, само за да провери за един точен суфикс на тригер (като \"?en\" или \"?de\" — по един за всеки език, вижте пълния списък в Настройки) в края на написаното от вас. Второ: съобщение или коментар, върху който задържите пръст, за да се покаже плаващ превод на езика по подразбиране, който сте избрали в Настройки. Нито един от двата пътя никога не чете полета за пароли, никога не работи в приложения, които не сте разрешили изрично, и никога не пази история на прочетеното. Когато бъде открит тригер или когато задържите пръст върху съобщение в разрешено приложение, съответният текст се изпраща през HTTPS до конфигурирания от вас Gemini API и се превежда. Резултатът от написания тригер заменя съдържанието на полето; резултатът от задържането се показва само в временен плаващ балон и никога не докосва оригиналното приложение. Нищо не се изпраща никъде, освен ако не напишете точно един от тези тригери или не задържите пръст върху съобщение в приложение, включено в настройките на TextGate AI.</string>
+
+    <!-- Settings screen -->
+    <string name="settings_title">TextGate AI</string>
+
+    <string name="section_master_switch">AI трансформация</string>
+    <string name="master_switch_label">Включване на превод чрез написан тригер</string>
+    <string name="master_switch_description">Основен превключвател. Напишете тригер като ?en или ?de в края на съобщение, за да го преведете на този език (вижте пълния списък по-долу). Управлява също плаващия балон за превод при задържане. Когато е изключен, TextGate AI никога не чете никакво поле или съобщение и никога не прави мрежова заявка, независимо от другите настройки.</string>
+
+    <string name="bubble_language_label">Език на приложението и превода</string>
+    <string name="bubble_language_description">Изберете езика си веднъж тук. Той задава езика по подразбиране за плаващия балон за превод при задържане И езика, на който се показват собствените екрани на TextGate AI — двете се променят заедно.</string>
+
+    <string name="section_accessibility_status">Услуга за достъпност</string>
+    <string name="accessibility_status_enabled">Включена</string>
+    <string name="accessibility_status_disabled">Не е включена — TextGate AI не може да направи нищо, докато не я включите</string>
+    <string name="btn_open_accessibility_settings">Отваряне на настройките за достъпност</string>
+
+    <string name="section_gemini_api">Gemini API</string>
+    <string name="label_api_key">API ключ за Gemini</string>
+    <string name="hint_api_key">Поставете своя API ключ за Gemini</string>
+    <string name="btn_get_api_key">Вземете безплатен API ключ</string>
+    <string name="btn_show_api_key_instructions">Как да направя това? (ръководство стъпка по стъпка)</string>
+    <string name="btn_hide_api_key_instructions">Скриване на ръководството</string>
+    <string name="api_key_instructions_body">1. Докоснете \"Вземете безплатен API ключ\" по-горе — това отваря Google AI Studio в браузъра ви.\n2. Влезте с профила си в Google (този, който използвате всеки ден).\n3. Приемете Общите условия, ако бъдете помолени.\n4. Докоснете \"Създаване на API ключ\" на страницата.\n5. Копирайте появилия се ключ — дълъг низ от букви и цифри.\n6. Върнете се в това приложение, поставете ключа в полето по-долу и докоснете \"Запазване на ключа\".\n\nКлючът е безплатен в рамките на безплатните лимити на Google и никога не напуска телефона ви, освен за да комуникира директно с Gemini — той е шифрован и се съхранява само на това устройство.</string>
+    <string name="btn_save_api_key">Запазване на ключа (шифрован)</string>
+    <string name="api_key_saved">API ключът е запазен, шифрован с Android Keystore</string>
+    <string name="api_key_cleared">API ключът е премахнат</string>
+    <string name="btn_clear_api_key">Премахване на запазения ключ</string>
+    <string name="api_key_status_present">Запазен е ключ (шифрован). Той никога повече не се показва на екрана.</string>
+    <string name="api_key_status_absent">Все още няма запазен ключ</string>
+
+    <string name="label_model">Модел на Gemini</string>
+    <string name="hint_model">напр. gemini-3.5-flash-lite</string>
+    <string name="model_suggestions_label">Предложения (докоснете, за да използвате):</string>
+
+    <string name="btn_test_api">Тест на връзката с API</string>
+    <string name="test_api_running">Тестване…</string>
+    <string name="test_api_success">Успех — Gemini отговори правилно.</string>
+    <string name="test_api_failure">Неуспешно: %1$s</string>
+
+    <string name="section_allowed_apps">Разрешени приложения</string>
+    <string name="allowed_apps_description">TextGate AI е включен по подразбиране само за често използвани приложения за социални медии и съобщения — например WhatsApp, Messenger, Instagram, Telegram, Signal, Discord, Snapchat, TikTok, X, Threads, LinkedIn и SMS/съобщения — така че няма нужда от настройване. Този списък управлява както написаните тригери за превод (?en, ?de, ?fr и т.н.), така и плаващия балон за превод при задържане. Известни приложения за управление на пароли, банкиране, удостоверяване и системна сигурност никога не се показват тук и не могат да бъдат разрешени; портфейли и борси за криптовалути се блокират по същия начин.</string>
+    <string name="allowed_apps_advanced_hint">Искате друго приложение или да премахнете някое от стандартните? Изберете приложенията ръчно вместо това.</string>
+    <string name="btn_show_advanced_apps">Показване на разширени настройки: ръчен избор на приложения</string>
+    <string name="btn_hide_advanced_apps">Скриване на разширените настройки</string>
+    <string name="allowed_apps_empty">Не са открити инсталирани приложения с икона за стартиране.</string>
+    <string name="allowed_apps_loading">Зареждане на инсталираните приложения…</string>
+
+    <string name="section_privacy">Поверителност</string>
+    <string name="privacy_notice_headline">Текст се изпраща до Google Gemini само когато изрично напишете тригер за превод (като ?en или ?de) или задържите пръст върху съобщение.</string>
+    <string name="privacy_notice_body">TextGate AI не събира аналитични данни, доклади за срив или данни за използване от какъвто и да е вид и не съдържа никакви SDK на трети страни. Единствените мрежови заявки, които това приложение прави, са заявките за превод, които вие сами задействате, изпратени директно до Gemini API на Google през HTTPS. API ключът ви е шифрован на устройството с Android Keystore и е изключен от резервните копия. Полетата за пароли и другите чувствителни данни никога не се четат, при никакви обстоятелства. Докоснете \"Пълна политика за поверителност\" по-долу за пълните подробности.</string>
+    <string name="btn_full_privacy_policy">Пълна политика за поверителност</string>
+    <string name="btn_close_dialog">Затваряне</string>
+    <string name="privacy_full_policy_title">Пълна политика за поверителност</string>
+    <string name="privacy_full_policy_body">Какво чете TextGate AI:\n• Текстовото поле, в което пишете в момента — само за да провери за един точен тригер за превод (като \"?en\" или \"?de\") в края.\n• Съобщение или коментар, върху който задържите пръст — само в приложения, които сте включили в „Разрешени приложения“.\n\nКакво никога не чете: полета за пароли, въвеждане на ПИН или всяко поле, което приложението разпознава като чувствително — без изключения, в което и да е приложение.\n\nКакво се изпраща и къде: само текстът, който сте задействали, изпратен веднъж, директно през HTTPS до Gemini API на Google, чрез ключа, който сами предоставяте. Нищо никога не се изпраща, освен ако сами не напишете тригер или не задържите пръст върху съобщение.\n\nКакво се съхранява на телефона ви: вашият API ключ за Gemini, шифрован с Android Keystore (същата хардуерно защитена сигурност, която Android използва за данните за заключен екран), и вашите прости настройки (кои приложения са разрешени, избраният от вас език, избраният от вас модел на Gemini). Нищо от това не се включва в резервните копия на телефона.\n\nКакво НЕ прави TextGate AI: без аналитика, без доклади за срив, без проследяване на използването, без реклами, без библиотеки на трети страни от какъвто и да е вид, без история на нещо, което сте превели, и без четене на приложение, което не сте разрешили изрично.\n\nВие оставате в контрол: изключете цялата функция по всяко време с основния превключвател и добавяйте или премахвайте приложения от разрешения списък, когато пожелаете.</string>
+
+    <string name="section_about">Относно</string>
+    <string name="about_version_label">Версия</string>
+
+    <!-- Toasts / runtime messages (never include user text) -->
+    <string name="toast_sending_to_gemini">Изпращане на избрания текст до Gemini</string>
+    <string name="toast_translation_failed">Преводът е неуспешен — оригиналният текст остава непроменен</string>
+    <string name="toast_field_changed_aborted">Полето беше променено преди пристигането на резултата — нищо не беше заменено</string>
+    <string name="toast_service_disabled">AI трансформацията е изключена в настройките</string>
+
+    <!-- Long-press translation bubble -->
+    <string name="bubble_loading">Превеждане…</string>
+    <string name="bubble_close_content_description">Затваряне</string>
+
+    <!-- Errors -->
+    <string name="error_no_api_key">Първо въведете и запазете API ключ за Gemini</string>
+    <string name="error_text_too_long">Текстът е твърде дълъг, за да бъде изпратен автоматично (лимит: %1$d знака)</string>
+    <string name="error_generic">Възникна грешка. Моля, опитайте отново.</string>
+    <string name="error_timeout">Времето за изчакване на заявката изтече.</string>
+    <string name="error_network">Неуспешна връзка с Gemini. Проверете връзката си.</string>
+    <string name="error_http">Gemini върна грешка (код %1$d).</string>
+    <string name="error_empty_response">Gemini върна празен отговор.</string>
+</resources>

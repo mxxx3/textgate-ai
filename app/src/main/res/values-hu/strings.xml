@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">TextGate AI</string>
+
+    <string name="accessibility_service_description">A TextGate AI kétféleképpen olvassa a szöveget, mindkettő szigorúan korlátozott. Először: azt a szövegmezőt, amelyet éppen szerkeszt, és csakis azért, hogy megkeresse a beírt szöveg végén az egyetlen pontos aktiváló utótagot (például \"?en\" vagy \"?de\" — nyelvenként egyet, a teljes listát a Beállításokban találja). Másodszor: egy üzenetet vagy hozzászólást, amelyet hosszan megnyom, hogy megjelenjen egy lebegő fordítás a Beállításokban kiválasztott alapértelmezett nyelvre. Egyik módszer sem olvassa el soha a jelszómezőket, sosem működik olyan alkalmazásokban, amelyeket kifejezetten nem engedélyezett, és sosem tárol előzményt semmiről, amit olvasott. Amikor felismer egy aktiválót, vagy amikor hosszan megnyom egy üzenetet egy engedélyezett alkalmazásban, az érintett szöveg HTTPS-en keresztül elküldésre kerül az Ön által beállított Gemini API-hoz, és lefordításra kerül. A begépelt aktiváló eredménye felülírja a mező tartalmát; a hosszú megnyomás eredménye csak egy ideiglenes lebegő buborékban jelenik meg, és sosem érinti az eredeti alkalmazást. Semmi sem kerül elküldésre sehova, hacsak nem gépeli be az egyik pontos aktiválót, vagy nem nyom hosszan meg egy üzenetet egy olyan alkalmazásban, amely be van kapcsolva a TextGate AI beállításaiban.</string>
+
+    <!-- Settings screen -->
+    <string name="settings_title">TextGate AI</string>
+
+    <string name="section_master_switch">AI-alapú átalakítás</string>
+    <string name="master_switch_label">Begépelt aktiválóval történő fordítás engedélyezése</string>
+    <string name="master_switch_description">Fő kapcsoló. Gépeljen be egy aktiválót, például ?en vagy ?de, egy üzenet végére, hogy lefordítsa azt az adott nyelvre (a teljes listát lásd alább). Ez a beállítás a hosszú megnyomásra megjelenő fordítási buborékot is szabályozza. Kikapcsolt állapotban a TextGate AI sosem olvas el semmilyen mezőt vagy üzenetet, és sosem küld hálózati kérést, függetlenül bármely más beállítástól.</string>
+
+    <string name="bubble_language_label">Alkalmazás- és fordítási nyelv</string>
+    <string name="bubble_language_description">Itt egyszer válassza ki a nyelvét. Ez határozza meg a hosszú megnyomásra megjelenő fordítási buborék alapértelmezett nyelvét ÉS azt a nyelvet is, amelyen a TextGate AI saját képernyői megjelennek — a kettő együtt változik.</string>
+
+    <string name="section_accessibility_status">Kisegítő lehetőségek szolgáltatás</string>
+    <string name="accessibility_status_enabled">Engedélyezve</string>
+    <string name="accessibility_status_disabled">Nincs engedélyezve — a TextGate AI semmit sem tud tenni, amíg nem engedélyezi</string>
+    <string name="btn_open_accessibility_settings">Kisegítő lehetőségek beállításainak megnyitása</string>
+
+    <string name="section_gemini_api">Gemini API</string>
+    <string name="label_api_key">Gemini API-kulcs</string>
+    <string name="hint_api_key">Illessze be a Gemini API-kulcsát</string>
+    <string name="btn_get_api_key">Ingyenes API-kulcs igénylése</string>
+    <string name="btn_show_api_key_instructions">Hogyan csináljam? (lépésről lépésre útmutató)</string>
+    <string name="btn_hide_api_key_instructions">Útmutató elrejtése</string>
+    <string name="api_key_instructions_body">1. Koppintson a fenti \"Ingyenes API-kulcs igénylése\" gombra — ez megnyitja a Google AI Studiót a böngészőjében.\n2. Jelentkezzen be a Google-fiókjával (azzal, amelyet naponta használ).\n3. Ha kéri, fogadja el a Szolgáltatási feltételeket.\n4. Koppintson a \"Create API key\" gombra az oldalon.\n5. Másolja ki a megjelenő kulcsot — ez betűk és számok hosszú sorozata.\n6. Térjen vissza ebbe az alkalmazásba, illessze be a kulcsot az alábbi mezőbe, majd koppintson a \"Kulcs mentése\" gombra.\n\nA kulcs ingyenes a Google ingyenes szintjének korlátain belül, és sosem hagyja el a telefonját, kivéve amikor közvetlenül a Geminivel kommunikál — titkosítva van, és kizárólag ezen az eszközön tárolódik.</string>
+    <string name="btn_save_api_key">Kulcs mentése (titkosítva)</string>
+    <string name="api_key_saved">API-kulcs elmentve, az Android Keystore-ral titkosítva</string>
+    <string name="api_key_cleared">API-kulcs eltávolítva</string>
+    <string name="btn_clear_api_key">Mentett kulcs eltávolítása</string>
+    <string name="api_key_status_present">Egy kulcs el van mentve (titkosítva). Ez soha többé nem jelenik meg a képernyőn.</string>
+    <string name="api_key_status_absent">Még nincs elmentett kulcs</string>
+
+    <string name="label_model">Gemini modell</string>
+    <string name="hint_model">pl. gemini-3.5-flash-lite</string>
+    <string name="model_suggestions_label">Javaslatok (koppintson a használatukhoz):</string>
+
+    <string name="btn_test_api">API-kapcsolat tesztelése</string>
+    <string name="test_api_running">Tesztelés folyamatban…</string>
+    <string name="test_api_success">Sikeres — a Gemini megfelelően válaszolt.</string>
+    <string name="test_api_failure">Sikertelen: %1$s</string>
+
+    <string name="section_allowed_apps">Engedélyezett alkalmazások</string>
+    <string name="allowed_apps_description">A TextGate AI alapértelmezés szerint csak a gyakori közösségimédia- és üzenetküldő alkalmazásokhoz van engedélyezve — például WhatsApp, Messenger, Instagram, Telegram, Signal, Discord, Snapchat, TikTok, X, Threads, LinkedIn és SMS/Üzenetek —, így nincs szükség beállításra. Ez a lista szabályozza mind a begépelt fordítási aktiválókat (?en, ?de, ?fr és így tovább), mind a hosszú megnyomásra megjelenő fordítási buborékot. Ismert jelszókezelők, banki, hitelesítő és rendszer-biztonsági alkalmazások sosem jelennek meg itt, és sosem engedélyezhetők; a kriptovaluta-tárcák és -tőzsdék ugyanígy le vannak tiltva.</string>
+    <string name="allowed_apps_advanced_hint">Másik alkalmazást szeretne, vagy eltávolítana egyet az alapértelmezettek közül? Válassza ki inkább kézzel az alkalmazásokat.</string>
+    <string name="btn_show_advanced_apps">Speciális beállítások megjelenítése: alkalmazások kézi kiválasztása</string>
+    <string name="btn_hide_advanced_apps">Speciális beállítások elrejtése</string>
+    <string name="allowed_apps_empty">Nem található indítóikonnal rendelkező telepített alkalmazás.</string>
+    <string name="allowed_apps_loading">Telepített alkalmazások betöltése…</string>
+
+    <string name="section_privacy">Adatvédelem</string>
+    <string name="privacy_notice_headline">A szöveg csak akkor kerül elküldésre a Google Geminihez, ha kifejezetten begépel egy fordítási aktiválót (például ?en vagy ?de), vagy hosszan megnyom egy üzenetet.</string>
+    <string name="privacy_notice_body">A TextGate AI nem gyűjt analitikai adatokat, összeomlási jelentéseket vagy bármilyen használati adatot, és nem tartalmaz harmadik féltől származó SDK-kat. Az egyetlen hálózati kérés, amit ez az alkalmazás valaha küld, az az Ön által kezdeményezett fordítási kérés, amely közvetlenül a Google Gemini API-jához kerül elküldésre HTTPS-en keresztül. Az API-kulcsa az eszközön titkosítva van az Android Keystore segítségével, és ki van zárva a biztonsági mentésekből. A jelszómezőket és más érzékeny beviteli mezőket semmilyen körülmények között sosem olvassa el. Koppintson a lenti \"Teljes adatvédelmi szabályzat\" gombra a részletekért.</string>
+    <string name="btn_full_privacy_policy">Teljes adatvédelmi szabályzat</string>
+    <string name="btn_close_dialog">Bezárás</string>
+    <string name="privacy_full_policy_title">Teljes adatvédelmi szabályzat</string>
+    <string name="privacy_full_policy_body">Mit olvas a TextGate AI:\n• Azt a szövegmezőt, amelybe éppen gépel — csakis azért, hogy ellenőrizze, van-e a végén egyetlen pontos fordítási aktiváló (például \"?en\" vagy \"?de\").\n• Egy üzenetet vagy hozzászólást, amelyet hosszan megnyom — csak azokban az alkalmazásokban, amelyeket bekapcsolt az \"Engedélyezett alkalmazások\" menüpontban.\n\nMit nem olvas el soha: jelszómezőket, PIN-kód bevitelét, vagy bármely mezőt, amelyet az alkalmazás érzékenynek ismer fel — kivétel nélkül, bármely alkalmazásban.\n\nMi kerül elküldésre, és hová: csak az Ön által aktivált szöveg, egyszer elküldve, közvetlenül HTTPS-en keresztül a Google Gemini API-jához, az Ön által megadott kulcs használatával. Semmi sem kerül elküldésre, hacsak Ön maga nem gépel be egy aktiválót, vagy nem nyom hosszan meg egy üzenetet.\n\nMi tárolódik a telefonján: a Gemini API-kulcsa, az Android Keystore-ral titkosítva (ugyanaz a hardveresen támogatott biztonság, amelyet az Android a zárolt képernyő hitelesítő adataihoz használ), valamint az egyszerű beállításai (mely alkalmazások engedélyezettek, az Ön által kiválasztott nyelv, az Ön által kiválasztott Gemini modell). Ezek egyike sem szerepel a telefon biztonsági mentéseiben.\n\nMit NEM csinál a TextGate AI: nincs analitika, nincs összeomlás-jelentés, nincs használatkövetés, nincs reklám, nincsenek semmilyen harmadik féltől származó könyvtárak, nincs előzmény semmiről, amit lefordított, és nem olvas el egyetlen olyan alkalmazást sem, amelyet kifejezetten nem engedélyezett.\n\nÖn tartja kézben az irányítást: bármikor kikapcsolhatja a teljes funkciót a fő kapcsolóval, és bármikor hozzáadhat vagy eltávolíthat bármely alkalmazást az engedélyezettek listájáról.</string>
+
+    <string name="section_about">Névjegy</string>
+    <string name="about_version_label">Verzió</string>
+
+    <!-- Toasts / runtime messages (never include user text) -->
+    <string name="toast_sending_to_gemini">A kijelölt szöveg elküldése a Geminihez</string>
+    <string name="toast_translation_failed">A fordítás sikertelen — az eredeti szöveg változatlan maradt</string>
+    <string name="toast_field_changed_aborted">A mező megváltozott, mielőtt megérkezett volna az eredmény — semmi sem lett kicserélve</string>
+    <string name="toast_service_disabled">Az AI-alapú átalakítás ki van kapcsolva a Beállításokban</string>
+
+    <!-- Long-press translation bubble -->
+    <string name="bubble_loading">Fordítás folyamatban…</string>
+    <string name="bubble_close_content_description">Bezárás</string>
+
+    <!-- Errors -->
+    <string name="error_no_api_key">Először adjon meg és mentsen el egy Gemini API-kulcsot</string>
+    <string name="error_text_too_long">A szöveg túl hosszú az automatikus küldéshez (korlát: %1$d karakter)</string>
+    <string name="error_generic">Valami hiba történt. Kérjük, próbálja újra.</string>
+    <string name="error_timeout">A kérés túllépte az időkorlátot.</string>
+    <string name="error_network">Nem sikerült elérni a Geminit. Ellenőrizze a kapcsolatát.</string>
+    <string name="error_http">A Gemini hibát adott vissza (%1$d kód).</string>
+    <string name="error_empty_response">A Gemini üres választ adott vissza.</string>
+</resources>

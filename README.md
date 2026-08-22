@@ -1744,6 +1744,49 @@ typed-trigger suffix, the persisted Settings value, and the Android
   privacy-notice copy — all now describe "a translation trigger like ?en
   or ?de" generically instead of naming only the original two.
 
+**Post-1.4.0 CI regression fix (v1.4.1): `AppSettingsStore` NPE during
+Application bootstrap, caught by the GitHub Actions run right after 1.4.0
+was delivered, before it was ever installed on a device.** The CI logs
+showed 55 of 87 unit tests failing with `NullPointerException at
+AppSettingsStore.kt:31` — including tests (`SensitiveInputGuardTest`,
+`GeminiClientTest`) that never touch `AppSettingsStore` at all, which was
+the tell that this wasn't really 55 separate failures but one shared root
+cause poisoning every Robolectric-backed test class.
+
+**Root cause:** `TextGateApplication.attachBaseContext` (added in 1.4.0
+to apply the new "App interface language" override via `LocaleHelper`,
+see above) calls `LocaleHelper.applyOverride(base)`, which constructs
+`AppSettingsStore(base)` to read `appInterfaceLanguage`. `AppSettingsStore`
+in turn called `context.applicationContext.getSharedPreferences(...)` —
+but `Context.getApplicationContext()` has a well-known Android
+chicken-and-egg gap specifically *inside* `Application.attachBaseContext`:
+the `Application` object is itself what becomes the application context,
+but at the moment `attachBaseContext` runs it has not finished attaching
+to itself yet, so `applicationContext` is still `null` there. Calling
+`.getSharedPreferences(...)` on that `null` threw the `NullPointerException`.
+Robolectric constructs `TextGateApplication` (as declared in the
+manifest) once per test via `ApplicationProvider`, which runs
+`attachBaseContext` for every single Robolectric-based test regardless of
+what that test itself exercises — hence all 5 Robolectric test classes
+failing uniformly (`AppSettingsStoreTest`, `BubbleTranslateGateTest`,
+`EventGateTest`, `GeminiClientTest`, `SensitiveInputGuardTest`), while the
+4 plain-JUnit test classes that need no `Context` at all
+(`NetworkAllowlistTest`, `AppBlocklistTest`, `ResultPolicyTest`,
+`TriggerDetectorTest`) were unaffected — 87 total, 55 failed, 32 passed,
+matching exactly.
+
+**Fix:** `AppSettingsStore`'s `SharedPreferences` initializer now falls
+back to the raw `context` itself when `context.applicationContext` is
+`null`: `(context.applicationContext ?: context).getSharedPreferences(...)`.
+This is safe specifically because `getSharedPreferences` does not retain
+a reference to whichever `Context` it was called through — unlike storing
+a `Context` in a field for later use (the actual leak-prone pattern this
+app avoids elsewhere, e.g. in `SecureApiKeyStore`, which is never
+constructed during `attachBaseContext` and so keeps the plain
+`context.applicationContext` form unchanged). Every other call site of
+`AppSettingsStore` (Activity `onCreate`, Service `onServiceConnected`) is
+outside the risky window and behaves exactly as before.
+
 ## 15. Verified build result (GitHub Actions)
 
 Confirmed on `https://github.com/mxxx3/textgate-ai`, workflow run

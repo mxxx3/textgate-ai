@@ -27,8 +27,19 @@ import com.textgate.ai.model.Languages
  */
 class AppSettingsStore(context: Context) {
 
+    // Falls back to `context` itself (instead of only `context.applicationContext`)
+    // because this store is now also constructed from inside
+    // Application.attachBaseContext (see LocaleHelper.applyOverride, called from
+    // TextGateApplication) — at that exact point in the Android lifecycle,
+    // getApplicationContext() has a well-known chicken-and-egg gap: the
+    // Application object IS what becomes the application context, but it has
+    // not finished attaching to itself yet, so applicationContext is still
+    // null. getSharedPreferences() does not retain a reference to whichever
+    // Context it was called through (unlike, say, storing the Context in a
+    // field for later use, which is the actual leak-prone pattern this
+    // app avoids elsewhere), so falling back to the raw Context here is safe.
     private val prefs: SharedPreferences =
-        context.applicationContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        (context.applicationContext ?: context).getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
     var isAiEnabled: Boolean
         get() = prefs.getBoolean(KEY_AI_ENABLED, false)

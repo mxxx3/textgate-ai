@@ -155,7 +155,7 @@ fires AccessibilityEvent.TYPE_VIEW_LONG_CLICKED (standard long-press
         signal — WhatsApp, Telegram) OR AccessibilityEvent.TYPE_VIEW_SELECTED
         (fallback for apps whose long-press enters a multi-select mode
         WITHOUT ever dispatching TYPE_VIEW_LONG_CLICKED — see the
-        "Known limitation / in-progress" note below and
+        "Known, accepted limitation" note below and
         accessibility_service_config.xml)
         ▼
 TextGateAccessibilityService.handleLongClick()
@@ -203,30 +203,33 @@ read — `ACTION_SET_TEXT` is only ever used by the typed-trigger pipeline
 above. The bubble is a read-only, temporary overlay; the message the user
 long-pressed is left completely untouched in its original app.
 
-**Known limitation / in-progress (as of 1.2.4):** real-device testing
+**Known, accepted limitation (as of 1.2.6): Google Messages (SMS) and
+X (Twitter) do not support the long-press bubble.** Real-device testing
 showed the bubble works in Telegram, and (after a fix — see §14 "Amendment
-to Feature update #6") in WhatsApp, but the stock/Google Messages SMS app
-never dispatched `TYPE_VIEW_LONG_CLICKED` at all for a long-press on a
-message. The `TYPE_VIEW_SELECTED` subscription above is an evidence-driven
-*hypothesis*, not a confirmed fix: Google Messages, like many apps,
-implements "long-press to enter multi-select mode" via its own touch/
-gesture handling rather than `View.performLongClick()` — the standard path
-that dispatches `TYPE_VIEW_LONG_CLICKED` — but entering that selection
-state is still expected to mark the row `isSelected` and announce that
-state change to accessibility services, which `TYPE_VIEW_SELECTED` reports.
-This still uses only standard, purpose-built accessibility signals — never
-raw touch/motion tracking (`flagRequestTouchExplorationMode`) and never
-screenshot-based OCR, both of which were considered and rejected: raw
-touch tracking would turn the whole device into TalkBack-style navigation,
-and OCR would (a) still not explain why no event fires at all without ALSO
-adding raw touch tracking, (b) require a new third-party dependency
-(breaking this project's zero-production-dependency principle — see §4),
-(c) read the entire screen instead of one scoped node, and (d) cannot
-reliably exclude password/sensitive on-screen content, which would break
-this app's core security guarantee. This section will be updated once
-real-device testing confirms whether `TYPE_VIEW_SELECTED` actually fires
-for Google Messages; if it does not, SMS support is likely to be
-documented as an accepted limitation rather than pursued further.
+to Feature update #6") in WhatsApp, but neither `TYPE_VIEW_LONG_CLICKED`
+nor `TYPE_VIEW_SELECTED` is ever dispatched for a long-press in Google
+Messages or X. A third signal, `TYPE_WINDOW_CONTENT_CHANGED`, was tried
+and confirmed to fire, but far too generically (on almost any UI change,
+in any app) to serve as a specific trigger without reading much more of
+the screen than this app is willing to. The most likely explanation,
+backed by Android's own documentation and researched in full in §14
+("Second amendment to Feature update #6" and after): both apps' relevant
+UI is very likely built with Jetpack Compose, whose `combinedClickable`
+long-press handling never goes through the classic `View.performLongClick()`
+path any of these signals depend on. Two further alternatives —
+`Intent.ACTION_PROCESS_TEXT` and a clipboard-reading floating button —
+were researched and either ruled out or left unbuilt (see §14 for why).
+Consistent with the reasoning throughout this section, raw touch/motion
+tracking (`flagRequestTouchExplorationMode`) and screenshot-based OCR
+remain rejected: raw touch tracking would turn the whole device into
+TalkBack-style navigation, and OCR would require a new third-party
+dependency (breaking this project's zero-production-dependency principle
+— see §4), read the entire screen instead of one scoped node, and cannot
+reliably exclude password/sensitive on-screen content — breaking this
+app's core security guarantee. This is a deliberate, evidence-based
+stopping point, not an oversight — the typed `?en`/`?pl` trigger pathway
+(§2.1) is completely unaffected and works identically in every app,
+including Google Messages and X.
 
 ### 2.2 Why the code is organized this way
 
@@ -311,9 +314,7 @@ which is not a runtime/dangerous permission at all.
 **Accessibility** is not a manifest permission — it's a system-mediated
 capability the user grants manually in Settings → Accessibility, and its
 scope is further restricted by `accessibility_service_config.xml` (three
-permanent event types plus one temporary diagnostic-only event type as of
-1.2.5 — see §14 "Third amendment to Feature update #6" — no window
-enumeration; see §2 and §8).
+event types, no window enumeration; see §2 and §8).
 
 **The long-press translation bubble (§2.1b) still requests no new
 permission.** It is a `WindowManager` overlay of type
@@ -1257,46 +1258,79 @@ the two can never interfere with each other), and only the most recent
 event's details are shown once the stream goes quiet, as "DIAG
 content-changed x&lt;count&gt;\npackage=...\nclass=...\ntypes=...".
 
-**This is, again, a hypothesis to be evidence-checked on-device, not a
-confirmed fix.** If long-pressing a message in Google Messages now
-produces this diagnostic bubble, that confirms the theory and the next
-step is turning the content-changed signal into a real trigger (likely
-scoped much more narrowly than "any content change," e.g. only when
-`contentChangeTypes` and the resulting node's `isSelected`/checked state
-indicate a genuine selection). If nothing appears even now, that is strong
-evidence Google Messages' selection UI does not surface ANY
-accessibility-observable signal for a physical long-press in this build —
-at which point, having now tried three independent standard accessibility
-signals (`TYPE_VIEW_LONG_CLICKED`, `TYPE_VIEW_SELECTED`,
-`TYPE_WINDOW_CONTENT_CHANGED`) without success, and having already ruled
-out raw touch/motion tracking and OCR for solid security/architecture
-reasons (see above), the honest recommendation will be to document SMS as
-an accepted limitation of this feature rather than continue searching for
-a fourth signal.
+**Result (1.2.5, confirmed on-device): the signal fires, but is unusably
+generic.** Long-pressing a message in Google Messages did produce a "DIAG
+content-changed" bubble — but so did nearly every other tap, scroll, and
+interaction anywhere in the app, with `contentChangeTypes` reported as `1`
+(`CONTENT_CHANGE_TYPE_SUBTREE`, the most generic possible value — "some
+subtree of the screen changed," which Android sends for almost any UI
+update) and the source node's class name reported as the generic
+`android.view.View`, not anything Compose-identifiable. The same test was
+then run against X (Twitter) — chosen because Twitter's own engineering
+team has publicly described going "all in on Jetpack Compose"
+([source](https://android-developers.googleblog.com/2022/04/twitter-going-all-in-on-jetpack-compose.html)) —
+and produced the exact same pattern: content-changed fires constantly,
+long-click and selected never do. This is consistent with, though not
+absolute proof of, the Compose-architecture explanation above, and — more
+practically — confirms this is not an SMS-specific quirk but a pattern
+likely to recur in any app whose UI has migrated to Compose.
 
-**Temporary diagnostic (in progress, not a permanent feature, v2) in
-`handleLongClick()`.** On real devices, the long-press bubble (§2.1b)
-works in Telegram but does not trigger in WhatsApp or the SMS app. The
-most likely explanation is that those apps implement long-press detection
-with their own custom touch/gesture handling (for their own
-message-selection UI) rather than through the standard
-`View.performLongClick()` path that dispatches
-`AccessibilityEvent.TYPE_VIEW_LONG_CLICKED` — the event this feature
-relies on — but that hasn't been confirmed on-device yet. The first
-diagnostic attempt used a `Toast`, which produced no visible result even
-in Telegram (where the real feature demonstrably works) — Toasts fired
-from an `AccessibilityService` are known to be unreliable on some Android
-versions/OEM skins, so that attempt couldn't distinguish "event never
-fired" from "toast never rendered." v2 instead reuses the exact same
-overlay-bubble rendering path the real feature already uses successfully,
-removing that uncertainty: `handleLongClick()` now shows a bubble reading
-"DIAG: long-click seen" (package name only) the instant any long-click
-event arrives, updated to "DIAG blocked: <reason>" if `BubbleTranslateGate`
-blocks it (the abstract reason only, e.g. `"empty text"` or
-`"not allow-listed"`) — never message content. Marked `TEMPORARY
-DIAGNOSTIC (v2)` in the code; will be removed once the root cause is
-confirmed and the real fix (if any is possible from this app's side) is
-implemented.
+Two further alternatives were researched and ruled out before concluding
+the investigation:
+
+* **`Intent.ACTION_PROCESS_TEXT`** — the standard Android mechanism that
+  makes an app appear as a "Translate"-style entry in the system text-
+  selection toolbar (Cut/Copy/Paste/...) wherever text can be selected by
+  dragging. This is simple, safe, and requires no accessibility-service
+  involvement at all for the apps where it applies. It was ruled out for
+  this specific problem because Google Messages does not support
+  fine-grained text selection inside a received message at all — long-
+  pressing only ever enters its own whole-message "select/Copy/Delete/
+  Star" mode (confirmed on-device), never the standard Android text-
+  selection handles `ACTION_PROCESS_TEXT` depends on. Separately,
+  Compose's own `TextToolbar` API exposes only a fixed set of actions
+  (copy/paste/cut/select-all) with no documented support for third-party
+  `ACTION_PROCESS_TEXT` entries, so even apps that DO support Compose text
+  selection may not surface this option either. This remains a
+  potentially valuable, independent, lower-risk feature for a future
+  version — it would work everywhere classic Android text selection
+  exists (browsers, most `EditText`/`TextView` content, likely Telegram
+  and WhatsApp) — but it does not solve the Messages/X problem and was
+  not built in this investigation.
+* **A persistent floating "translate what I copied" button** — since
+  Google Messages' own "Copy" action (visible in its whole-message
+  selection toolbar) does work, one remaining idea was a small always-
+  visible overlay button, shown only in allow-listed foreground apps, that
+  the user taps after using the app's own Copy action; tapping it would
+  launch a brief, real (focused) Activity to read the clipboard, since
+  Android 10+ restricts `ClipboardManager` reads to the default IME or the
+  app that currently holds focus
+  ([source](https://developer.android.com/about/versions/10/privacy/changes)) —
+  something neither the accessibility service nor its overlay bubble can
+  claim to be. This was judged workable in principle but was not pursued:
+  it requires a persistent on-screen button (a real, ongoing UX cost) for
+  an uncertain payoff, and the app's own owner chose to stop the
+  investigation before it was built.
+
+**Conclusion: SMS (Google Messages) and X (Twitter) are documented as an
+accepted limitation of the long-press bubble feature (§2.1b), not a bug
+being actively chased.** Three independent, standard, non-invasive
+accessibility signals were tried (`TYPE_VIEW_LONG_CLICKED`,
+`TYPE_VIEW_SELECTED`, `TYPE_WINDOW_CONTENT_CHANGED`); raw touch/motion
+tracking and OCR were ruled out earlier for solid security/architecture
+reasons (see above); `ACTION_PROCESS_TEXT` and a clipboard-reading
+floating button were researched and either ruled out or left as
+un-pursued future options. All temporary diagnostic code from this
+investigation (`v2`'s "DIAG: long-click seen"/"DIAG blocked" bubbles and
+`v3`'s `TYPE_WINDOW_CONTENT_CHANGED` handler) has been removed as of
+1.2.6 — `accessibility_service_config.xml` is back to exactly the three
+permanent event types, and `TextGateAccessibilityService.kt` no longer
+shows anything on screen beyond the real feature's own loading/result/
+error bubble. The long-press bubble continues to work normally in
+Telegram, WhatsApp, and any other app whose UI dispatches standard
+`View`-based accessibility events; the typed `?en`/`?pl` trigger pathway
+is entirely unaffected by any of this, in every app, since it never
+depended on long-press detection at all.
 
 ## 15. Verified build result (GitHub Actions)
 

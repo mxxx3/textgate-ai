@@ -11,7 +11,6 @@ import android.widget.Toast
 import com.textgate.ai.R
 import com.textgate.ai.model.TranslationPrompts
 import com.textgate.ai.network.GeminiClient
-import com.textgate.ai.security.AppBlocklist
 import com.textgate.ai.security.AppSettingsStore
 import com.textgate.ai.security.BubbleTranslateGate
 import com.textgate.ai.security.EventGate
@@ -48,7 +47,7 @@ import java.util.concurrent.atomic.AtomicBoolean
  *     intentionally skips ONLY the editability check, since its entire
  *     purpose is reading non-editable received content — see
  *     BubbleTranslateGate's class doc for why that is safe).
- *   - Three PERMANENT event types are subscribed to:
+ *   - Three event types are subscribed to:
  *     [AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED],
  *     [AccessibilityEvent.TYPE_VIEW_LONG_CLICKED], and
  *     [AccessibilityEvent.TYPE_VIEW_SELECTED] (see
@@ -60,14 +59,7 @@ import java.util.concurrent.atomic.AtomicBoolean
  *     blank — that SAME node's own bounded set of descendants (see
  *     [BubbleTranslateGate]'s "Where the text actually lives" doc
  *     section). The typed-trigger path never does even that much: it
- *     only ever reads `event.source` directly, nothing further. A FOURTH,
- *     TEMPORARY diagnostic-only event type,
- *     [AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED], is also currently
- *     subscribed to (see [handleContentChangedDiagnostic] and
- *     accessibility_service_config.xml for why) — it never reads
- *     `node.text` either, only the source node's class name and screen
- *     bounds, and is planned for removal once the SMS investigation
- *     concludes.
+ *     only ever reads `event.source` directly, nothing further.
  *   - No AccessibilityEvent is ever stored past the return of
  *     onAccessibilityEvent(); only a single AccessibilityNodeInfo may be
  *     held briefly (bounded by [DEBOUNCE_MS] plus one network round trip
@@ -80,6 +72,14 @@ import java.util.concurrent.atomic.AtomicBoolean
  *   - Any exception, anywhere in either pipeline, results in doing nothing
  *     further (fail closed) — never in retrying, never in falling back to
  *     a broader read.
+ *
+ * The long-press bubble pathway does not work in every app — see README.md
+ * §14 "Third amendment to Feature update #6" for a full, evidence-based
+ * account of the investigation into Google Messages (SMS) and X/Twitter,
+ * both of which appear to be built with Jetpack Compose in a way that
+ * makes a real physical long-press architecturally invisible to any of the
+ * three event types above. That investigation concluded this is an
+ * accepted limitation, not a bug to keep chasing with more event types.
  */
 class TextGateAccessibilityService : AccessibilityService() {
 
@@ -90,19 +90,6 @@ class TextGateAccessibilityService : AccessibilityService() {
     private val mainHandler = Handler(Looper.getMainLooper())
     private val debouncer = Debouncer(DEBOUNCE_MS)
     private val bubble by lazy { TranslationBubble(this) }
-
-    // ====================================================================
-    // TEMPORARY DIAGNOSTIC (v3) state — see handleContentChangedDiagnostic()
-    // and accessibility_service_config.xml for the full explanation. A
-    // SEPARATE Debouncer from the one above: this diagnostic must never
-    // interfere with the real typed-trigger debounce timing.
-    // ====================================================================
-    private val diagnosticDebouncer = Debouncer(DIAGNOSTIC_DEBOUNCE_MS)
-    private var diagnosticContentChangeCount = 0
-    private var diagnosticLastPackage: String? = null
-    private var diagnosticLastClassName: String? = null
-    private var diagnosticLastChangeTypes: Int = 0
-    private var diagnosticLastBounds: Rect = Rect()
 
     /** True while a single trigger's network round trip is in flight. Also
      * doubles as the "one operation at a time" guard: a new trigger is
@@ -129,13 +116,11 @@ class TextGateAccessibilityService : AccessibilityService() {
 
     override fun onInterrupt() {
         cancelPendingDebounce()
-        diagnosticDebouncer.cancel() // TEMPORARY DIAGNOSTIC (v3)
         bubble.dismiss()
     }
 
     override fun onDestroy() {
         cancelPendingDebounce()
-        diagnosticDebouncer.cancel() // TEMPORARY DIAGNOSTIC (v3)
         bubble.dismiss()
         networkExecutor?.shutdownNow()
         networkExecutor = null
@@ -172,19 +157,14 @@ class TextGateAccessibilityService : AccessibilityService() {
             AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED -> handleTextChanged(event)
             // Both routed to the same handler: TYPE_VIEW_LONG_CLICKED is the
             // standard long-press signal (works in WhatsApp/Telegram);
-            // TYPE_VIEW_SELECTED is a fallback for apps (confirmed: the
-            // stock/Google Messages SMS app) whose long-press enters a
-            // multi-select mode instead, without ever dispatching
+            // TYPE_VIEW_SELECTED is a fallback for apps whose long-press
+            // enters a multi-select mode instead, without ever dispatching
             // TYPE_VIEW_LONG_CLICKED — see accessibility_service_config.xml.
             // handleLongClick() itself doesn't need to know or care which
             // of the two fired; the gating and text-resolution logic is
             // identical either way.
             AccessibilityEvent.TYPE_VIEW_LONG_CLICKED,
             AccessibilityEvent.TYPE_VIEW_SELECTED -> handleLongClick(event)
-            // TEMPORARY DIAGNOSTIC (v3) — see handleContentChangedDiagnostic()
-            // and accessibility_service_config.xml. Never starts a
-            // translation, never reads node.text.
-            AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED -> handleContentChangedDiagnostic(event)
             else -> return
         }
     }
@@ -243,34 +223,12 @@ class TextGateAccessibilityService : AccessibilityService() {
         val packageName = event.packageName?.toString()
         val node = event.source
 
-        val diagBounds = Rect()
-        try {
-            node?.getBoundsInScreen(diagBounds)
-        } catch (_: Exception) {
-            // Leave as zero-rect; the bubble's own clamping keeps it on screen.
-        }
-
-        // ============================================================
-        // TEMPORARY DIAGNOSTIC (v2) — added to investigate why the bubble
-        // appears in Telegram but not in WhatsApp/SMS. The first version
-        // of this diagnostic used a Toast, which produced no visible
-        // result anywhere (even in Telegram, where the real feature
-        // works) — Toasts fired from an AccessibilityService are known to
-        // be unreliable on some Android versions/OEM skins. This version
-        // reuses the SAME overlay-bubble rendering path the real feature
-        // already uses successfully, removing that uncertainty entirely.
-        // Shows ONLY the package name (not sensitive — already used
-        // everywhere for gating) and, if blocked, BubbleTranslateGate's
-        // abstract block reason string (e.g. "empty text",
-        // "not allow-listed") — NEVER the message content itself. Remove
-        // this call and the one further below (plus this comment block)
-        // once the root cause is confirmed and fixed.
-        bubble.showResult(diagBounds, "DIAG: long-click seen\npackage=$packageName")
-        // ============================================================
-
         // Same cheap short-circuit as the typed-trigger path: only one AI
         // request of either kind runs at a time.
-        if (requestInFlight.get()) return
+        if (requestInFlight.get()) {
+            node?.let { recycleSafely(it) }
+            return
+        }
 
         // BubbleTranslateGate performs every remaining check — block-list,
         // allow-list, master switch, sensitivity (deliberately NOT
@@ -293,84 +251,8 @@ class TextGateAccessibilityService : AccessibilityService() {
                 startBubbleTranslation(decision.text, bounds)
             }
             is BubbleTranslateGate.Decision.Blocked -> {
-                // TEMPORARY DIAGNOSTIC (v2) — see comment above; remove
-                // with it. Overwrites the "long-click seen" bubble above
-                // with the specific reason it was blocked, so that bubble
-                // stays on screen (rather than being silently dismissed)
-                // whenever the event fires but gating stops it.
-                bubble.showResult(diagBounds, "DIAG blocked:\n${decision.reason}")
                 node?.let { recycleSafely(it) }
             }
-        }
-    }
-
-    /**
-     * TEMPORARY DIAGNOSTIC (v3) — see accessibility_service_config.xml's
-     * `typeWindowContentChanged` paragraph for the full theory this is
-     * testing (Google Messages is likely built with Jetpack Compose, whose
-     * combinedClickable(onLongClick) never dispatches
-     * TYPE_VIEW_LONG_CLICKED/TYPE_VIEW_SELECTED for a real physical
-     * gesture, but whose accessibility bridge should still emit
-     * TYPE_WINDOW_CONTENT_CHANGED for any resulting semantics change, IF
-     * that semantics change is wired up correctly on Google's side).
-     *
-     * Deliberately reads nothing sensitive: only `event.source`'s class
-     * name and screen bounds (never `.text`, never children) and the raw
-     * `contentChangeTypes` bitmask, which describes WHAT KIND of change
-     * happened (subtree/text/state/etc.), not any content. Gated by the
-     * exact same master-switch/block-list/allow-list checks as the real
-     * pathways, purely so this diagnostic doesn't show bubbles for
-     * unrelated apps — there is no content-sensitivity reason to gate it,
-     * since nothing sensitive is ever read.
-     *
-     * TYPE_WINDOW_CONTENT_CHANGED fires very frequently during ordinary
-     * use (scrolling, new messages arriving, cursor blink, etc.), so
-     * individual events are never shown directly — they're counted and
-     * batched behind [diagnosticDebouncer], and only the most recent
-     * event's details are shown once the stream goes quiet for
-     * [DIAGNOSTIC_DEBOUNCE_MS]. This function, its state fields, its
-     * accessibility_service_config.xml subscription, and this comment are
-     * all planned for removal once the SMS investigation concludes either
-     * way — see README.md §14.
-     */
-    private fun handleContentChangedDiagnostic(event: AccessibilityEvent) {
-        val packageName = event.packageName?.toString()
-        if (packageName.isNullOrBlank()) return
-        if (!settingsStore.isAiEnabled) return
-        if (AppBlocklist.isBlocked(packageName, applicationContext.packageName)) return
-        if (!settingsStore.isPackageAllowed(packageName)) return
-
-        val node = event.source
-        val className = try {
-            node?.className?.toString()
-        } catch (_: Exception) {
-            null
-        }
-        val bounds = Rect()
-        try {
-            node?.getBoundsInScreen(bounds)
-        } catch (_: Exception) {
-            // Leave as zero-rect; the bubble's own clamping keeps it on screen.
-        }
-        node?.let { recycleSafely(it) }
-
-        diagnosticContentChangeCount++
-        diagnosticLastPackage = packageName
-        diagnosticLastClassName = className
-        diagnosticLastChangeTypes = event.contentChangeTypes
-        diagnosticLastBounds = bounds
-
-        diagnosticDebouncer.schedule {
-            val count = diagnosticContentChangeCount
-            val pkg = diagnosticLastPackage ?: packageName
-            val cls = diagnosticLastClassName ?: "?"
-            val types = diagnosticLastChangeTypes
-            val anchor = diagnosticLastBounds
-            diagnosticContentChangeCount = 0
-            bubble.showResult(
-                anchor,
-                "DIAG content-changed x$count\npackage=$pkg\nclass=$cls\ntypes=$types"
-            )
         }
     }
 
@@ -591,11 +473,5 @@ class TextGateAccessibilityService : AccessibilityService() {
 
     companion object {
         private const val DEBOUNCE_MS = 400L
-
-        /** TEMPORARY DIAGNOSTIC (v3) — see handleContentChangedDiagnostic().
-         * Deliberately longer than [DEBOUNCE_MS]: TYPE_WINDOW_CONTENT_CHANGED
-         * fires far more often than a real keystroke, so a longer quiet
-         * period is needed before showing one summary bubble. */
-        private const val DIAGNOSTIC_DEBOUNCE_MS = 700L
     }
 }

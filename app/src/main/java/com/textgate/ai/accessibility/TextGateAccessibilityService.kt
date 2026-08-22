@@ -96,7 +96,11 @@ import java.util.concurrent.atomic.AtomicBoolean
  * not have been generic noise after all — it just wasn't inspecting the
  * right properties of `event.source`. v1.2.7 re-adds a narrower, better
  * targeted diagnostic to actually test that before drawing any final
- * conclusion.
+ * conclusion. v1.2.8 then fixed a real regression discovered on-device in
+ * v1.2.7: the diagnostic fired for every allow-listed app, not just the
+ * two under investigation, producing a disruptive false-looking
+ * "translation" bubble in TikTok. It is now hard-restricted to exactly
+ * [DIAGNOSTIC_TARGET_PACKAGES] — see README.md §14 "Fifth amendment".
  */
 class TextGateAccessibilityService : AccessibilityService() {
 
@@ -339,6 +343,17 @@ class TextGateAccessibilityService : AccessibilityService() {
     private fun handleComposeSelectionDiagnostic(event: AccessibilityEvent) {
         val packageName = event.packageName?.toString()
         if (packageName.isNullOrBlank()) return
+        // v1.2.8 fix: this diagnostic exists ONLY to investigate Google
+        // Messages and X — it must never fire for any other app, even one
+        // on the user's own allow-list. v1.2.7 mistakenly gated this on
+        // settingsStore.isPackageAllowed(packageName) alone, which meant it
+        // fired for EVERY allow-listed app (confirmed on-device: it fired
+        // constantly in TikTok while scrolling comments / tapping buttons,
+        // since TYPE_WINDOW_CONTENT_CHANGED is just as generic there as it
+        // is everywhere else — see README.md §14 "Fifth amendment"). The
+        // cheapest possible check goes first, before touching settingsStore
+        // or event.source at all.
+        if (packageName !in DIAGNOSTIC_TARGET_PACKAGES) return
         if (!::settingsStore.isInitialized) return
         if (!settingsStore.isAiEnabled) return
         if (AppBlocklist.isBlocked(packageName, applicationContext.packageName)) return
@@ -617,5 +632,23 @@ class TextGateAccessibilityService : AccessibilityService() {
          * into a single displayed snapshot; not a correctness-critical
          * value the way [DEBOUNCE_MS] is for the typed-trigger path. */
         private const val DIAGNOSTIC_DEBOUNCE_MS = 250L
+
+        /** TEMPORARY (v4 diagnostic, v1.2.8 fix) — the ONLY two packages
+         * this diagnostic is allowed to ever fire for: Google Messages and
+         * X (Twitter), the two apps this whole investigation is actually
+         * about. Added after on-device confirmation that gating on the
+         * user's general allow-list alone (v1.2.7) let this diagnostic
+         * fire for every allow-listed app — including TikTok, where
+         * TYPE_WINDOW_CONTENT_CHANGED fires constantly during ordinary
+         * scrolling/tapping, producing a disruptive false-looking
+         * "translation" bubble that has nothing to do with the real
+         * feature. This set is intentionally an allow-list, not a
+         * TikTok-specific block — narrower and safer than trying to
+         * enumerate every "chatty" app that might exhibit the same
+         * problem. */
+        private val DIAGNOSTIC_TARGET_PACKAGES = setOf(
+            "com.google.android.apps.messaging",
+            "com.twitter.android"
+        )
     }
 }

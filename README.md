@@ -203,7 +203,7 @@ read — `ACTION_SET_TEXT` is only ever used by the typed-trigger pipeline
 above. The bubble is a read-only, temporary overlay; the message the user
 long-pressed is left completely untouched in its original app.
 
-**Known limitation, currently being re-investigated (as of 1.2.7): Google
+**Known limitation, currently being re-investigated (as of 1.2.8): Google
 Messages (SMS) and X (Twitter) do not (yet) support the long-press
 bubble.** Real-device testing showed the bubble works in Telegram, and
 (after a fix — see §14 "Amendment to Feature update #6") in WhatsApp, but
@@ -217,7 +217,10 @@ of the properties it never checked (`isChecked`, and whether
 `className`) turned out, on verification against the actual AndroidX
 Compose source, to be exactly the ones this problem plausibly hinges on.
 1.2.7 re-adds this event type as a narrower diagnostic to test that
-directly (see §14) — the outcome is not yet known. The most likely
+directly (see §14) — the outcome is not yet known. As of 1.2.8, this
+diagnostic is hard-restricted to fire only for Google Messages and X
+(see §14 "Fifth amendment") after it was found, on-device, to also fire
+disruptively in TikTok. The most likely
 explanation for why the two permanent signals never fire at all, backed
 by Android's own documentation and researched in full in §14 ("Second
 amendment to Feature update #6" and after): both apps' relevant UI is
@@ -321,8 +324,10 @@ which is not a runtime/dangerous permission at all.
 **Accessibility** is not a manifest permission — it's a system-mediated
 capability the user grants manually in Settings → Accessibility, and its
 scope is further restricted by `accessibility_service_config.xml` (four
-event types as of 1.2.7 — three permanent, one temporary diagnostic, see
-§14 "Fourth amendment" — no window enumeration; see §2 and §8).
+event types as of 1.2.7/1.2.8 — three permanent, one temporary diagnostic
+restricted in code to firing only for Google Messages and X, see §14
+"Fourth amendment" and "Fifth amendment" — no window enumeration; see §2
+and §8).
 
 **The long-press translation bubble (§2.1b) still requests no new
 permission.** It is a `WindowManager` overlay of type
@@ -1428,6 +1433,50 @@ long-press, that would be stronger, more specific evidence for the
 1.2.6 conclusion below would be reinstated with this additional evidence
 folded in, and the clipboard/floating-button fallback would be the only
 remaining unexplored option.
+
+**Fifth amendment (v1.2.8): a real regression, found and fixed the same
+day, from on-device use rather than deliberate testing.** After
+installing 1.2.7, the app's owner reported that a translation-looking
+bubble kept appearing in **TikTok** — every time they scrolled the
+comment list, and every time they tapped any button — while nothing
+similar happened anywhere else while scrolling. This was not a new,
+separate bug: it was the v4 diagnostic bubble from the paragraph above,
+firing in an app that has nothing to do with this investigation.
+
+The cause was a gating mistake in `handleComposeSelectionDiagnostic()`:
+it was gated on `settingsStore.isPackageAllowed(packageName)` — the
+user's general allow-list — exactly like the real translation pathways
+are. But the user has TikTok on that allow-list (for the typed `?en`/`?pl`
+trigger feature, §2.1), so the *diagnostic*, which was only ever meant to
+run against Google Messages and X, fired there too. TikTok's comment list
+and video UI change constantly (playback progress, like counters, newly
+loaded comments), so `TYPE_WINDOW_CONTENT_CHANGED` fires there just as
+generically and constantly as it does everywhere else — this in itself
+is a small additional confirmation of the 1.2.5 finding that this event
+type is inherently noisy, not something specific to Compose or to
+Messages/X. The visible symptom — a bubble that looked like a translation
+result appearing on every scroll/tap — was purely a side effect of this
+diagnostic reusing the same `TranslationBubble.showResult()` UI as the
+real feature; no actual translation, network call, or text read to
+Gemini ever happened for TikTok content, since the diagnostic's own text
+read is separately gated behind `SensitiveInputGuard.isSensitiveInput`
+and never sends anything anywhere — but it was still a real, disruptive
+usability regression in an app the user actively uses.
+
+**Fix:** `handleComposeSelectionDiagnostic()` now checks
+`event.packageName` against a new, hard-coded
+`DIAGNOSTIC_TARGET_PACKAGES` set — exactly `com.google.android.apps.messaging`
+and `com.twitter.android` — as the very first, cheapest check, before even
+touching `settingsStore` or `event.source`. This is deliberately an
+allow-list of the two investigation targets, not a TikTok-specific
+block-list entry, since the same noisy-content-changed pattern could
+plausibly show up in any other chatty, frequently-updating app on the
+user's allow-list, not just TikTok. `accessibility_service_config.xml`'s
+doc comment and the class-level KDoc in
+`TextGateAccessibilityService.kt` were both updated to document this
+restriction. No other behavior changed: the diagnostic's internal logic,
+the real translation pathways, and every other gate are exactly as
+described in the "Fourth amendment" above.
 
 ## 15. Verified build result (GitHub Actions)
 

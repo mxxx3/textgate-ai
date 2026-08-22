@@ -3,11 +3,18 @@
     Deliberately minimal accessibility service configuration.
 
     accessibilityEventTypes="typeViewTextChanged|typeViewLongClicked|typeViewSelected|typeWindowContentChanged"
-        Four event types, as of v1.2.7. The first three are permanent. The
-        fourth, typeWindowContentChanged, is a TEMPORARY diagnostic re-added
-        in v1.2.7 — see the "Fourth amendment" note below and README.md §14
-        for the full, evidence-based reasoning for why it came back after
-        being removed in v1.2.6.
+        Four event types, as of v1.2.7/1.2.8. The first three are permanent.
+        The fourth, typeWindowContentChanged, is a TEMPORARY diagnostic
+        re-added in v1.2.7 — see the "Fourth amendment" note below and
+        README.md §14 for the full, evidence-based reasoning for why it
+        came back after being removed in v1.2.6. IMPORTANT, added in
+        v1.2.8: at the OS subscription level this event type is still
+        received for every window from every app (there is no per-package
+        filtering available here — see the android:packageNames note
+        below), but TextGateAccessibilityService.handleComposeSelectionDiagnostic()
+        now discards it immediately for any package other than Google
+        Messages or X — see README.md §14 "Fifth amendment" for why this
+        was necessary (it fired disruptively in TikTok in v1.2.7).
 
         typeViewTextChanged powers the typed "?en"/"?pl" trigger pathway:
         "the text in the field currently being edited changed."
@@ -124,9 +131,12 @@
         ALL FOUR event types: the long-press bubble pathway (long-click AND
         selected) is gated by BubbleTranslateGate, which enforces the exact
         same block-list and allow-list as the typed-trigger pathway (see
-        BubbleTranslateGate.kt); the v1.2.7 content-changed diagnostic
-        pathway enforces the same block-list/allow-list/master-switch gate
-        directly in handleComposeSelectionDiagnostic() itself.
+        BubbleTranslateGate.kt); the content-changed diagnostic pathway
+        enforces the same block-list/allow-list/master-switch gate directly
+        in handleComposeSelectionDiagnostic() itself, PLUS (as of v1.2.8) a
+        narrower diagnostic-only allow-list of exactly two packages
+        (DIAGNOSTIC_TARGET_PACKAGES) — see the "IMPORTANT, added in v1.2.8"
+        note above.
 
     android:canRetrieveWindowContent="true" is required for
     AccessibilityEvent#getSource() to return a usable node at all; without

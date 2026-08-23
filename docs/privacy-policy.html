@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Polityka prywatności — TextGate AI</title>
+<style>
+  :root {
+    --primary: #1B5E20;
+    --bg: #FFFFFF;
+    --surface: #F3F4F6;
+    --text: #1A1A1A;
+    --text-secondary: #5F6368;
+    --divider: #E0E0E0;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--surface);
+    color: var(--text);
+    line-height: 1.6;
+  }
+  header {
+    background: var(--primary);
+    color: #FFFFFF;
+    padding: 48px 24px 40px;
+    text-align: center;
+  }
+  header h1 { margin: 0 0 8px 0; font-size: 1.9rem; }
+  header p { margin: 0; opacity: 0.9; font-size: 0.95rem; }
+  main {
+    max-width: 760px;
+    margin: -24px auto 60px;
+    padding: 0 20px;
+  }
+  .card {
+    background: var(--bg);
+    border: 1px solid var(--divider);
+    border-radius: 16px;
+    padding: 32px;
+    margin-bottom: 24px;
+  }
+  h2 {
+    font-size: 1.25rem;
+    margin-top: 0;
+    color: var(--primary);
+  }
+  .lead {
+    font-weight: 600;
+    font-size: 1.05rem;
+  }
+  ul { padding-left: 22px; }
+  li { margin-bottom: 10px; }
+  .divider-lang {
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin: 48px 0 24px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .divider-lang::before, .divider-lang::after {
+    content: "";
+    display: inline-block;
+    width: 60px;
+    height: 1px;
+    background: var(--divider);
+    vertical-align: middle;
+    margin: 0 12px;
+  }
+  code {
+    background: var(--surface);
+    padding: 2px 6px;
+    border-radius: 6px;
+    font-size: 0.9em;
+  }
+  footer {
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    padding: 0 20px 40px;
+  }
+  footer a { color: var(--primary); }
+  .contact-placeholder {
+    background: #FFF8E1;
+    border: 1px solid #F0D98C;
+    border-radius: 10px;
+    padding: 14px 18px;
+    font-size: 0.92rem;
+    color: #6B5900;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Polityka prywatności — TextGate AI</h1>
+  <p>Ostatnia aktualizacja: 23 sierpnia 2026 · Wersja aplikacji 1.5.1</p>
+</header>
+
+<main>
+
+  <div class="card">
+    <p class="lead">Tekst jest wysyłany do Google Gemini tylko wtedy, gdy wyraźnie wpiszesz wyzwalacz tłumaczenia (np. <code>?en</code> lub <code>?de</code>), albo przytrzymasz wiadomość palcem.</p>
+    <p>TextGate AI nie zbiera żadnych danych analitycznych, raportów awarii ani danych o użytkowaniu i nie zawiera żadnych zewnętrznych bibliotek (SDK) firm trzecich.</p>
+  </div>
+
+  <div class="card">
+    <h2>Co TextGate AI odczytuje</h2>
+    <ul>
+      <li>Pole tekstowe, które właśnie edytujesz — wyłącznie po to, by sprawdzić, czy na końcu znajduje się jeden dokładny wyzwalacz tłumaczenia (np. „?en” lub „?de”, jeden na każdy z 40 obsługiwanych języków).</li>
+      <li>Wiadomość lub komentarz, który przytrzymasz palcem — tylko w aplikacjach, które sam/sama włączysz w sekcji „Dozwolone aplikacje”.</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>Czego nigdy nie odczytuje</h2>
+    <p>Pól haseł, kodów PIN ani żadnego pola rozpoznanego jako wrażliwe (np. numer karty, kod CVV, fraza odzyskiwania portfela kryptowalut) — bez wyjątków, w żadnej aplikacji. Menedżery haseł, aplikacje bankowe, uwierzytelniające i portfele/giełdy kryptowalut są zablokowane na stałe i nie da się ich włączyć w ustawieniach.</p>
+  </div>
+
+  <div class="card">
+    <h2>Co jest wysyłane i dokąd</h2>
+    <p>Wyłącznie tekst, który sam/sama wywołałeś/aś (wpisując wyzwalacz lub przytrzymując wiadomość), wysyłany jednorazowo, bezpośrednio przez HTTPS do Gemini API firmy Google, z użyciem klucza API, który sam/sama podałeś/aś we własnym, darmowym koncie Google AI Studio. Nic nie jest nigdy wysyłane bez tej Twojej wyraźnej akcji.</p>
+  </div>
+
+  <div class="card">
+    <h2>Co jest przechowywane na telefonie</h2>
+    <p>Twój klucz API Gemini — zaszyfrowany za pomocą Android Keystore (tego samego, sprzętowo wspieranego zabezpieczenia, którego Android używa dla danych logowania do ekranu blokady) — oraz Twoje proste ustawienia: które aplikacje są dozwolone, wybrany język, wybrany model Gemini. Żadne z tych danych nie są uwzględniane w kopiach zapasowych telefonu (android:allowBackup="false").</p>
+  </div>
+
+  <div class="card">
+    <h2>Czego TextGate AI nie robi</h2>
+    <ul>
+      <li>Nie zbiera danych analitycznych ani danych o użytkowaniu.</li>
+      <li>Nie wysyła raportów awarii do żadnej usługi zewnętrznej.</li>
+      <li>Nie wyświetla reklam.</li>
+      <li>Nie zawiera żadnych zewnętrznych bibliotek (SDK) — cały kod źródłowy jest napisany od podstaw, bez zależności produkcyjnych.</li>
+      <li>Nie zapisuje historii przetłumaczonych treści.</li>
+      <li>Nie czyta żadnej aplikacji, na którą wyraźnie nie wyraziłeś/aś zgody.</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>Usługa ułatwień dostępu (Accessibility Service)</h2>
+    <p>TextGate AI korzysta z Androidowej Usługi ułatwień dostępu wyłącznie po to, by móc odczytać tekst pola, które aktualnie edytujesz, lub wiadomości, którą przytrzymujesz — dokładnie tak, jak opisano powyżej, i wyłącznie w aplikacjach, które sam/sama włączysz. Aplikacja nie jest przeznaczona dla osób z niepełnosprawnościami — świadomie korzysta z tego samego API w celu tłumaczenia tekstu, o czym jasno informujemy.</p>
+  </div>
+
+  <div class="card">
+    <h2>Twoja kontrola</h2>
+    <p>Możesz wyłączyć całą funkcję tłumaczenia w dowolnym momencie jednym głównym przełącznikiem w Ustawieniach, dodawać i usuwać dowolną aplikację z listy dozwolonych, kiedy tylko chcesz, oraz w każdej chwili usunąć zapisany klucz API. Odinstalowanie aplikacji usuwa wszystkie lokalnie przechowywane dane.</p>
+  </div>
+
+  <div class="card">
+    <h2>Dzieci</h2>
+    <p>TextGate AI nie jest kierowana do dzieci i nie zbiera świadomie żadnych danych od osób poniżej 13. roku życia (ani od nikogo innego — patrz sekcje powyżej).</p>
+  </div>
+
+  <div class="card">
+    <h2>Zmiany w polityce prywatności</h2>
+    <p>Jeśli ta polityka się zmieni, zaktualizowana wersja zostanie opublikowana pod tym samym adresem, z nową datą aktualizacji na górze strony.</p>
+  </div>
+
+  <div class="card">
+    <h2>Kontakt</h2>
+    <p class="contact-placeholder">⚠️ Uzupełnij ten adres przed publikacją: <strong>[TWÓJ ADRES E-MAIL DO KONTAKTU]</strong> — Google Play wymaga realnego sposobu kontaktu w sprawach prywatności.</p>
+  </div>
+
+  <div class="divider-lang">English version below</div>
+
+  <div class="card">
+    <p class="lead">Text is sent to Google Gemini only when you explicitly type a translation trigger (like <code>?en</code> or <code>?de</code>), or long-press a message.</p>
+    <p>TextGate AI does not collect analytics, crash reports, or usage data of any kind, and contains no third-party SDKs.</p>
+  </div>
+
+  <div class="card">
+    <h2>What TextGate AI reads</h2>
+    <ul>
+      <li>The text field you're currently editing — only to check for one exact translation trigger (like "?en" or "?de", one per each of the 40 supported languages) at the end.</li>
+      <li>A message or comment you long-press — only in apps you've switched on in "Allowed apps".</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>What it never reads</h2>
+    <p>Password fields, PIN entry, or any field the app recognizes as sensitive (card numbers, CVV codes, crypto wallet recovery phrases) — no exceptions, in any app. Password managers, banking apps, authenticator apps, and crypto wallets/exchanges are permanently blocked and cannot be enabled.</p>
+  </div>
+
+  <div class="card">
+    <h2>What gets sent, and where</h2>
+    <p>Only the text you triggered yourself (by typing a trigger or long-pressing a message), sent once, directly over HTTPS to Google's Gemini API, using the API key you provided from your own free Google AI Studio account. Nothing is ever sent without this explicit action from you.</p>
+  </div>
+
+  <div class="card">
+    <h2>What's stored on your phone</h2>
+    <p>Your Gemini API key — encrypted with the Android Keystore (the same hardware-backed security Android uses for your lock screen credentials) — and your simple settings: which apps are allowed, your chosen language, your chosen Gemini model. None of this is included in phone backups (android:allowBackup="false").</p>
+  </div>
+
+  <div class="card">
+    <h2>What TextGate AI does not do</h2>
+    <ul>
+      <li>No analytics or usage tracking.</li>
+      <li>No crash reporting to any external service.</li>
+      <li>No advertising.</li>
+      <li>No third-party libraries (SDKs) — every line of code is written from scratch, with zero production dependencies.</li>
+      <li>No history of anything you've translated.</li>
+      <li>No reading of any app you haven't explicitly allowed.</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>Accessibility Service</h2>
+    <p>TextGate AI uses Android's Accessibility Service solely to read the text of the field you're currently editing, or the message you're long-pressing — exactly as described above, and only in apps you switch on yourself. This app is not intended for users with disabilities — it knowingly uses this same API for translation, which we disclose clearly here.</p>
+  </div>
+
+  <div class="card">
+    <h2>Your control</h2>
+    <p>You can turn the whole translation feature off at any time with a single master switch in Settings, add or remove any app from the allowed list whenever you like, and clear your saved API key at any time. Uninstalling the app removes all locally stored data.</p>
+  </div>
+
+  <div class="card">
+    <h2>Children</h2>
+    <p>TextGate AI is not directed at children and does not knowingly collect data from anyone under 13 (or from anyone at all, beyond what's described above).</p>
+  </div>
+
+  <div class="card">
+    <h2>Changes to this policy</h2>
+    <p>If this policy changes, the updated version will be published at this same address, with a new "last updated" date at the top of the page.</p>
+  </div>
+
+  <div class="card">
+    <h2>Contact</h2>
+    <p class="contact-placeholder">⚠️ Fill in before publishing: <strong>[YOUR CONTACT EMAIL]</strong> — Google Play requires a real way to contact you about privacy matters.</p>
+  </div>
+
+</main>
+
+<footer>
+  TextGate AI — <a href="https://github.com/mxxx3/textgate-ai">kod źródłowy na GitHub</a>
+</footer>
+
+</body>
+</html>

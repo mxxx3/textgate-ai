@@ -13,3 +13,8 @@ app/release/
 *.keystore
 *.jks
 !debug.keystore
+
+# Release upload-key material (generated locally, delivered to the app
+# owner directly) — must never be committed, even accidentally: contains
+# the raw keystore, its base64 encoding, and a plaintext-password README.
+/release-signing/

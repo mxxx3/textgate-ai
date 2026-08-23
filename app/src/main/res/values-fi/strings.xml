@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">TextGate AI</string>
+    <string name="app_name">Tłumacz TextGate AI</string>
 
     <string name="accessibility_service_description">TextGate AI lukee tekstiä kahdella tavalla, molemmat tiukasti rajattuja. Ensinnäkin: tekstikenttä, jota parhaillaan muokkaat, ja vain etsiäkseen kirjoittamasi tekstin lopusta yhtä tarkkaa liipaisinpäätettä (kuten \"?en\" tai \"?de\" — yksi kutakin kieltä kohden, katso täydellinen luettelo Asetuksista). Toiseksi: viesti tai kommentti, jota painat pitkään, jotta näytettäisiin kelluva käännös oletuskielelle, jonka valitset Asetuksista. Kumpikaan tapa ei koskaan lue salasanakenttiä, ei koskaan toimi sovelluksissa, joita et ole nimenomaisesti sallinut, eikä koskaan säilytä historiaa mistään luetusta. Kun liipaisin havaitaan tai kun painat viestiä pitkään sallitussa sovelluksessa, kyseinen teksti lähetetään HTTPS:n kautta määrittämääsi Gemini-rajapintaan ja käännetään. Kirjoitetun liipaisimen tulos korvaa kentän sisällön; pitkän painalluksen tulos näytetään vain väliaikaisessa kelluvassa kuplassa eikä se koskaan kosketa alkuperäistä sovellusta. Mitään ei lähetetä minnekään, ellet kirjoita jotakin näistä tarkoista liipaisimista tai paina pitkään viestiä sovelluksessa, joka on kytketty päälle TextGate AI:n asetuksissa.</string>
 
@@ -18,6 +18,11 @@
     <string name="accessibility_status_enabled">Käytössä</string>
     <string name="accessibility_status_disabled">Ei käytössä — TextGate AI ei voi tehdä mitään, ennen kuin otat sen käyttöön</string>
     <string name="btn_open_accessibility_settings">Avaa esteettömyysasetukset</string>
+
+    <string name="accessibility_disclosure_title">Ennen kuin otat esteettömyyspalvelun käyttöön</string>
+    <string name="accessibility_disclosure_body">TextGate AI ei ole esteettömyystyökalu vammaisille henkilöille — se käyttää Androidin esteettömyyspalvelua ainoastaan mahdollistaakseen kääntämisen suoraan paikan päällä, ja vain tässä kuvatulla tavalla.\n\nMitä luetaan: tekstikenttä, jota parhaillaan muokkaat, vain sen tarkistamiseksi, päättyykö kirjoittamasi teksti johonkin yhteen tarkkaan liipaisinpäätteeseen, kuten \"?en\" tai \"?de\"; sekä viesti tai kommentti, jota painat pitkään, vain sovelluksissa, jotka olet nimenomaisesti sallinut Asetuksissa.\n\nMitä ei koskaan lueta: salasanakenttiä, PIN-koodin syöttöä tai mitään sovelluksessa, jota et ole ottanut käyttöön. Mistään luetusta ei koskaan säilytetä historiaa.\n\nMitä tapahtuu seuraavaksi: vasta kun liipaisin havaitaan tai kun painat viestiä pitkään, kyseinen teksti lähetetään kerran HTTPS:n kautta määrittämääsi Gemini-rajapintaan ja käännetään. Muulloin mitään ei lähetetä.\n\nPysyt hallinnassa: voit sammuttaa koko ominaisuuden milloin tahansa Asetusten pääkytkimestä ja poistaa minkä tahansa sovelluksen sallittujen listalta, milloin haluat.\n\nKun napautat \"Hyväksyn\", avautuvat Androidin omat esteettömyysasetukset, joissa otat TextGate AI:n käyttöön itse — pelkkä tämän painikkeen napauttaminen ei ota mitään käyttöön.</string>
+    <string name="btn_accessibility_agree">Hyväksyn ja jatkan asetuksiin</string>
+    <string name="btn_accessibility_cancel">Peruuta</string>
 
     <string name="section_gemini_api">Gemini API</string>
     <string name="label_api_key">Gemini API -avain</string>

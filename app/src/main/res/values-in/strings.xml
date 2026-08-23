@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">TextGate AI</string>
+    <string name="app_name">Tłumacz TextGate AI</string>
 
     <string name="accessibility_service_description">TextGate AI membaca teks dengan dua cara, dan keduanya dibatasi secara ketat. Pertama: kolom teks yang sedang Anda edit, dan hanya untuk mencari satu akhiran pemicu yang persis (seperti \"?en\" atau \"?de\" — satu untuk setiap bahasa, lihat daftar lengkapnya di Pengaturan) di akhir apa yang Anda ketik. Kedua: pesan atau komentar yang Anda tekan lama, untuk menampilkan terjemahan mengambang ke bahasa default yang Anda pilih di Pengaturan. Kedua cara ini tidak pernah membaca kolom kata sandi, tidak pernah berjalan di aplikasi yang belum Anda izinkan secara eksplisit, dan tidak pernah menyimpan riwayat apa pun yang dibaca. Ketika sebuah pemicu terdeteksi, atau ketika Anda menekan lama sebuah pesan, di aplikasi yang diizinkan, teks terkait dikirim melalui HTTPS ke Gemini API yang telah Anda konfigurasi dan diterjemahkan. Hasil dari pemicu yang diketik akan menggantikan isi kolom tersebut; hasil dari tekan lama hanya akan ditampilkan dalam gelembung mengambang sementara dan tidak pernah menyentuh aplikasi aslinya. Tidak ada apa pun yang dikirim ke mana pun kecuali Anda mengetikkan salah satu pemicu persis ini atau menekan lama sebuah pesan di aplikasi yang diaktifkan dalam pengaturan TextGate AI.</string>
 
@@ -18,6 +18,10 @@
     <string name="accessibility_status_enabled">Diaktifkan</string>
     <string name="accessibility_status_disabled">Belum diaktifkan — TextGate AI tidak dapat melakukan apa pun sampai Anda mengaktifkannya</string>
     <string name="btn_open_accessibility_settings">Buka Pengaturan Aksesibilitas</string>
+    <string name="accessibility_disclosure_title">Sebelum Anda mengaktifkan Layanan Aksesibilitas</string>
+    <string name="accessibility_disclosure_body">TextGate AI bukan alat aksesibilitas untuk penyandang disabilitas — aplikasi ini menggunakan Layanan Aksesibilitas Android semata-mata untuk mendukung terjemahan langsung di tempat, dan hanya dengan cara yang dijelaskan di sini.\n\nYang dibaca: kolom teks yang sedang Anda edit, hanya untuk memeriksa satu akhiran pemicu yang persis seperti \"?en\" atau \"?de\" di akhir apa yang Anda ketik; dan pesan atau komentar yang Anda tekan lama, hanya di aplikasi yang telah Anda izinkan secara eksplisit di Pengaturan.\n\nYang tidak pernah dibaca: kolom kata sandi, entri PIN, atau apa pun di aplikasi yang belum Anda aktifkan. Riwayat apa pun yang dibaca tidak pernah disimpan.\n\nYang terjadi selanjutnya: hanya ketika pemicu terdeteksi, atau Anda menekan lama sebuah pesan, teks terkait dikirim satu kali, melalui HTTPS, ke Gemini API yang telah Anda konfigurasi, lalu diterjemahkan. Tidak ada apa pun yang dikirim pada waktu lain.\n\nAnda tetap memegang kendali: matikan seluruh fitur ini kapan saja dengan sakelar utama di Pengaturan, dan hapus aplikasi apa pun dari daftar yang diizinkan kapan pun Anda mau.\n\nMengetuk \"Saya setuju\" akan membuka Pengaturan Aksesibilitas bawaan Android, tempat Anda sendiri yang mengaktifkan TextGate AI — tidak ada apa pun yang diaktifkan hanya dengan mengetuk tombol ini.</string>
+    <string name="btn_accessibility_agree">Saya setuju dan lanjutkan ke Pengaturan</string>
+    <string name="btn_accessibility_cancel">Batal</string>
 
     <string name="section_gemini_api">Gemini API</string>
     <string name="label_api_key">Kunci API Gemini</string>

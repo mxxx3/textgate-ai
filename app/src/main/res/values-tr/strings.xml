@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">TextGate AI</string>
+    <string name="app_name">Tłumacz TextGate AI</string>
 
     <string name="accessibility_service_description">TextGate AI, metinleri yalnızca sıkı biçimde sınırlandırılmış iki yolla okur. Birincisi: şu anda düzenlemekte olduğunuz metin alanı ve yalnızca yazdığınız metnin sonunda tam olarak eşleşen tek bir tetikleyici ek (örneğin \"?en\" veya \"?de\" — dil başına bir tane, tam listeyi Ayarlar\'da bulabilirsiniz) arar. İkincisi: uzun basılı tuttuğunuz bir mesaj veya yorum; bu, Ayarlar\'da seçtiğiniz varsayılan dile yapılan çeviriyi yüzen bir baloncukta göstermek içindir. Her iki yol da parola alanlarını asla okumaz, açıkça izin vermediğiniz uygulamalarda asla çalışmaz ve okunan hiçbir şeyin geçmişini tutmaz. İzin verilen bir uygulamada bir tetikleyici algılandığında veya bir mesaja uzun bastığınızda, ilgili metin HTTPS üzerinden yapılandırdığınız Gemini API\'sine gönderilir ve çevrilir. Yazılı tetikleyici sonucu, alanın içeriğinin yerini alır; uzun basma sonucu ise yalnızca geçici bir yüzen baloncukta gösterilir ve orijinal uygulamaya asla dokunmaz. Bu tam tetikleyicilerden birini yazmadığınız veya TextGate AI\'nin ayarlarında açık olan bir uygulamada bir mesaja uzun basmadığınız sürece hiçbir şey hiçbir yere gönderilmez.</string>
 
@@ -18,6 +18,10 @@
     <string name="accessibility_status_enabled">Etkin</string>
     <string name="accessibility_status_disabled">Etkin değil — siz etkinleştirene kadar TextGate AI hiçbir şey yapamaz</string>
     <string name="btn_open_accessibility_settings">Erişilebilirlik Ayarlarını Aç</string>
+    <string name="accessibility_disclosure_title">Erişilebilirlik Hizmetini etkinleştirmeden önce</string>
+    <string name="accessibility_disclosure_body">TextGate AI, engelli bireyler için bir erişilebilirlik aracı değildir — Android\'in Erişilebilirlik Hizmeti\'ni yalnızca yerinde çeviriyi çalıştırmak için ve yalnızca burada açıklanan şekilde kullanır.\n\nNe okunur: şu anda düzenlemekte olduğunuz metin alanı — yalnızca yazdığınız metnin sonunda \"?en\" veya \"?de\" gibi tam olarak eşleşen tek bir tetikleyici ek olup olmadığını kontrol etmek için; ve Ayarlar\'da açıkça izin verdiğiniz uygulamalarda uzun bastığınız bir mesaj veya yorum.\n\nAsla okunmayanlar: parola alanları, PIN girişi veya açmadığınız bir uygulamadaki herhangi bir şey. Okunan hiçbir şeyin geçmişi hiçbir zaman tutulmaz.\n\nSonra ne olur: yalnızca bir tetikleyici algılandığında veya bir mesaja uzun bastığınızda, ilgili metin HTTPS üzerinden yapılandırdığınız Gemini API\'sine tek seferliğine gönderilir ve çevrilir. Başka hiçbir zaman hiçbir şey gönderilmez.\n\nKontrol her zaman sizde: Ayarlar\'daki ana anahtarla özelliğin tamamını istediğiniz zaman kapatabilir, izin verilen listeden istediğiniz uygulamayı istediğiniz zaman kaldırabilirsiniz.\n\n\"Kabul ediyorum ve ayarlara devam ediyorum\" seçeneğine dokunmak, Android\'in kendi Erişilebilirlik ayarlarını açar; TextGate AI\'yi orada kendiniz etkinleştirirsiniz — yalnızca bu düğmeye dokunmak hiçbir şeyi etkinleştirmez.</string>
+    <string name="btn_accessibility_agree">Kabul ediyorum ve ayarlara devam ediyorum</string>
+    <string name="btn_accessibility_cancel">İptal</string>
 
     <string name="section_gemini_api">Gemini API</string>
     <string name="label_api_key">Gemini API anahtarı</string>

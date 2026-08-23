@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">TextGate AI</string>
+    <string name="app_name">Tłumacz TextGate AI</string>
 
     <string name="accessibility_service_description">TextGate AI đọc văn bản theo hai cách, cả hai đều bị giới hạn nghiêm ngặt. Thứ nhất: trường văn bản mà bạn đang chỉnh sửa, và chỉ để tìm một hậu tố kích hoạt chính xác duy nhất (như \"?en\" hoặc \"?de\" — mỗi ngôn ngữ có một mã, xem danh sách đầy đủ trong Cài đặt) ở cuối nội dung bạn đã gõ. Thứ hai: một tin nhắn hoặc bình luận mà bạn nhấn giữ, để hiển thị bản dịch nổi sang ngôn ngữ mặc định mà bạn chọn trong Cài đặt. Cả hai cách đều không bao giờ đọc các trường mật khẩu, không bao giờ hoạt động trong các ứng dụng mà bạn chưa cho phép rõ ràng, và không bao giờ lưu lại lịch sử bất kỳ nội dung nào đã đọc. Khi phát hiện lệnh kích hoạt, hoặc khi bạn nhấn giữ một tin nhắn, trong một ứng dụng được cho phép, văn bản liên quan sẽ được gửi qua HTTPS đến Gemini API mà bạn đã định cấu hình để dịch. Kết quả từ lệnh kích hoạt gõ sẽ thay thế nội dung của trường văn bản; kết quả từ thao tác nhấn giữ chỉ hiển thị trong một bong bóng nổi tạm thời và không bao giờ tác động đến ứng dụng gốc. Không có gì được gửi đi bất cứ đâu trừ khi bạn gõ một trong các lệnh kích hoạt chính xác này hoặc nhấn giữ một tin nhắn trong ứng dụng đã được bật trong cài đặt của TextGate AI.</string>
 
@@ -18,6 +18,10 @@
     <string name="accessibility_status_enabled">Đã bật</string>
     <string name="accessibility_status_disabled">Chưa bật — TextGate AI không thể làm gì cho đến khi bạn bật dịch vụ này</string>
     <string name="btn_open_accessibility_settings">Mở Cài đặt Hỗ trợ tiếp cận</string>
+    <string name="accessibility_disclosure_title">Trước khi bạn bật Dịch vụ Hỗ trợ tiếp cận</string>
+    <string name="accessibility_disclosure_body">TextGate AI không phải là công cụ hỗ trợ tiếp cận dành cho người khuyết tật — ứng dụng chỉ sử dụng Dịch vụ Hỗ trợ tiếp cận của Android để thực hiện dịch tại chỗ, và chỉ theo cách được mô tả ở đây.\n\nNhững gì được đọc: trường văn bản mà bạn đang chỉnh sửa, chỉ để kiểm tra một hậu tố kích hoạt chính xác duy nhất như \"?en\" hoặc \"?de\" ở cuối nội dung bạn đã gõ; và một tin nhắn hoặc bình luận mà bạn nhấn giữ, chỉ trong các ứng dụng bạn đã cho phép rõ ràng trong Cài đặt.\n\nNhững gì không bao giờ được đọc: các trường mật khẩu, nhập mã PIN, hoặc bất kỳ nội dung nào trong ứng dụng bạn chưa bật. Không có lịch sử nội dung nào đã đọc từng được lưu lại.\n\nĐiều gì xảy ra tiếp theo: chỉ khi phát hiện lệnh kích hoạt, hoặc khi bạn nhấn giữ một tin nhắn, văn bản liên quan mới được gửi một lần, qua HTTPS, đến Gemini API mà bạn đã định cấu hình, và được dịch. Không có gì được gửi đi vào bất kỳ thời điểm nào khác.\n\nBạn luôn nắm quyền kiểm soát: tắt toàn bộ tính năng bất cứ lúc nào bằng công tắc chính trong Cài đặt, và xóa bất kỳ ứng dụng nào khỏi danh sách được phép bất cứ khi nào bạn muốn.\n\nChạm \"Tôi đồng ý và tiếp tục đến phần cài đặt\" sẽ mở phần cài đặt Hỗ trợ tiếp cận của chính Android, nơi bạn tự bật TextGate AI — chỉ chạm nút này thôi thì không có gì được bật cả.</string>
+    <string name="btn_accessibility_agree">Tôi đồng ý và tiếp tục đến phần cài đặt</string>
+    <string name="btn_accessibility_cancel">Hủy</string>
 
     <string name="section_gemini_api">Gemini API</string>
     <string name="label_api_key">Khóa API Gemini</string>

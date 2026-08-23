@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">TextGate AI</string>
+    <string name="app_name">Tłumacz TextGate AI</string>
 
     <string name="accessibility_service_description">TextGate AI bere besedilo na dva strogo omejena načina. Prvič: besedilno polje, ki ga trenutno urejate, in to samo za iskanje ene natančne sprožilne pripone (na primer „?en“ ali „?de“ — ena za vsak jezik, celoten seznam si oglejte v nastavitvah) na koncu vnesenega besedila. Drugič: sporočilo ali komentar, na katerega dolgo pritisnete in ga držite, da se prikaže plavajoč prevod v privzeti jezik, ki ga izberete v nastavitvah. Nobena od teh poti nikoli ne bere polj z gesli, nikoli ne deluje v aplikacijah, ki jih niste izrecno dovolili, in nikoli ne shranjuje zgodovine česarkoli prebranega. Ko je zaznan sprožilec ali ko dolgo pritisnete sporočilo v dovoljeni aplikaciji, se ustrezno besedilo prek HTTPS pošlje v API Gemini, ki ste ga konfigurirali, in prevede. Rezultat vnesenega sprožilca nadomesti vsebino polja; rezultat dolgega pritiska se prikaže samo v začasnem plavajočem oblačku in nikoli ne vpliva na izvirno aplikacijo. Nič se nikamor ne pošlje, razen če vnesete enega od teh natančnih sprožilcev ali dolgo pritisnete sporočilo v aplikaciji, ki je vklopljena v nastavitvah TextGate AI.</string>
 
@@ -18,6 +18,11 @@
     <string name="accessibility_status_enabled">Omogočeno</string>
     <string name="accessibility_status_disabled">Ni omogočeno — TextGate AI ne more delovati, dokler je ne omogočite</string>
     <string name="btn_open_accessibility_settings">Odpri nastavitve za osebe s posebnimi potrebami</string>
+
+    <string name="accessibility_disclosure_title">Preden omogočite storitev za osebe s posebnimi potrebami</string>
+    <string name="accessibility_disclosure_body">TextGate AI ni pripomoček za osebe s posebnimi potrebami – Androidovo storitev za osebe s posebnimi potrebami uporablja izključno za prevajanje besedila na mestu, kjer ga pišete, in to samo na način, opisan spodaj.\n\nKaj se bere: besedilno polje, ki ga trenutno urejate, in to samo za preverjanje ene natančne sprožilne pripone, na primer „?en“ ali „?de“, na koncu vnesenega besedila; ter sporočilo ali komentar, na katerega dolgo pritisnete, in to samo v aplikacijah, ki ste jih izrecno dovolili v nastavitvah.\n\nKaj se nikoli ne bere: polja z gesli, vnos PIN-a ali karkoli v aplikaciji, ki je niste vklopili. Zgodovina česarkoli prebranega se nikoli ne shranjuje.\n\nKaj se zgodi nato: šele ko je zaznan sprožilec ali dolgo pritisnete sporočilo, se ustrezno besedilo enkrat pošlje prek HTTPS-a v API Gemini, ki ste ga konfigurirali, in prevede. V nobenem drugem trenutku se nič ne pošlje.\n\nNadzor ostaja pri vas: celotno funkcijo lahko kadar koli izklopite z glavnim stikalom v nastavitvah in kadar koli odstranite katero koli aplikacijo s seznama dovoljenih.\n\nS tapom na »Strinjam se« se odprejo nastavitve za osebe s posebnimi potrebami v Androidu, kjer TextGate AI omogočite sami – zgolj tap na ta gumb sam po sebi ničesar ne omogoči.</string>
+    <string name="btn_accessibility_agree">Strinjam se in nadaljujem v nastavitve</string>
+    <string name="btn_accessibility_cancel">Prekliči</string>
 
     <string name="section_gemini_api">Gemini API</string>
     <string name="label_api_key">Ključ API za Gemini</string>

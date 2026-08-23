@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">TextGate AI</string>
+    <string name="app_name">Tłumacz TextGate AI</string>
 
     <string name="accessibility_service_description">TextGate AI leser tekst på to strengt begrensede måter. Først: tekstfeltet du redigerer akkurat nå, og bare for å se etter én bestemt utløsersuffiks (som \"?en\" eller \"?de\" — én per språk, se hele listen i Innstillinger) på slutten av det du har skrevet. For det andre: en melding eller kommentar du trykker og holder inne på, for å vise en flytende oversettelse til standardspråket du velger i Innstillinger. Ingen av disse to metodene leser noensinne passordfelt, kjører aldri i apper du ikke uttrykkelig har tillatt, og lagrer aldri noen historikk over noe som er lest. Når en utløser oppdages, eller når du trykker og holder inne på en melding, i en tillatt app, sendes den aktuelle teksten over HTTPS til Gemini-API-et du har konfigurert, og oversettes. Resultatet fra den skrevne utløseren erstatter innholdet i feltet; resultatet fra trykk-og-hold vises bare i en midlertidig flytende boble og berører aldri den opprinnelige appen. Ingenting sendes noe sted med mindre du skriver en av disse eksakte utløserne eller trykker og holder inne på en melding i en app som er slått på i TextGate AIs innstillinger.</string>
 
@@ -18,6 +18,11 @@
     <string name="accessibility_status_enabled">Aktivert</string>
     <string name="accessibility_status_disabled">Ikke aktivert — TextGate AI kan ikke gjøre noe før du aktiverer den</string>
     <string name="btn_open_accessibility_settings">Åpne tilgjengelighetsinnstillinger</string>
+
+    <string name="accessibility_disclosure_title">Før du aktiverer tilgjengelighetstjenesten</string>
+    <string name="accessibility_disclosure_body">TextGate AI er ikke et hjelpemiddel for personer med nedsatt funksjonsevne — appen bruker Androids tilgjengelighetstjeneste utelukkende til å drive oversettelse der du skriver, og kun på måten som beskrives her.\n\nHva som leses: tekstfeltet du redigerer akkurat nå, bare for å sjekke om det står én bestemt utløsersuffiks, som \"?en\" eller \"?de\", helt til slutt i det du har skrevet; og en melding eller kommentar du trykker og holder inne på, bare i apper du uttrykkelig har tillatt i Innstillinger.\n\nHva som aldri leses: passordfelt, PIN-kode-inntasting, eller noe som helst i en app du ikke har slått på. Ingen historikk over det som er lest, lagres noensinne.\n\nHva som skjer videre: først når en utløser oppdages, eller du trykker og holder inne på en melding, sendes den aktuelle teksten én gang, over HTTPS, til Gemini-API-et du har konfigurert, og oversettes. Ingenting sendes på noe annet tidspunkt.\n\nDu har full kontroll: slå av hele funksjonen når som helst med hovedbryteren i Innstillinger, og fjern en app fra den tillatte listen når du måtte ønske.\n\nNår du trykker «Jeg godtar», åpnes Androids egne tilgjengelighetsinnstillinger, der du selv slår på TextGate AI — ingenting blir aktivert bare ved å trykke på denne knappen.</string>
+    <string name="btn_accessibility_agree">Jeg godtar og fortsetter til innstillinger</string>
+    <string name="btn_accessibility_cancel">Avbryt</string>
 
     <string name="section_gemini_api">Gemini-API</string>
     <string name="label_api_key">Gemini API-nøkkel</string>

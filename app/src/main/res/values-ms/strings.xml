@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">TextGate AI</string>
+    <string name="app_name">Tłumacz TextGate AI</string>
 
     <string name="accessibility_service_description">TextGate AI membaca teks dalam dua cara sahaja, kedua-duanya sangat terhad. Pertama: medan teks yang sedang anda edit, dan hanya untuk mencari satu akhiran pencetus yang tepat (seperti \"?en\" atau \"?de\" — satu untuk setiap bahasa, lihat senarai lengkap dalam Tetapan) di hujung apa yang anda taip. Kedua: mesej atau komen yang anda tekan dan tahan, untuk memaparkan terjemahan terapung ke dalam bahasa lalai yang anda pilih dalam Tetapan. Kedua-dua cara ini tidak pernah membaca medan kata laluan, tidak pernah beroperasi dalam aplikasi yang belum anda benarkan secara jelas, dan tidak pernah menyimpan sebarang sejarah apa-apa yang dibaca. Apabila pencetus dikesan, atau apabila anda menekan dan menahan mesej, dalam aplikasi yang dibenarkan, teks berkenaan dihantar melalui HTTPS ke API Gemini yang telah anda konfigurasikan dan diterjemahkan. Hasil pencetus yang ditaip menggantikan kandungan medan tersebut; hasil tekan dan tahan hanya dipaparkan dalam gelembung terapung sementara dan tidak pernah menyentuh aplikasi asal. Tiada apa-apa dihantar ke mana-mana melainkan anda menaip salah satu pencetus tepat ini atau menekan dan menahan mesej dalam aplikasi yang dihidupkan dalam tetapan TextGate AI.</string>
 
@@ -18,6 +18,11 @@
     <string name="accessibility_status_enabled">Diaktifkan</string>
     <string name="accessibility_status_disabled">Tidak diaktifkan — TextGate AI tidak dapat melakukan apa-apa sehingga anda mengaktifkannya</string>
     <string name="btn_open_accessibility_settings">Buka Tetapan Kebolehcapaian</string>
+
+    <string name="accessibility_disclosure_title">Sebelum anda mendayakan Perkhidmatan Kebolehcapaian</string>
+    <string name="accessibility_disclosure_body">TextGate AI bukan alat kebolehcapaian untuk orang kurang upaya — ia menggunakan Perkhidmatan Kebolehcapaian Android semata-mata untuk menyokong terjemahan di tempat, dan hanya dengan cara yang diterangkan di sini.\n\nApa yang dibaca: medan teks yang sedang anda edit, hanya untuk menyemak satu pencetus tepat seperti \"?en\" atau \"?de\" di hujung apa yang anda taip; dan mesej atau komen yang anda tekan dan tahan, hanya dalam aplikasi yang telah anda benarkan secara jelas dalam Tetapan.\n\nApa yang tidak pernah dibaca: medan kata laluan, kemasukan PIN, atau apa-apa dalam aplikasi yang belum anda hidupkan. Tiada sejarah apa-apa yang dibaca pernah disimpan.\n\nApa yang berlaku seterusnya: hanya apabila pencetus dikesan, atau apabila anda menekan dan menahan mesej, teks berkenaan dihantar sekali sahaja, melalui HTTPS, ke API Gemini yang telah anda konfigurasikan, dan diterjemahkan. Tiada apa-apa dihantar pada bila-bila masa lain.\n\nAnda kekal mengawal: matikan keseluruhan ciri ini pada bila-bila masa dengan suis induk dalam Tetapan, dan keluarkan mana-mana aplikasi daripada senarai dibenarkan bila-bila masa anda mahu.\n\nMengetik \"Saya bersetuju\" akan membuka tetapan Kebolehcapaian Android sendiri, di mana anda sendiri mendayakan TextGate AI — tiada apa-apa yang didayakan hanya dengan mengetik butang ini.</string>
+    <string name="btn_accessibility_agree">Saya bersetuju dan teruskan ke tetapan</string>
+    <string name="btn_accessibility_cancel">Batal</string>
 
     <string name="section_gemini_api">API Gemini</string>
     <string name="label_api_key">Kunci API Gemini</string>

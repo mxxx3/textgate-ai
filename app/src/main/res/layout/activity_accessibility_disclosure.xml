@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Google Play's "prominent disclosure and consent" requirement for apps
+    that use AccessibilityService as a non-accessibility tool (see
+    docs/publikacja_google_play.md, section 0): a DEDICATED, in-app screen —
+    not the Android system Settings screen — shown BEFORE the user is sent
+    to enable the service, that clearly explains what is read and requires
+    an explicit affirmative action ("I agree", not "OK"/"Understood") before
+    continuing. SettingsActivity launches this screen instead of jumping
+    straight to Settings.ACTION_ACCESSIBILITY_SETTINGS; only tapping
+    buttonAgree here does that.
+-->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    android:background="@color/tg_surface">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/bg_card"
+            android:layout_marginBottom="16dp">
+
+            <TextView
+                android:id="@+id/textDisclosureTitle"
+                style="@style/TgSectionTitle"
+                android:textSize="20sp"
+                android:text="@string/accessibility_disclosure_title" />
+
+            <TextView
+                android:id="@+id/textDisclosureBody"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:textSize="15sp"
+                android:lineSpacingExtra="4dp"
+                android:textColor="@color/tg_text_primary"
+                android:text="@string/accessibility_disclosure_body" />
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/buttonAgree"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/btn_accessibility_agree"
+            tools:ignore="ButtonStyle" />
+
+        <Button
+            android:id="@+id/buttonCancel"
+            style="?android:attr/borderlessButtonStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:textColor="@color/tg_text_secondary"
+            android:background="?android:attr/selectableItemBackground"
+            android:text="@string/btn_accessibility_cancel" />
+
+    </LinearLayout>
+</ScrollView>

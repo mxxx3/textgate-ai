@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">TextGate AI</string>
+    <string name="app_name">Tłumacz TextGate AI</string>
 
     <string name="accessibility_service_description">TextGate AI loeb teksti kahel viisil, mõlemad rangelt piiratud. Esiteks: tekstiväli, mida te parasjagu redigeerite, ja seda ainult selleks, et otsida selle lõpust ühte täpset päästiku-sufiksit (näiteks \"?en\" või \"?de\" — üks iga keele kohta, vaadake täielikku loendit Seadetes) sellest, mida olete kirjutanud. Teiseks: sõnum või kommentaar, millel te pikalt vajutate ja hoiate, et kuvada hõljuv tõlge vaikekeelde, mille valite Seadetes. Kumbki tegevusviis ei loe kunagi paroolivälju, ei tööta kunagi rakendustes, mida te ei ole sõnaselgelt lubanud, ega säilita kunagi ajalugu loetust. Kui lubatud rakenduses tuvastatakse päästik või kui te vajutate sõnumil pikalt, saadetakse asjakohane tekst üle HTTPS-i teie seadistatud Gemini API-sse ja tõlgitakse. Kirjutatud päästiku tulemus asendab välja sisu; pikavajutuse tulemust näidatakse ainult ajutises hõljuvas mullis ja see ei puuduta kunagi algset rakendust. Midagi ei saadeta kuhugi, kui te ei kirjuta üht neist täpsetest päästikutest ega vajuta pikalt sõnumil rakenduses, mis on TextGate AI seadetes sisse lülitatud.</string>
 
@@ -18,6 +18,11 @@
     <string name="accessibility_status_enabled">Lubatud</string>
     <string name="accessibility_status_disabled">Ei ole lubatud — TextGate AI ei saa midagi teha, kuni te selle lubate</string>
     <string name="btn_open_accessibility_settings">Ava hõlbustusteenuse seaded</string>
+
+    <string name="accessibility_disclosure_title">Enne hõlbustusteenuse lubamist</string>
+    <string name="accessibility_disclosure_body">TextGate AI ei ole hõlbustusvahend puuetega inimestele — see kasutab Androidi hõlbustusteenust ainuüksi selleks, et võimaldada tõlkimist otse kohapeal, ja seda ainult nii, nagu siin kirjeldatud.\n\nMida loetakse: tekstiväli, mida te parasjagu redigeerite — ainult selleks, et kontrollida, kas kirjutatu lõpus on üks täpne päästiku-sufiks, näiteks \"?en\" või \"?de\"; ning sõnum või kommentaar, millel te pikalt vajutate, ainult rakendustes, mille olete Seadetes sõnaselgelt lubanud.\n\nMida ei loeta kunagi: paroolivälju, PIN-koode ega midagi rakenduses, mida te ei ole sisse lülitanud. Loetu kohta ei säilitata kunagi ajalugu.\n\nMis juhtub seejärel: alles siis, kui tuvastatakse päästik või kui te sõnumil pikalt vajutate, saadetakse asjakohane tekst üks kord üle HTTPS-i teie seadistatud Gemini API-sse ja tõlgitakse. Muul ajal ei saadeta midagi.\n\nKontroll jääb teile: lülitage kogu funktsioon soovi korral igal ajal välja Seadete pealülitist ja eemaldage rakendus lubatud loendist, millal iganes soovite.\n\nNupu \"Nõustun\" vajutamine avab Androidi enda hõlbustusteenuse seaded, kus te lülitate TextGate AI ise sisse — ainuüksi selle nupu vajutamine midagi sisse ei lülita.</string>
+    <string name="btn_accessibility_agree">Nõustun ja jätkan seadetesse</string>
+    <string name="btn_accessibility_cancel">Tühista</string>
 
     <string name="section_gemini_api">Gemini API</string>
     <string name="label_api_key">Gemini API võti</string>

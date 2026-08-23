@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">TextGate AI</string>
+    <string name="app_name">Tłumacz TextGate AI</string>
 
     <string name="accessibility_service_description">TextGate AI reads text in two ways, both strictly limited. First: the text field you are currently editing, and only to look for one exact trigger suffix (like \"?en\" or \"?de\" — one per language, see the full list in Settings) at the end of what you\'ve typed. Second: a message or comment you long-press and hold, to show a floating translation into the default language you choose in Settings. Both pathways never read password fields, never run in apps you have not explicitly allowed, and never keep a history of anything read. When a trigger is detected, or when you long-press a message, in an allowed app, the relevant text is sent over HTTPS to the Gemini API you have configured and translated. The typed-trigger result replaces the field\'s contents; the long-press result is only ever shown in a temporary floating bubble and never touches the original app. Nothing is sent anywhere unless you type one of these exact triggers or long-press a message in an app that is switched on in TextGate AI\'s settings.</string>
 
@@ -18,6 +18,16 @@
     <string name="accessibility_status_enabled">Enabled</string>
     <string name="accessibility_status_disabled">Not enabled — TextGate AI cannot do anything until you enable it</string>
     <string name="btn_open_accessibility_settings">Open Accessibility Settings</string>
+
+    <!-- Prominent disclosure screen shown before the Accessibility Service
+         is ever requested — see AccessibilityDisclosureActivity. Required
+         by Google Play policy for apps using this API as a
+         non-accessibility tool: a dedicated in-app screen, shown before the
+         system Settings screen, that a user must actively agree to. -->
+    <string name="accessibility_disclosure_title">Before you enable the Accessibility Service</string>
+    <string name="accessibility_disclosure_body">TextGate AI is not an accessibility tool for people with disabilities — it uses Android\'s Accessibility Service purely to power in-place translation, and only in the way described here.\n\nWhat is read: the text field you are currently editing, only to check for one exact trigger suffix like \"?en\" or \"?de\" at the end of what you\'ve typed; and a message or comment you long-press, only in apps you have explicitly allowed in Settings.\n\nWhat is never read: password fields, PIN entry, or anything in an app you have not switched on. No history of anything read is ever kept.\n\nWhat happens next: only when a trigger is detected, or you long-press a message, the relevant text is sent once, over HTTPS, to the Gemini API you configured, and translated. Nothing is sent at any other time.\n\nYou stay in control: turn the whole feature off anytime with the master switch in Settings, and remove any app from the allowed list whenever you like.\n\nTapping \"I agree\" opens Android\'s own Accessibility settings, where you switch TextGate AI on yourself — nothing is enabled by tapping this button alone.</string>
+    <string name="btn_accessibility_agree">I agree and continue to settings</string>
+    <string name="btn_accessibility_cancel">Cancel</string>
 
     <string name="section_gemini_api">Gemini API</string>
     <string name="label_api_key">Gemini API key</string>

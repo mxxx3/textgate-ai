@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">TextGate AI</string>
+    <string name="app_name">Tłumacz TextGate AI</string>
 
     <string name="accessibility_service_description">TextGate AI は、厳密に制限された2つの方法でのみテキストを読み取ります。1つ目は、現在編集中のテキストフィールドで、入力した内容の末尾にある特定のトリガー接尾辞(「?en」や「?de」など。言語ごとに1つずつ用意されており、完全なリストは設定画面で確認できます)を探すためだけに読み取ります。2つ目は、長押ししたメッセージやコメントを読み取り、設定で選択したデフォルトの言語へのフローティング翻訳を表示するためのものです。どちらの方法も、パスワード入力欄を読み取ることは一切なく、明示的に許可していないアプリでは動作せず、読み取った内容の履歴を保持することもありません。許可されたアプリ内でトリガーが検出された場合、またはメッセージを長押しした場合、該当するテキストはHTTPS経由で設定済みのGemini APIに送信され、翻訳されます。入力トリガーの結果はフィールドの内容を置き換えます。長押しの結果は一時的なフローティングバブルにのみ表示され、元のアプリには一切影響しません。これらの正確なトリガーのいずれかを入力するか、TextGate AIの設定でオンになっているアプリでメッセージを長押しした場合を除き、どこにも何も送信されません。</string>
 
@@ -18,6 +18,11 @@
     <string name="accessibility_status_enabled">有効</string>
     <string name="accessibility_status_disabled">無効 — 有効にするまで TextGate AI は何も実行できません</string>
     <string name="btn_open_accessibility_settings">ユーザー補助の設定を開く</string>
+
+    <string name="accessibility_disclosure_title">ユーザー補助サービスを有効にする前に</string>
+    <string name="accessibility_disclosure_body">TextGate AI は、障がいのある方向けのユーザー補助ツールではありません。Android のユーザー補助サービスは、その場での翻訳を実現するためだけに使用しており、ここで説明する方法でのみ利用します。\n\n読み取る内容: 現在編集中のテキストフィールドについては、入力した内容の末尾にある「?en」や「?de」などの特定のトリガー接尾辞を確認するためだけに読み取ります。また、長押ししたメッセージやコメントについては、設定で明示的に許可したアプリでのみ読み取ります。\n\n一切読み取らない内容: パスワード入力欄、PIN入力欄、またはオンにしていないアプリ内のあらゆる内容です。読み取った内容の履歴が保存されることもありません。\n\nその後の流れ: トリガーが検出されたとき、またはメッセージを長押ししたときにのみ、該当するテキストが一度だけHTTPS経由で設定済みのGemini APIに送信され、翻訳されます。それ以外のタイミングで送信されることはありません。\n\n主導権はあなたにあります: 設定のメインスイッチでこの機能全体をいつでもオフにでき、許可リストからアプリをいつでも削除できます。\n\n「同意」をタップすると、Android 本来のユーザー補助の設定画面が開き、そこでご自身の操作で TextGate AI を有効にできます。このボタンをタップしただけでは、何も有効になりません。</string>
+    <string name="btn_accessibility_agree">同意して設定に進む</string>
+    <string name="btn_accessibility_cancel">キャンセル</string>
 
     <string name="section_gemini_api">Gemini API</string>
     <string name="label_api_key">Gemini APIキー</string>

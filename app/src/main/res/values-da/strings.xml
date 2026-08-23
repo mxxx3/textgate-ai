@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">TextGate AI</string>
+    <string name="app_name">Tłumacz TextGate AI</string>
 
     <string name="accessibility_service_description">TextGate AI læser tekst på to måder, som begge er strengt begrænsede. For det første: det tekstfelt, du er i gang med at redigere, og kun for at kigge efter én bestemt trigger-endelse (som \"?en\" eller \"?de\" — én pr. sprog, se den fulde liste under Indstillinger) i slutningen af det, du har skrevet. For det andet: en besked eller kommentar, du trykker og holder nede på, for at vise en flydende oversættelse til det standardsprog, du vælger under Indstillinger. Ingen af de to metoder læser nogensinde adgangskodefelter, kører aldrig i apps, du ikke udtrykkeligt har givet tilladelse til, og gemmer aldrig en historik over noget, der er læst. Når en trigger registreres, eller når du trykker og holder på en besked, i en tilladt app, sendes den relevante tekst via HTTPS til den Gemini API, du har konfigureret, og bliver oversat. Resultatet af den skrevne trigger erstatter feltets indhold; resultatet af tryk-og-hold vises kun i en midlertidig flydende boble og rører aldrig ved den oprindelige app. Der bliver ikke sendt noget nogen steder, medmindre du skriver en af disse præcise triggers eller trykker og holder på en besked i en app, der er slået til i TextGate AI\'s indstillinger.</string>
 
@@ -18,6 +18,11 @@
     <string name="accessibility_status_enabled">Aktiveret</string>
     <string name="accessibility_status_disabled">Ikke aktiveret — TextGate AI kan ikke gøre noget, før du aktiverer den</string>
     <string name="btn_open_accessibility_settings">Åbn indstillinger for tilgængelighed</string>
+
+    <string name="accessibility_disclosure_title">Før du aktiverer tilgængelighedstjenesten</string>
+    <string name="accessibility_disclosure_body">TextGate AI er ikke et hjælpemiddel til personer med handicap — appen bruger udelukkende Androids tilgængelighedstjeneste til at drive oversættelse direkte der, hvor du skriver, og kun på den måde, der er beskrevet her.\n\nDet, der bliver læst: det tekstfelt, du er i gang med at redigere, kun for at kigge efter én bestemt trigger-endelse som \"?en\" eller \"?de\" i slutningen af det, du har skrevet; samt en besked eller kommentar, du trykker og holder nede på, kun i apps, du udtrykkeligt har givet adgang til under Indstillinger.\n\nDet, der aldrig bliver læst: adgangskodefelter, PIN-indtastning eller noget som helst i en app, du ikke har slået til. Der gemmes aldrig nogen historik over det, der er læst.\n\nHvad der sker herefter: kun når en trigger registreres, eller du trykker og holder på en besked, sendes den relevante tekst én gang, via HTTPS, til den Gemini API, du har konfigureret, og bliver oversat. Der bliver ikke sendt noget på noget andet tidspunkt.\n\nDu har fuld kontrol: slå hele funktionen fra, når du vil, med hovedafbryderen i Indstillinger, og fjern enhver app fra listen over tilladte apps, når du ønsker det.\n\nNår du trykker på \"Jeg accepterer\", åbnes Androids egne indstillinger for tilgængelighed, hvor du selv slår TextGate AI til — der bliver ikke aktiveret noget blot ved at trykke på denne knap.</string>
+    <string name="btn_accessibility_agree">Jeg accepterer og fortsætter til indstillinger</string>
+    <string name="btn_accessibility_cancel">Annuller</string>
 
     <string name="section_gemini_api">Gemini API</string>
     <string name="label_api_key">Gemini API-nøgle</string>

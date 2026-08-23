@@ -24,6 +24,7 @@ import android.widget.Toast
 import com.textgate.ai.BuildConfig
 import com.textgate.ai.LocaleHelper
 import com.textgate.ai.R
+import com.textgate.ai.accessibility.AccessibilityDisclosureActivity
 import com.textgate.ai.accessibility.TextGateAccessibilityService
 import com.textgate.ai.databinding.ActivitySettingsBinding
 import com.textgate.ai.model.Languages
@@ -271,11 +272,30 @@ class SettingsActivity : Activity() {
     private fun setupAccessibilitySection() {
         refreshAccessibilityStatus()
         binding.buttonOpenAccessibilitySettings.setOnClickListener {
-            try {
-                startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
-            } catch (_: Exception) {
-                Toast.makeText(this, R.string.error_generic, Toast.LENGTH_SHORT).show()
+            if (isAccessibilityServiceEnabled()) {
+                // Already granted — this tap can only be to review or turn
+                // it back off, so go straight to the system screen as
+                // before. The mandatory disclosure (below) is specifically
+                // about what happens BEFORE the permission is requested;
+                // Google's policy does not require re-showing it to a user
+                // who already granted the permission.
+                openSystemAccessibilitySettings()
+            } else {
+                // Not yet granted: show the in-app "prominent disclosure"
+                // screen first (see AccessibilityDisclosureActivity's doc
+                // comment). Only that screen's own "I agree" button — never
+                // this one — is allowed to open the system screen that
+                // actually requests the permission.
+                startActivity(Intent(this, AccessibilityDisclosureActivity::class.java))
             }
+        }
+    }
+
+    private fun openSystemAccessibilitySettings() {
+        try {
+            startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
+        } catch (_: Exception) {
+            Toast.makeText(this, R.string.error_generic, Toast.LENGTH_SHORT).show()
         }
     }
 

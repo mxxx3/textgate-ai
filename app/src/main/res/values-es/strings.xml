@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">TextGate AI</string>
+    <string name="app_name">Tłumacz TextGate AI</string>
 
     <string name="accessibility_service_description">TextGate AI lee texto de dos formas, ambas estrictamente limitadas. La primera: el campo de texto que estás editando en ese momento, y solo para buscar un sufijo de activación exacto (como «?en» o «?de» — uno por idioma; consulta la lista completa en Ajustes) al final de lo que has escrito. La segunda: un mensaje o comentario que mantienes pulsado, para mostrar una traducción flotante al idioma predeterminado que elijas en Ajustes. Ninguna de las dos vías lee nunca campos de contraseña, ni se ejecuta nunca en aplicaciones que no hayas permitido explícitamente, ni guarda jamás un historial de lo que se ha leído. Cuando se detecta una activación, o cuando mantienes pulsado un mensaje, en una aplicación permitida, el texto correspondiente se envía por HTTPS a la API de Gemini que has configurado y se traduce. El resultado de la activación escrita sustituye el contenido del campo; el resultado de mantener pulsado solo se muestra en una burbuja flotante temporal y nunca toca la aplicación original. No se envía nada a ningún sitio a menos que escribas una de estas activaciones exactas o mantengas pulsado un mensaje en una aplicación que esté activada en los ajustes de TextGate AI.</string>
 
@@ -18,6 +18,11 @@
     <string name="accessibility_status_enabled">Activado</string>
     <string name="accessibility_status_disabled">No activado: TextGate AI no puede hacer nada hasta que lo actives</string>
     <string name="btn_open_accessibility_settings">Abrir los ajustes de accesibilidad</string>
+
+    <string name="accessibility_disclosure_title">Antes de activar el Servicio de accesibilidad</string>
+    <string name="accessibility_disclosure_body">TextGate AI no es una herramienta de accesibilidad para personas con discapacidad: usa el Servicio de accesibilidad de Android únicamente para ofrecer traducción en el mismo lugar donde escribes, y solo de la forma que se describe aquí.\n\nQué se lee: el campo de texto que estás editando en ese momento, solo para comprobar si hay un sufijo de activación exacto, como «?en» o «?de», al final de lo que has escrito; y un mensaje o comentario que mantienes pulsado, solo en las aplicaciones que hayas permitido explícitamente en Ajustes.\n\nQué no se lee nunca: campos de contraseña, la introducción del PIN, ni nada en una aplicación que no hayas activado. Nunca se guarda un historial de lo leído.\n\nQué ocurre después: solo cuando se detecta una activación, o mantienes pulsado un mensaje, el texto correspondiente se envía una vez, por HTTPS, a la API de Gemini que has configurado, y se traduce. No se envía nada en ningún otro momento.\n\nTú tienes el control: desactiva toda la función cuando quieras con el interruptor principal en Ajustes, y elimina cualquier aplicación de la lista de permitidas cuando lo desees.\n\nAl pulsar «Estoy de acuerdo» se abren los propios ajustes de accesibilidad de Android, donde tú mismo activas TextGate AI — no se activa nada solo con pulsar este botón.</string>
+    <string name="btn_accessibility_agree">Estoy de acuerdo y continúo a ajustes</string>
+    <string name="btn_accessibility_cancel">Cancelar</string>
 
     <string name="section_gemini_api">API de Gemini</string>
     <string name="label_api_key">Clave de la API de Gemini</string>

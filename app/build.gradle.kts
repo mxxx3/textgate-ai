@@ -11,8 +11,8 @@ android {
         applicationId = "com.textgate.ai"
         minSdk = 26
         targetSdk = 35
-        versionCode = 20
-        versionName = "1.4.1"
+        versionCode = 22
+        versionName = "1.5.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -47,6 +47,30 @@ android {
             keyAlias = "androiddebugkey"
             keyPassword = "android"
         }
+
+        // Release ("upload key") signing config. Deliberately reads
+        // everything from environment variables instead of hardcoding a
+        // path or password here — this file is committed to the repo, and
+        // the real keystore + passwords must never be. In CI, these four
+        // variables are populated by .github/workflows/release-bundle.yml
+        // from GitHub Secrets (see that file for the one-time setup this
+        // requires). For a local `./gradlew bundleRelease`, export the same
+        // four variables yourself (see
+        // release-signing/KEYSTORE_CREDENTIALS_README.txt for the values).
+        //
+        // If RELEASE_KEYSTORE_PATH is unset, this config is simply never
+        // assigned to the release build type below — `bundleRelease` still
+        // succeeds locally without it, it just produces an UNSIGNED bundle
+        // (fine for local inspection; Play Console will reject it as-is).
+        val releaseKeystorePath = System.getenv("RELEASE_KEYSTORE_PATH")
+        if (releaseKeystorePath != null) {
+            create("release") {
+                storeFile = file(releaseKeystorePath)
+                storePassword = System.getenv("RELEASE_KEYSTORE_PASSWORD")
+                keyAlias = System.getenv("RELEASE_KEY_ALIAS")
+                keyPassword = System.getenv("RELEASE_KEY_PASSWORD")
+            }
+        }
     }
 
     buildTypes {
@@ -57,6 +81,13 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            // Only assigned when the environment provides real signing
+            // material (see signingConfigs above) — keeps a plain local
+            // `bundleRelease` working (unsigned output) when no keystore is
+            // configured, while CI always has it set.
+            if (System.getenv("RELEASE_KEYSTORE_PATH") != null) {
+                signingConfig = signingConfigs.getByName("release")
+            }
         }
         debug {
             // Debug builds are for local development only and are never

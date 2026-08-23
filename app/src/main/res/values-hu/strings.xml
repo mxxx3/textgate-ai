@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">TextGate AI</string>
+    <string name="app_name">Tłumacz TextGate AI</string>
 
     <string name="accessibility_service_description">A TextGate AI kétféleképpen olvassa a szöveget, mindkettő szigorúan korlátozott. Először: azt a szövegmezőt, amelyet éppen szerkeszt, és csakis azért, hogy megkeresse a beírt szöveg végén az egyetlen pontos aktiváló utótagot (például \"?en\" vagy \"?de\" — nyelvenként egyet, a teljes listát a Beállításokban találja). Másodszor: egy üzenetet vagy hozzászólást, amelyet hosszan megnyom, hogy megjelenjen egy lebegő fordítás a Beállításokban kiválasztott alapértelmezett nyelvre. Egyik módszer sem olvassa el soha a jelszómezőket, sosem működik olyan alkalmazásokban, amelyeket kifejezetten nem engedélyezett, és sosem tárol előzményt semmiről, amit olvasott. Amikor felismer egy aktiválót, vagy amikor hosszan megnyom egy üzenetet egy engedélyezett alkalmazásban, az érintett szöveg HTTPS-en keresztül elküldésre kerül az Ön által beállított Gemini API-hoz, és lefordításra kerül. A begépelt aktiváló eredménye felülírja a mező tartalmát; a hosszú megnyomás eredménye csak egy ideiglenes lebegő buborékban jelenik meg, és sosem érinti az eredeti alkalmazást. Semmi sem kerül elküldésre sehova, hacsak nem gépeli be az egyik pontos aktiválót, vagy nem nyom hosszan meg egy üzenetet egy olyan alkalmazásban, amely be van kapcsolva a TextGate AI beállításaiban.</string>
 
@@ -18,6 +18,10 @@
     <string name="accessibility_status_enabled">Engedélyezve</string>
     <string name="accessibility_status_disabled">Nincs engedélyezve — a TextGate AI semmit sem tud tenni, amíg nem engedélyezi</string>
     <string name="btn_open_accessibility_settings">Kisegítő lehetőségek beállításainak megnyitása</string>
+    <string name="accessibility_disclosure_title">Mielőtt engedélyezné a Kisegítő lehetőségek szolgáltatást</string>
+    <string name="accessibility_disclosure_body">A TextGate AI nem fogyatékossággal élők számára készült kisegítő eszköz — az Android Kisegítő lehetőségek szolgáltatását kizárólag a helyben történő fordítás működtetésére használja, és csakis az itt leírt módon.\n\nMit olvas: azt a szövegmezőt, amelyet éppen szerkeszt, csakis azért, hogy ellenőrizze, van-e a begépelt szöveg végén egyetlen pontos aktiváló utótag, például \"?en\" vagy \"?de\"; valamint egy üzenetet vagy hozzászólást, amelyet hosszan megnyom, de csakis olyan alkalmazásokban, amelyeket kifejezetten engedélyezett a Beállításokban.\n\nMit nem olvas el soha: jelszómezőket, PIN-kód bevitelét, vagy bármit egy olyan alkalmazásban, amelyet nem kapcsolt be. Semmiről, amit olvasott, sosem készül előzmény.\n\nMi történik ezután: csak akkor, ha felismer egy aktiválót, vagy Ön hosszan megnyom egy üzenetet, az érintett szöveg egyszer, HTTPS-en keresztül elküldésre kerül az Ön által beállított Gemini API-hoz, és lefordításra kerül. Más időpontban semmi sem kerül elküldésre.\n\nÖn tartja kézben az irányítást: a Beállításokban lévő fő kapcsolóval bármikor kikapcsolhatja a teljes funkciót, és bármikor eltávolíthat bármely alkalmazást az engedélyezettek listájáról.\n\nAz \"Elfogadom\" gombra koppintva megnyílnak Android saját Kisegítő lehetőségek beállításai, ahol Ön saját maga kapcsolja be a TextGate AI-t — önmagában e gomb megérintésétől semmi sem kerül engedélyezésre.</string>
+    <string name="btn_accessibility_agree">Elfogadom és tovább a beállításokhoz</string>
+    <string name="btn_accessibility_cancel">Mégse</string>
 
     <string name="section_gemini_api">Gemini API</string>
     <string name="label_api_key">Gemini API-kulcs</string>

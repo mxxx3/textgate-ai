@@ -70,6 +70,20 @@
         </activity>
 
         <!--
+            Google Play's mandatory "prominent disclosure" screen for the
+            Accessibility Service below (see section 0 of
+            docs/publikacja_google_play.md, and this Activity's own doc
+            comment). Not a launcher entry point — it is only ever started
+            from SettingsActivity, so it declares no intent-filter.
+            exported="false" is correct and safe here: nothing outside this
+            app has any legitimate reason to start it directly.
+        -->
+        <activity
+            android:name=".accessibility.AccessibilityDisclosureActivity"
+            android:exported="false"
+            android:label="@string/accessibility_disclosure_title" />
+
+        <!--
             The accessibility service. android:exported="true" is mandatory
             here: Android will not bind a service the OS Accessibility
             framework cannot see. It is safe because:

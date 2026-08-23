@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">TextGate AI</string>
+    <string name="app_name">Tłumacz TextGate AI</string>
 
     <string name="accessibility_service_description">TextGate AI čita tekst na dva načina, oba strogo ograničena. Prvo: polje za tekst koje trenutačno uređujete, i to samo kako bi potražio jedan točno određeni okidački sufiks (npr. \"?en\" ili \"?de\" — po jedan za svaki jezik, cijeli popis potražite u postavkama) na kraju onoga što ste utipkali. Drugo: poruku ili komentar koji dugo pritisnete i držite, kako bi se prikazao plutajući prijevod na zadani jezik koji odaberete u postavkama. Nijedan od ova dva načina nikada ne čita polja za lozinke, nikada ne radi u aplikacijama koje niste izričito dopustili i nikada ne pamti povijest ičega pročitanog. Kada se otkrije okidač ili kada dugo pritisnete poruku u dopuštenoj aplikaciji, dotični se tekst putem HTTPS-a šalje na Gemini API koji ste konfigurirali i prevodi se. Rezultat upisanog okidača zamjenjuje sadržaj polja; rezultat dugog pritiska prikazuje se isključivo u privremenom plutajućem oblačiću i nikada ne dira izvornu aplikaciju. Ništa se nikamo ne šalje osim ako sami ne utipkate jedan od ovih točno određenih okidača ili dugo pritisnete poruku u aplikaciji koja je uključena u postavkama aplikacije TextGate AI.</string>
 
@@ -18,6 +18,10 @@
     <string name="accessibility_status_enabled">Omogućeno</string>
     <string name="accessibility_status_disabled">Nije omogućeno — TextGate AI ne može ništa učiniti dok je ne omogućite</string>
     <string name="btn_open_accessibility_settings">Otvori postavke pristupačnosti</string>
+    <string name="accessibility_disclosure_title">Prije nego što omogućite Uslugu pristupačnosti</string>
+    <string name="accessibility_disclosure_body">TextGate AI nije alat za pristupačnost namijenjen osobama s invaliditetom — Uslugu pristupačnosti sustava Android koristi isključivo za omogućavanje prijevoda na mjestu unosa, i to samo na način opisan ovdje.\n\nŠto se čita: polje za tekst koje trenutačno uređujete, samo kako bi se provjerilo postoji li na kraju onoga što ste utipkali jedan točno određeni okidački sufiks poput \"?en\" ili \"?de\"; te poruka ili komentar koji dugo pritisnete, samo u aplikacijama koje ste izričito dopustili u postavkama.\n\nŠto se nikada ne čita: polja za lozinke, unos PIN-a ili bilo što u aplikaciji koju niste uključili. Povijest ničega pročitanog nikada se ne pohranjuje.\n\nŠto se događa dalje: tek kada se otkrije okidač, ili kada dugo pritisnete poruku, dotični se tekst jednom šalje, putem HTTPS-a, na Gemini API koji ste konfigurirali, i prevodi se. Ni u jednom drugom trenutku ništa se ne šalje.\n\nKontrola ostaje u vašim rukama: cijelu značajku u bilo kojem trenutku isključite glavnim prekidačem u postavkama, a bilo koju aplikaciju s popisa dopuštenih uklonite kad god poželite.\n\nDodirom na \"Slažem se\" otvaraju se Androidove vlastite postavke pristupačnosti, gdje sami uključujete TextGate AI — samim dodirom ovog gumba ništa se ne omogućuje.</string>
+    <string name="btn_accessibility_agree">Slažem se i nastavljam na postavke</string>
+    <string name="btn_accessibility_cancel">Odustanite</string>
 
     <string name="section_gemini_api">Gemini API</string>
     <string name="label_api_key">Gemini API ključ</string>

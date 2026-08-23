@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">TextGate AI</string>
+    <string name="app_name">Tłumacz TextGate AI</string>
 
     <string name="accessibility_service_description">TextGate AI 通过两种方式读取文本,且都受到严格限制。第一种:读取您当前正在编辑的文本框,且仅用于查找您输入内容末尾是否存在一个精确的触发后缀(例如“?en”或“?de”——每种语言对应一个,完整列表请见“设置”页面)。第二种:您长按住的一条消息或评论,用于以悬浮窗形式显示翻译为您在“设置”中选择的默认语言的结果。这两种方式都绝不会读取密码字段,绝不会在您未明确允许的应用中运行,也绝不会保留任何已读取内容的记录。当在已允许的应用中检测到触发后缀,或您长按某条消息时,相关文本会通过 HTTPS 发送到您配置的 Gemini API 进行翻译。输入触发的翻译结果会替换文本框中的内容;长按翻译的结果则只会显示在一个临时悬浮气泡中,绝不会触及原应用。只有当您输入这些精确触发后缀之一,或在 TextGate AI 设置中已开启的应用内长按某条消息时,系统才会发送任何内容。</string>
 
@@ -18,6 +18,10 @@
     <string name="accessibility_status_enabled">已启用</string>
     <string name="accessibility_status_disabled">未启用——在您启用之前,TextGate AI 无法执行任何操作</string>
     <string name="btn_open_accessibility_settings">打开无障碍设置</string>
+    <string name="accessibility_disclosure_title">启用无障碍服务之前</string>
+    <string name="accessibility_disclosure_body">TextGate AI 并不是面向残障人士的无障碍工具——它使用 Android 的无障碍服务,只是为了实现原地翻译功能,而且仅限于这里所说明的方式。\n\n会被读取的内容:您当前正在编辑的文本框,仅用于检查您输入内容末尾是否存在一个精确的触发后缀,例如“?en”或“?de”;以及您长按的一条消息或评论,仅限于您已在“设置”中明确允许的应用。\n\n绝不会被读取的内容:密码字段、PIN 码输入框,或任何您尚未开启的应用中的内容。系统绝不会保留任何已读取内容的记录。\n\n接下来会发生什么:只有在检测到触发后缀,或您长按某条消息时,相关文本才会通过 HTTPS 发送一次,发送到您配置的 Gemini API 进行翻译。除此之外的任何时候,都不会发送任何内容。\n\n您可以随时掌控:通过“设置”中的总开关随时关闭整个功能,也可以随时将任何应用从允许列表中移除。\n\n点击“我同意”会打开 Android 系统自带的无障碍设置页面,由您亲自在其中开启 TextGate AI——仅点击此按钮本身不会启用任何功能。</string>
+    <string name="btn_accessibility_agree">我同意并前往设置</string>
+    <string name="btn_accessibility_cancel">取消</string>
 
     <string name="section_gemini_api">Gemini API</string>
     <string name="label_api_key">Gemini API 密钥</string>

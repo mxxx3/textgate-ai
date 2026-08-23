@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">TextGate AI</string>
+    <string name="app_name">Tłumacz TextGate AI</string>
 
     <string name="accessibility_service_description">TextGate AI čte text dvěma způsoby, oba přísně omezené. Za prvé: textové pole, které právě upravujete, a to pouze za účelem vyhledání jedné přesné koncovky spouštěče (například \"?en\" nebo \"?de\" — jedna pro každý jazyk, úplný seznam najdete v Nastavení) na konci toho, co jste napsali. Za druhé: zprávu nebo komentář, na který dlouze podržíte prst, aby se zobrazil plovoucí překlad do výchozího jazyka, který si zvolíte v Nastavení. Ani jeden z těchto způsobů nikdy nečte pole pro hesla, nikdy nefunguje v aplikacích, které jste výslovně nepovolili, a nikdy si neukládá historii ničeho přečteného. Když je zjištěn spouštěč, nebo když dlouze podržíte zprávu, v povolené aplikaci, je příslušný text odeslán přes HTTPS do vámi nakonfigurovaného Gemini API a přeložen. Výsledek napsaného spouštěče nahradí obsah pole; výsledek dlouhého podržení se zobrazí pouze v dočasné plovoucí bublině a nikdy se nedotkne původní aplikace. Nikam se nic neodesílá, pokud nenapíšete přesně jeden z těchto spouštěčů nebo dlouze nepodržíte zprávu v aplikaci zapnuté v nastavení TextGate AI.</string>
 
@@ -18,6 +18,10 @@
     <string name="accessibility_status_enabled">Povoleno</string>
     <string name="accessibility_status_disabled">Není povoleno — TextGate AI nemůže nic dělat, dokud ji nepovolíte</string>
     <string name="btn_open_accessibility_settings">Otevřít nastavení usnadnění přístupu</string>
+    <string name="accessibility_disclosure_title">Než povolíte Službu usnadnění přístupu</string>
+    <string name="accessibility_disclosure_body">TextGate AI není nástroj usnadnění přístupu pro osoby se zdravotním postižením — Službu usnadnění přístupu systému Android využívá výhradně k překladu přímo v textu, který upravujete, a to pouze způsobem popsaným zde.\n\nCo se čte: textové pole, které právě upravujete — pouze za účelem kontroly, zda na konci napsaného textu není přesná koncovka spouštěče, například \"?en\" nebo \"?de\"; a zpráva nebo komentář, na který dlouze podržíte prst — pouze v aplikacích, které jste výslovně povolili v Nastavení.\n\nCo se nikdy nečte: pole pro hesla, zadávání PIN kódu ani nic v aplikaci, kterou jste nepovolili. Historie ničeho přečteného se nikdy neukládá.\n\nCo se stane dál: pouze při zjištění spouštěče nebo když dlouze podržíte zprávu, se příslušný text jednorázově odešle přes HTTPS do vámi nastaveného API Gemini a přeloží. V žádnou jinou chvíli se nic neodesílá.\n\nMáte vše pod kontrolou: celou funkci kdykoli vypněte hlavním přepínačem v Nastavení a kteroukoli aplikaci ze seznamu povolených odeberte, kdykoli budete chtít.\n\nKlepnutím na \"Souhlasím\" otevřete vlastní nastavení usnadnění přístupu systému Android, kde si TextGate AI zapnete sami — samotným klepnutím na toto tlačítko se nic nezapíná.</string>
+    <string name="btn_accessibility_agree">Souhlasím a pokračuji do nastavení</string>
+    <string name="btn_accessibility_cancel">Zrušit</string>
 
     <string name="section_gemini_api">Gemini API</string>
     <string name="label_api_key">Klíč API pro Gemini</string>

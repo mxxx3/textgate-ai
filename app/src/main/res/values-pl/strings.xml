@@ -7,7 +7,7 @@
     other system language.
 -->
 <resources>
-    <string name="app_name">TextGate AI</string>
+    <string name="app_name">Tłumacz TextGate AI</string>
 
     <string name="accessibility_service_description">TextGate AI odczytuje tekst na dwa sposoby, oba ściśle ograniczone. Pierwszy: pole tekstowe, które właśnie edytujesz — wyłącznie po to, by sprawdzić, czy na końcu wpisanego tekstu znajduje się jeden konkretny przyrostek-wyzwalacz (np. „?en” lub „?de” — jeden na język, pełna lista w Ustawieniach). Drugi: wiadomość lub komentarz, który przytrzymasz palcem, aby zobaczyć pływające tłumaczenie na domyślny język wybrany w Ustawieniach. Żadna z tych ścieżek nigdy nie odczytuje pól haseł, nigdy nie działa w aplikacjach, na które nie wyraziłeś/aś wyraźnej zgody, i nigdy nie zapisuje historii odczytanych treści. Gdy w dozwolonej aplikacji wykryty zostanie wyzwalacz, albo gdy przytrzymasz wiadomość, odpowiedni tekst jest wysyłany przez HTTPS do skonfigurowanego przez Ciebie API Gemini i tłumaczony. Wynik dla wpisanego wyzwalacza zastępuje zawartość pola; wynik dla przytrzymania jest pokazywany wyłącznie w tymczasowej pływającej chmurce i nigdy nie dotyka oryginalnej aplikacji. Nic nie jest nigdzie wysyłane, dopóki nie wpiszesz jednego z tych dokładnych wyzwalaczy lub nie przytrzymasz wiadomości w aplikacji włączonej w ustawieniach TextGate AI.</string>
 
@@ -25,6 +25,11 @@
     <string name="accessibility_status_enabled">Włączona</string>
     <string name="accessibility_status_disabled">Nie włączona — TextGate AI nic nie zrobi, dopóki jej nie włączysz</string>
     <string name="btn_open_accessibility_settings">Otwórz ustawienia ułatwień dostępu</string>
+
+    <string name="accessibility_disclosure_title">Zanim włączysz Usługę ułatwień dostępu</string>
+    <string name="accessibility_disclosure_body">TextGate AI nie jest narzędziem dla osób z niepełnosprawnościami — korzysta z Usługi ułatwień dostępu Androida wyłącznie po to, by tłumaczyć tekst w miejscu, gdzie go czytasz i piszesz, i tylko w sposób opisany poniżej.\n\nCo jest odczytywane: pole tekstowe, które właśnie edytujesz — wyłącznie po to, by sprawdzić, czy na końcu wpisanego tekstu znajduje się jeden konkretny wyzwalacz, np. „?en” lub „?de”; oraz wiadomość lub komentarz, który przytrzymasz palcem — tylko w aplikacjach, które sam/sama włączysz w Ustawieniach.\n\nCo nigdy nie jest odczytywane: pola haseł, kody PIN ani nic w aplikacji, której nie włączyłeś/aś. Historia odczytanych treści nigdy nie jest zapisywana.\n\nCo dzieje się dalej: dopiero gdy wykryty zostanie wyzwalacz albo przytrzymasz wiadomość, odpowiedni tekst jest wysyłany jednorazowo, przez HTTPS, do skonfigurowanego przez Ciebie API Gemini i tłumaczony. W żadnym innym momencie nic nie jest wysyłane.\n\nMasz pełną kontrolę: możesz wyłączyć całą funkcję w dowolnej chwili głównym przełącznikiem w Ustawieniach i usunąć dowolną aplikację z listy dozwolonych, kiedy tylko zechcesz.\n\nKliknięcie „Zgadzam się” otworzy ustawienia ułatwień dostępu Androida, gdzie sam/sama włączysz TextGate AI — samo kliknięcie tego przycisku niczego jeszcze nie włącza.</string>
+    <string name="btn_accessibility_agree">Zgadzam się i przechodzę do ustawień</string>
+    <string name="btn_accessibility_cancel">Anuluj</string>
 
     <string name="section_gemini_api">API Gemini</string>
     <string name="label_api_key">Klucz API Gemini</string>

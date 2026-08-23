@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">TextGate AI</string>
+    <string name="app_name">Tłumacz TextGate AI</string>
 
     <string name="accessibility_service_description">TextGate AI llegeix el text de dues maneres, totes dues estrictament limitades. Primera: el camp de text que estàs editant en aquest moment, i només per buscar un sufix de disparador exacte (com ara \"?en\" o \"?de\" — un per idioma, consulta la llista completa a Configuració) al final del que has escrit. Segona: un missatge o comentari que mantens premut, per mostrar una traducció flotant a l\'idioma predeterminat que triïs a Configuració. Cap de les dues vies llegeix mai camps de contrasenya, no s\'executa mai en aplicacions que no hagis permès explícitament, i no manté mai cap historial del que s\'ha llegit. Quan es detecta un disparador, o quan mantens premut un missatge, en una aplicació permesa, el text corresponent s\'envia per HTTPS a l\'API de Gemini que has configurat i es tradueix. El resultat del disparador escrit substitueix el contingut del camp; el resultat de mantenir premut només es mostra en una bombolla flotant temporal i mai no toca l\'aplicació original. No s\'envia res enlloc llevat que escriguis exactament un d\'aquests disparadors o mantinguis premut un missatge en una aplicació activada a la configuració de TextGate AI.</string>
 
@@ -18,6 +18,10 @@
     <string name="accessibility_status_enabled">Activat</string>
     <string name="accessibility_status_disabled">No activat — TextGate AI no pot fer res fins que l\'activis</string>
     <string name="btn_open_accessibility_settings">Obre la configuració d\'accessibilitat</string>
+    <string name="accessibility_disclosure_title">Abans d\'activar el Servei d\'accessibilitat</string>
+    <string name="accessibility_disclosure_body">TextGate AI no és una eina d\'accessibilitat per a persones amb discapacitat — utilitza el Servei d\'accessibilitat d\'Android únicament per traduir el text allà mateix on l\'escrius, i només de la manera descrita aquí.\n\nQuè es llegeix: el camp de text que estàs editant en aquest moment, només per comprovar si hi ha un sufix de disparador exacte, com ara \"?en\" o \"?de\", al final del que has escrit; i un missatge o comentari que mantens premut, només a les aplicacions que has permès explícitament a Configuració.\n\nQuè no es llegeix mai: camps de contrasenya, entrada de PIN, o qualsevol cosa en una aplicació que no has activat. No es conserva mai cap historial del que s\'ha llegit.\n\nQuè passa després: només quan es detecta un disparador, o quan mantens premut un missatge, el text corresponent s\'envia una vegada, per HTTPS, a l\'API de Gemini que has configurat, i es tradueix. No s\'envia res en cap altre moment.\n\nTu tens el control: desactiva tota la funció quan vulguis amb l\'interruptor principal a Configuració, i elimina qualsevol aplicació de la llista de permeses quan et vingui de gust.\n\nEn tocar \"Hi estic d\'acord\" s\'obre la configuració d\'accessibilitat pròpia d\'Android, on ets tu qui activa TextGate AI — no s\'activa res només en tocar aquest botó.</string>
+    <string name="btn_accessibility_agree">Hi estic d\'acord i continuo a la configuració</string>
+    <string name="btn_accessibility_cancel">Cancel·la</string>
 
     <string name="section_gemini_api">API de Gemini</string>
     <string name="label_api_key">Clau d\'API de Gemini</string>

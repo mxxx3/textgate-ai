@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">TextGate AI</string>
+    <string name="app_name">Tłumacz TextGate AI</string>
 
     <string name="accessibility_service_description">TextGate AI lasa tekstu tikai divos stingri ierobežotos veidos. Pirmkārt: teksta lauku, kuru pašlaik rediģējat, un tikai lai meklētu vienu precīzu izraisītājsufiksu (piemēram, \"?en\" vai \"?de\" — pa vienam katrai valodai, pilnu sarakstu skatiet Iestatījumos) ievadītā teksta beigās. Otrkārt: ziņu vai komentāru, kuru turat nospiestu, lai parādītu peldošu tulkojumu noklusējuma valodā, ko izvēlaties Iestatījumos. Neviens no šiem veidiem nekad nelasa paroles laukus, nekad nedarbojas lietotnēs, kurām neesat to skaidri atļāvis, un nekad nesaglabā nekādu izlasītā teksta vēsturi. Kad tiek atklāts izraisītājs vai kad turat nospiestu ziņu atļautā lietotnē, attiecīgais teksts tiek nosūtīts pa HTTPS uz jūsu konfigurēto Gemini API un iztulkots. Ievadītā izraisītāja rezultāts aizstāj lauka saturu; ilgas piespiešanas rezultāts tiek parādīts tikai īslaicīgā peldošā burbulī un nekad neietekmē pašu lietotni. Nekas nekur netiek nosūtīts, ja vien neievadāt kādu no šiem precīzajiem izraisītājiem vai neturat nospiestu ziņu lietotnē, kas ir ieslēgta TextGate AI iestatījumos.</string>
 
@@ -18,6 +18,11 @@
     <string name="accessibility_status_enabled">Iespējots</string>
     <string name="accessibility_status_disabled">Nav iespējots — TextGate AI nevar neko darīt, kamēr to neiespējosiet</string>
     <string name="btn_open_accessibility_settings">Atvērt pieejamības iestatījumus</string>
+
+    <string name="accessibility_disclosure_title">Pirms iespējojat pieejamības pakalpojumu</string>
+    <string name="accessibility_disclosure_body">TextGate AI nav pieejamības rīks cilvēkiem ar invaliditāti — tā izmanto Android pieejamības pakalpojumu tikai un vienīgi tulkošanai tieši tur, kur rakstāt, un vienīgi tā, kā aprakstīts šeit.\n\nKas tiek lasīts: teksta lauks, kuru pašlaik rediģējat, tikai lai pārbaudītu, vai ievadītā teksta beigās ir viens precīzs izraisītājsufikss, piemēram, \"?en\" vai \"?de\"; un ziņa vai komentārs, kuru turat nospiestu, tikai lietotnēs, kurām to skaidri atļāvāt Iestatījumos.\n\nKas nekad netiek lasīts: paroles lauki, PIN koda ievade vai jebkas lietotnē, kuru neesat iespējojis. Nekāda izlasītā satura vēsture nekad netiek saglabāta.\n\nKas notiek tālāk: tikai tad, kad tiek atklāts izraisītājs vai kad turat nospiestu ziņu, attiecīgais teksts vienu reizi tiek nosūtīts pa HTTPS uz jūsu konfigurēto Gemini API un iztulkots. Nekādā citā brīdī nekas netiek sūtīts.\n\nJūs saglabājat pilnu kontroli: jebkurā brīdī izslēdziet visu funkciju ar galveno slēdzi Iestatījumos un jebkurā brīdī noņemiet jebkuru lietotni no atļauto saraksta.\n\nPieskaroties \"Piekrītu\", tiks atvērti Android pieejamības iestatījumi, kur pats/pati iespējosiet TextGate AI — vienkārši nospiežot šo pogu, nekas netiek iespējots.</string>
+    <string name="btn_accessibility_agree">Piekrītu un turpinu uz iestatījumiem</string>
+    <string name="btn_accessibility_cancel">Atcelt</string>
 
     <string name="section_gemini_api">Gemini API</string>
     <string name="label_api_key">Gemini API atslēga</string>

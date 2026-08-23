@@ -1787,6 +1787,76 @@ constructed during `attachBaseContext` and so keeps the plain
 `AppSettingsStore` (Activity `onCreate`, Service `onServiceConnected`) is
 outside the risky window and behaves exactly as before.
 
+**Prominent disclosure screen for the Accessibility Service (v1.5.0).**
+Google Play's policy for apps that use `AccessibilityService` as a
+"non-accessibility tool" (see
+`docs/publikacja_google_play.md`, section 0) requires a dedicated in-app
+screen — not the Android system Settings screen — that is shown *before*
+the user is ever sent to enable the service, clearly discloses what is
+read and why, and requires an explicit affirmative action (a button that
+reads like real consent, e.g. "I agree", never a dismissive "OK" or
+"Understood") before continuing.
+
+**What changed:** a new `AccessibilityDisclosureActivity`
+(`app/src/main/java/com/textgate/ai/accessibility/`) with its own layout
+(`activity_accessibility_disclosure.xml`). `SettingsActivity`'s "Open
+Accessibility Settings" button no longer jumps straight to
+`Settings.ACTION_ACCESSIBILITY_SETTINGS`: if the service is not yet
+enabled, it now launches this disclosure screen first, and only that
+screen's own "I agree and continue to settings" button opens the system
+screen — tapping "Cancel", or the system back gesture, simply returns to
+Settings with nothing changed. If the service is already enabled, the
+button still goes straight to the system screen as before (to review or
+turn it back off), since Google's requirement is specifically about the
+moment before the permission is first requested, not every subsequent
+visit.
+
+The disclosure text (`accessibility_disclosure_title`,
+`accessibility_disclosure_body`, `btn_accessibility_agree`,
+`btn_accessibility_cancel`) was added to all 40 language files this app
+ships (`values/` through the 39 `values-<code>/` locale directories),
+each translated natively rather than machine-translated, matching the
+existing tone/register and terminology already used in that same file —
+consistent with how the v1.4.0 multi-language rebuild's strings were
+localized. The new Activity applies the same
+`LocaleHelper.applyOverride`/`attachBaseContext` pattern as every other
+screen, so it always renders in the user's chosen app language, not just
+the system language.
+
+`AndroidManifest.xml` declares the new Activity with `exported="false"` —
+it is only ever started from `SettingsActivity` via an explicit internal
+`Intent`, never a launcher entry point or a target for any external
+`Intent`, so no new attack surface is introduced.
+
+**App name change for Play Store discoverability (v1.5.1).** The
+in-app launcher name (`app_name`, shown under the home-screen icon, in
+the Recents/app-switcher, and as the Accessibility Service's label in
+Android's own Settings) was "TextGate AI" with no translation-related
+keyword in it. Google Play's own search ranking weighs the app's title
+field heavily, and a purely branded name with no descriptive keyword
+tends to under-perform against apps that pair a keyword with their brand
+(a "Brand: Keyword" or "Keyword Brand" title, one keyword only — not
+several stuffed in). It was changed to **"Tłumacz TextGate AI"**
+("Tłumacz" = Polish for "Translator") to match the same title now used
+for the Google Play Store listing itself (see
+`docs/publikacja_google_play.md`), so a search for "tłumacz" is more
+likely to surface the app both in Play search and, secondarily, in the
+device's own app-drawer/system search.
+
+This string is deliberately identical (untranslated) across all 40
+`values*/strings.xml` locale files — same treatment as the "TextGate AI"
+brand name before it, which was likewise never translated per-locale.
+The trade-off is worth noting: a Polish word will show under the icon
+regardless of the phone's system language. That was a deliberate,
+explicit choice (not an oversight) made when this was decided, on the
+basis that the Play Store listing itself is Polish-first (see the short/
+long descriptions in `store-assets/opisy_sklepowe.md`, which already
+lead with "Tłumacz"/"Translator" respectively) — if the app is ever
+positioned for non-Polish markets as a primary audience, this is the
+string to revisit, and per-locale translation of `app_name` (e.g.
+"Translator TextGate AI" for English) is a straightforward follow-up if
+wanted.
+
 ## 15. Verified build result (GitHub Actions)
 
 Confirmed on `https://github.com/mxxx3/textgate-ai`, workflow run

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">TextGate AI</string>
+    <string name="app_name">Tłumacz TextGate AI</string>
 
     <string name="accessibility_service_description">O TextGate AI lê texto de duas formas, ambas estritamente limitadas. Primeiro: o campo de texto que você está editando no momento, e apenas para procurar um sufixo de gatilho exato (como \"?en\" ou \"?de\" — um por idioma, veja a lista completa em Configurações) no final do que você digitou. Segundo: uma mensagem ou comentário em que você toca e segura, para mostrar uma tradução flutuante no idioma padrão que você escolher em Configurações. Nenhum dos dois caminhos lê campos de senha, nunca funciona em aplicativos que você não tenha autorizado explicitamente, e nunca mantém um histórico do que foi lido. Quando um gatilho é detectado, ou quando você toca e segura em uma mensagem, em um aplicativo permitido, o texto relevante é enviado por HTTPS para a API Gemini que você configurou e traduzido. O resultado do gatilho digitado substitui o conteúdo do campo; o resultado de tocar e segurar é mostrado apenas em um balão flutuante temporário e nunca afeta o aplicativo original. Nada é enviado para lugar nenhum, a menos que você digite um desses gatilhos exatos ou toque e segure uma mensagem em um aplicativo que esteja ativado nas configurações do TextGate AI.</string>
 
@@ -18,6 +18,10 @@
     <string name="accessibility_status_enabled">Ativado</string>
     <string name="accessibility_status_disabled">Não ativado — o TextGate AI não pode fazer nada até que você o ative</string>
     <string name="btn_open_accessibility_settings">Abrir Configurações de Acessibilidade</string>
+    <string name="accessibility_disclosure_title">Antes de ativar o Serviço de Acessibilidade</string>
+    <string name="accessibility_disclosure_body">O TextGate AI não é uma ferramenta de acessibilidade para pessoas com deficiência — ele usa o Serviço de Acessibilidade do Android apenas para viabilizar a tradução direto na tela, e só da forma descrita aqui.\n\nO que é lido: o campo de texto que você está editando no momento, apenas para verificar um sufixo de gatilho exato, como \"?en\" ou \"?de\", no final do que você digitou; e uma mensagem ou comentário em que você toca e segura, apenas em aplicativos que você permitiu explicitamente em Configurações.\n\nO que nunca é lido: campos de senha, entrada de PIN ou qualquer coisa em um aplicativo que você não tenha ativado. Nenhum histórico do que foi lido é mantido.\n\nO que acontece depois: só quando um gatilho é detectado, ou quando você toca e segura uma mensagem, o texto correspondente é enviado uma única vez, por HTTPS, para a API Gemini que você configurou, e traduzido. Nada é enviado em nenhum outro momento.\n\nVocê mantém o controle: desligue o recurso inteiro a qualquer momento com a chave principal em Configurações, e remova qualquer aplicativo da lista de permitidos quando quiser.\n\nAo tocar em \"Concordo\", as configurações de Acessibilidade do próprio Android são abertas, e é lá que você ativa o TextGate AI — só tocar neste botão não ativa nada.</string>
+    <string name="btn_accessibility_agree">Concordo e continuo para as configurações</string>
+    <string name="btn_accessibility_cancel">Cancelar</string>
 
     <string name="section_gemini_api">API Gemini</string>
     <string name="label_api_key">Chave de API do Gemini</string>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">TextGate AI</string>
+    <string name="app_name">Tłumacz TextGate AI</string>
 
     <string name="accessibility_service_description">TextGate AI skaito tekstą tik dviem griežtai ribojamais būdais. Pirma: teksto lauką, kurį šiuo metu redaguojate, ir tik tam, kad surastų vieną tikslų suveikimo priesagą (pvz., \"?en\" arba \"?de\" — po vieną kiekvienai kalbai, visą sąrašą rasite Nustatymuose) įvesto teksto pabaigoje. Antra: pranešimą ar komentarą, kurį paspaudžiate ir laikote nuspaudę, kad būtų parodytas plaukiojantis vertimas į numatytąją kalbą, kurią pasirenkate Nustatymuose. Abu būdai niekada neskaito slaptažodžių laukų, niekada neveikia programose, kurių aiškiai neleidote, ir niekada nesaugo jokios perskaityto teksto istorijos. Kai aptinkamas suveikimo ženklas arba kai laikote nuspaudę pranešimą leidžiamoje programoje, atitinkamas tekstas per HTTPS siunčiamas į jūsų sukonfigūruotą Gemini API ir išverčiamas. Įvesto suveikimo ženklo rezultatas pakeičia lauko turinį; ilgo paspaudimo rezultatas rodomas tik laikinajame plaukiojančiame burbule ir niekada nepaliečia pačios programos. Niekas niekur nesiunčiama, nebent įvedate vieną iš šių tikslių suveikimo ženklų arba laikote nuspaudę pranešimą programoje, kuri įjungta TextGate AI nustatymuose.</string>
 
@@ -18,6 +18,11 @@
     <string name="accessibility_status_enabled">Įjungta</string>
     <string name="accessibility_status_disabled">Neįjungta — TextGate AI negalės nieko atlikti, kol jos neįjungsite</string>
     <string name="btn_open_accessibility_settings">Atidaryti pritaikymo neįgaliesiems nustatymus</string>
+
+    <string name="accessibility_disclosure_title">Prieš įjungdami pritaikymo neįgaliesiems paslaugą</string>
+    <string name="accessibility_disclosure_body">TextGate AI nėra pritaikymo neįgaliesiems priemonė žmonėms su negalia — ji naudoja Android pritaikymo neįgaliesiems paslaugą tik tam, kad veiktų vertimas vietoje, ir tik taip, kaip aprašyta čia.\n\nKas skaitoma: teksto laukas, kurį šiuo metu redaguojate, tik tam, kad būtų patikrinta, ar įvesto teksto pabaigoje yra vienas tikslus suveikimo ženklas, pvz., \"?en\" arba \"?de\"; ir pranešimas ar komentaras, kurį paspaudžiate ir laikote nuspaudę, tik tose programose, kurias aiškiai leidote Nustatymuose.\n\nKas niekada neskaitoma: slaptažodžių laukai, PIN kodo įvestis ar bet kas programoje, kurios neįjungėte. Jokia perskaityto teksto istorija niekada nesaugoma.\n\nKas vyksta toliau: tik aptikus suveikimo ženklą arba jums laikant nuspaudę pranešimą, atitinkamas tekstas vieną kartą siunčiamas per HTTPS į jūsų sukonfigūruotą Gemini API ir išverčiamas. Jokiu kitu metu niekas nesiunčiama.\n\nJūs viską kontroliuojate: bet kada išjunkite visą funkciją pagrindiniu jungikliu Nustatymuose ir bet kada pašalinkite bet kurią programą iš leidžiamų sąrašo.\n\nPalietę \"Sutinku\" atidarysite Android pritaikymo neįgaliesiems nustatymus, kuriuose patys įjungsite TextGate AI — vien paspaudus šį mygtuką niekas neįjungiama.</string>
+    <string name="btn_accessibility_agree">Sutinku ir tęsiu į nustatymus</string>
+    <string name="btn_accessibility_cancel">Atšaukti</string>
 
     <string name="section_gemini_api">Gemini API</string>
     <string name="label_api_key">Gemini API raktas</string>

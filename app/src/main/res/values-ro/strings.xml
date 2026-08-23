@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">TextGate AI</string>
+    <string name="app_name">Tłumacz TextGate AI</string>
 
     <string name="accessibility_service_description">TextGate AI citește textul în două moduri, ambele strict limitate. Primul: câmpul de text pe care îl editați în prezent, doar pentru a căuta un sufix declanșator exact (precum \"?en\" sau \"?de\" — câte unul pentru fiecare limbă, consultați lista completă din Setări) la sfârșitul a ceea ce ați scris. Al doilea: un mesaj sau un comentariu pe care apăsați lung, pentru a afișa o traducere plutitoare în limba implicită pe care o alegeți din Setări. Niciuna dintre aceste două metode nu citește vreodată câmpurile de parolă, nu funcționează niciodată în aplicații pe care nu le-ați permis explicit și nu păstrează niciodată un istoric al a ceea ce a fost citit. Când este detectat un declanșator, sau când apăsați lung pe un mesaj, într-o aplicație permisă, textul relevant este trimis prin HTTPS către API-ul Gemini pe care l-ați configurat și tradus. Rezultatul declanșatorului scris înlocuiește conținutul câmpului; rezultatul apăsării lungi este afișat doar într-o bulă plutitoare temporară și nu afectează niciodată aplicația originală. Nimic nu este trimis nicăieri, decât dacă scrieți unul dintre acești declanșatori exacți sau apăsați lung pe un mesaj într-o aplicație care este activată în setările TextGate AI.</string>
 
@@ -18,6 +18,10 @@
     <string name="accessibility_status_enabled">Activat</string>
     <string name="accessibility_status_disabled">Neactivat — TextGate AI nu poate face nimic până când nu îl activați</string>
     <string name="btn_open_accessibility_settings">Deschideți setările de accesibilitate</string>
+    <string name="accessibility_disclosure_title">Înainte de a activa Serviciul de accesibilitate</string>
+    <string name="accessibility_disclosure_body">TextGate AI nu este un instrument de accesibilitate pentru persoanele cu dizabilități — aplicația folosește Serviciul de accesibilitate al Android exclusiv pentru a face posibilă traducerea direct pe ecran, și doar în modul descris aici.\n\nCe se citește: câmpul de text pe care îl editați în prezent, doar pentru a verifica existența unui singur sufix declanșator exact, precum \"?en\" sau \"?de\", la sfârșitul a ceea ce ați scris; și un mesaj sau un comentariu pe care apăsați lung, doar în aplicațiile pe care le-ați permis explicit în Setări.\n\nCe nu se citește niciodată: câmpurile de parolă, introducerea codului PIN sau orice se află într-o aplicație pe care nu ați activat-o. Nu se păstrează niciodată vreun istoric al a ceea ce a fost citit.\n\nCe urmează: doar atunci când este detectat un declanșator, sau când apăsați lung pe un mesaj, textul respectiv este trimis o singură dată, prin HTTPS, către API-ul Gemini pe care l-ați configurat, și tradus. Nu se trimite nimic în niciun alt moment.\n\nDețineți controlul: dezactivați întreaga funcție oricând, cu ajutorul comutatorului principal din Setări, și eliminați orice aplicație din lista celor permise oricând doriți.\n\nAtingând \"Sunt de acord\", se deschid setările de accesibilitate proprii ale Android, unde activați chiar dvs. TextGate AI — nimic nu este activat doar prin atingerea acestui buton.</string>
+    <string name="btn_accessibility_agree">Sunt de acord și continui către setări</string>
+    <string name="btn_accessibility_cancel">Anulați</string>
 
     <string name="section_gemini_api">API Gemini</string>
     <string name="label_api_key">Cheie API Gemini</string>

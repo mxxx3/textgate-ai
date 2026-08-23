@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">TextGate AI</string>
+    <string name="app_name">Tłumacz TextGate AI</string>
 
     <string name="accessibility_service_description">TextGate AI lit le texte de deux façons, toutes deux strictement limitées. Premièrement : le champ de texte que vous êtes en train de modifier, et seulement pour rechercher un suffixe déclencheur exact (comme « ?en » ou « ?de » — un par langue, voir la liste complète dans les Paramètres) à la fin de ce que vous avez saisi. Deuxièmement : un message ou un commentaire sur lequel vous effectuez un appui long, pour afficher une traduction flottante dans la langue par défaut que vous choisissez dans les Paramètres. Aucun de ces deux mécanismes ne lit jamais les champs de mot de passe, ne fonctionne jamais dans des applications que vous n\'avez pas explicitement autorisées, et ne conserve jamais d\'historique de ce qui a été lu. Lorsqu\'un déclencheur est détecté, ou lorsque vous effectuez un appui long sur un message, dans une application autorisée, le texte concerné est envoyé via HTTPS à l\'API Gemini que vous avez configurée, puis traduit. Le résultat du déclencheur saisi remplace le contenu du champ ; le résultat de l\'appui long n\'est jamais affiché que dans une bulle flottante temporaire et ne touche jamais l\'application d\'origine. Rien n\'est envoyé nulle part, sauf si vous saisissez l\'un de ces déclencheurs exacts ou effectuez un appui long sur un message dans une application activée dans les paramètres de TextGate AI.</string>
 
@@ -18,6 +18,11 @@
     <string name="accessibility_status_enabled">Activé</string>
     <string name="accessibility_status_disabled">Non activé — TextGate AI ne peut rien faire tant que vous ne l\'activez pas</string>
     <string name="btn_open_accessibility_settings">Ouvrir les paramètres d\'accessibilité</string>
+
+    <string name="accessibility_disclosure_title">Avant d\'activer le service d\'accessibilité</string>
+    <string name="accessibility_disclosure_body">TextGate AI n\'est pas un outil d\'accessibilité pour les personnes en situation de handicap — l\'application utilise le service d\'accessibilité d\'Android uniquement pour permettre la traduction directement sur place, et seulement de la façon décrite ici.\n\nCe qui est lu : le champ de texte que vous êtes en train de modifier, uniquement pour vérifier la présence d\'un suffixe déclencheur exact comme « ?en » ou « ?de » à la fin de ce que vous avez saisi ; ainsi qu\'un message ou un commentaire sur lequel vous effectuez un appui long, uniquement dans les applications que vous avez explicitement autorisées dans les Paramètres.\n\nCe qui n\'est jamais lu : les champs de mot de passe, la saisie du code PIN, ou tout élément d\'une application que vous n\'avez pas activée. Aucun historique de ce qui a été lu n\'est jamais conservé.\n\nCe qui se passe ensuite : uniquement lorsqu\'un déclencheur est détecté, ou lorsque vous effectuez un appui long sur un message, le texte concerné est envoyé une seule fois, via HTTPS, à l\'API Gemini que vous avez configurée, puis traduit. Rien n\'est envoyé à aucun autre moment.\n\nVous gardez le contrôle : désactivez toute la fonctionnalité à tout moment grâce à l\'interrupteur principal dans les Paramètres, et retirez n\'importe quelle application de la liste autorisée quand vous le souhaitez.\n\nEn appuyant sur « J\'accepte », vous ouvrez les paramètres d\'accessibilité d\'Android eux-mêmes, où vous activez vous-même TextGate AI — cette seule pression sur le bouton n\'active rien.</string>
+    <string name="btn_accessibility_agree">J\'accepte et je continue vers les paramètres</string>
+    <string name="btn_accessibility_cancel">Annuler</string>
 
     <string name="section_gemini_api">API Gemini</string>
     <string name="label_api_key">Clé API Gemini</string>

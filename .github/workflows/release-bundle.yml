@@ -1,0 +1,96 @@
+name: Build signed release bundle (AAB)
+
+# Produces a SIGNED app-release.aab, ready to upload to Play Console —
+# something the sandbox that generated this project cannot do itself (no
+# Android SDK / build tools there, see README "Build verification
+# history"). This workflow is intentionally manual-only (workflow_dispatch):
+# unlike build.yml (which runs on every push/PR to catch regressions early),
+# a signed release build is a deliberate release action, not something that
+# should fire automatically on every commit.
+#
+# ONE-TIME SETUP required before this workflow can run (see
+# docs/publikacja_google_play.md, section "Workflow do budowania podpisanego
+# AAB"): add three repository secrets under
+# Settings → Secrets and variables → Actions → New repository secret:
+#   - RELEASE_KEYSTORE_BASE64   the release-signing/textgate-ai-upload.jks
+#                                keystore file, base64-encoded (the file
+#                                release-signing/textgate-ai-upload.jks.base64.txt
+#                                already has this — its content is exactly
+#                                what goes into this secret's value).
+#   - RELEASE_KEYSTORE_PASSWORD the store password from
+#                                release-signing/KEYSTORE_CREDENTIALS_README.txt
+#   - RELEASE_KEY_PASSWORD      the SAME value as RELEASE_KEYSTORE_PASSWORD
+#                                (PKCS12 keystores require store and key
+#                                password to match — see that same README).
+#
+# The keystore file itself, and the README with its passwords, are
+# deliberately NOT committed to this repository (.gitignore excludes
+# /release-signing/ entirely) — only the base64 text goes into a GitHub
+# secret, which GitHub encrypts and never displays again after saving.
+on:
+  workflow_dispatch:
+
+jobs:
+  bundle-release:
+    name: bundleRelease (signed)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+
+      # Decodes the base64 secret back into a real .jks file, written only
+      # into the runner's ephemeral temp directory — never into the
+      # checked-out repository, so it can never accidentally get committed.
+      - name: Decode release keystore
+        run: |
+          echo "${{ secrets.RELEASE_KEYSTORE_BASE64 }}" | base64 -d > "${RUNNER_TEMP}/release.jks"
+
+      # build.gradle.kts's "release" signingConfig reads these exact
+      # environment variable names (see app/build.gradle.kts) — if they are
+      # unset, the release build type is left unsigned, which is exactly
+      # what happens for a normal local `./gradlew bundleRelease` run
+      # without these secrets configured.
+      - name: bundleRelease
+        env:
+          RELEASE_KEYSTORE_PATH: ${{ runner.temp }}/release.jks
+          RELEASE_KEYSTORE_PASSWORD: ${{ secrets.RELEASE_KEYSTORE_PASSWORD }}
+          RELEASE_KEY_ALIAS: textgateai-upload
+          RELEASE_KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD }}
+        run: ./gradlew bundleRelease --stacktrace
+
+      - name: Remove decoded keystore
+        if: always()
+        run: rm -f "${RUNNER_TEMP}/release.jks"
+
+      - name: Compute AAB SHA-256
+        if: always()
+        run: |
+          AAB_PATH="app/build/outputs/bundle/release/app-release.aab"
+          if [ -f "$AAB_PATH" ]; then
+            sha256sum "$AAB_PATH" | tee app-release-sha256.txt
+          else
+            echo "AAB not found at $AAB_PATH (build likely failed, or is unsigned — check the bundleRelease step's log)" | tee app-release-sha256.txt
+          fi
+
+      - name: Upload signed AAB
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-release-aab
+          path: |
+            app/build/outputs/bundle/release/app-release.aab
+            app-release-sha256.txt
+          if-no-files-found: warn

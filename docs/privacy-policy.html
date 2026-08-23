@@ -82,14 +82,20 @@
     padding: 0 20px 40px;
   }
   footer a { color: var(--primary); }
-  .contact-placeholder {
-    background: #FFF8E1;
-    border: 1px solid #F0D98C;
+  .contact-email {
+    background: var(--surface);
+    border: 1px solid var(--divider);
     border-radius: 10px;
     padding: 14px 18px;
     font-size: 0.92rem;
-    color: #6B5900;
+    color: var(--text);
   }
+  .contact-email a {
+    color: var(--primary);
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .contact-email a:hover { text-decoration: underline; }
 </style>
 </head>
 <body>
@@ -163,7 +169,7 @@
 
   <div class="card">
     <h2>Kontakt</h2>
-    <p class="contact-placeholder">⚠️ Uzupełnij ten adres przed publikacją: <strong>[TWÓJ ADRES E-MAIL DO KONTAKTU]</strong> — Google Play wymaga realnego sposobu kontaktu w sprawach prywatności.</p>
+    <p class="contact-email">W sprawach związanych z prywatnością napisz na: <a href="mailto:mxxxx31@gmail.com">mxxxx31@gmail.com</a></p>
   </div>
 
   <div class="divider-lang">English version below</div>
@@ -230,7 +236,7 @@
 
   <div class="card">
     <h2>Contact</h2>
-    <p class="contact-placeholder">⚠️ Fill in before publishing: <strong>[YOUR CONTACT EMAIL]</strong> — Google Play requires a real way to contact you about privacy matters.</p>
+    <p class="contact-email">For privacy-related questions, email: <a href="mailto:mxxxx31@gmail.com">mxxxx31@gmail.com</a></p>
   </div>
 
 </main>

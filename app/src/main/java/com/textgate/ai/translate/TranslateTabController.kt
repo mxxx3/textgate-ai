@@ -225,7 +225,10 @@ class TranslateTabController(
     private fun describeFailure(failure: GeminiClient.Result.Failure): String = when (failure) {
         GeminiClient.Result.Failure.Timeout -> activity.getString(R.string.error_timeout)
         GeminiClient.Result.Failure.NetworkError -> activity.getString(R.string.error_network)
-        is GeminiClient.Result.Failure.HttpError -> activity.getString(R.string.error_http, failure.code)
+        is GeminiClient.Result.Failure.HttpError -> {
+            val base = activity.getString(R.string.error_http, failure.code)
+            failure.detail?.let { "$base $it" } ?: base
+        }
         GeminiClient.Result.Failure.EmptyResponse -> activity.getString(R.string.error_empty_response)
         GeminiClient.Result.Failure.MissingApiKey -> activity.getString(R.string.error_no_api_key)
         is GeminiClient.Result.Failure.AllKeysExhausted -> activity.getString(R.string.error_all_keys_exhausted)

@@ -69,7 +69,15 @@ object GeminiClient {
             data object MissingApiKey : Failure()
             data object Timeout : Failure()
             data object NetworkError : Failure()
-            data class HttpError(val code: Int) : Failure()
+            /** [detail] is a short, best-effort excerpt of Gemini's own
+             * `error.message` from the response body (e.g. what exactly was
+             * wrong with a 400 INVALID_ARGUMENT) — null if the body was
+             * empty, unparseable, or carried no message field. Bounded to
+             * [HTTP_ERROR_DETAIL_MAX_LENGTH] characters so a pathological
+             * response body can't bloat a UI string. Never derived from
+             * anything the user typed — this is Google's own diagnostic
+             * text about the request shape/model/quota, not user content. */
+            data class HttpError(val code: Int, val detail: String? = null) : Failure()
             data object EmptyResponse : Failure()
             data object InvalidResponse : Failure()
             /** The constructed request did not target the allow-listed
@@ -165,16 +173,16 @@ object GeminiClient {
 
             val statusCode = connection.responseCode
             if (statusCode !in 200..299) {
+                val errorBody = try {
+                    connection.errorStream?.bufferedReader(Charsets.UTF_8)?.use { it.readText() }.orEmpty()
+                } catch (_: Exception) {
+                    ""
+                }
                 if (statusCode == HTTP_QUOTA_EXCEEDED) {
-                    val errorBody = try {
-                        connection.errorStream?.bufferedReader(Charsets.UTF_8)?.use { it.readText() }.orEmpty()
-                    } catch (_: Exception) {
-                        ""
-                    }
                     val retryAfterHeader = connection.getHeaderField("Retry-After")
                     return parseQuotaFailure(errorBody, retryAfterHeader)
                 }
-                return Result.Failure.HttpError(statusCode)
+                return Result.Failure.HttpError(statusCode, extractErrorMessage(errorBody))
             }
 
             val responseText = connection.inputStream.bufferedReader(Charsets.UTF_8).use { it.readText() }
@@ -347,5 +355,24 @@ object GeminiClient {
         if (raw.isBlank()) return null
         val trimmed = raw.trim().removeSuffix("s")
         return trimmed.toDoubleOrNull()?.toLong()
+    }
+
+    /** See [Result.Failure.HttpError.detail]. */
+    private const val HTTP_ERROR_DETAIL_MAX_LENGTH = 200
+
+    /** Best-effort extraction of Google's own `error.message` from a
+     * non-2xx response body (the standard `{"error":{"code":...,
+     * "message":"...","status":"..."}}` shape every Generative Language API
+     * error uses, not just 429s). Returns null rather than throwing for any
+     * body that isn't that exact shape — this is a diagnostics nicety, never
+     * something the rest of the request/response path depends on. */
+    internal fun extractErrorMessage(errorBody: String): String? {
+        if (errorBody.isBlank()) return null
+        return try {
+            val message = JSONObject(errorBody).optJSONObject("error")?.optString("message")
+            message?.trim()?.takeIf { it.isNotEmpty() }?.take(HTTP_ERROR_DETAIL_MAX_LENGTH)
+        } catch (_: Exception) {
+            null
+        }
     }
 }

@@ -199,4 +199,33 @@ class GeminiClientTest {
         val result = GeminiClient.parseQuotaFailure("""{"error":{}}""", retryAfterHeader = null)
         assertEquals(null, result.retryAfterSeconds)
     }
+
+    @Test
+    fun `extractErrorMessage reads Google's standard error message shape`() {
+        val body = """{"error":{"code":400,"message":"Invalid JSON payload received.","status":"INVALID_ARGUMENT"}}"""
+        assertEquals("Invalid JSON payload received.", GeminiClient.extractErrorMessage(body))
+    }
+
+    @Test
+    fun `extractErrorMessage returns null for an empty body`() {
+        assertEquals(null, GeminiClient.extractErrorMessage(""))
+    }
+
+    @Test
+    fun `extractErrorMessage returns null for malformed json, never throws`() {
+        assertEquals(null, GeminiClient.extractErrorMessage("not json at all"))
+    }
+
+    @Test
+    fun `extractErrorMessage returns null when the error object has no message field`() {
+        assertEquals(null, GeminiClient.extractErrorMessage("""{"error":{"code":400}}"""))
+    }
+
+    @Test
+    fun `extractErrorMessage truncates a very long message`() {
+        val longMessage = "x".repeat(500)
+        val body = """{"error":{"message":"$longMessage"}}"""
+        val result = GeminiClient.extractErrorMessage(body)
+        assertEquals(200, result?.length)
+    }
 }

@@ -509,7 +509,10 @@ class TextGateAccessibilityService : AccessibilityService() {
     private fun mapFailureMessage(failure: GeminiClient.Result.Failure): String = when (failure) {
         GeminiClient.Result.Failure.Timeout -> getString(R.string.error_timeout)
         GeminiClient.Result.Failure.NetworkError -> getString(R.string.error_network)
-        is GeminiClient.Result.Failure.HttpError -> getString(R.string.error_http, failure.code)
+        is GeminiClient.Result.Failure.HttpError -> {
+            val base = getString(R.string.error_http, failure.code)
+            failure.detail?.let { "$base $it" } ?: base
+        }
         GeminiClient.Result.Failure.EmptyResponse -> getString(R.string.error_empty_response)
         GeminiClient.Result.Failure.MissingApiKey -> getString(R.string.error_no_api_key)
         is GeminiClient.Result.Failure.AllKeysExhausted -> getString(R.string.error_all_keys_exhausted)

@@ -34,6 +34,16 @@
         żywo screen itself and Android's own system mic indicator). Runtime
         permission, requested only when the user first starts Na żywo.
 
+    android.permission.WAKE_LOCK (v2)
+        A normal, install-time-granted permission (no runtime prompt) —
+        required simply to be ALLOWED to call PowerManager.WakeLock.acquire()
+        at all. LiveTranslationService.acquireWakeLock() takes a
+        PARTIAL_WAKE_LOCK (CPU only, screen stays off — see that method's own
+        doc) for the duration of an active Na żywo session. Without this
+        declared, acquire() throws SecurityException and crashes the
+        Foreground Service the moment a session starts — this was missing in
+        the initial v2.0.0 drop and is the fix for that crash.
+
     In particular this app still requests NONE of: contacts, SMS, call
     logs, location, camera, storage, phone state, or QUERY_ALL_PACKAGES.
     The accessibility capability itself is not a manifest permission the
@@ -47,6 +57,7 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <!--
         Declarative package-visibility filter (Android 11+ / API 30+).

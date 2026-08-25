@@ -6,7 +6,9 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
+import android.media.AudioManager
 import android.os.IBinder
+import android.os.PowerManager
 import android.widget.ArrayAdapter
 import com.textgate.ai.LocaleHelper
 import com.textgate.ai.MainActivity
@@ -47,6 +49,49 @@ class LiveTabController(
     private var service: LiveTranslationService? = null
     private var bound = false
     private val stateListener: (LiveSessionState) -> Unit = { state -> activity.runOnUiThread { render(state) } }
+
+    /** Held only while a session actually has audio flowing (mic listening
+     * or translated audio playing) — see [render], which is the only
+     * caller of [setAudioActive]. Two things a real phone call gets "for
+     * free" from the platform that this screen has to ask for explicitly,
+     * since it plays/records audio itself rather than going through the
+     * telephony stack: the screen turning off when held to the ear (this
+     * wake lock), and the hardware volume keys controlling ITS audio
+     * specifically (see the [AudioManager] usage below). */
+    private val powerManager = activity.getSystemService(Context.POWER_SERVICE) as PowerManager
+    private var proximityWakeLock: PowerManager.WakeLock? = null
+
+    private fun setAudioActive(active: Boolean) {
+        if (active) {
+            // PROXIMITY_SCREEN_OFF_WAKE_LOCK — not deprecated (unlike
+            // SCREEN_DIM_WAKE_LOCK/SCREEN_BRIGHT_WAKE_LOCK); it's the
+            // standard, still-current way any calling/communication app
+            // gets "screen off near the ear" without a telephony call of
+            // its own. isWakeLockLevelSupported() guards devices where the
+            // platform has no proximity sensor for this.
+            if (proximityWakeLock == null &&
+                powerManager.isWakeLockLevelSupported(PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK)
+            ) {
+                proximityWakeLock = powerManager.newWakeLock(
+                    PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK,
+                    "TextGateAI:liveProximity"
+                )
+            }
+            if (proximityWakeLock?.isHeld == false) proximityWakeLock?.acquire()
+            // AudioTrack playback for this session uses
+            // AudioAttributes.USAGE_VOICE_COMMUNICATION (see
+            // LiveTranslationService.beginCapturePlayback), which the
+            // platform maps to the legacy STREAM_VOICE_CALL stream — but
+            // the hardware volume keys only follow that mapping if this
+            // Activity explicitly says so; left at the default they'd
+            // silently adjust STREAM_MUSIC instead, which nothing here
+            // uses, so vol+/- would appear to do nothing.
+            activity.volumeControlStream = AudioManager.STREAM_VOICE_CALL
+        } else {
+            if (proximityWakeLock?.isHeld == true) proximityWakeLock?.release()
+            activity.volumeControlStream = AudioManager.USE_DEFAULT_STREAM_TYPE
+        }
+    }
 
     private val connection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, binderService: IBinder?) {
@@ -92,6 +137,12 @@ class LiveTabController(
             activity.unbindService(connection)
             bound = false
         }
+        // The proximity/volume behavior in setAudioActive is specifically
+        // "this screen is what's near the user's ear/hand right now" — that
+        // stops being true the moment the Activity itself is backgrounded,
+        // regardless of whether the underlying service session is still
+        // running. Always safe to call even if nothing was held/set.
+        setAudioActive(false)
     }
 
     fun onDestroy() {
@@ -183,5 +234,17 @@ class LiveTabController(
             binding.textLiveInputTranscript.text = activeService.latestInputTranscript
             binding.textLiveOutputTranscript.text = activeService.latestOutputTranscript
         }
+
+        // CONNECTING is included so the screen already behaves like a call
+        // the moment the user presses start, not only once audio actually
+        // starts flowing. PAUSED is deliberately excluded — that state
+        // means the headset was disconnected and capture/playback are both
+        // stopped (see LiveSessionState's own doc), so there's no reason to
+        // keep the screen off or volume keys pointed at this session.
+        val isAudioActive = state == LiveSessionState.CONNECTING ||
+            state == LiveSessionState.LISTENING ||
+            state == LiveSessionState.TRANSLATING ||
+            state == LiveSessionState.RECONNECTING
+        setAudioActive(isAudioActive)
     }
 }

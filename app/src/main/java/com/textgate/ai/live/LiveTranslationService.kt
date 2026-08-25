@@ -192,7 +192,27 @@ class LiveTranslationService : Service() {
             apiKey = apiKey,
             model = LIVE_MODEL,
             targetLanguageCode = targetLanguage.localeLanguageTag
-        ) { event -> mainHandler.post { handleServerEvent(event) } }
+        ) { event ->
+            mainHandler.post {
+                // GeminiLiveClient.close() (called from stopSession/
+                // handleDisconnect) tears the socket down asynchronously —
+                // OkHttp's onClosed/onFailure, or this class's own 20s setup
+                // watchdog, can still fire and post an event AFTER [client]
+                // has already been replaced by a newer session (a quick
+                // stop-then-restart) or set to null (a plain stop). Without
+                // this identity check, that stale event would run
+                // handleServerEvent against whatever session is CURRENT —
+                // e.g. calling handleDisconnect() and tearing down a
+                // brand-new session because the OLD one finally reported an
+                // error, or reposting the notification with stale state
+                // right after stopSession() already removed it. Two real
+                // reports traced to exactly this: the notification not
+                // disappearing after STOP, and a restart soon after a stop
+                // appearing to connect but never actually translating.
+                if (liveClient !== client) return@post
+                handleServerEvent(event)
+            }
+        }
     }
 
     private fun handleServerEvent(event: ServerEvent) {

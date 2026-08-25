@@ -2613,3 +2613,97 @@ be verified" notes above already flag as needing a real device — Robolectric
 has no meaningful way to simulate acoustic echo cancellation); needs
 another on-device test, on the loudspeaker specifically since that's the
 condition that reproduced this.
+
+**Update — translation works; three follow-up requests from real usage.**
+
+1. **Voice changes between sessions.** Checked whether the app can pin a
+   specific narrator voice. Google's `speechConfig.voiceConfig.
+   prebuiltVoiceConfig.voiceName` field exists and is a real, valid part of
+   the wire protocol (confirmed via the same `google-genai` SDK source read
+   above) — but a real-world field report from another developer building
+   against this exact preview model documents that setting it is *silently
+   ignored*: the model performs voice/style transfer from the original
+   speaker instead of using a fixed selectable narrator voice (their test:
+   pinning a female voice against male source audio still returned a male
+   output voice). The same report also documents the voice drifting
+   *within* one long session. Given credible evidence that this control
+   doesn't actually work on this preview model, no voice-picker UI was
+   added — shipping a control that silently does nothing would be worse
+   than not having it. Nothing here is within this app's control to fix;
+   it would need Google to add real voice-pinning support to this model.
+2. **Screen doesn't turn off held to the ear, unlike a phone call.** Real
+   gap, now fixed for Na żywo: `LiveTabController` acquires a
+   `PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK` (the same, still-current,
+   non-deprecated mechanism any calling app uses for this) whenever the
+   session is CONNECTING, LISTENING, TRANSLATING, or RECONNECTING, and
+   releases it on PAUSED/STOPPED/ERROR and whenever the Activity itself
+   stops. Deliberately NOT added to Rozmowa — that mode is face-to-face,
+   both participants looking at the screen throughout (see
+   `ConversationTabController`'s own class doc), so screen-off-near-ear
+   would be wrong there, not missing.
+3. **Hardware volume keys (vol +/-) don't adjust the translated audio.**
+   Real bug, now fixed in both Na żywo and Rozmowa. Both play translated
+   audio via an `AudioTrack` using
+   `AudioAttributes.USAGE_VOICE_COMMUNICATION`, which the platform maps to
+   the legacy `STREAM_VOICE_CALL` stream — but Android's hardware volume
+   keys only follow that mapping if the Activity explicitly sets
+   `volumeControlStream` to it; left at the default they silently control
+   `STREAM_MUSIC` instead, which this app never uses, so the keys appeared
+   to do nothing. Fixed by setting `activity.volumeControlStream =
+   AudioManager.STREAM_VOICE_CALL` while a session has audio active, and
+   resetting to `AudioManager.USE_DEFAULT_STREAM_TYPE` when it doesn't.
+
+None of the three needed a new permission. (2) and (3) are real Android
+framework/hardware behavior, so — same caveat as the echo-cancellation fix
+above — not unit-testable in this sandbox; both need on-device
+confirmation, ideally with the phone actually held to the ear for (2).
+
+**Update — found a real race condition before the app owner even tested
+the previous fixes: stop notification doesn't disappear, and restarting
+soon after a stop silently fails to translate.** Both reports trace to the
+same bug: [GeminiLiveClient.close] tears the WebSocket down
+*asynchronously* (OkHttp's `onClosed`/`onFailure` fire on a background
+thread sometime after `close()` returns; this class's own 20s setup
+watchdog can also still be pending). `LiveTranslationService.startSession`
+and `ConversationTabController.startSession` each captured their
+`GeminiLiveClient`'s events in a plain `{ event -> mainHandler.post {
+handleServerEvent(event) } }` closure with no way to tell "this event is
+from the client I still care about" apart from "this event is from a
+client I already told to close." A stale event from an old, already-closed
+client could therefore still reach `handleServerEvent` after
+`stopSession()` had already run:
+
+- If it arrived after a plain STOP, `handleServerEvent` would fall through
+  to its trailing `updateNotification()` call, which calls
+  `notificationManager.notify(NOTIFICATION_ID, buildNotification())`
+  directly — independent of `stopForeground()`, which had already run
+  moments earlier. The notification reappears right after being removed,
+  and nothing else ever cancels it, so it just sits there — exactly the
+  "should disappear automatically but doesn't" report, and exactly why the
+  screenshot that prompted this showed a live-looking "ŁĄCZENIE"
+  notification with a working STOP button even though the session had
+  already been told to stop.
+- If it arrived after a stop-then-quick-restart, worse: a stale `Error` or
+  non-1000 `Closed` event from the OLD client would run
+  `handleServerEvent`'s `Error`/`Closed` branch, which calls
+  `handleDisconnect()` — and `handleDisconnect()` operates on whatever the
+  CURRENT `liveClient`/`captureThread`/`micActive` are, which by then
+  belong to the brand-new session the user just started. The old session's
+  belated failure event tears down the new session moments after it began,
+  which looks exactly like "seems fine, but doesn't translate, like it's
+  slowly finishing off the previous session" — because that's precisely
+  what was happening, just to the wrong session.
+
+Fixed in both files by capturing the specific `GeminiLiveClient` instance
+in a local `val client` and checking `if (liveClient !== client)
+return@post` as the first line inside the posted callback, before calling
+`handleServerEvent` at all — a stale event from a superseded or closed
+client is now silently dropped instead of mutating state that belongs to
+a different (or no) session. This is the standard fix for "async callback
+outlives the resource it came from," and it resolves both symptoms with
+one change each, since both traced to the same unguarded callback. Not
+unit-tested — reproducing the exact async race (a WebSocket close/failure
+callback firing just after a stop-then-restart) needs a real device and
+real timing, which this sandbox cannot provide; needs on-device
+confirmation, specifically: stop while still CONNECTING (matching the
+report) and stop-then-immediately-restart.

@@ -4,6 +4,7 @@ import android.Manifest
 import android.app.Activity
 import android.media.AudioAttributes
 import android.media.AudioFormat
+import android.media.AudioManager
 import android.media.AudioRecord
 import android.media.AudioTrack
 import android.media.MediaRecorder
@@ -168,13 +169,37 @@ class ConversationTabController(
         binding.textConversationStatus.text = activity.getString(R.string.live_state_connecting)
         binding.buttonConversationStartStop.setText(R.string.conversation_button_stop)
 
+        // playbackTrack (built in beginCapturePlayback, below) uses
+        // AudioAttributes.USAGE_VOICE_COMMUNICATION, which the platform maps
+        // to the legacy STREAM_VOICE_CALL stream — but the hardware volume
+        // keys only follow that mapping if this Activity says so; left at
+        // the default they'd silently adjust STREAM_MUSIC instead, which
+        // nothing here uses, so vol+/- would appear to do nothing. No
+        // proximity/screen-off wake lock here on purpose, unlike Na żywo:
+        // Rozmowa is a face-to-face mode both people look at the screen
+        // during (see this class's own doc), not a to-the-ear call.
+        activity.volumeControlStream = AudioManager.STREAM_VOICE_CALL
+
         val client = GeminiLiveClient()
         liveClient = client
         client.connect(
             apiKey = apiKey,
             model = LiveTranslationService.LIVE_MODEL,
             targetLanguageCode = currentTargetLanguage().localeLanguageTag
-        ) { event -> mainHandler.post { handleServerEvent(event) } }
+        ) { event ->
+            mainHandler.post {
+                // See LiveTranslationService.startSession's identical guard
+                // for the full reasoning: GeminiLiveClient.close() tears the
+                // socket down asynchronously, so a stale event from a
+                // superseded/closed [client] can still arrive after
+                // stopSession() or restartSessionWithCurrentDirection()
+                // already moved on to null or a newer client — without this
+                // check it would run handleServerEvent against whatever
+                // session is CURRENT instead of being silently dropped.
+                if (liveClient !== client) return@post
+                handleServerEvent(event)
+            }
+        }
     }
 
     private fun handleServerEvent(event: ServerEvent) {
@@ -211,6 +236,7 @@ class ConversationTabController(
         playbackTrack = null
         liveClient?.close()
         liveClient = null
+        activity.volumeControlStream = AudioManager.USE_DEFAULT_STREAM_TYPE
         binding.textConversationStatus.text = activity.getString(R.string.live_state_stopped)
         binding.buttonConversationStartStop.setText(R.string.conversation_button_start)
     }

@@ -93,8 +93,10 @@ class GeminiLiveClientTest {
 
     // --- buildSetupMessage / buildRealtimeAudioMessage: regression coverage
     // for the real, user-hit "stuck at Łączenie forever" bug — a missing
-    // responseModalities field and a wrong realtimeInput shape. See
-    // GeminiLiveClient's own IMPLEMENTATION NOTE for the full story. ---
+    // responseModalities field, a misplaced translationConfig, and a wrong
+    // realtimeInput shape, all confirmed against the actual google-genai
+    // Python SDK's request-serialization source. See GeminiLiveClient's own
+    // IMPLEMENTATION NOTE for the full story. ---
 
     @Test
     fun `setup message requests AUDIO response modality`() {
@@ -117,11 +119,23 @@ class GeminiLiveClientTest {
     }
 
     @Test
+    fun `setup message nests translationConfig inside generationConfig, not at the top level`() {
+        val setup = client.buildSetupMessage("gemini-3.5-live-translate-preview", "pl")
+            .getJSONObject("setup")
+        assertTrue(!setup.has("translationConfig"))
+        assertTrue(setup.getJSONObject("generationConfig").has("translationConfig"))
+    }
+
+    @Test
     fun `setup message carries the model path and target language`() {
         val setup = client.buildSetupMessage("gemini-3.5-live-translate-preview", "pl")
             .getJSONObject("setup")
         assertEquals("models/gemini-3.5-live-translate-preview", setup.getString("model"))
-        assertEquals("pl", setup.getJSONObject("translationConfig").getString("targetLanguageCode"))
+        assertEquals(
+            "pl",
+            setup.getJSONObject("generationConfig").getJSONObject("translationConfig")
+                .getString("targetLanguageCode")
+        )
     }
 
     @Test

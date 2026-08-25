@@ -2471,3 +2471,102 @@ exact area, so its request-building is no longer left untested. Still not
 verified end-to-end against a real Live session (still no Android SDK or
 live network access in this sandbox) — needs another on-device Na żywo
 test.
+
+**Update — the "Łączenie" hang persisted after the responseModalities
+fix.** The app owner retested on-device and it was still stuck; their own
+Gemini API usage dashboard showed the answer that mattered most: zero Live
+API requests logged at all (only the Tłumacz text-model calls appear),
+while the same API key against the same model worked fine in Google AI
+Studio's own playground. That combination — real key, real model access
+confirmed elsewhere, but literally nothing arriving at Google for this
+app's Live attempts — points at the WebSocket handshake itself never
+completing from the Android device, not at the JSON payload (which was
+already fixed, and would at minimum register as a rejected request if it
+were still the problem). This sandbox has no way to reproduce a hung
+WebSocket handshake or read the device's network logs, so rather than
+guess at a specific network-layer cause with no evidence, `GeminiLiveClient`
+was hardened so a hang can no longer happen invisibly, and so that if it
+still fails, the failure will finally say why:
+
+1. Added an app-level watchdog: if `ServerEvent.SetupComplete` hasn't
+   arrived within 20s of calling `connect()`, the client now force-closes
+   the socket itself and reports `ServerEvent.Error` — independent of
+   whatever OkHttp/the OS/the network are actually doing underneath. The
+   UI can no longer get stuck on "Łączenie" with no way out, regardless of
+   whether the true underlying cause turns out to be OkHttp-related,
+   OS-related, or network-related.
+2. Added an explicit 15s `connectTimeout` to the `OkHttpClient` for the
+   initial TCP+TLS handshake. Deliberately did NOT add a short
+   `readTimeout` — that setting applies to the whole connection's life,
+   not just the handshake, and a real conversation has natural silences
+   longer than any short value, so a short read timeout would have
+   silently killed perfectly healthy sessions the first time nobody spoke
+   for a few seconds. Set to unbounded (`0`) instead, relying on the
+   existing `pingInterval` for liveness the way OkHttp's WebSocket support
+   is actually designed to be used.
+3. `onFailure`'s reported message now includes the exception's class name
+   and, when available, the HTTP status/message from a rejected Upgrade
+   response — `t.message` alone is frequently null or unhelpful (e.g. a
+   bare "Software caused connection abort"), and this is exactly the
+   detail that would distinguish a DNS failure from a TLS failure from
+   Google's server actively rejecting the handshake, without needing a
+   full device log.
+
+This does not claim to have found the underlying network-layer cause —
+without device logs or a way to reproduce a hung WebSocket handshake in
+this sandbox, that would be exactly the kind of guess this project's own
+prior mistakes (see above) already showed doesn't hold up. What it does
+guarantee is that the next attempt will end in a concrete, visible error
+message within 20 seconds instead of an indefinite silent hang — and that
+message is the next real diagnostic input needed.
+
+**Update — found a real, ground-truth-confirmed second bug in the same
+setup message, before the on-device retest even happened.** The app owner
+pointed at
+[google-gemini/gemini-live-api-examples](https://github.com/google-gemini/gemini-live-api-examples)
+on GitHub. That repo's own examples use the `google-genai` Python SDK
+rather than raw WebSocket JSON, so instead of reading its examples and
+guessing how the SDK serializes them, `google-genai` (the real, current
+package, version 2.20.0) was installed directly in this sandbox with `pip
+install google-genai` and its request-serialization source
+(`_live_converters.py`) was read directly — this is Google's own code that
+builds the exact JSON sent over the wire, strictly more authoritative than
+any doc page or forum post (both of which had already been checked and
+had partially conflicted with each other on this exact file).
+
+That source shows `_LiveConnectConfig_to_mldev` placing
+`translation_config` at `setup.generationConfig.translationConfig` —
+nested inside `generationConfig`, alongside `responseModalities`. This
+file had `translationConfig` at the TOP LEVEL of `setup` instead (a
+sibling of `generationConfig`) — wrong, and a second real bug in the exact
+same setup message as the `responseModalities` one already fixed. This is
+very plausibly the actual primary cause of the "stuck on Łączenie"
+reports: `translationConfig` is what tells the server this is a
+*translation* session in the first place, so if it isn't where the server
+looks for it, there is no complete, valid translation session to set up —
+consistent with a request that's accepted by the transport but never
+answered with `setupComplete`. Fixed by nesting it inside
+`generationConfig`.
+
+The same SDK source also *confirmed* (not just left alone) two things
+already in this file were right: `inputAudioTranscription` /
+`outputAudioTranscription` staying at the top level of `setup` (matching
+the earlier forum field report, not the doc page's own example), and
+`realtimeInput.audio` as a valid current shape (the SDK's converter
+accepts both `audio` and the older `mediaChunks` array as independent
+optional fields). And the WebSocket URL itself —
+`wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContent?key=...`
+— was confirmed byte-for-byte against the SDK's own URL-building code for
+a plain (non-ephemeral) API key, settling a stray concern raised by a
+different example in that same GitHub repo that connects via `v1alpha` and
+a `BidiGenerateContentConstrained` method — that variant turned out to be
+specific to that example's ephemeral-OAuth-token flow, not applicable to
+this app's plain-API-key auth, confirmed by reading the SDK's own
+branching logic (`if api_key.startswith('auth_tokens/')`) rather than
+assumed.
+
+`GeminiLiveClientTest` gained a new test asserting `translationConfig` is
+nested correctly, and the existing "carries the model path and target
+language" test was updated to check the new nesting. Still not verified
+end-to-end on a real device — that on-device retest, with the diagnostic
+error message this update also added, is the next step.

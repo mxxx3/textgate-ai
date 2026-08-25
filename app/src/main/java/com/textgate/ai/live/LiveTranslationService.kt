@@ -503,6 +503,14 @@ class LiveTranslationService : Service() {
     }
 
     private fun updateNotification() {
+        // On Android 13+, posting a notification requires POST_NOTIFICATIONS
+        // at runtime (requested the first time the user starts Na żywo — see
+        // LiveTabController). If it was denied or not yet granted, skip the
+        // call rather than let lint's MissingPermission check fire: the
+        // service keeps running either way (startForeground() itself does
+        // not require this permission), the user just won't see the
+        // persistent status notification until they grant it.
+        if (!MainActivity.hasNotificationPermission(this)) return
         notificationManager.notify(NOTIFICATION_ID, buildNotification())
     }
 

@@ -214,7 +214,6 @@ class ConversationTabController(
         binding.buttonConversationStartStop.setText(R.string.conversation_button_start)
     }
 
-    @Suppress("MissingPermission") // Checked in startSession() before ever reaching here.
     private fun beginCapturePlayback() {
         val minBufferSize = AudioRecord.getMinBufferSize(
             CAPTURE_SAMPLE_RATE_HZ, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT
@@ -244,6 +243,7 @@ class ConversationTabController(
         thread.start()
     }
 
+    @Suppress("MissingPermission") // RECORD_AUDIO is checked in startSession() before this capture thread is ever started.
     private fun runCaptureLoop(bufferSize: Int) {
         val record = try {
             AudioRecord(

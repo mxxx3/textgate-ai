@@ -2349,7 +2349,46 @@ first thing to check against Google's current reference); `AudioRecord`/
 USB route detection and the headset-disconnect pause/resume flow; the
 Foreground Service's behavior across real screen-off/lock/backgrounding;
 the persistent notification's STOP action; and the Rozmowa "swap direction
-by reconnecting" simplification noted above. No Gradle build, lint pass, or
-test run was executed for this release — unlike section 15's verified CI
-run, there is no green-build confirmation yet for versionCode 26 /
-versionName "2.0.0".
+by reconnecting" simplification noted above.
+
+**Update — real CI build feedback (still versionCode 26 / "2.0.0"):** this
+release *has* now been run through `build.yml` on the app owner's own
+GitHub Actions, catching two real bugs neither manual review nor this
+sandbox's Python-simulation checks could have found without a genuine
+Android SDK:
+
+1. `values-ja/strings.xml` and `values-ko/strings.xml`'s
+   `user_gender_description` began with an unescaped `?`, which Android's
+   resource compiler parses as the start of a theme-attribute reference
+   (`?attr/...`) rather than literal text — `Aapt2Exception: Android
+   resource linking failed`. Fixed by escaping the leading `?` (`\?en...`)
+   in both files; all 40 locale files were re-scanned for the same
+   leading-`@`/`?` pattern and no other instances were found.
+2. Lint (`abortOnError = true`, so any lint Error fails the build) reported
+   62 errors. One was a real permission-check bug: `ConversationTabController`'s
+   `@Suppress("MissingPermission")` was on `beginCapturePlayback()`, which
+   only starts the capture thread, instead of on `runCaptureLoop()`, which
+   is where `AudioRecord(...)` is actually constructed — the exact pattern
+   already used correctly in `LiveTranslationService`. A second was
+   `LiveTranslationService.updateNotification()` calling
+   `notificationManager.notify(...)` without a `POST_NOTIFICATIONS` guard;
+   fixed with an explicit `MainActivity.hasNotificationPermission()` check.
+   The remaining 61 of the 62 errors were all `MissingTranslation`: the
+   ~61 new v2.0.0 string keys had only been added to `values/` (English)
+   and `values-pl/`, relying on Android's default-locale fallback at
+   runtime — which works at runtime, but this project's lint config treats
+   an untranslated string as a build-breaking Error, not a warning. That
+   was a real gap, not just a documentation footnote as first written here
+   — it is now fixed properly: all ~61 keys were translated into all 38
+   other locale files (2,318 strings total; `pt`/`pt-rBR` and `zh`/`zh-rCN`
+   intentionally share identical text, matching this project's existing
+   convention for those variant pairs), not suppressed or disabled. See
+   `scripts/v2_translations.py` and `scripts/inject_v2_translations.py`.
+
+No Gradle build, lint pass, or test run has been executed *in this
+sandbox* for this release (still no Android SDK here) — but unlike the
+first draft of this section, the release has now had real, external CI
+feedback and known-real bugs from that feedback are fixed. A fresh CI run
+is still needed to confirm this exact fix set goes fully green end to end
+(lint fully clean, all 87 unit tests passing, debug APK produced) before
+this is treated as release-ready.

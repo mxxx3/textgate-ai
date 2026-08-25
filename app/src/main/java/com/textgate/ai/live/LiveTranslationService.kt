@@ -335,6 +335,22 @@ class LiveTranslationService : Service() {
             return
         }
 
+        // MODE_IN_COMMUNICATION, paired with runCaptureLoop's
+        // AudioSource.VOICE_COMMUNICATION and this method's own
+        // AudioAttributes.USAGE_VOICE_COMMUNICATION below: all three exist
+        // together as one unit on every VoIP-style app for a reason — the
+        // "voice communication" audio source/usage/attributes only get the
+        // platform's special call-style routing and volume behavior applied
+        // while AudioManager itself is told a communication session is
+        // active. Left at the default MODE_NORMAL, some devices still
+        // record fine (AudioSource.VOICE_COMMUNICATION alone can still
+        // engage AEC) but route or attenuate USAGE_VOICE_COMMUNICATION
+        // *playback* incorrectly — inaudible or near-silent output despite
+        // AudioTrack.write() succeeding and the session otherwise working,
+        // which is exactly what "shows Tłumaczę but nothing is heard" looks
+        // like. Reset to MODE_NORMAL in stopCapturePlayback().
+        audioManager.mode = AudioManager.MODE_IN_COMMUNICATION
+
         val minBufferSize = AudioRecord.getMinBufferSize(
             CAPTURE_SAMPLE_RATE_HZ, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT
         ).coerceAtLeast(MIN_BUFFER_FLOOR)
@@ -468,6 +484,11 @@ class LiveTranslationService : Service() {
             }
         }
         playbackTrack = null
+        // Symmetric with beginCapturePlayback's MODE_IN_COMMUNICATION —
+        // never leave the device's audio mode changed after this session's
+        // own capture/playback has actually stopped, since MODE_IN_COMMUNICATION
+        // affects routing/volume behavior for every app, not just this one.
+        audioManager.mode = AudioManager.MODE_NORMAL
     }
 
     // ---------------------------------------------------------------

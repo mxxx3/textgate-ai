@@ -58,6 +58,7 @@ class ConversationTabController(
 
     private val apiKeyStore = SecureApiKeyStore(activity.applicationContext)
     private val mainHandler = android.os.Handler(android.os.Looper.getMainLooper())
+    private val audioManager = activity.getSystemService(android.content.Context.AUDIO_SERVICE) as AudioManager
 
     private val languages: List<SupportedLanguage> = Languages.ALL
     private var languageA: SupportedLanguage = Languages.DEFAULT
@@ -237,11 +238,23 @@ class ConversationTabController(
         liveClient?.close()
         liveClient = null
         activity.volumeControlStream = AudioManager.USE_DEFAULT_STREAM_TYPE
+        // Symmetric with beginCapturePlayback's MODE_IN_COMMUNICATION below.
+        audioManager.mode = AudioManager.MODE_NORMAL
         binding.textConversationStatus.text = activity.getString(R.string.live_state_stopped)
         binding.buttonConversationStartStop.setText(R.string.conversation_button_start)
     }
 
     private fun beginCapturePlayback() {
+        // MODE_IN_COMMUNICATION, paired with runCaptureLoop's
+        // AudioSource.VOICE_COMMUNICATION and this method's own
+        // AudioAttributes.USAGE_VOICE_COMMUNICATION below — see
+        // LiveTranslationService.beginCapturePlayback's identical comment
+        // for the full reasoning: without this, USAGE_VOICE_COMMUNICATION
+        // *playback* can be routed/attenuated incorrectly on some devices
+        // even though capture and AudioTrack.write() both appear to work,
+        // which looks exactly like "status says translating, but silence."
+        audioManager.mode = AudioManager.MODE_IN_COMMUNICATION
+
         val minBufferSize = AudioRecord.getMinBufferSize(
             CAPTURE_SAMPLE_RATE_HZ, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT
         ).coerceAtLeast(MIN_BUFFER_FLOOR)

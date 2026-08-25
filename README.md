@@ -2707,3 +2707,37 @@ callback firing just after a stop-then-restart) needs a real device and
 real timing, which this sandbox cannot provide; needs on-device
 confirmation, specifically: stop while still CONNECTING (matching the
 report) and stop-then-immediately-restart.
+
+**Update — "shows Tłumaczę, but nothing is audible."** The app owner
+suspected something had been accidentally deleted and asked for the code
+to be checked again against the same GitHub examples repo referenced
+earlier. Re-checked it directly — but this particular symptom turned out
+to be an Android-specific audio-session detail that doesn't show up in
+that repo's Python/JS examples at all (they're not Android, so they never
+touch `AudioManager.mode`), and traces back to this project's OWN earlier
+fix, not a deletion: the echo-cancellation fix (see above) switched
+capture to `MediaRecorder.AudioSource.VOICE_COMMUNICATION`, which pairs
+with `AudioAttributes.USAGE_VOICE_COMMUNICATION` (already used for
+playback) as a matched set on every VoIP-style app — but that fix never
+added the third piece of the same set: telling `AudioManager` itself that
+a communication session is active via `audioManager.mode =
+AudioManager.MODE_IN_COMMUNICATION`. Without it, some devices still
+capture fine (the VOICE_COMMUNICATION source alone can still engage AEC)
+but route or attenuate `USAGE_VOICE_COMMUNICATION` *playback* incorrectly
+— `AudioTrack.write()` succeeds, the status label correctly flips to
+"Tłumaczę" (a real `AudioChunk` event did arrive), but the actual output
+is inaudible or near-silent, which is exactly the report.
+
+Fixed in both `LiveTranslationService.beginCapturePlayback` /
+`ConversationTabController.beginCapturePlayback` (sets
+`MODE_IN_COMMUNICATION`) and their `stopCapturePlayback`/`stopSession`
+counterparts (resets to `MODE_NORMAL`) — the standard paired
+acquire/release every VoIP app does around a call-like session, so this
+app is never the reason a phone gets stuck in communication audio mode
+after the session ends. `ConversationTabController` didn't have an
+`AudioManager` reference yet; added one the same way
+`LiveTranslationService` already had it. No new permission needed. Not
+unit-testable here — audio routing/attenuation behavior is real hardware
+behavior that varies by device, so this needs an on-device retest to
+confirm audio is actually audible now, on the same device/route (speaker)
+that reproduced the silent report.

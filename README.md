@@ -2428,3 +2428,46 @@ catch (both require an actual device/network, not just a compiler):
 
 A fresh CI run plus another on-device Na żywo + Tłumacz test are still
 needed to confirm both fixes hold in practice.
+
+**Update — Na żywo still stuck at "Łączenie" after the WAKE_LOCK fix:**
+the crash-on-start was fixed by the WAKE_LOCK permission above, but the app
+owner reported the session then just hangs on "Łączenie" (connecting)
+forever and never completes. That pointed at the Live WebSocket `setup`
+message itself, which this project's own doc comment had already flagged
+as unverified (no live network access in this sandbox to test it against).
+Checked this time against Google's current official `live-translate` doc
+page *and* a real-world Gemini API forum field report from another
+developer building against this same preview model (the two didn't fully
+agree with each other, so both were needed):
+
+1. `GeminiLiveClient.buildSetupMessage()` never sent
+   `generationConfig.responseModalities: ["AUDIO"]` at all. Every official
+   example includes it; without it the server has no documented reason to
+   ever send back `setupComplete`, which is exactly "stuck connecting
+   forever, no error" — the socket stays open, `setup` was sent, but
+   nothing comes back to move the session out of the CONNECTING state.
+   Fixed by adding it.
+2. `inputAudioTranscription` / `outputAudioTranscription` were already
+   correctly placed at the top level of `setup` in this codebase (not
+   nested inside `generationConfig`) — which matches a field report from
+   another developer describing the *opposite* placement (matching
+   Google's own doc example) being rejected with a WebSocket close 1007
+   ("Unknown name inputAudioTranscription at setup.generation_config").
+   Left as-is; now cited.
+3. `GeminiLiveClient.buildRealtimeAudioMessage()` sent
+   `realtimeInput.mediaChunks: [{mimeType, data}]` (an array) — the
+   documented current shape for this model is `realtimeInput.audio`
+   (a single `{data, mimeType}` object). This wouldn't have caused the
+   connecting hang itself (setup happens first), but would have broken
+   audio streaming immediately after a successful connection, so it's
+   fixed as part of the same pass rather than left for a second bug
+   report. Fixed.
+
+`buildSetupMessage`/`buildRealtimeAudioMessage` were made `internal` and
+four new tests added to `GeminiLiveClientTest` asserting the exact request
+shape, the same pattern already used for `GeminiClient`'s response
+parsing — this class had already shipped one real, user-hit bug in this
+exact area, so its request-building is no longer left untested. Still not
+verified end-to-end against a real Live session (still no Android SDK or
+live network access in this sandbox) — needs another on-device Na żywo
+test.

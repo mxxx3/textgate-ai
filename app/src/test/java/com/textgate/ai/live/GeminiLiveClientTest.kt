@@ -90,4 +90,49 @@ class GeminiLiveClientTest {
         val events = client.parseServerMessage("""{"somethingElseEntirely":true}""")
         assertTrue(events.isEmpty())
     }
+
+    // --- buildSetupMessage / buildRealtimeAudioMessage: regression coverage
+    // for the real, user-hit "stuck at Łączenie forever" bug — a missing
+    // responseModalities field and a wrong realtimeInput shape. See
+    // GeminiLiveClient's own IMPLEMENTATION NOTE for the full story. ---
+
+    @Test
+    fun `setup message requests AUDIO response modality`() {
+        val setup = client.buildSetupMessage("gemini-3.5-live-translate-preview", "pl")
+            .getJSONObject("setup")
+        val modalities = setup.getJSONObject("generationConfig").getJSONArray("responseModalities")
+        assertEquals(1, modalities.length())
+        assertEquals("AUDIO", modalities.getString(0))
+    }
+
+    @Test
+    fun `setup message keeps transcription config at the top level, not nested in generationConfig`() {
+        val setup = client.buildSetupMessage("gemini-3.5-live-translate-preview", "pl")
+            .getJSONObject("setup")
+        assertTrue(setup.has("inputAudioTranscription"))
+        assertTrue(setup.has("outputAudioTranscription"))
+        assertTrue(setup.getJSONObject("generationConfig").has("responseModalities"))
+        assertTrue(!setup.getJSONObject("generationConfig").has("inputAudioTranscription"))
+        assertTrue(!setup.getJSONObject("generationConfig").has("outputAudioTranscription"))
+    }
+
+    @Test
+    fun `setup message carries the model path and target language`() {
+        val setup = client.buildSetupMessage("gemini-3.5-live-translate-preview", "pl")
+            .getJSONObject("setup")
+        assertEquals("models/gemini-3.5-live-translate-preview", setup.getString("model"))
+        assertEquals("pl", setup.getJSONObject("translationConfig").getString("targetLanguageCode"))
+    }
+
+    @Test
+    fun `realtime audio message uses a single audio object, not a mediaChunks array`() {
+        val pcmBytes = byteArrayOf(9, 8, 7, 6)
+        val message = client.buildRealtimeAudioMessage(pcmBytes).getJSONObject("realtimeInput")
+        assertTrue(message.has("audio"))
+        assertTrue(!message.has("mediaChunks"))
+        val audio = message.getJSONObject("audio")
+        assertEquals("audio/pcm;rate=16000", audio.getString("mimeType"))
+        val decoded = Base64.decode(audio.getString("data"), Base64.NO_WRAP)
+        assertTrue(decoded.contentEquals(pcmBytes))
+    }
 }

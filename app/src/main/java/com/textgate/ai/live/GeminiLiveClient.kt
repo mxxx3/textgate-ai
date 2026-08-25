@@ -24,19 +24,40 @@ import java.util.concurrent.TimeUnit
  * [LiveTranslationService] (and, for the foreground-only Rozmowa screen,
  * its own controller) to surface as a clear message — exactly as required.
  *
- * IMPLEMENTATION NOTE — Gemini Live API wire format: this project's sandbox
+ * IMPLEMENTATION NOTE - Gemini Live API wire format: this project's sandbox
  * has no network access to a live Gemini endpoint and no Android
- * compiler/emulator, so the exact JSON message shapes below (`setup` /
- * `realtimeInput` / `serverContent`) are built from the field names the app
- * owner specified directly (`inputAudioTranscription`,
- * `outputAudioTranscription`, `translationConfig`, `targetLanguageCode`)
- * plus this project's best understanding of the general BidiGenerateContent
- * WebSocket protocol shape. BEFORE SHIPPING: verify every message shape
- * below against Google's current Gemini Live API reference (a preview API,
- * more likely than a stable one to have changed field names since) using a
- * real device and a real API key, and adjust ONLY the private
- * buildX/parseX functions in this file if anything differs — nothing
- * outside this file needs to know the wire format, by design.
+ * compiler/emulator, so this can never be end-to-end verified here; it has
+ * now been checked, though, against Google's current official
+ * "live-translate" doc page AND a real-world Gemini API forum field report
+ * from another developer hitting this exact model, and corrected where the
+ * two disagreed:
+ *
+ * - setup.generationConfig.responseModalities: ["AUDIO"] was MISSING
+ *   entirely before this fix - every official example includes it, and its
+ *   absence is the confirmed, documented cause of a Live session that opens
+ *   the socket, sends setup, and then never receives setupComplete - i.e.
+ *   exactly "stuck on Laczenie forever" with no error surfaced, since the
+ *   server has no way to tell the client what went wrong about a field
+ *   that was never sent at all. Added.
+ * - inputAudioTranscription / outputAudioTranscription are kept at the TOP
+ *   LEVEL of setup (siblings of generationConfig), NOT nested inside
+ *   generationConfig as the official doc's own example shows - a field
+ *   report from another developer building against this same preview
+ *   model documents that nesting them inside generationConfig is rejected
+ *   outright (WebSocket close 1007, "Unknown name inputAudioTranscription
+ *   at setup.generation_config"), and top-level placement is what the API
+ *   actually accepts. This was already how this file had it; left
+ *   unchanged, now with a citation.
+ * - realtimeInput.mediaChunks: [...] (an array) was WRONG - the
+ *   documented, current shape for this model is realtimeInput.audio (a
+ *   single object: {data, mimeType}), not an array of chunks under
+ *   mediaChunks. Fixed in [buildRealtimeAudioMessage].
+ *
+ * If a future server response still hangs at setup after this fix, check
+ * first whether Google has since changed this preview model's schema again
+ * (preview APIs are the most likely to move) before assuming a different
+ * bug. Nothing outside this file needs to know the wire format, by design -
+ * adjust only the private buildX/parseX functions here if anything differs.
  *
  * Uses OkHttp for the WebSocket connection itself — see build.gradle.kts
  * for why this is the one deliberate, documented exception to this app's
@@ -162,20 +183,35 @@ class GeminiLiveClient {
         client = null
     }
 
-    private fun buildSetupMessage(model: String, targetLanguageCode: String): JSONObject {
+    /** `internal` (not `private`) solely so [GeminiLiveClientTest] can
+     * assert on the exact request shape directly — the same reasoning as
+     * [parseServerMessage], applied to construction instead of parsing,
+     * specifically because this class has already shipped one real,
+     * user-hit bug in this exact shape (see the IMPLEMENTATION NOTE). */
+    internal fun buildSetupMessage(model: String, targetLanguageCode: String): JSONObject {
+        // responseModalities tells the server this session wants audio back
+        // (not text) — see this class's IMPLEMENTATION NOTE: omitting it
+        // entirely was the confirmed cause of a setup that is sent but never
+        // answered with setupComplete.
+        val generationConfig = JSONObject()
+            .put("responseModalities", JSONArray().put("AUDIO"))
         val setup = JSONObject()
             .put("model", "models/$model")
+            .put("generationConfig", generationConfig)
             .put("inputAudioTranscription", JSONObject())
             .put("outputAudioTranscription", JSONObject())
             .put("translationConfig", JSONObject().put("targetLanguageCode", targetLanguageCode))
         return JSONObject().put("setup", setup)
     }
 
-    private fun buildRealtimeAudioMessage(pcm16: ByteArray): JSONObject {
-        val chunk = JSONObject()
-            .put("mimeType", "audio/pcm;rate=16000")
+    /** `internal` for the same reason as [buildSetupMessage]. */
+    internal fun buildRealtimeAudioMessage(pcm16: ByteArray): JSONObject {
+        // realtimeInput.audio is a single {data, mimeType} object, not an
+        // array — see this class's IMPLEMENTATION NOTE.
+        val audio = JSONObject()
             .put("data", Base64.encodeToString(pcm16, Base64.NO_WRAP))
-        val realtimeInput = JSONObject().put("mediaChunks", JSONArray().put(chunk))
+            .put("mimeType", "audio/pcm;rate=16000")
+        val realtimeInput = JSONObject().put("audio", audio)
         return JSONObject().put("realtimeInput", realtimeInput)
     }
 

@@ -7,6 +7,7 @@ import android.media.AudioFormat
 import android.media.AudioRecord
 import android.media.AudioTrack
 import android.media.MediaRecorder
+import android.media.audiofx.AcousticEchoCanceler
 import android.widget.ArrayAdapter
 import android.widget.Toast
 import com.textgate.ai.MainActivity
@@ -247,7 +248,17 @@ class ConversationTabController(
     private fun runCaptureLoop(bufferSize: Int) {
         val record = try {
             AudioRecord(
-                MediaRecorder.AudioSource.MIC,
+                // VOICE_COMMUNICATION, not MIC — see LiveTranslationService's
+                // own runCaptureLoop for the full reasoning: this screen
+                // plays translated audio out loud while simultaneously
+                // capturing, and AudioSource.MIC has no echo handling, so on
+                // a speaker (no headset) the mic hears the phone's own
+                // translated output and sends it back as "new speech" —
+                // a real, reported bug ("hears one sentence, then loops").
+                // VOICE_COMMUNICATION routes through the platform's
+                // telephony audio pipeline, which applies acoustic echo
+                // cancellation (AEC) where the device supports it.
+                MediaRecorder.AudioSource.VOICE_COMMUNICATION,
                 CAPTURE_SAMPLE_RATE_HZ,
                 AudioFormat.CHANNEL_IN_MONO,
                 AudioFormat.ENCODING_PCM_16BIT,
@@ -259,6 +270,18 @@ class ConversationTabController(
         if (record.state != AudioRecord.STATE_INITIALIZED) {
             record.release()
             return
+        }
+        // Explicit AEC on top of the VOICE_COMMUNICATION source — see
+        // LiveTranslationService's runCaptureLoop for why this is kept as a
+        // best-effort, never-fatal addition rather than relied on alone.
+        val echoCanceler = try {
+            if (AcousticEchoCanceler.isAvailable()) {
+                AcousticEchoCanceler.create(record.audioSessionId)?.also { it.enabled = true }
+            } else {
+                null
+            }
+        } catch (_: Exception) {
+            null
         }
         try {
             record.startRecording()
@@ -273,6 +296,7 @@ class ConversationTabController(
         } catch (_: Exception) {
             // Capture loop winding down — nothing further to do.
         } finally {
+            try { echoCanceler?.release() } catch (_: Exception) { }
             try { record.stop() } catch (_: Exception) { }
             record.release()
         }

@@ -2570,3 +2570,46 @@ nested correctly, and the existing "carries the model path and target
 language" test was updated to check the new nesting. Still not verified
 end-to-end on a real device — that on-device retest, with the diagnostic
 error message this update also added, is the next step.
+
+**Update — connection now works; new report: "hears one sentence, then
+loops."** The app owner retested and Na żywo/Rozmowa now connect and
+translate. The new symptom — it translates one real sentence correctly,
+then appears to keep re-translating "that" indefinitely — is a different
+class of bug: an acoustic feedback loop, not a protocol bug. Both capture
+loops (`LiveTranslationService.runCaptureLoop` and
+`ConversationTabController.runCaptureLoop`) opened their `AudioRecord` with
+`MediaRecorder.AudioSource.MIC` — a plain capture path with no echo
+handling — while simultaneously playing translated audio out loud through
+an `AudioTrack` on the same device, tested specifically on the phone's
+loudspeaker (confirmed by the app owner earlier: "testuje na glosniku nie
+sluchawkach"). Without echo cancellation, the microphone picks up the
+phone's own translated output, sends that back to Gemini as if it were new
+speech, and Gemini translates its own prior output again — a
+self-sustaining loop that presents exactly as "hears something once, then
+repeats it forever," even though nothing is actually stuck; the client is
+faithfully capturing and sending real (if unwanted) audio every time.
+
+Fixed in both files by switching the `AudioRecord` source from
+`MediaRecorder.AudioSource.MIC` to `MediaRecorder.AudioSource.VOICE_COMMUNICATION`
+— the source Android's own telephony/video-call apps use specifically
+because it routes capture through the platform's audio pipeline, which
+applies acoustic echo cancellation (AEC) where the device supports it, and
+is the correct choice any time an app plays audio and records audio on the
+same device at the same time (exactly this app's situation). As a second,
+defense-in-depth layer — `VOICE_COMMUNICATION` alone isn't guaranteed
+effective on every OEM audio stack — both capture loops now also attach an
+explicit `android.media.audiofx.AcousticEchoCanceler` to the `AudioRecord`
+session when `AcousticEchoCanceler.isAvailable()` reports the device
+supports it, released alongside the `AudioRecord` in each loop's cleanup.
+Both additions are best-effort and non-fatal: if AEC isn't available on a
+given device, capture still proceeds without it rather than failing the
+session, same as before this fix.
+
+No manifest change was needed — `VOICE_COMMUNICATION` uses the same
+`RECORD_AUDIO` permission already declared and requested, just a different
+Android audio-source constant. Not unit-tested (this is real
+`AudioRecord`/hardware behavior, which this project's own "what could not
+be verified" notes above already flag as needing a real device — Robolectric
+has no meaningful way to simulate acoustic echo cancellation); needs
+another on-device test, on the loudspeaker specifically since that's the
+condition that reproduced this.

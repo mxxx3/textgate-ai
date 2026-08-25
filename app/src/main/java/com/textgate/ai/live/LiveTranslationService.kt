@@ -14,6 +14,7 @@ import android.media.AudioManager
 import android.media.AudioRecord
 import android.media.AudioTrack
 import android.media.MediaRecorder
+import android.media.audiofx.AcousticEchoCanceler
 import android.os.Binder
 import android.os.Build
 import android.os.Handler
@@ -348,7 +349,24 @@ class LiveTranslationService : Service() {
     private fun runCaptureLoop(bufferSize: Int) {
         val record = try {
             AudioRecord(
-                MediaRecorder.AudioSource.MIC,
+                // VOICE_COMMUNICATION, not MIC: this session plays translated
+                // audio out loud (speaker, per playbackTrack's own
+                // USAGE_VOICE_COMMUNICATION above) WHILE simultaneously
+                // capturing — exactly the "phone call" scenario Android's
+                // audio source enum exists to distinguish. AudioSource.MIC
+                // is a raw capture path with no echo handling, so on a
+                // speaker (no headset) the mic keeps hearing the phone's own
+                // translated output, sends it back to Gemini as new "speech",
+                // and Gemini translates its own prior output again — a
+                // self-sustaining loop that looks like "hears one sentence,
+                // then repeats it forever" (a real report from this app's
+                // own speaker testing). VOICE_COMMUNICATION routes capture
+                // through the platform's telephony audio pipeline, which
+                // applies acoustic echo cancellation (AEC) when the device
+                // supports it. See [echoCanceler] below for the explicit,
+                // defense-in-depth AEC attachment on top of this — some
+                // devices' VOICE_COMMUNICATION source alone isn't enough.
+                MediaRecorder.AudioSource.VOICE_COMMUNICATION,
                 CAPTURE_SAMPLE_RATE_HZ,
                 AudioFormat.CHANNEL_IN_MONO,
                 AudioFormat.ENCODING_PCM_16BIT,
@@ -363,6 +381,21 @@ class LiveTranslationService : Service() {
             record.release()
             mainHandler.post { handleDisconnect() }
             return
+        }
+
+        // Explicit AEC on top of the VOICE_COMMUNICATION source (see above)
+        // — belt-and-braces, since not every device's VOICE_COMMUNICATION
+        // path includes effective echo cancellation on its own, but
+        // AcousticEchoCanceler.isAvailable() is itself unreliable on some
+        // OEM builds, so this is best-effort and never fatal to the session.
+        val echoCanceler = try {
+            if (AcousticEchoCanceler.isAvailable()) {
+                AcousticEchoCanceler.create(record.audioSessionId)?.also { it.enabled = true }
+            } else {
+                null
+            }
+        } catch (_: Exception) {
+            null
         }
 
         try {
@@ -382,6 +415,11 @@ class LiveTranslationService : Service() {
             // here to avoid double-triggering reconnect logic from a
             // thread that is simply winding down after stopCapturePlayback().
         } finally {
+            try {
+                echoCanceler?.release()
+            } catch (_: Exception) {
+                // Best-effort cleanup only.
+            }
             try {
                 record.stop()
             } catch (_: Exception) {

@@ -2392,3 +2392,39 @@ feedback and known-real bugs from that feedback are fixed. A fresh CI run
 is still needed to confirm this exact fix set goes fully green end to end
 (lint fully clean, all 87 unit tests passing, debug APK produced) before
 this is treated as release-ready.
+
+**Update — real on-device feedback (still versionCode 26 / "2.0.0"):**
+CI later went green and the app owner installed and tested the debug APK
+on their own phone, surfacing two real runtime bugs a green CI run cannot
+catch (both require an actual device/network, not just a compiler):
+
+1. **Na żywo crashed immediately after granting the microphone and
+   notification permissions, and could never be started again afterward.**
+   Root cause: `AndroidManifest.xml` never declared
+   `android.permission.WAKE_LOCK`. `LiveTranslationService.acquireWakeLock()`
+   calls `PowerManager.WakeLock.acquire()` right after a session starts,
+   and without that manifest permission that call throws
+   `SecurityException` — deterministically, on every attempt, which is
+   exactly the "crashes, and now I can never turn it on" symptom reported
+   (it's not corrupted state; it's the same guaranteed crash every time).
+   Fixed by declaring the permission (it's install-time-granted, so this
+   adds no new runtime prompt).
+2. **The Tłumacz tab's "Testuj połączenie z API" showed "Gemini zwrócił
+   błąd (kod 400). Request contains an invalid argument." for model
+   `gemini-3.5-flash-lite`.** Root cause: `GeminiClient.buildRequestBody()`
+   sent `generationConfig.thinkingConfig.thinkingBudget: 0` for this
+   model. That field/shape is correct for the older Gemini 2.5 generation,
+   but Gemini 3.x models (this one included) replaced it with a string
+   `thinkingConfig.thinkingLevel` field (`"minimal"`/`"low"`/`"medium"`/
+   `"high"`) — the two fields are mutually exclusive, and sending the
+   wrong one is itself rejected with exactly this 400. Confirmed against
+   Google's current API docs and changelog (not guessed) before fixing;
+   fixed by sending `thinkingLevel: "minimal"` instead for this model. No
+   other model is affected by this code path — every other model already
+   sent no `thinkingConfig` at all. (`gemini-3.5-live-translate-preview`,
+   the separate model used by Na żywo, was independently confirmed to
+   still be the correct, current model id for real-time speech-to-speech
+   translation — that was never the problem.)
+
+A fresh CI run plus another on-device Na żywo + Tłumacz test are still
+needed to confirm both fixes hold in practice.

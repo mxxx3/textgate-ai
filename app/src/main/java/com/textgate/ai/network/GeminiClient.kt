@@ -47,11 +47,23 @@ object GeminiClient {
      * rather than a prefix/substring, so a possible future
      * "gemini-3.5-flash-lite-8b"-style variant is not silently swept in
      * without a deliberate decision. Left unset for every other model:
-     * different model families expose different thinking-budget
-     * ranges/defaults/requirements, and guessing a value for a model this
+     * different model families expose different thinking-config
+     * shapes/defaults/requirements, and guessing a value for a model this
      * app doesn't specifically know about risks a rejected request rather
-     * than a faster one. */
-    private const val LOW_THINKING_BUDGET_MODEL = "gemini-3.5-flash-lite"
+     * than a faster one.
+     *
+     * IMPORTANT — field shape, not just value: this is a Gemini 3.x
+     * model, and the 3.x generation replaced the numeric
+     * `thinkingConfig.thinkingBudget` field (still used by Gemini 2.5
+     * models) with a string `thinkingConfig.thinkingLevel` field
+     * ("minimal" | "low" | "medium" | "high"). The two fields are
+     * mutually exclusive — sending `thinkingBudget` to a 3.x model (or
+     * `thinkingLevel` to a 2.5 model) is itself rejected with a 400
+     * INVALID_ARGUMENT ("Request contains an invalid argument"), which is
+     * exactly the failure this app's real users hit in production before
+     * this fix: `thinkingBudget: 0` was being sent to gemini-3.5-flash-lite,
+     * which only understands `thinkingLevel`. See [buildRequestBody]. */
+    private const val MINIMAL_THINKING_MODEL = "gemini-3.5-flash-lite"
 
     /** Conservative allow-list for a Gemini model id: letters, digits, dot,
      * dash, underscore only. Rejects anything else before it is ever used
@@ -224,15 +236,18 @@ object GeminiClient {
         val generationConfig = JSONObject()
             .put("temperature", 0.2)
 
-        // See LOW_THINKING_BUDGET_MODEL's doc comment: a plain translation
+        // See MINIMAL_THINKING_MODEL's doc comment: a plain translation
         // gains nothing from "thinking" tokens, so explicitly request the
-        // lowest available budget (0) for the one model this app knows
-        // supports that field. Every other model is left exactly as
-        // before — no generationConfig.thinkingConfig key at all — so this
-        // is purely additive and cannot change behavior for any model
-        // other than the default.
-        if (model.equals(LOW_THINKING_BUDGET_MODEL, ignoreCase = true)) {
-            generationConfig.put("thinkingConfig", JSONObject().put("thinkingBudget", 0))
+        // lowest thinking level for the one model this app knows supports
+        // that field — using the field name that model's generation
+        // actually accepts (`thinkingLevel`, a string; NOT `thinkingBudget`,
+        // the numeric field the older Gemini 2.5 generation used, which
+        // this model rejects outright with a 400). Every other model is
+        // left exactly as before — no generationConfig.thinkingConfig key
+        // at all — so this is purely additive and cannot change behavior
+        // for any model other than the default.
+        if (model.equals(MINIMAL_THINKING_MODEL, ignoreCase = true)) {
+            generationConfig.put("thinkingConfig", JSONObject().put("thinkingLevel", "minimal"))
         }
 
         return JSONObject()

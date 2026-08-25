@@ -14,6 +14,12 @@
     <string name="bubble_language_label">Ngôn ngữ ứng dụng và bản dịch</string>
     <string name="bubble_language_description">Chọn ngôn ngữ của bạn một lần tại đây. Ngôn ngữ này sẽ đặt làm ngôn ngữ mặc định cho bong bóng dịch khi nhấn giữ VÀ ngôn ngữ hiển thị các màn hình của chính TextGate AI — cả hai sẽ thay đổi cùng nhau.</string>
 
+    <string name="label_user_gender">Giới tính của bạn</string>
+    <string name="user_gender_description">Chỉ được dùng khi dịch những tin nhắn CHÍNH BẠN gõ bằng lệnh kích hoạt như ?en hoặc ?de, để các động từ và tính từ chỉ về bạn được thể hiện chính xác trong những ngôn ngữ cần điều đó. Không bao giờ áp dụng cho tin nhắn bạn nhận và dịch bằng cách nhấn giữ — những tin nhắn đó do người khác viết.</string>
+    <string name="label_gender_auto">Tự động / không xác định</string>
+    <string name="label_gender_male">Nam</string>
+    <string name="label_gender_female">Nữ</string>
+
     <string name="section_accessibility_status">Dịch vụ Hỗ trợ tiếp cận</string>
     <string name="accessibility_status_enabled">Đã bật</string>
     <string name="accessibility_status_disabled">Chưa bật — TextGate AI không thể làm gì cho đến khi bạn bật dịch vụ này</string>
@@ -36,6 +42,17 @@
     <string name="btn_clear_api_key">Xóa khóa đã lưu</string>
     <string name="api_key_status_present">Đã lưu một khóa (được mã hóa). Khóa này sẽ không bao giờ hiển thị lại trên màn hình.</string>
     <string name="api_key_status_absent">Chưa có khóa nào được lưu</string>
+
+    <string name="label_saved_api_keys">Khóa API đã lưu</string>
+    <string name="api_keys_multi_description">Bạn có thể lưu nhiều hơn một khóa API Gemini miễn phí. Khi khóa đang dùng hết hạn mức miễn phí hằng tháng, ứng dụng sẽ tự động chuyển sang khóa đã lưu tiếp theo — không gián đoạn, bạn không cần làm gì cả.</string>
+    <string name="label_add_api_key">Thêm khóa khác</string>
+    <string name="btn_add_api_key">Thêm khóa</string>
+    <string name="btn_remove_api_key">Xóa</string>
+    <string name="api_keys_empty">Chưa có khóa nào được lưu. Thêm một khóa bên dưới để bật tính năng dịch.</string>
+    <string name="api_key_status_format">Đã lưu %1$d khóa. Đang dùng: •••• %2$s</string>
+    <string name="api_key_row_label">•••• %1$s</string>
+    <string name="api_key_row_label_active">•••• %1$s  ·  đang dùng</string>
+    <string name="error_all_keys_exhausted">Tất cả khóa bạn đã lưu đều đã đạt giới hạn miễn phí hôm nay. Hãy thêm khóa khác, hoặc chờ hạn mức được làm mới.</string>
 
     <string name="label_model">Mô hình Gemini</string>
     <string name="hint_model">ví dụ: gemini-3.5-flash-lite</string>

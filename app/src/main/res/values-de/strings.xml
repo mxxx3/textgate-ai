@@ -14,6 +14,12 @@
     <string name="bubble_language_label">App- und Übersetzungssprache</string>
     <string name="bubble_language_description">Wählen Sie hier einmal Ihre Sprache. Sie legt sowohl die Standardsprache für die Übersetzungsblase beim langen Drücken als auch die Sprache fest, in der die eigenen Bildschirme von TextGate AI angezeigt werden — beides ändert sich gemeinsam.</string>
 
+    <string name="label_user_gender">Ihr Geschlecht</string>
+    <string name="user_gender_description">Wird nur verwendet, wenn Nachrichten übersetzt werden, die SIE selbst mit einem Auslöser wie ?en oder ?de eingeben, damit sich auf Sie beziehende Verben und Adjektive in Sprachen, die dies erfordern, korrekt wiedergegeben werden. Wird nie auf Nachrichten angewendet, die Sie empfangen und per langem Drücken übersetzen — diese hat jemand anderes geschrieben.</string>
+    <string name="label_gender_auto">Automatisch / nicht angegeben</string>
+    <string name="label_gender_male">Männlich</string>
+    <string name="label_gender_female">Weiblich</string>
+
     <string name="section_accessibility_status">Bedienungshilfen-Dienst</string>
     <string name="accessibility_status_enabled">Aktiviert</string>
     <string name="accessibility_status_disabled">Nicht aktiviert — TextGate AI kann nichts tun, bis Sie den Dienst aktivieren</string>
@@ -37,6 +43,17 @@
     <string name="btn_clear_api_key">Gespeicherten Schlüssel entfernen</string>
     <string name="api_key_status_present">Ein Schlüssel ist gespeichert (verschlüsselt). Er wird nie wieder auf dem Bildschirm angezeigt.</string>
     <string name="api_key_status_absent">Noch kein Schlüssel gespeichert</string>
+
+    <string name="label_saved_api_keys">Gespeicherte API-Schlüssel</string>
+    <string name="api_keys_multi_description">Sie können mehr als einen kostenlosen Gemini-API-Schlüssel speichern. Wenn der aktive Schlüssel sein monatliches Freikontingent aufbraucht, wechselt die App automatisch zum nächsten gespeicherten Schlüssel — ohne Unterbrechung und ohne dass Sie etwas tun müssen.</string>
+    <string name="label_add_api_key">Weiteren Schlüssel hinzufügen</string>
+    <string name="btn_add_api_key">Schlüssel hinzufügen</string>
+    <string name="btn_remove_api_key">Entfernen</string>
+    <string name="api_keys_empty">Noch kein Schlüssel gespeichert. Fügen Sie unten einen hinzu, um die Übersetzung zu aktivieren.</string>
+    <string name="api_key_status_format">%1$d Schlüssel gespeichert. Aktiv: •••• %2$s</string>
+    <string name="api_key_row_label">•••• %1$s</string>
+    <string name="api_key_row_label_active">•••• %1$s  ·  aktiv</string>
+    <string name="error_all_keys_exhausted">Alle Ihre gespeicherten Schlüssel haben das heutige kostenlose Limit erreicht. Fügen Sie einen weiteren Schlüssel hinzu oder warten Sie, bis sich das Kontingent zurücksetzt.</string>
 
     <string name="label_model">Gemini-Modell</string>
     <string name="hint_model">z. B. gemini-3.5-flash-lite</string>

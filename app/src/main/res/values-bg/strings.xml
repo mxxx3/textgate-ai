@@ -14,6 +14,12 @@
     <string name="bubble_language_label">Език на приложението и превода</string>
     <string name="bubble_language_description">Изберете езика си веднъж тук. Той задава езика по подразбиране за плаващия балон за превод при задържане И езика, на който се показват собствените екрани на TextGate AI — двете се променят заедно.</string>
 
+    <string name="label_user_gender">Вашият пол</string>
+    <string name="user_gender_description">Използва се само при превод на съобщения, които ВИЕ пишете с тригер като ?en или ?de, за да звучат правилно глаголите и прилагателните, отнасящи се до вас, в езиците, които изискват това. Никога не се прилага към съобщения, които получавате и превеждате чрез задържане — те са написани от друг човек.</string>
+    <string name="label_gender_auto">Автоматично / неопределено</string>
+    <string name="label_gender_male">Мъж</string>
+    <string name="label_gender_female">Жена</string>
+
     <string name="section_accessibility_status">Услуга за достъпност</string>
     <string name="accessibility_status_enabled">Включена</string>
     <string name="accessibility_status_disabled">Не е включена — TextGate AI не може да направи нищо, докато не я включите</string>
@@ -36,6 +42,17 @@
     <string name="btn_clear_api_key">Премахване на запазения ключ</string>
     <string name="api_key_status_present">Запазен е ключ (шифрован). Той никога повече не се показва на екрана.</string>
     <string name="api_key_status_absent">Все още няма запазен ключ</string>
+
+    <string name="label_saved_api_keys">Запазени API ключове</string>
+    <string name="api_keys_multi_description">Можете да запазите повече от един безплатен API ключ за Gemini. Ако активният ключ изчерпи месечната си безплатна квота, приложението автоматично превключва към следващия запазен ключ — без прекъсване и без никакви действия от ваша страна.</string>
+    <string name="label_add_api_key">Добавяне на друг ключ</string>
+    <string name="btn_add_api_key">Добавяне на ключ</string>
+    <string name="btn_remove_api_key">Премахване</string>
+    <string name="api_keys_empty">Все още няма запазени ключове. Добавете такъв по-долу, за да активирате превода.</string>
+    <string name="api_key_status_format">Запазени ключове: %1$d. Активен: •••• %2$s</string>
+    <string name="api_key_row_label">•••• %1$s</string>
+    <string name="api_key_row_label_active">•••• %1$s  ·  активен</string>
+    <string name="error_all_keys_exhausted">Всички запазени ключове достигнаха днешния безплатен лимит. Добавете друг ключ или изчакайте нулиране на квотата.</string>
 
     <string name="label_model">Модел на Gemini</string>
     <string name="hint_model">напр. gemini-3.5-flash-lite</string>

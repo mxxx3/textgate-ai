@@ -14,6 +14,12 @@
     <string name="bubble_language_label">앱 및 번역 언어</string>
     <string name="bubble_language_description">여기서 언어를 한 번만 선택하세요. 길게 눌러 번역하는 말풍선의 기본 언어와 TextGate AI 자체 화면에 표시되는 언어가 함께 설정되며, 두 가지가 동시에 변경됩니다.</string>
 
+    <string name="label_user_gender">본인 성별</string>
+    <string name="user_gender_description">?en, ?de와 같은 트리거를 사용해 직접 입력한 메시지를 번역할 때만 사용되며, 이를 통해 문법상 성별 구분이 필요한 언어에서 본인을 가리키는 동사와 형용사가 올바르게 표현됩니다. 길게 눌러 번역하는, 다른 사람이 작성한 수신 메시지에는 전혀 적용되지 않습니다.</string>
+    <string name="label_gender_auto">자동 / 지정 안 함</string>
+    <string name="label_gender_male">남성</string>
+    <string name="label_gender_female">여성</string>
+
     <string name="section_accessibility_status">접근성 서비스</string>
     <string name="accessibility_status_enabled">사용 중</string>
     <string name="accessibility_status_disabled">사용 안 함 — 활성화하기 전까지 TextGate AI는 아무 작업도 할 수 없습니다</string>
@@ -37,6 +43,17 @@
     <string name="btn_clear_api_key">저장된 키 삭제</string>
     <string name="api_key_status_present">키가 저장되어 있습니다(암호화됨). 화면에 다시 표시되지 않습니다.</string>
     <string name="api_key_status_absent">저장된 키가 없습니다</string>
+
+    <string name="label_saved_api_keys">저장된 API 키</string>
+    <string name="api_keys_multi_description">무료 Gemini API 키를 여러 개 저장할 수 있습니다. 사용 중인 키가 월간 무료 할당량을 모두 사용하면 앱이 자동으로 다음에 저장된 키로 전환됩니다. 중단 없이, 별도 조작 없이 이루어집니다.</string>
+    <string name="label_add_api_key">다른 키 추가</string>
+    <string name="btn_add_api_key">키 추가</string>
+    <string name="btn_remove_api_key">삭제</string>
+    <string name="api_keys_empty">아직 저장된 키가 없습니다. 아래에서 키를 추가하면 번역을 사용할 수 있습니다.</string>
+    <string name="api_key_status_format">저장된 키: %1$d개. 활성 키: •••• %2$s</string>
+    <string name="api_key_row_label">•••• %1$s</string>
+    <string name="api_key_row_label_active">•••• %1$s  ·  활성</string>
+    <string name="error_all_keys_exhausted">저장된 모든 키가 오늘의 무료 한도에 도달했습니다. 다른 키를 추가하거나 한도가 초기화될 때까지 기다려 주세요.</string>
 
     <string name="label_model">Gemini 모델</string>
     <string name="hint_model">예: gemini-3.5-flash-lite</string>

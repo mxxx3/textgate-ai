@@ -14,6 +14,12 @@
     <string name="bubble_language_label">Lietotnes un tulkošanas valoda</string>
     <string name="bubble_language_description">Izvēlieties savu valodu šeit vienu reizi. Tā iestata noklusējuma valodu gan ilgas piespiešanas tulkošanas burbulim, gan valodu, kādā tiek rādīti paši TextGate AI ekrāni — abas mainās vienlaikus.</string>
 
+    <string name="label_user_gender">Jūsu dzimums</string>
+    <string name="user_gender_description">Tiek izmantots tikai tad, kad tulko ziņas, kuras JŪS rakstāt, izmantojot izraisītāju, piemēram, ?en vai ?de, lai darbības vārdi un īpašības vārdi, kas attiecas uz jums, būtu pareizi valodās, kurās tas nepieciešams. Nekad netiek piemērots ziņām, kuras saņemat un tulkojat ar ilgu piespiešanu — tās ir rakstījis kāds cits.</string>
+    <string name="label_gender_auto">Automātisks / nenorādīts</string>
+    <string name="label_gender_male">Vīrietis</string>
+    <string name="label_gender_female">Sieviete</string>
+
     <string name="section_accessibility_status">Pieejamības pakalpojums</string>
     <string name="accessibility_status_enabled">Iespējots</string>
     <string name="accessibility_status_disabled">Nav iespējots — TextGate AI nevar neko darīt, kamēr to neiespējosiet</string>
@@ -37,6 +43,17 @@
     <string name="btn_clear_api_key">Noņemt saglabāto atslēgu</string>
     <string name="api_key_status_present">Atslēga ir saglabāta (šifrēta). Tā vairs netiek rādīta ekrānā.</string>
     <string name="api_key_status_absent">Atslēga vēl nav saglabāta</string>
+
+    <string name="label_saved_api_keys">Saglabātās API atslēgas</string>
+    <string name="api_keys_multi_description">Varat saglabāt vairāk nekā vienu bezmaksas Gemini API atslēgu. Ja aktīvajai atslēgai beidzas ikmēneša bezmaksas kvota, lietotne automātiski pārslēdzas uz nākamo saglabāto atslēgu — bez pārtraukumiem un bez jebkādas rīcības no jūsu puses.</string>
+    <string name="label_add_api_key">Pievienot vēl vienu atslēgu</string>
+    <string name="btn_add_api_key">Pievienot atslēgu</string>
+    <string name="btn_remove_api_key">Noņemt</string>
+    <string name="api_keys_empty">Vēl nav saglabāta neviena atslēga. Pievienojiet to zemāk, lai iespējotu tulkošanu.</string>
+    <string name="api_key_status_format">Saglabātas atslēgas: %1$d. Aktīvā: •••• %2$s</string>
+    <string name="api_key_row_label">•••• %1$s</string>
+    <string name="api_key_row_label_active">•••• %1$s  ·  aktīva</string>
+    <string name="error_all_keys_exhausted">Visas jūsu saglabātās atslēgas ir sasniegušas šodienas bezmaksas limitu. Pievienojiet citu atslēgu vai gaidiet, kamēr limits atjaunosies.</string>
 
     <string name="label_model">Gemini modelis</string>
     <string name="hint_model">piem., gemini-3.5-flash-lite</string>

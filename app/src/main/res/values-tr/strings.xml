@@ -14,6 +14,12 @@
     <string name="bubble_language_label">Uygulama ve çeviri dili</string>
     <string name="bubble_language_description">Dilinizi burada bir kez seçin. Bu seçim hem uzun basma çeviri baloncuğunun varsayılan dilini hem de TextGate AI\'nin kendi ekranlarının görüntülendiği dili belirler — ikisi birlikte değişir.</string>
 
+    <string name="label_user_gender">Cinsiyetiniz</string>
+    <string name="user_gender_description">Yalnızca SİZİN ?en veya ?de gibi bir tetikleyiciyle yazdığınız mesajları çevirirken kullanılır; böylece sizi ifade eden fiil ve sıfatlar buna ihtiyaç duyan dillerde doğru çıkar. Uzun basarak aldığınız ve çevirdiğiniz mesajlara asla uygulanmaz — onları başka biri yazmıştır.</string>
+    <string name="label_gender_auto">Otomatik / belirtilmemiş</string>
+    <string name="label_gender_male">Erkek</string>
+    <string name="label_gender_female">Kadın</string>
+
     <string name="section_accessibility_status">Erişilebilirlik Hizmeti</string>
     <string name="accessibility_status_enabled">Etkin</string>
     <string name="accessibility_status_disabled">Etkin değil — siz etkinleştirene kadar TextGate AI hiçbir şey yapamaz</string>
@@ -36,6 +42,17 @@
     <string name="btn_clear_api_key">Kaydedilen anahtarı kaldır</string>
     <string name="api_key_status_present">Kaydedilmiş bir anahtar var (şifreli). Bu anahtar ekranda bir daha asla gösterilmez.</string>
     <string name="api_key_status_absent">Henüz kaydedilmiş bir anahtar yok</string>
+
+    <string name="label_saved_api_keys">Kaydedilmiş API anahtarları</string>
+    <string name="api_keys_multi_description">Birden fazla ücretsiz Gemini API anahtarı kaydedebilirsiniz. Etkin anahtarın aylık ücretsiz kotası dolduğunda uygulama otomatik olarak bir sonraki kayıtlı anahtara geçer — kesinti olmaz, sizin yapmanız gereken hiçbir şey yoktur.</string>
+    <string name="label_add_api_key">Başka bir anahtar ekle</string>
+    <string name="btn_add_api_key">Anahtar ekle</string>
+    <string name="btn_remove_api_key">Kaldır</string>
+    <string name="api_keys_empty">Henüz kaydedilmiş bir anahtar yok. Çeviriyi etkinleştirmek için aşağıdan bir tane ekleyin.</string>
+    <string name="api_key_status_format">%1$d anahtar kaydedildi. Etkin: •••• %2$s</string>
+    <string name="api_key_row_label">•••• %1$s</string>
+    <string name="api_key_row_label_active">•••• %1$s  ·  etkin</string>
+    <string name="error_all_keys_exhausted">Kaydedilmiş anahtarlarınızın tümü bugünkü ücretsiz sınıra ulaştı. Başka bir anahtar ekleyin ya da kotanın yenilenmesini bekleyin.</string>
 
     <string name="label_model">Gemini modeli</string>
     <string name="hint_model">örn. gemini-3.5-flash-lite</string>

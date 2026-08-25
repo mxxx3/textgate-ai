@@ -14,6 +14,12 @@
     <string name="bubble_language_label">App &amp; translation language</string>
     <string name="bubble_language_description">Choose your language once here. It sets the default language for the long-press translation bubble AND the language TextGate AI\'s own screens are shown in — both change together.</string>
 
+    <string name="label_user_gender">Your gender</string>
+    <string name="user_gender_description">Used only when translating messages YOU type with a trigger like ?en or ?de, so verbs and adjectives that refer to you come out correct in languages that need it. Never applied to messages you receive and translate by long-press — those were written by someone else.</string>
+    <string name="label_gender_auto">Automatic / unspecified</string>
+    <string name="label_gender_male">Male</string>
+    <string name="label_gender_female">Female</string>
+
     <string name="section_accessibility_status">Accessibility Service</string>
     <string name="accessibility_status_enabled">Enabled</string>
     <string name="accessibility_status_disabled">Not enabled — TextGate AI cannot do anything until you enable it</string>
@@ -42,6 +48,17 @@
     <string name="btn_clear_api_key">Remove saved key</string>
     <string name="api_key_status_present">A key is saved (encrypted). It is never shown again on screen.</string>
     <string name="api_key_status_absent">No key saved yet</string>
+
+    <string name="label_saved_api_keys">Saved API keys</string>
+    <string name="api_keys_multi_description">You can save more than one free Gemini API key. If the active key runs out of its monthly free quota, the app automatically switches to your next saved key — no interruption, nothing for you to do.</string>
+    <string name="label_add_api_key">Add another key</string>
+    <string name="btn_add_api_key">Add key</string>
+    <string name="btn_remove_api_key">Remove</string>
+    <string name="api_keys_empty">No keys saved yet. Add one below to enable translation.</string>
+    <string name="api_key_status_format">%1$d key(s) saved. Active: •••• %2$s</string>
+    <string name="api_key_row_label">•••• %1$s</string>
+    <string name="api_key_row_label_active">•••• %1$s  ·  active</string>
+    <string name="error_all_keys_exhausted">All your saved keys have hit today\'s free limit. Add another key, or wait for the quota to reset.</string>
 
     <string name="label_model">Gemini model</string>
     <string name="hint_model">e.g. gemini-3.5-flash-lite</string>
@@ -89,4 +106,81 @@
     <string name="error_network">Could not reach Gemini. Check your connection.</string>
     <string name="error_http">Gemini returned an error (code %1$d).</string>
     <string name="error_empty_response">Gemini returned an empty response.</string>
+    <string name="error_quota_exceeded">Gemini\'s request limit was reached. Retrying automatically.</string>
+
+    <!-- v2: bottom navigation -->
+    <string name="nav_tab_translate">Translate</string>
+    <string name="nav_tab_conversation">Conversation</string>
+    <string name="nav_tab_live">Live</string>
+    <string name="nav_tab_settings">Settings</string>
+
+    <!-- v2: shared -->
+    <string name="label_language_auto">Automatic</string>
+
+    <!-- v2: Tłumacz tab -->
+    <string name="translate_hint_source">Enter text to translate</string>
+    <string name="translate_hint_result">Translation</string>
+    <string name="translate_swap_content_description">Swap languages</string>
+    <string name="translate_swap_needs_source">Choose a specific source language first (not Automatic) to swap</string>
+    <string name="translate_mic_content_description">Dictate text</string>
+    <string name="translate_mic_unavailable">Speech recognition is not available on this device</string>
+    <string name="translate_clear_content_description">Clear text</string>
+    <string name="translate_copy_content_description">Copy translation</string>
+    <string name="translate_copied">Translation copied</string>
+    <string name="translate_speak_content_description">Play translation aloud</string>
+
+    <!-- v2: Rozmowa tab -->
+    <string name="conversation_swap_direction">Swap direction</string>
+    <string name="conversation_direction_format">%1$s → %2$s</string>
+    <string name="conversation_label_original">Original</string>
+    <string name="conversation_label_translation">Translation</string>
+    <string name="conversation_button_start">Start conversation</string>
+    <string name="conversation_button_stop">Stop conversation</string>
+
+    <!-- v2: Na żywo tab -->
+    <string name="live_label_ambient_language">Surrounding language</string>
+    <string name="live_target_language_format">Translating into: %1$s (change in Settings)</string>
+    <string name="live_current_device_format">Current audio device: %1$s</string>
+    <string name="live_device_speaker">Phone speaker</string>
+    <string name="live_device_wired">Wired headphones</string>
+    <string name="live_device_bluetooth">Bluetooth headset</string>
+    <string name="live_device_usb">USB audio</string>
+    <string name="live_headset_connected_hint">Translated audio will play through your connected headset.</string>
+    <string name="live_headset_missing_hint">No headset connected — connect one, or allow speaker playback in Settings, before starting.</string>
+    <string name="live_button_start">Start</string>
+    <string name="live_button_stop">Stop</string>
+    <string name="live_button_retry">Try again</string>
+    <string name="live_label_original_transcript">Original speech</string>
+    <string name="live_label_translation_transcript">Translation</string>
+    <string name="live_state_stopped">STOPPED</string>
+    <string name="live_state_connecting">CONNECTING</string>
+    <string name="live_state_listening">LISTENING</string>
+    <string name="live_state_translating">TRANSLATING</string>
+    <string name="live_state_reconnecting">RECONNECTING</string>
+    <string name="live_state_paused">PAUSED — headset disconnected</string>
+    <string name="live_state_error">ERROR</string>
+
+    <!-- v2: Na żywo persistent notification -->
+    <string name="live_notification_channel_name">Live translation</string>
+    <string name="live_notification_title">TextGate AI — Live translation</string>
+    <string name="live_notification_active_format">%1$s → %2$s • Listening</string>
+    <string name="live_notification_paused">Paused — headset disconnected</string>
+    <string name="live_notification_error">Error — tap to try again</string>
+    <string name="live_notification_stop_action">STOP</string>
+
+    <!-- v2: Settings reorganization group headers -->
+    <string name="settings_group_translation">Translation</string>
+    <string name="settings_group_audio_live">Audio &amp; Live</string>
+    <string name="settings_group_ai">AI</string>
+    <string name="settings_group_integrations">Integrations</string>
+    <string name="settings_group_privacy">Privacy</string>
+    <string name="settings_group_advanced">Advanced</string>
+    <string name="advanced_model_hint">The exact Gemini model used for translation can be changed manually in the AI section above.</string>
+
+    <!-- v2: headset-disconnect setting -->
+    <string name="section_headset_disconnect">When headphones disconnect</string>
+    <string name="headset_disconnect_description">What should happen to an active Na żywo (Live) session if your headset disconnects mid-session.</string>
+    <string name="label_headset_disconnect_pause">Pause translation (recommended)</string>
+    <string name="label_headset_disconnect_speaker">Switch to speaker</string>
+    <string name="live_settings_hint">Ambient language, target language, and START/STOP for a Live session are set on the Na żywo tab itself.</string>
 </resources>

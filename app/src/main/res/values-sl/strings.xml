@@ -14,6 +14,12 @@
     <string name="bubble_language_label">Jezik aplikacije &amp; prevoda</string>
     <string name="bubble_language_description">Tukaj enkrat izberite svoj jezik. Ta določa privzeti jezik za oblaček za prevajanje ob dolgem pritisku IN jezik, v katerem so prikazani zasloni same aplikacije TextGate AI — oba se spremenita skupaj.</string>
 
+    <string name="label_user_gender">Vaš spol</string>
+    <string name="user_gender_description">Uporabljeno samo pri prevajanju sporočil, ki jih VI napišete s sprožilcem, na primer ?en ali ?de, da so glagoli in pridevniki, ki se nanašajo na vas, pravilni v jezikih, ki to zahtevajo. Nikoli se ne uporablja za sporočila, ki jih prejmete in prevedete z dolgim pritiskom — ta je napisal nekdo drug.</string>
+    <string name="label_gender_auto">Samodejno / neopredeljeno</string>
+    <string name="label_gender_male">Moški</string>
+    <string name="label_gender_female">Ženska</string>
+
     <string name="section_accessibility_status">Storitev za osebe s posebnimi potrebami</string>
     <string name="accessibility_status_enabled">Omogočeno</string>
     <string name="accessibility_status_disabled">Ni omogočeno — TextGate AI ne more delovati, dokler je ne omogočite</string>
@@ -37,6 +43,17 @@
     <string name="btn_clear_api_key">Odstrani shranjeni ključ</string>
     <string name="api_key_status_present">Ključ je shranjen (šifrirano). Nikoli več ni prikazan na zaslonu.</string>
     <string name="api_key_status_absent">Še ni shranjenega ključa</string>
+
+    <string name="label_saved_api_keys">Shranjeni ključi API</string>
+    <string name="api_keys_multi_description">Shranite lahko več kot en brezplačen ključ API za Gemini. Ko aktivnemu ključu zmanjka mesečne brezplačne kvote, aplikacija samodejno preklopi na naslednji shranjeni ključ — brez prekinitve in brez kakršnegakoli ukrepanja z vaše strani.</string>
+    <string name="label_add_api_key">Dodaj še en ključ</string>
+    <string name="btn_add_api_key">Dodaj ključ</string>
+    <string name="btn_remove_api_key">Odstrani</string>
+    <string name="api_keys_empty">Še ni shranjenih ključev. Dodajte enega spodaj, da omogočite prevajanje.</string>
+    <string name="api_key_status_format">Shranjenih ključev: %1$d. Aktiven: •••• %2$s</string>
+    <string name="api_key_row_label">•••• %1$s</string>
+    <string name="api_key_row_label_active">•••• %1$s  ·  aktiven</string>
+    <string name="error_all_keys_exhausted">Vsi vaši shranjeni ključi so dosegli današnjo brezplačno omejitev. Dodajte nov ključ ali počakajte, da se kvota obnovi.</string>
 
     <string name="label_model">Model Gemini</string>
     <string name="hint_model">npr. gemini-3.5-flash-lite</string>

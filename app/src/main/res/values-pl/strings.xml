@@ -21,6 +21,12 @@
     <string name="bubble_language_label">Język aplikacji i tłumaczeń</string>
     <string name="bubble_language_description">Wybierz swój język tutaj, raz. Ustawia on domyślny język chmurki tłumaczenia po przytrzymaniu ORAZ język, w jakim wyświetlane są własne ekrany TextGate AI — oba zmieniają się razem.</string>
 
+    <string name="label_user_gender">Twoja płeć</string>
+    <string name="user_gender_description">Używane wyłącznie przy tłumaczeniu wiadomości, które TY piszesz za pomocą wyzwalacza, np. ?en lub ?de — aby czasowniki i przymiotniki odnoszące się do Ciebie brzmiały poprawnie w językach, które tego wymagają. Nigdy nie jest stosowane do wiadomości, które otrzymujesz i tłumaczysz przez przytrzymanie — te napisała inna osoba.</string>
+    <string name="label_gender_auto">Automatyczna / nieokreślona</string>
+    <string name="label_gender_male">Mężczyzna</string>
+    <string name="label_gender_female">Kobieta</string>
+
     <string name="section_accessibility_status">Usługa ułatwień dostępu</string>
     <string name="accessibility_status_enabled">Włączona</string>
     <string name="accessibility_status_disabled">Nie włączona — TextGate AI nic nie zrobi, dopóki jej nie włączysz</string>
@@ -44,6 +50,17 @@
     <string name="btn_clear_api_key">Usuń zapisany klucz</string>
     <string name="api_key_status_present">Klucz jest zapisany (zaszyfrowany). Nigdy więcej nie zostanie pokazany na ekranie.</string>
     <string name="api_key_status_absent">Nie zapisano jeszcze żadnego klucza</string>
+
+    <string name="label_saved_api_keys">Zapisane klucze API</string>
+    <string name="api_keys_multi_description">Możesz zapisać więcej niż jeden darmowy klucz API Gemini. Gdy aktywnemu kluczowi skończy się miesięczny darmowy limit, aplikacja automatycznie przełączy się na kolejny zapisany klucz — bez przerwy w działaniu i bez żadnych działań z Twojej strony.</string>
+    <string name="label_add_api_key">Dodaj kolejny klucz</string>
+    <string name="btn_add_api_key">Dodaj klucz</string>
+    <string name="btn_remove_api_key">Usuń</string>
+    <string name="api_keys_empty">Nie zapisano jeszcze żadnego klucza. Dodaj jeden poniżej, aby włączyć tłumaczenie.</string>
+    <string name="api_key_status_format">Zapisane klucze: %1$d. Aktywny: •••• %2$s</string>
+    <string name="api_key_row_label">•••• %1$s</string>
+    <string name="api_key_row_label_active">•••• %1$s  ·  aktywny</string>
+    <string name="error_all_keys_exhausted">Wszystkie zapisane klucze osiągnęły dzisiejszy darmowy limit. Dodaj kolejny klucz albo poczekaj na odnowienie limitu.</string>
 
     <string name="label_model">Model Gemini</string>
     <string name="hint_model">np. gemini-3.5-flash-lite</string>
@@ -91,4 +108,81 @@
     <string name="error_network">Nie udało się połączyć z Gemini. Sprawdź swoje połączenie.</string>
     <string name="error_http">Gemini zwrócił błąd (kod %1$d).</string>
     <string name="error_empty_response">Gemini zwrócił pustą odpowiedź.</string>
+    <string name="error_quota_exceeded">Osiągnięto limit zapytań Gemini. Ponawiam automatycznie.</string>
+
+    <!-- v2: dolna nawigacja -->
+    <string name="nav_tab_translate">Tłumacz</string>
+    <string name="nav_tab_conversation">Rozmowa</string>
+    <string name="nav_tab_live">Na żywo</string>
+    <string name="nav_tab_settings">Ustawienia</string>
+
+    <!-- v2: wspólne -->
+    <string name="label_language_auto">Automatycznie</string>
+
+    <!-- v2: zakładka Tłumacz -->
+    <string name="translate_hint_source">Wpisz tekst do przetłumaczenia</string>
+    <string name="translate_hint_result">Tłumaczenie</string>
+    <string name="translate_swap_content_description">Zamień języki</string>
+    <string name="translate_swap_needs_source">Aby zamienić języki, najpierw wybierz konkretny język źródłowy (nie Automatycznie)</string>
+    <string name="translate_mic_content_description">Podyktuj tekst</string>
+    <string name="translate_mic_unavailable">Rozpoznawanie mowy nie jest dostępne na tym urządzeniu</string>
+    <string name="translate_clear_content_description">Wyczyść tekst</string>
+    <string name="translate_copy_content_description">Kopiuj tłumaczenie</string>
+    <string name="translate_copied">Skopiowano tłumaczenie</string>
+    <string name="translate_speak_content_description">Odtwórz tłumaczenie na głos</string>
+
+    <!-- v2: zakładka Rozmowa -->
+    <string name="conversation_swap_direction">Zamień kierunek</string>
+    <string name="conversation_direction_format">%1$s → %2$s</string>
+    <string name="conversation_label_original">Oryginał</string>
+    <string name="conversation_label_translation">Tłumaczenie</string>
+    <string name="conversation_button_start">Rozpocznij rozmowę</string>
+    <string name="conversation_button_stop">Zakończ rozmowę</string>
+
+    <!-- v2: zakładka Na żywo -->
+    <string name="live_label_ambient_language">Język otoczenia</string>
+    <string name="live_target_language_format">Tłumaczenie na: %1$s (zmień w Ustawieniach)</string>
+    <string name="live_current_device_format">Bieżące urządzenie audio: %1$s</string>
+    <string name="live_device_speaker">Głośnik telefonu</string>
+    <string name="live_device_wired">Słuchawki przewodowe</string>
+    <string name="live_device_bluetooth">Zestaw Bluetooth</string>
+    <string name="live_device_usb">Audio USB</string>
+    <string name="live_headset_connected_hint">Przetłumaczony dźwięk będzie odtwarzany w podłączonych słuchawkach.</string>
+    <string name="live_headset_missing_hint">Brak podłączonych słuchawek — podłącz je albo zezwól na odtwarzanie przez głośnik w Ustawieniach przed rozpoczęciem.</string>
+    <string name="live_button_start">Start</string>
+    <string name="live_button_stop">Stop</string>
+    <string name="live_button_retry">Spróbuj ponownie</string>
+    <string name="live_label_original_transcript">Oryginalna wypowiedź</string>
+    <string name="live_label_translation_transcript">Tłumaczenie</string>
+    <string name="live_state_stopped">ZATRZYMANO</string>
+    <string name="live_state_connecting">ŁĄCZENIE</string>
+    <string name="live_state_listening">SŁUCHAM</string>
+    <string name="live_state_translating">TŁUMACZĘ</string>
+    <string name="live_state_reconnecting">PONOWNE ŁĄCZENIE</string>
+    <string name="live_state_paused">WSTRZYMANO — słuchawki odłączone</string>
+    <string name="live_state_error">BŁĄD</string>
+
+    <!-- v2: trwałe powiadomienie Na żywo -->
+    <string name="live_notification_channel_name">Tłumaczenie na żywo</string>
+    <string name="live_notification_title">TextGate AI — Tłumaczenie na żywo</string>
+    <string name="live_notification_active_format">%1$s → %2$s • Słuchanie aktywne</string>
+    <string name="live_notification_paused">Wstrzymano — słuchawki odłączone</string>
+    <string name="live_notification_error">Błąd — dotknij, aby spróbować ponownie</string>
+    <string name="live_notification_stop_action">ZATRZYMAJ</string>
+
+    <!-- v2: nagłówki grup w Ustawieniach -->
+    <string name="settings_group_translation">Tłumaczenie</string>
+    <string name="settings_group_audio_live">Audio i Live</string>
+    <string name="settings_group_ai">AI</string>
+    <string name="settings_group_integrations">Integracje</string>
+    <string name="settings_group_privacy">Prywatność</string>
+    <string name="settings_group_advanced">Zaawansowane</string>
+    <string name="advanced_model_hint">Dokładny model Gemini używany do tłumaczenia można zmienić ręcznie w sekcji AI powyżej.</string>
+
+    <!-- v2: ustawienie zachowania po odłączeniu słuchawek -->
+    <string name="section_headset_disconnect">Po odłączeniu słuchawek</string>
+    <string name="headset_disconnect_description">Co powinno się stać z aktywną sesją Na żywo, jeśli słuchawki odłączą się w trakcie tłumaczenia.</string>
+    <string name="label_headset_disconnect_pause">Wstrzymaj tłumaczenie (zalecane)</string>
+    <string name="label_headset_disconnect_speaker">Przełącz na głośnik</string>
+    <string name="live_settings_hint">Język otoczenia, język docelowy oraz START/STOP sesji ustawia się bezpośrednio na zakładce Na żywo.</string>
 </resources>

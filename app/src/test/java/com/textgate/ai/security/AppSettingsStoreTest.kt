@@ -2,6 +2,7 @@ package com.textgate.ai.security
 
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
+import com.textgate.ai.model.UserGender
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -78,6 +79,20 @@ class AppSettingsStoreTest {
         val store = AppSettingsStore(context)
         store.setPackageAllowed("com.example.notesapp", true)
         assertFalse(store.isPackageAllowed("com.example.othernotesapp"))
+    }
+
+    @Test
+    fun `user gender preference defaults to AUTO`() {
+        assertEquals(UserGender.AUTO, AppSettingsStore(context).userGender)
+    }
+
+    @Test
+    fun `user gender preference persists across separate store instances`() {
+        AppSettingsStore(context).userGender = UserGender.FEMALE
+        assertEquals(UserGender.FEMALE, AppSettingsStore(context).userGender)
+
+        AppSettingsStore(context).userGender = UserGender.MALE
+        assertEquals(UserGender.MALE, AppSettingsStore(context).userGender)
     }
 
     @Test

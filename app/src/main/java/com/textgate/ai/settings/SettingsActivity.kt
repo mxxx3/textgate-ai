@@ -27,10 +27,14 @@ import com.textgate.ai.R
 import com.textgate.ai.accessibility.AccessibilityDisclosureActivity
 import com.textgate.ai.accessibility.TextGateAccessibilityService
 import com.textgate.ai.databinding.ActivitySettingsBinding
+import com.textgate.ai.model.HeadsetDisconnectBehavior
 import com.textgate.ai.model.Languages
 import com.textgate.ai.model.SupportedLanguage
 import com.textgate.ai.model.TranslationPrompts
+import com.textgate.ai.model.UserGender
 import com.textgate.ai.network.GeminiClient
+import com.textgate.ai.network.ModelAvailabilityStore
+import com.textgate.ai.network.TranslationOrchestrator
 import com.textgate.ai.security.AppSettingsStore
 import com.textgate.ai.security.SecureApiKeyStore
 import com.textgate.ai.security.TriggerDetector
@@ -48,6 +52,7 @@ class SettingsActivity : Activity() {
     private lateinit var binding: ActivitySettingsBinding
     private lateinit var settingsStore: AppSettingsStore
     private lateinit var apiKeyStore: SecureApiKeyStore
+    private lateinit var availabilityStore: ModelAvailabilityStore
 
     private val mainHandler = Handler(Looper.getMainLooper())
     private var backgroundExecutor: ExecutorService? = null
@@ -128,10 +133,13 @@ class SettingsActivity : Activity() {
 
         settingsStore = AppSettingsStore(applicationContext)
         apiKeyStore = SecureApiKeyStore(applicationContext)
+        availabilityStore = ModelAvailabilityStore(applicationContext)
         backgroundExecutor = Executors.newSingleThreadExecutor()
 
         setupMasterSwitch()
         setupLanguageSection()
+        setupUserGenderSection()
+        setupHeadsetDisconnectSection()
         setupAccessibilitySection()
         setupApiKeySection()
         setupModelSection()
@@ -266,6 +274,101 @@ class SettingsActivity : Activity() {
     }
 
     // ---------------------------------------------------------------
+    // User gender preference (v1.7.0+)
+    // ---------------------------------------------------------------
+
+    /** Fixed display order for the gender spinner — index into this list is
+     * how [android.widget.AdapterView.OnItemSelectedListener.onItemSelected]'s
+     * `position` is translated back into a [UserGender]. [UserGender.AUTO]
+     * is deliberately first/default, matching how it behaves in
+     * [TranslationPrompts.systemPromptFor] (no gender clause added at all). */
+    private val genderOptions = listOf(UserGender.AUTO, UserGender.MALE, UserGender.FEMALE)
+
+    private fun genderLabelRes(gender: UserGender): Int = when (gender) {
+        UserGender.AUTO -> R.string.label_gender_auto
+        UserGender.MALE -> R.string.label_gender_male
+        UserGender.FEMALE -> R.string.label_gender_female
+    }
+
+    /**
+     * Same Spinner + deferred-listener pattern as [setupLanguageSection]
+     * above, for the same reason: attaching the selection listener before
+     * the initial [android.widget.Spinner.setSelection] call would fire it
+     * immediately for that programmatic selection too, re-saving the
+     * already-current value on every Settings screen open.
+     *
+     * This preference is read ONLY by
+     * [com.textgate.ai.accessibility.TextGateAccessibilityService.confirmAndProcess]
+     * (the typed `?xx`-trigger path) — see [AppSettingsStore.userGender]'s
+     * doc comment for why the long-press "translate a received message"
+     * bubble must never read it. Nothing in this Activity needs to enforce
+     * that; it is simply never referenced from that other code path.
+     */
+    private fun setupUserGenderSection() {
+        val labels = genderOptions.map { getString(genderLabelRes(it)) }
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, labels)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        binding.spinnerUserGender.adapter = adapter
+
+        val currentIndex = genderOptions.indexOf(settingsStore.userGender).let { if (it >= 0) it else 0 }
+        binding.spinnerUserGender.setSelection(currentIndex, false)
+
+        binding.spinnerUserGender.post {
+            binding.spinnerUserGender.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                    val selected = genderOptions.getOrNull(position) ?: return
+                    settingsStore.userGender = selected
+                }
+
+                override fun onNothingSelected(parent: AdapterView<*>?) = Unit
+            }
+        }
+    }
+
+    // ---------------------------------------------------------------
+    // Headset-disconnect behavior (v2, "Audio i Live" section)
+    // ---------------------------------------------------------------
+
+    /** Fixed display order — [HeadsetDisconnectBehavior.PAUSE_TRANSLATION]
+     * (the privacy-preserving default) first, matching how it behaves in
+     * [com.textgate.ai.live.LiveTranslationService]. Same Spinner +
+     * deferred-listener pattern as [setupUserGenderSection] above, for the
+     * same reason: attaching the listener before the initial
+     * [android.widget.Spinner.setSelection] call would fire it immediately
+     * for that programmatic selection too. */
+    private val headsetDisconnectOptions = listOf(
+        HeadsetDisconnectBehavior.PAUSE_TRANSLATION,
+        HeadsetDisconnectBehavior.SWITCH_TO_SPEAKER
+    )
+
+    private fun headsetDisconnectLabelRes(behavior: HeadsetDisconnectBehavior): Int = when (behavior) {
+        HeadsetDisconnectBehavior.PAUSE_TRANSLATION -> R.string.label_headset_disconnect_pause
+        HeadsetDisconnectBehavior.SWITCH_TO_SPEAKER -> R.string.label_headset_disconnect_speaker
+    }
+
+    private fun setupHeadsetDisconnectSection() {
+        val labels = headsetDisconnectOptions.map { getString(headsetDisconnectLabelRes(it)) }
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, labels)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        binding.spinnerHeadsetDisconnectBehavior.adapter = adapter
+
+        val currentIndex = headsetDisconnectOptions.indexOf(settingsStore.headsetDisconnectBehavior)
+            .let { if (it >= 0) it else 0 }
+        binding.spinnerHeadsetDisconnectBehavior.setSelection(currentIndex, false)
+
+        binding.spinnerHeadsetDisconnectBehavior.post {
+            binding.spinnerHeadsetDisconnectBehavior.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                    val selected = headsetDisconnectOptions.getOrNull(position) ?: return
+                    settingsStore.headsetDisconnectBehavior = selected
+                }
+
+                override fun onNothingSelected(parent: AdapterView<*>?) = Unit
+            }
+        }
+    }
+
+    // ---------------------------------------------------------------
     // Accessibility status
     // ---------------------------------------------------------------
 
@@ -327,6 +430,7 @@ class SettingsActivity : Activity() {
     // ---------------------------------------------------------------
 
     private fun setupApiKeySection() {
+        renderApiKeyList()
         refreshApiKeyStatus()
 
         // Opens Google AI Studio's "Create API key" page directly in the
@@ -348,32 +452,93 @@ class SettingsActivity : Activity() {
             toggleApiKeyInstructionsVisibility()
         }
 
-        binding.buttonSaveApiKey.setOnClickListener {
+        // Appends a new key to the store rather than replacing whatever was
+        // there before — this is the "Add key" button in the multi-key
+        // (v1.6.0+) UI, not a single-slot save.
+        binding.buttonAddApiKey.setOnClickListener {
             val chars = CharArray(binding.editApiKey.text.length)
             binding.editApiKey.text.getChars(0, chars.size, chars, 0)
-            val saved = apiKeyStore.saveApiKey(chars)
+            val added = apiKeyStore.addKey(chars)
             // Clear the on-screen field immediately after handing the key
             // off — the key is never shown again once saved.
             binding.editApiKey.text?.clear()
-            if (saved) {
+            if (added) {
                 Toast.makeText(this, R.string.api_key_saved, Toast.LENGTH_SHORT).show()
             } else {
                 Toast.makeText(this, R.string.error_no_api_key, Toast.LENGTH_SHORT).show()
             }
+            renderApiKeyList()
             refreshApiKeyStatus()
         }
 
+        // "Remove all" — same button id/label as the old single-key
+        // "Remove saved key" action, now clearing the entire list at once.
+        // Per-key removal is handled by each row's own remove button (see
+        // renderApiKeyList).
         binding.buttonClearApiKey.setOnClickListener {
-            apiKeyStore.clearApiKey()
+            apiKeyStore.clearAllKeys()
             Toast.makeText(this, R.string.api_key_cleared, Toast.LENGTH_SHORT).show()
+            renderApiKeyList()
             refreshApiKeyStatus()
         }
     }
 
+    /**
+     * Rebuilds [binding.layoutApiKeyList] from scratch: one
+     * [R.layout.item_api_key_row] per stored key (showing its last 4
+     * characters, and a " · active" marker on whichever key
+     * [SecureApiKeyStore.activeKeyId] currently points at), or a single
+     * empty-state label when nothing is stored yet. Called after every
+     * mutation (add / remove one / clear all) so the list is always exactly
+     * what [SecureApiKeyStore] holds — never a stale in-memory copy.
+     */
+    private fun renderApiKeyList() {
+        binding.layoutApiKeyList.removeAllViews()
+        val keys = apiKeyStore.listKeys()
+        if (keys.isEmpty()) {
+            val empty = TextView(this).apply {
+                text = getString(R.string.api_keys_empty)
+                textSize = 13f
+                setTextColor(getColor(R.color.tg_text_secondary))
+            }
+            binding.layoutApiKeyList.addView(empty)
+            return
+        }
+
+        val activeId = apiKeyStore.activeKeyId()
+        val inflater = LayoutInflater.from(this)
+        keys.forEach { key ->
+            val row = inflater.inflate(R.layout.item_api_key_row, binding.layoutApiKeyList, false)
+            val label = row.findViewById<TextView>(R.id.textApiKeyRowLabel)
+            val removeButton = row.findViewById<android.widget.Button>(R.id.buttonRemoveApiKey)
+
+            label.text = if (key.id == activeId) {
+                getString(R.string.api_key_row_label_active, key.last4)
+            } else {
+                getString(R.string.api_key_row_label, key.last4)
+            }
+
+            removeButton.setOnClickListener {
+                apiKeyStore.removeKey(key.id)
+                renderApiKeyList()
+                refreshApiKeyStatus()
+            }
+
+            binding.layoutApiKeyList.addView(row)
+        }
+    }
+
     private fun refreshApiKeyStatus() {
-        binding.textApiKeyStatus.text = getString(
-            if (apiKeyStore.hasApiKey()) R.string.api_key_status_present else R.string.api_key_status_absent
-        )
+        val count = apiKeyStore.keyCount()
+        binding.textApiKeyStatus.text = if (count == 0) {
+            getString(R.string.api_keys_empty)
+        } else {
+            val activeLast4 = apiKeyStore.listKeys()
+                .firstOrNull { it.id == apiKeyStore.activeKeyId() }
+                ?.last4
+                .orEmpty()
+            getString(R.string.api_key_status_format, count, activeLast4)
+        }
     }
 
     /** Same expand/collapse pattern as [toggleAdvancedAppsVisibility] below,
@@ -423,9 +588,16 @@ class SettingsActivity : Activity() {
         binding.buttonTestApi.setOnClickListener { runApiTest() }
     }
 
+    /**
+     * Runs a real request through the SAME rotation path a live translation
+     * uses ([KeyRotationTranslator.translateWithRotation]) rather than
+     * testing only the active key directly — this way "Test API" tells the
+     * user whether translation will actually work right now (including
+     * transparently rotating past an exhausted key), not just whether one
+     * particular key happens to be good.
+     */
     private fun runApiTest() {
-        val apiKey = apiKeyStore.getApiKey()
-        if (apiKey.isNullOrBlank()) {
+        if (!apiKeyStore.hasAnyKey()) {
             binding.textTestApiResult.text = getString(R.string.error_no_api_key)
             return
         }
@@ -437,9 +609,10 @@ class SettingsActivity : Activity() {
 
         executor.execute {
             val result = try {
-                GeminiClient.translateBlocking(
-                    apiKey = apiKey,
-                    model = model,
+                TranslationOrchestrator.translateText(
+                    apiKeyStore = apiKeyStore,
+                    availabilityStore = availabilityStore,
+                    requestedModel = model,
                     systemPrompt = TranslationPrompts.EN_TRANSLATION_SYSTEM_PROMPT,
                     // Fixed, non-sensitive test string — never content from
                     // any monitored field.
@@ -457,6 +630,10 @@ class SettingsActivity : Activity() {
                         describeFailure(result)
                     )
                 }
+                // The active key may have changed if rotation kicked in
+                // during the test — reflect that immediately.
+                renderApiKeyList()
+                refreshApiKeyStatus()
             }
         }
     }
@@ -467,6 +644,8 @@ class SettingsActivity : Activity() {
         is GeminiClient.Result.Failure.HttpError -> getString(R.string.error_http, failure.code)
         GeminiClient.Result.Failure.EmptyResponse -> getString(R.string.error_empty_response)
         GeminiClient.Result.Failure.MissingApiKey -> getString(R.string.error_no_api_key)
+        is GeminiClient.Result.Failure.AllKeysExhausted -> getString(R.string.error_all_keys_exhausted)
+        is GeminiClient.Result.Failure.QuotaExceeded -> getString(R.string.error_quota_exceeded)
         GeminiClient.Result.Failure.InvalidModel -> getString(R.string.error_generic)
         GeminiClient.Result.Failure.InvalidResponse -> getString(R.string.error_generic)
         GeminiClient.Result.Failure.HostNotAllowed -> getString(R.string.error_generic)

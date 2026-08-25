@@ -14,6 +14,12 @@
     <string name="bubble_language_label">Limba aplicației și a traducerii</string>
     <string name="bubble_language_description">Alegeți limba o singură dată aici. Aceasta stabilește limba implicită pentru bula de traducere la apăsare lungă ȘI limba în care sunt afișate ecranele proprii ale TextGate AI — ambele se schimbă împreună.</string>
 
+    <string name="label_user_gender">Genul dumneavoastră</string>
+    <string name="user_gender_description">Folosit doar la traducerea mesajelor pe care LE SCRIEȚI dumneavoastră cu un declanșator precum ?en sau ?de, astfel încât verbele și adjectivele care se referă la dumneavoastră să fie corecte în limbile care necesită acest lucru. Nu se aplică niciodată mesajelor pe care le primiți și le traduceți prin apăsare lungă — acestea au fost scrise de altcineva.</string>
+    <string name="label_gender_auto">Automat / nespecificat</string>
+    <string name="label_gender_male">Bărbat</string>
+    <string name="label_gender_female">Femeie</string>
+
     <string name="section_accessibility_status">Serviciul de accesibilitate</string>
     <string name="accessibility_status_enabled">Activat</string>
     <string name="accessibility_status_disabled">Neactivat — TextGate AI nu poate face nimic până când nu îl activați</string>
@@ -36,6 +42,17 @@
     <string name="btn_clear_api_key">Eliminați cheia salvată</string>
     <string name="api_key_status_present">O cheie este salvată (criptată). Nu mai este afișată niciodată pe ecran.</string>
     <string name="api_key_status_absent">Nicio cheie salvată încă</string>
+
+    <string name="label_saved_api_keys">Chei API salvate</string>
+    <string name="api_keys_multi_description">Puteți salva mai multe chei API Gemini gratuite. Dacă cheia activă epuizează cota lunară gratuită, aplicația trece automat la următoarea cheie salvată — fără întreruperi și fără nicio acțiune din partea dumneavoastră.</string>
+    <string name="label_add_api_key">Adăugați altă cheie</string>
+    <string name="btn_add_api_key">Adăugați cheia</string>
+    <string name="btn_remove_api_key">Eliminați</string>
+    <string name="api_keys_empty">Nu ați salvat încă nicio cheie. Adăugați una mai jos pentru a activa traducerea.</string>
+    <string name="api_key_status_format">%1$d chei salvate. Activă: •••• %2$s</string>
+    <string name="api_key_row_label">•••• %1$s</string>
+    <string name="api_key_row_label_active">•••• %1$s  ·  activă</string>
+    <string name="error_all_keys_exhausted">Toate cheile salvate au atins limita gratuită de azi. Adăugați altă cheie sau așteptați reînnoirea cotei.</string>
 
     <string name="label_model">Model Gemini</string>
     <string name="hint_model">de ex., gemini-3.5-flash-lite</string>

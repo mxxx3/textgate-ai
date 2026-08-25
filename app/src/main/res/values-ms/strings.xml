@@ -14,6 +14,12 @@
     <string name="bubble_language_label">Bahasa aplikasi dan terjemahan</string>
     <string name="bubble_language_description">Pilih bahasa anda sekali di sini. Ia menetapkan bahasa lalai untuk gelembung terjemahan tekan dan tahan DAN bahasa yang digunakan untuk memaparkan skrin TextGate AI sendiri — kedua-duanya berubah bersama.</string>
 
+    <string name="label_user_gender">Jantina anda</string>
+    <string name="user_gender_description">Hanya digunakan semasa menterjemah mesej yang ANDA taip menggunakan pencetus seperti ?en atau ?de, supaya kata kerja dan kata sifat yang merujuk kepada anda menjadi betul dalam bahasa yang memerlukannya. Tidak pernah digunakan pada mesej yang anda terima dan terjemah melalui tekan dan tahan — mesej itu ditulis oleh orang lain.</string>
+    <string name="label_gender_auto">Automatik / tidak dinyatakan</string>
+    <string name="label_gender_male">Lelaki</string>
+    <string name="label_gender_female">Perempuan</string>
+
     <string name="section_accessibility_status">Perkhidmatan Kebolehcapaian</string>
     <string name="accessibility_status_enabled">Diaktifkan</string>
     <string name="accessibility_status_disabled">Tidak diaktifkan — TextGate AI tidak dapat melakukan apa-apa sehingga anda mengaktifkannya</string>
@@ -37,6 +43,17 @@
     <string name="btn_clear_api_key">Alih keluar kunci yang disimpan</string>
     <string name="api_key_status_present">Satu kunci telah disimpan (disulitkan). Ia tidak akan dipaparkan lagi pada skrin.</string>
     <string name="api_key_status_absent">Belum ada kunci disimpan</string>
+
+    <string name="label_saved_api_keys">Kunci API yang disimpan</string>
+    <string name="api_keys_multi_description">Anda boleh menyimpan lebih daripada satu kunci API Gemini percuma. Jika kunci aktif kehabisan kuota percuma bulanannya, aplikasi akan bertukar secara automatik ke kunci seterusnya yang disimpan — tiada gangguan, tiada apa-apa yang perlu anda lakukan.</string>
+    <string name="label_add_api_key">Tambah kunci lain</string>
+    <string name="btn_add_api_key">Tambah kunci</string>
+    <string name="btn_remove_api_key">Alih keluar</string>
+    <string name="api_keys_empty">Belum ada kunci disimpan. Tambah satu di bawah untuk mendayakan terjemahan.</string>
+    <string name="api_key_status_format">%1$d kunci disimpan. Aktif: •••• %2$s</string>
+    <string name="api_key_row_label">•••• %1$s</string>
+    <string name="api_key_row_label_active">•••• %1$s  ·  aktif</string>
+    <string name="error_all_keys_exhausted">Semua kunci yang anda simpan telah mencapai had percuma hari ini. Tambah kunci lain, atau tunggu sehingga kuota diset semula.</string>
 
     <string name="label_model">Model Gemini</string>
     <string name="hint_model">cth., gemini-3.5-flash-lite</string>

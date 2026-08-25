@@ -33,7 +33,13 @@ class ResultPolicyTest {
             GeminiClient.Result.Failure.InvalidResponse,
             GeminiClient.Result.Failure.InvalidModel,
             GeminiClient.Result.Failure.MissingApiKey,
-            GeminiClient.Result.Failure.HostNotAllowed
+            GeminiClient.Result.Failure.HostNotAllowed,
+            GeminiClient.Result.Failure.AllKeysExhausted(),
+            GeminiClient.Result.Failure.AllKeysExhausted(
+                GeminiClient.Result.Failure.QuotaExceeded(GeminiClient.Result.Failure.QuotaScope.DAILY, 3600L)
+            ),
+            GeminiClient.Result.Failure.QuotaExceeded(GeminiClient.Result.Failure.QuotaScope.SHORT_TERM, 30L),
+            GeminiClient.Result.Failure.QuotaExceeded(GeminiClient.Result.Failure.QuotaScope.UNKNOWN, null)
         )
         failures.forEach { failure ->
             assertFalse(

@@ -11,8 +11,8 @@ android {
         applicationId = "com.textgate.ai"
         minSdk = 26
         targetSdk = 35
-        versionCode = 22
-        versionName = "1.5.1"
+        versionCode = 26
+        versionName = "2.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -137,21 +137,41 @@ android {
 }
 
 dependencies {
-    // --- PRODUCTION DEPENDENCIES: INTENTIONALLY NONE. ---
-    // This app ships with zero third-party runtime libraries. Every runtime
-    // capability it needs (encryption, HTTPS, UI widgets, background work,
-    // debouncing) is available directly from the Android SDK and the Kotlin
+    // --- PRODUCTION DEPENDENCIES: exactly one, deliberately scoped. ---
+    // This app shipped with zero third-party runtime libraries through
+    // v1.7.1. As of v2, ONE dependency is added — OkHttp — used for exactly
+    // one thing: the WebSocket connection to the Gemini Live API that
+    // powers the "Rozmowa" and "Na żywo" real-time voice-translation modes
+    // (see com.textgate.ai.live.GeminiLiveClient). Every other capability
+    // this app needs (encryption, the existing synchronous HTTPS
+    // translation calls, UI widgets, background work, debouncing) remains
+    // hand-rolled on the Android SDK and Kotlin standard library exactly as
+    // before — this is NOT a reversal of the zero-dependency policy, it is
+    // one narrow, documented exception.
+    //
+    // Why OkHttp specifically, here, when nothing else in this app needed
+    // an exception: the Android SDK has no built-in WebSocket client at
+    // all. The only zero-dependency alternative is hand-rolling the RFC
+    // 6455 handshake and frame format (masking, fragmentation, ping/pong,
+    // close codes) over a raw SSLSocket — for a feature that streams live
+    // microphone audio bidirectionally and must reconnect cleanly under
+    // real network conditions (see LiveTranslationService's reconnect
+    // logic), a subtle framing bug is the kind of failure that is silent,
+    // hard to reproduce, and cannot be exercised at all in this project's
+    // development environment (no physical device, no live Gemini Live
+    // endpoint to test against here). OkHttp's WebSocket implementation is
+    // widely used, has years of hardening against exactly these edge cases,
+    // and is a single, self-contained, actively audited library — a
+    // meaningfully smaller supply-chain surface than an equivalent
+    // hand-written implementation would be untested risk. See README.md
+    // "Dependency report" for the full reasoning.
+    //
+    // Everything else keeps the original reasoning: every other runtime
+    // capability is available directly from the Android SDK and the Kotlin
     // standard library, both of which are unavoidable and are pulled in
     // automatically by the Android Gradle Plugin — they are not listed here
     // because there is nothing to choose or version-pin.
-    //
-    // This is a deliberate security decision, not an oversight: every extra
-    // dependency is additional code that (a) can change behavior on its own
-    // release schedule, (b) pulls in its own transitive dependencies that
-    // must also be audited, and (c) is one more supply-chain path into an
-    // app that regularly sees passwords, PINs and private messages pass
-    // through the device. See README.md "Dependency report" for the full
-    // reasoning and the (empty) transitive dependency tree.
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
 
     // --- Test-only dependencies. Gradle's testImplementation scope is
     // compile+runtime for the unit test task ONLY — none of these classes

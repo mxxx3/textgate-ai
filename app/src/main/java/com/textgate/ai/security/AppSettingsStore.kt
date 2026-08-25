@@ -2,7 +2,9 @@ package com.textgate.ai.security
 
 import android.content.Context
 import android.content.SharedPreferences
+import com.textgate.ai.model.HeadsetDisconnectBehavior
 import com.textgate.ai.model.Languages
+import com.textgate.ai.model.UserGender
 
 /**
  * Non-secret configuration: the master on/off switch, the user's allow-list
@@ -109,6 +111,28 @@ class AppSettingsStore(context: Context) {
         }
 
     /**
+     * The app owner's own grammatical-gender preference — see
+     * [UserGender]'s class doc for exactly what this does and does not
+     * affect. Read ONLY by the typed-trigger translation path
+     * ([com.textgate.ai.accessibility.TextGateAccessibilityService.confirmAndProcess]);
+     * the long-press "translate a received message" bubble path must never
+     * read it, since that text was written by someone else.
+     */
+    var userGender: UserGender
+        get() = UserGender.fromPrefValue(prefs.getString(KEY_USER_GENDER, null))
+        set(value) = prefs.edit().putString(KEY_USER_GENDER, value.prefValue).apply()
+
+    /**
+     * What an active "Na żywo" Live session does the instant the user's
+     * headset disconnects — see [HeadsetDisconnectBehavior]'s own class doc
+     * for the full behavior and the privacy reasoning behind its default.
+     * Read only by [com.textgate.ai.live.LiveTranslationService].
+     */
+    var headsetDisconnectBehavior: HeadsetDisconnectBehavior
+        get() = HeadsetDisconnectBehavior.fromPrefValue(prefs.getString(KEY_HEADSET_DISCONNECT_BEHAVIOR, null))
+        set(value) = prefs.edit().putString(KEY_HEADSET_DISCONNECT_BEHAVIOR, value.prefValue).apply()
+
+    /**
      * The allow-list as it stands: the user's own explicit choices once
      * they have made any (even down to an empty set, e.g. after removing
      * every default), or else [DEFAULT_ALLOWED_PACKAGES] as long as the
@@ -139,6 +163,8 @@ class AppSettingsStore(context: Context) {
         private const val KEY_ALLOWED_PACKAGES = "allowed_packages"
         private const val KEY_BUBBLE_TARGET_LANGUAGE = "bubble_target_language"
         private const val KEY_APP_INTERFACE_LANGUAGE = "app_interface_language"
+        private const val KEY_USER_GENDER = "user_gender"
+        private const val KEY_HEADSET_DISCONNECT_BEHAVIOR = "headset_disconnect_behavior"
 
         /**
          * Chosen from the app owner's own Google AI Studio rate-limit

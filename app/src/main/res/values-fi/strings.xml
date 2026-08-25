@@ -14,6 +14,12 @@
     <string name="bubble_language_label">Sovellus- ja käännöskieli</string>
     <string name="bubble_language_description">Valitse kielesi täällä kerran. Se määrittää sekä pitkän painalluksen käännöskuplan oletuskielen että kielen, jolla TextGate AI:n omat näytöt näytetään — molemmat muuttuvat yhdessä.</string>
 
+    <string name="label_user_gender">Sukupuolesi</string>
+    <string name="user_gender_description">Käytetään vain silloin, kun käännät viestejä, jotka SINÄ kirjoitat liipaisimella, kuten ?en tai ?de, jotta sinuun viittaavat verbit ja adjektiivit ovat oikein niissä kielissä, jotka sitä edellyttävät. Ei koskaan sovelleta viesteihin, jotka vastaanotat ja käännät pitkällä painalluksella — ne on kirjoittanut joku muu.</string>
+    <string name="label_gender_auto">Automaattinen / määrittelemätön</string>
+    <string name="label_gender_male">Mies</string>
+    <string name="label_gender_female">Nainen</string>
+
     <string name="section_accessibility_status">Esteettömyyspalvelu</string>
     <string name="accessibility_status_enabled">Käytössä</string>
     <string name="accessibility_status_disabled">Ei käytössä — TextGate AI ei voi tehdä mitään, ennen kuin otat sen käyttöön</string>
@@ -37,6 +43,17 @@
     <string name="btn_clear_api_key">Poista tallennettu avain</string>
     <string name="api_key_status_present">Avain on tallennettu (salattu). Sitä ei koskaan näytetä enää ruudulla.</string>
     <string name="api_key_status_absent">Avainta ei ole vielä tallennettu</string>
+
+    <string name="label_saved_api_keys">Tallennetut API-avaimet</string>
+    <string name="api_keys_multi_description">Voit tallentaa useamman kuin yhden ilmaisen Gemini API -avaimen. Jos aktiivisen avaimen kuukausittainen ilmainen kiintiö loppuu, sovellus vaihtaa automaattisesti seuraavaan tallennettuun avaimeen — ei katkoksia, ei toimenpiteitä sinulta.</string>
+    <string name="label_add_api_key">Lisää toinen avain</string>
+    <string name="btn_add_api_key">Lisää avain</string>
+    <string name="btn_remove_api_key">Poista</string>
+    <string name="api_keys_empty">Avaimia ei ole vielä tallennettu. Lisää yksi alla ottaaksesi käännöksen käyttöön.</string>
+    <string name="api_key_status_format">%1$d avain(ta) tallennettu. Aktiivinen: •••• %2$s</string>
+    <string name="api_key_row_label">•••• %1$s</string>
+    <string name="api_key_row_label_active">•••• %1$s  ·  aktiivinen</string>
+    <string name="error_all_keys_exhausted">Kaikki tallennetut avaimesi ovat saavuttaneet tämän päivän ilmaisen rajan. Lisää toinen avain tai odota, että kiintiö nollautuu.</string>
 
     <string name="label_model">Gemini-malli</string>
     <string name="hint_model">esim. gemini-3.5-flash-lite</string>

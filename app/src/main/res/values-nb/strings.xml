@@ -14,6 +14,12 @@
     <string name="bubble_language_label">App- og oversettelsesspråk</string>
     <string name="bubble_language_description">Velg språket ditt én gang her. Det setter standardspråket for oversettelsesboblen ved trykk-og-hold OG språket TextGate AIs egne skjermer vises på — begge endres sammen.</string>
 
+    <string name="label_user_gender">Ditt kjønn</string>
+    <string name="user_gender_description">Brukes bare når meldinger DU skriver med en utløser som ?en eller ?de oversettes, slik at verb og adjektiv som viser til deg, blir riktige i språk som krever det. Brukes aldri på meldinger du mottar og oversetter med trykk-og-hold — de er skrevet av noen andre.</string>
+    <string name="label_gender_auto">Automatisk / uspesifisert</string>
+    <string name="label_gender_male">Mann</string>
+    <string name="label_gender_female">Kvinne</string>
+
     <string name="section_accessibility_status">Tilgjengelighetstjeneste</string>
     <string name="accessibility_status_enabled">Aktivert</string>
     <string name="accessibility_status_disabled">Ikke aktivert — TextGate AI kan ikke gjøre noe før du aktiverer den</string>
@@ -37,6 +43,17 @@
     <string name="btn_clear_api_key">Fjern lagret nøkkel</string>
     <string name="api_key_status_present">En nøkkel er lagret (kryptert). Den vises aldri på skjermen igjen.</string>
     <string name="api_key_status_absent">Ingen nøkkel lagret ennå</string>
+
+    <string name="label_saved_api_keys">Lagrede API-nøkler</string>
+    <string name="api_keys_multi_description">Du kan lagre mer enn én gratis Gemini API-nøkkel. Hvis den aktive nøkkelen går tom for sin månedlige gratis kvote, bytter appen automatisk til din neste lagrede nøkkel — ingen avbrudd, ingenting du trenger å gjøre.</string>
+    <string name="label_add_api_key">Legg til en nøkkel til</string>
+    <string name="btn_add_api_key">Legg til nøkkel</string>
+    <string name="btn_remove_api_key">Fjern</string>
+    <string name="api_keys_empty">Ingen nøkler lagret ennå. Legg til en nedenfor for å aktivere oversettelse.</string>
+    <string name="api_key_status_format">%1$d nøkkel/nøkler lagret. Aktiv: •••• %2$s</string>
+    <string name="api_key_row_label">•••• %1$s</string>
+    <string name="api_key_row_label_active">•••• %1$s  ·  aktiv</string>
+    <string name="error_all_keys_exhausted">Alle dine lagrede nøkler har nådd dagens gratis grense. Legg til en ny nøkkel, eller vent til kvoten tilbakestilles.</string>
 
     <string name="label_model">Gemini-modell</string>
     <string name="hint_model">f.eks. gemini-3.5-flash-lite</string>

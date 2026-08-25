@@ -14,6 +14,12 @@
     <string name="bubble_language_label">שפת האפליקציה והתרגום</string>
     <string name="bubble_language_description">בחרו כאן את השפה שלכם פעם אחת. היא קובעת גם את שפת ברירת המחדל לבועת התרגום בלחיצה ארוכה וגם את השפה שבה מוצגים המסכים של TextGate AI עצמה — שתיהן משתנות יחד.</string>
 
+    <string name="label_user_gender">המגדר שלך</string>
+    <string name="user_gender_description">משמש רק בתרגום הודעות שאתם כותבים בעצמכם באמצעות טריגר כמו ?en או ?de, כדי שהפעלים והתארים המתייחסים אליכם ייצאו נכונים בשפות הזקוקות לכך. הוא לעולם לא חל על הודעות שאתם מקבלים ומתרגמים בלחיצה ארוכה — אלה נכתבו על ידי מישהו אחר.</string>
+    <string name="label_gender_auto">אוטומטי / לא מוגדר</string>
+    <string name="label_gender_male">גבר</string>
+    <string name="label_gender_female">אישה</string>
+
     <string name="section_accessibility_status">שירות הנגישות</string>
     <string name="accessibility_status_enabled">מופעל</string>
     <string name="accessibility_status_disabled">לא מופעל — TextGate AI לא יכולה לעשות דבר עד שתפעילו אותה</string>
@@ -37,6 +43,17 @@
     <string name="btn_clear_api_key">הסרת המפתח השמור</string>
     <string name="api_key_status_present">מפתח שמור (מוצפן). הוא לא יוצג שוב על המסך.</string>
     <string name="api_key_status_absent">עדיין לא נשמר מפתח</string>
+
+    <string name="label_saved_api_keys">מפתחות API שמורים</string>
+    <string name="api_keys_multi_description">אפשר לשמור יותר ממפתח API חינמי אחד של Gemini. אם המפתח הפעיל מיצה את מכסת החינם החודשית שלו, האפליקציה עוברת אוטומטית למפתח השמור הבא — בלי הפרעה, ובלי צורך לעשות דבר.</string>
+    <string name="label_add_api_key">הוספת מפתח נוסף</string>
+    <string name="btn_add_api_key">הוספת מפתח</string>
+    <string name="btn_remove_api_key">הסרה</string>
+    <string name="api_keys_empty">עדיין לא נשמר אף מפתח. הוסיפו מפתח למטה כדי להפעיל את התרגום.</string>
+    <string name="api_key_status_format">%1$d מפתחות שמורים. פעיל: •••• %2$s</string>
+    <string name="api_key_row_label">•••• %1$s</string>
+    <string name="api_key_row_label_active">•••• %1$s  ·  פעיל</string>
+    <string name="error_all_keys_exhausted">כל המפתחות השמורים הגיעו למכסת החינם היומית. הוסיפו מפתח נוסף, או המתינו לאיפוס המכסה.</string>
 
     <string name="label_model">מודל Gemini</string>
     <string name="hint_model">לדוגמה: gemini-3.5-flash-lite</string>

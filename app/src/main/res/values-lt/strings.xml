@@ -14,6 +14,12 @@
     <string name="bubble_language_label">Programos ir vertimo kalba</string>
     <string name="bubble_language_description">Kalbą pasirinkite čia vieną kartą. Ji nustato numatytąją ilgo paspaudimo vertimo burbulo kalbą IR kalbą, kuria rodomi patys TextGate AI ekranai — abi keičiasi kartu.</string>
 
+    <string name="label_user_gender">Jūsų lytis</string>
+    <string name="user_gender_description">Naudojama tik verčiant žinutes, kurias RAŠOTE naudodami suveikimo ženklą, pvz., ?en arba ?de, kad veiksmažodžiai ir būdvardžiai, nurodantys jus, būtų teisingi kalbose, kurioms tai svarbu. Niekada netaikoma žinutėms, kurias gaunate ir verčiate ilgu paspaudimu — jas parašė kažkas kitas.</string>
+    <string name="label_gender_auto">Automatinė / nenurodyta</string>
+    <string name="label_gender_male">Vyras</string>
+    <string name="label_gender_female">Moteris</string>
+
     <string name="section_accessibility_status">Pritaikymo neįgaliesiems paslauga</string>
     <string name="accessibility_status_enabled">Įjungta</string>
     <string name="accessibility_status_disabled">Neįjungta — TextGate AI negalės nieko atlikti, kol jos neįjungsite</string>
@@ -37,6 +43,17 @@
     <string name="btn_clear_api_key">Pašalinti išsaugotą raktą</string>
     <string name="api_key_status_present">Raktas išsaugotas (užšifruotas). Jis daugiau niekada nerodomas ekrane.</string>
     <string name="api_key_status_absent">Kol kas raktas neišsaugotas</string>
+
+    <string name="label_saved_api_keys">Išsaugoti API raktai</string>
+    <string name="api_keys_multi_description">Galite išsaugoti daugiau nei vieną nemokamą Gemini API raktą. Jei aktyviam raktui baigiasi mėnesinė nemokama kvota, programa automatiškai persijungia į kitą išsaugotą raktą — be pertrūkių ir be jokių veiksmų iš jūsų pusės.</string>
+    <string name="label_add_api_key">Pridėti kitą raktą</string>
+    <string name="btn_add_api_key">Pridėti raktą</string>
+    <string name="btn_remove_api_key">Pašalinti</string>
+    <string name="api_keys_empty">Kol kas neišsaugota jokio rakto. Pridėkite jį žemiau, kad įjungtumėte vertimą.</string>
+    <string name="api_key_status_format">Išsaugota raktų: %1$d. Aktyvus: •••• %2$s</string>
+    <string name="api_key_row_label">•••• %1$s</string>
+    <string name="api_key_row_label_active">•••• %1$s  ·  aktyvus</string>
+    <string name="error_all_keys_exhausted">Visi jūsų išsaugoti raktai pasiekė šiandienos nemokamą limitą. Pridėkite kitą raktą arba palaukite, kol limitas atsinaujins.</string>
 
     <string name="label_model">Gemini modelis</string>
     <string name="hint_model">pvz., gemini-3.5-flash-lite</string>

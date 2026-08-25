@@ -14,6 +14,12 @@
     <string name="bubble_language_label">App- en vertaaltaal</string>
     <string name="bubble_language_description">Kies hier eenmalig je taal. Dit stelt zowel de standaardtaal in voor de vertaalbel bij lang drukken ALS de taal waarin de schermen van TextGate AI zelf worden weergegeven — beide veranderen samen.</string>
 
+    <string name="label_user_gender">Jouw geslacht</string>
+    <string name="user_gender_description">Wordt alleen gebruikt bij het vertalen van berichten die JIJ typt met een trigger zoals ?en of ?de, zodat werkwoorden en bijvoeglijke naamwoorden die naar jou verwijzen correct zijn in talen die dat vereisen. Wordt nooit toegepast op berichten die je ontvangt en vertaalt via lang drukken — die zijn door iemand anders geschreven.</string>
+    <string name="label_gender_auto">Automatisch / niet opgegeven</string>
+    <string name="label_gender_male">Man</string>
+    <string name="label_gender_female">Vrouw</string>
+
     <string name="section_accessibility_status">Toegankelijkheidsservice</string>
     <string name="accessibility_status_enabled">Ingeschakeld</string>
     <string name="accessibility_status_disabled">Niet ingeschakeld — TextGate AI kan niets doen totdat je het inschakelt</string>
@@ -36,6 +42,17 @@
     <string name="btn_clear_api_key">Opgeslagen sleutel verwijderen</string>
     <string name="api_key_status_present">Er is een sleutel opgeslagen (versleuteld). Deze wordt nooit meer op het scherm getoond.</string>
     <string name="api_key_status_absent">Nog geen sleutel opgeslagen</string>
+
+    <string name="label_saved_api_keys">Opgeslagen API-sleutels</string>
+    <string name="api_keys_multi_description">Je kunt meer dan één gratis Gemini API-sleutel opslaan. Als de actieve sleutel zijn maandelijkse gratis quotum heeft bereikt, schakelt de app automatisch over naar je volgende opgeslagen sleutel — zonder onderbreking, zonder dat je iets hoeft te doen.</string>
+    <string name="label_add_api_key">Nog een sleutel toevoegen</string>
+    <string name="btn_add_api_key">Sleutel toevoegen</string>
+    <string name="btn_remove_api_key">Verwijderen</string>
+    <string name="api_keys_empty">Nog geen sleutels opgeslagen. Voeg er hieronder een toe om vertalen in te schakelen.</string>
+    <string name="api_key_status_format">%1$d sleutel(s) opgeslagen. Actief: •••• %2$s</string>
+    <string name="api_key_row_label">•••• %1$s</string>
+    <string name="api_key_row_label_active">•••• %1$s  ·  actief</string>
+    <string name="error_all_keys_exhausted">Al je opgeslagen sleutels hebben de gratis limiet van vandaag bereikt. Voeg een andere sleutel toe of wacht tot het quotum wordt gereset.</string>
 
     <string name="label_model">Gemini-model</string>
     <string name="hint_model">bijv. gemini-3.5-flash-lite</string>

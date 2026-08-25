@@ -3,24 +3,50 @@
     PERMISSION AUDIT (see README.md "Permissions" section for full detail):
 
     android.permission.INTERNET
-        Required for the single, explicit HTTPS call this app ever makes:
-        POSTing the text the user selected with the "?en" trigger to the
-        Gemini API host declared in network_security_config.xml. Android has
-        no per-component INTERNET permission — it is process-wide — so it
-        cannot be scoped more tightly than the manifest level. Everywhere
-        else in the app, network access is prevented in software (see
-        NetworkAllowlist / GeminiClient) even though the OS grant is broad.
+        Required for every HTTPS/WebSocket call this app ever makes — the
+        text-translation POST to the Gemini API host, and (as of v2) the
+        Gemini Live API WebSocket connection for Rozmowa/Na żywo — both
+        restricted in software to NetworkAllowlist.GEMINI_HOST regardless
+        of this broad, process-wide OS grant (Android has no per-component
+        INTERNET permission).
 
-    No other <uses-permission> is declared. In particular this app requests
-    NONE of: contacts, SMS, call logs, location, microphone, camera,
-    storage, phone state, or QUERY_ALL_PACKAGES. The accessibility
-    capability itself is not a manifest permission the app requests — it is
-    a system-mediated grant the user enables manually in Settings, scoped by
-    accessibility_service_config.xml below.
+    android.permission.RECORD_AUDIO (v2)
+        Required for the Rozmowa and Na żywo voice-translation modes to
+        capture microphone audio. Never requested at app launch — only
+        requested the first time the user opens Rozmowa or Na żywo and
+        presses START, exactly when it is actually needed.
+
+    android.permission.FOREGROUND_SERVICE (v2)
+        Required to run LiveTranslationService (the Na żywo ambient
+        session) as a foreground service at all, so it survives
+        screen-off/backgrounding — see that service's own class doc.
+
+    android.permission.FOREGROUND_SERVICE_MICROPHONE (v2)
+        Android 14+'s mandatory, specific foreground-service TYPE
+        permission for any foreground service that captures microphone
+        audio (a plain FOREGROUND_SERVICE grant is no longer sufficient on
+        its own) — required for the Android 16 target in this manifest.
+
+    android.permission.POST_NOTIFICATIONS (v2)
+        Required (Android 13+) to show LiveTranslationService's persistent
+        "Live session active" notification — the user's second of three
+        always-visible signals that the mic is active (alongside the Na
+        żywo screen itself and Android's own system mic indicator). Runtime
+        permission, requested only when the user first starts Na żywo.
+
+    In particular this app still requests NONE of: contacts, SMS, call
+    logs, location, camera, storage, phone state, or QUERY_ALL_PACKAGES.
+    The accessibility capability itself is not a manifest permission the
+    app requests — it is a system-mediated grant the user enables manually
+    in Settings, scoped by accessibility_service_config.xml below.
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <!--
         Declarative package-visibility filter (Android 11+ / API 30+).
@@ -51,15 +77,17 @@
         android:supportsRtl="true">
 
         <!--
-            Only launcher entry point. exported="true" is required for the
-            system launcher to start it; it does not accept any external
-            Intent data or deep link (no intent-filter data scheme is
-            declared), so there is no intent-injection surface here beyond
-            "start the app," which is the intended behavior of a launcher
-            activity.
+            Only launcher entry point, as of v2 (previously SettingsActivity
+            — see that Activity's own doc comment). Hosts the bottom
+            navigation (Tłumacz / Rozmowa / Na żywo / Ustawienia).
+            exported="true" is required for the system launcher to start
+            it; it does not accept any external Intent data or deep link
+            (no intent-filter data scheme is declared), so there is no
+            intent-injection surface here beyond "start the app," which is
+            the intended behavior of a launcher activity.
         -->
         <activity
-            android:name=".settings.SettingsActivity"
+            android:name=".MainActivity"
             android:exported="true"
             android:launchMode="singleTop"
             android:windowSoftInputMode="adjustResize">
@@ -70,11 +98,25 @@
         </activity>
 
         <!--
+            As of v2, reached only from MainActivity's "Ustawienia" tab —
+            no longer the launcher. exported="false" is correct and safe:
+            nothing outside this app has any legitimate reason to start it
+            directly, same reasoning as AccessibilityDisclosureActivity
+            below.
+        -->
+        <activity
+            android:name=".settings.SettingsActivity"
+            android:exported="false"
+            android:launchMode="singleTop"
+            android:windowSoftInputMode="adjustResize" />
+
+        <!--
             Google Play's mandatory "prominent disclosure" screen for the
             Accessibility Service below (see section 0 of
             docs/publikacja_google_play.md, and this Activity's own doc
             comment). Not a launcher entry point — it is only ever started
-            from SettingsActivity, so it declares no intent-filter.
+            from SettingsActivity (reached via MainActivity's Ustawienia
+            tab), so it declares no intent-filter.
             exported="false" is correct and safe here: nothing outside this
             app has any legitimate reason to start it directly.
         -->
@@ -108,6 +150,23 @@
                 android:name="android.accessibilityservice"
                 android:resource="@xml/accessibility_service_config" />
         </service>
+
+        <!--
+            The Na żywo ambient Live-translation Foreground Service (v2) —
+            see LiveTranslationService's own class doc for its full
+            lifecycle. android:foregroundServiceType="microphone" is the
+            Android 14+/16 mandatory declaration for any foreground service
+            that captures microphone audio, paired with the
+            FOREGROUND_SERVICE_MICROPHONE permission above. exported="false":
+            only ever started from within this app (MainActivity's Na żywo
+            tab, or this service's own notification's STOP/retry actions),
+            after an explicit user START — never from another app, boot, or
+            any external Intent.
+        -->
+        <service
+            android:name=".live.LiveTranslationService"
+            android:exported="false"
+            android:foregroundServiceType="microphone" />
 
     </application>
 </manifest>

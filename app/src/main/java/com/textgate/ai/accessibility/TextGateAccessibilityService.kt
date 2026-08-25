@@ -12,7 +12,10 @@ import android.widget.Toast
 import com.textgate.ai.LocaleHelper
 import com.textgate.ai.R
 import com.textgate.ai.model.TranslationPrompts
+import com.textgate.ai.model.UserGender
 import com.textgate.ai.network.GeminiClient
+import com.textgate.ai.network.ModelAvailabilityStore
+import com.textgate.ai.network.TranslationOrchestrator
 import com.textgate.ai.security.AppSettingsStore
 import com.textgate.ai.security.BubbleTranslateGate
 import com.textgate.ai.security.EventGate
@@ -100,6 +103,7 @@ class TextGateAccessibilityService : AccessibilityService() {
 
     private lateinit var settingsStore: AppSettingsStore
     private lateinit var apiKeyStore: SecureApiKeyStore
+    private lateinit var availabilityStore: ModelAvailabilityStore
     private lateinit var eventGate: EventGate
     private lateinit var bubbleGate: BubbleTranslateGate
     private val mainHandler = Handler(Looper.getMainLooper())
@@ -138,6 +142,7 @@ class TextGateAccessibilityService : AccessibilityService() {
         super.onServiceConnected()
         settingsStore = AppSettingsStore(applicationContext)
         apiKeyStore = SecureApiKeyStore(applicationContext)
+        availabilityStore = ModelAvailabilityStore(applicationContext)
         eventGate = EventGate(settingsStore, applicationContext.packageName)
         bubbleGate = BubbleTranslateGate(settingsStore, applicationContext.packageName)
         networkExecutor = Executors.newSingleThreadExecutor()
@@ -179,6 +184,7 @@ class TextGateAccessibilityService : AccessibilityService() {
     private fun handleEvent(event: AccessibilityEvent?) {
         if (event == null) return
         if (!::settingsStore.isInitialized || !::apiKeyStore.isInitialized ||
+            !::availabilityStore.isInitialized ||
             !::eventGate.isInitialized || !::bubbleGate.isInitialized
         ) return
 
@@ -293,15 +299,19 @@ class TextGateAccessibilityService : AccessibilityService() {
         if (!requestInFlight.compareAndSet(false, true)) return
 
         try {
-            val apiKey = apiKeyStore.getApiKey()
-            if (apiKey.isNullOrBlank()) {
+            if (!apiKeyStore.hasAnyKey()) {
                 requestInFlight.set(false)
                 showToast(getString(R.string.error_no_api_key))
                 return
             }
             val model = settingsStore.selectedModel
             val target = settingsStore.bubbleTargetLanguage
-            val systemPrompt = TranslationPrompts.systemPromptFor(target)
+            // Deliberately NOT settingsStore.userGender here: [text] is a
+            // message someone else wrote (the whole point of this
+            // long-press pathway), so the phone owner's own gender
+            // preference has no bearing on it and must never be sent —
+            // see AppSettingsStore.userGender's doc comment.
+            val systemPrompt = TranslationPrompts.systemPromptFor(target, UserGender.AUTO)
 
             val executor = networkExecutor
             if (executor == null || executor.isShutdown) {
@@ -313,9 +323,10 @@ class TextGateAccessibilityService : AccessibilityService() {
 
             executor.execute {
                 val result = try {
-                    GeminiClient.translateBlocking(
-                        apiKey = apiKey,
-                        model = model,
+                    TranslationOrchestrator.translateText(
+                        apiKeyStore = apiKeyStore,
+                        availabilityStore = availabilityStore,
+                        requestedModel = model,
                         systemPrompt = systemPrompt,
                         userText = text
                     )
@@ -376,8 +387,7 @@ class TextGateAccessibilityService : AccessibilityService() {
             val currentText = node.text?.toString()
             if (currentText != originalFullText) return abort()
 
-            val apiKey = apiKeyStore.getApiKey()
-            if (apiKey.isNullOrBlank()) {
+            if (!apiKeyStore.hasAnyKey()) {
                 showToast(getString(R.string.error_no_api_key))
                 return abort()
             }
@@ -388,13 +398,39 @@ class TextGateAccessibilityService : AccessibilityService() {
 
             showToast(getString(R.string.toast_sending_to_gemini))
 
-            val systemPrompt = TranslationPrompts.systemPromptFor(target)
+            // This is the ONLY call site allowed to pass the user's own
+            // gender preference into the prompt — see AppSettingsStore.
+            // userGender's and TranslationPrompts' doc comments for why
+            // startBubbleTranslation() below must never do this.
+            //
+            // v1.7.1 correction: `content` here is whatever text currently
+            // sits before the `?xx` trigger in an editable field — it is
+            // NOT necessarily something the phone owner wrote themselves.
+            // They may have pasted someone else's message in and appended
+            // a trigger just to translate it (e.g. "I was tired yesterday
+            // ?pl"). TranslationPrompts.systemPromptFor no longer treats a
+            // declared gender as automatically belonging to the author; it
+            // also needs the user's own preferred language so Gemini can
+            // apply the declared gender only when the request shape
+            // actually looks like "the user's own outgoing message" (source
+            // language == preferred language, translating OUT to a
+            // different target) — see that function's doc comment for the
+            // full rule. Resolved here, not cached as a field: the user's
+            // language setting can change between requests, and this is a
+            // cheap local lookup — no network call, no extra AI request.
+            val userPreferredLanguage = LocaleHelper.resolvePreferredLanguage(applicationContext)
+            val systemPrompt = TranslationPrompts.systemPromptFor(
+                target = target,
+                speakerGender = settingsStore.userGender,
+                userPreferredLanguage = userPreferredLanguage
+            )
 
             executor.execute {
                 val result = try {
-                    GeminiClient.translateBlocking(
-                        apiKey = apiKey,
-                        model = model,
+                    TranslationOrchestrator.translateText(
+                        apiKeyStore = apiKeyStore,
+                        availabilityStore = availabilityStore,
+                        requestedModel = model,
                         systemPrompt = systemPrompt,
                         userText = content
                     )
@@ -476,6 +512,8 @@ class TextGateAccessibilityService : AccessibilityService() {
         is GeminiClient.Result.Failure.HttpError -> getString(R.string.error_http, failure.code)
         GeminiClient.Result.Failure.EmptyResponse -> getString(R.string.error_empty_response)
         GeminiClient.Result.Failure.MissingApiKey -> getString(R.string.error_no_api_key)
+        is GeminiClient.Result.Failure.AllKeysExhausted -> getString(R.string.error_all_keys_exhausted)
+        is GeminiClient.Result.Failure.QuotaExceeded -> getString(R.string.error_quota_exceeded)
         GeminiClient.Result.Failure.InvalidModel,
         GeminiClient.Result.Failure.InvalidResponse,
         GeminiClient.Result.Failure.HostNotAllowed -> getString(R.string.toast_translation_failed)

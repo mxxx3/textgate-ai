@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- "Tłumacz" tab (v2) — Google-Translate-style screen. Reuses the
+     existing text-translation pipeline (see TranslateTabController /
+     com.textgate.ai.network.TranslationOrchestrator) unchanged; this file
+     is presentation only. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/translateRoot"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <Spinner
+            android:id="@+id/spinnerSourceLanguage"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1" />
+
+        <ImageButton
+            android:id="@+id/buttonSwapLanguages"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginStart="4dp"
+            android:layout_marginEnd="4dp"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_swap"
+            android:contentDescription="@string/translate_swap_content_description" />
+
+        <Spinner
+            android:id="@+id/spinnerTargetLanguage"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:orientation="vertical"
+        android:background="@drawable/bg_card">
+
+        <EditText
+            android:id="@+id/editSourceText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minLines="4"
+            android:maxLines="8"
+            android:gravity="top|start"
+            android:background="@null"
+            android:hint="@string/translate_hint_source"
+            android:inputType="textMultiLine|textCapSentences"
+            android:importantForAutofill="no" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:orientation="horizontal"
+            android:gravity="end|center_vertical">
+
+            <ImageButton
+                android:id="@+id/buttonMicInput"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_mic"
+                android:contentDescription="@string/translate_mic_content_description" />
+
+            <ImageButton
+                android:id="@+id/buttonClearSource"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:layout_marginStart="4dp"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_clear"
+                android:contentDescription="@string/translate_clear_content_description" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginTop="12dp"
+        android:orientation="vertical"
+        android:background="@drawable/bg_card">
+
+        <TextView
+            android:id="@+id/textTranslationResult"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:scrollbars="vertical"
+            android:textColor="@color/tg_text_primary"
+            android:textSize="16sp"
+            android:hint="@string/translate_hint_result"
+            android:textColorHint="@color/tg_text_secondary" />
+
+        <ProgressBar
+            android:id="@+id/progressTranslating"
+            style="?android:attr/progressBarStyleSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="start"
+            android:visibility="gone" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:orientation="horizontal"
+            android:gravity="end|center_vertical">
+
+            <ImageButton
+                android:id="@+id/buttonCopyResult"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_copy"
+                android:contentDescription="@string/translate_copy_content_description" />
+
+            <ImageButton
+                android:id="@+id/buttonSpeakResult"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:layout_marginStart="4dp"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_speaker"
+                android:contentDescription="@string/translate_speak_content_description" />
+        </LinearLayout>
+    </LinearLayout>
+
+</LinearLayout>

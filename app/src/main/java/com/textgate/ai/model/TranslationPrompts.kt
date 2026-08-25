@@ -22,28 +22,161 @@ import com.textgate.ai.security.TriggerDetector
  * comes back in — Gemini still returns the translation in the target
  * language's own script, exactly as it did for the original two
  * hand-written prompts.
+ *
+ * v1.7.0 rewrote the prompt body to be much more explicit about what must
+ * be PRESERVED rather than "improved": exact meaning, grammatical number,
+ * person, tense, any gender the source itself expresses, tone, and
+ * formality; no invented context; no silent singular/plural flips; source
+ * ambiguity kept as ambiguity when the target language allows it; proper
+ * nouns, @mentions, URLs, numbers, emoji, and formatting left untouched
+ * unless the translation itself requires a change. This was tightened
+ * specifically because a translation model given only "translate this
+ * naturally" instructions has room to over-localize — smoothing over
+ * exactly the kind of detail (a plural the user meant as a plural, an
+ * intentionally vague pronoun) that changes what the message actually
+ * says. See README.md's changelog entry for this version for the full
+ * rationale and the real-world complaint that prompted it.
+ *
+ * v1.7.1 corrected a wrong assumption baked into v1.7.0's gender handling:
+ * text reaching the typed-trigger pipeline (`?en`, `?pl`, ...) is NOT
+ * necessarily something the app owner wrote themselves — they may have
+ * pasted someone else's message in and appended a trigger just to
+ * translate it. [systemPromptFor] no longer tells Gemini "the author is
+ * X" unconditionally whenever a gender is declared; it now also takes
+ * [userPreferredLanguage] and instructs Gemini to apply the declared
+ * gender to the speaker/author ONLY when the (already self-detected, per
+ * the base prompt's own "detect it automatically" instruction) source
+ * language matches the user's own preferred language AND the translation
+ * target is a different language — i.e. only when the shape of the
+ * request looks like "I wrote this myself, translate it out," never when
+ * it looks like "someone sent me this in another language, translate it
+ * in" or any other shape. See [systemPromptFor]'s own doc comment for the
+ * full rule and README.md's changelog entry for this version for the
+ * worked examples that motivated it.
  */
 object TranslationPrompts {
 
     /** Not user-editable in v1 (this remains true post-v1.4.0) — the
-     * wording is fixed and auditable, only the target language name is a
-     * variable. */
-    fun systemPromptFor(target: TriggerDetector.Target): String {
+     * wording is fixed and auditable. The target language name, the
+     * speaker's declared gender, and (since v1.7.1) the user's own
+     * preferred language are the only variables.
+     *
+     * [speakerGender] defaults to [UserGender.AUTO] (i.e. "say nothing
+     * about it") so every existing call site that has no business knowing
+     * the phone owner's gender — the long-press "translate a received
+     * message" bubble, and the fixed non-sensitive "Test API" string in
+     * SettingsActivity — keeps working unchanged. Only
+     * [com.textgate.ai.accessibility.TextGateAccessibilityService.confirmAndProcess]
+     * (the typed `?xx`-trigger path) is meant to ever pass
+     * [UserGender.MALE] or [UserGender.FEMALE] here — see that function's
+     * own comment.
+     *
+     * [userPreferredLanguage] is the app owner's own preferred/primary
+     * language — [com.textgate.ai.security.AppSettingsStore.appInterfaceLanguage]
+     * resolved to a concrete [SupportedLanguage], see
+     * [com.textgate.ai.LocaleHelper.resolvePreferredLanguage] — and is only
+     * ever consulted when [speakerGender] is not [UserGender.AUTO]: it is
+     * the fact the "was this plausibly the user's own outgoing message, or
+     * text they pasted in from someone else" rule below is checked
+     * against. If a caller passes a non-[UserGender.AUTO] gender but
+     * leaves this `null` (it should never happen — the one real caller
+     * always resolves it first — but this function must still not guess),
+     * the safe fallback is to omit the gender clause entirely, exactly as
+     * if [UserGender.AUTO] had been passed: see the `?: return base` below.
+     */
+    fun systemPromptFor(
+        target: TriggerDetector.Target,
+        speakerGender: UserGender = UserGender.AUTO,
+        userPreferredLanguage: SupportedLanguage? = null
+    ): String {
         val name = (Languages.byCode(target.code) ?: Languages.DEFAULT).englishName
-        return "Translate the provided text into natural, conversational $name. " +
-            "The source text may be in any language — detect it automatically; if it is " +
-            "already $name, lightly polish the phrasing rather than leaving it unchanged. " +
-            "Preserve the intended meaning, context, emotional tone, and level of formality. " +
-            "Do not translate literally when a native $name speaker would use a different " +
-            "expression. Prefer idiomatic everyday $name. Do not add information that is not " +
-            "present in the original. Return only the translated text without quotation marks, " +
-            "explanations, labels, or commentary."
+
+        val base = "Translate the provided text into natural, idiomatic, conversational " +
+            "$name — exactly as a native $name speaker would actually say it, not a " +
+            "literal word-for-word rendering.\n\n" +
+            "The source text may be in any language; detect it automatically. If it is " +
+            "already written in $name, do not translate it — only correct grammar, " +
+            "spelling, and phrasing so it reads naturally, without changing its meaning.\n\n" +
+            "Preserve exactly: the intended meaning, grammatical number (singular vs. " +
+            "plural), grammatical person, tense, any gender the source text itself " +
+            "explicitly expresses or clearly implies, tone, and level of formality. Never " +
+            "invent information, context, or detail that is not present in the source. " +
+            "Never change a singular to a plural or a plural to a singular. If the source " +
+            "is ambiguous in a way the target language also allows to remain ambiguous, " +
+            "preserve that same ambiguity rather than resolving it — do not guess.\n\n" +
+            "Keep unchanged, exactly as written, unless the translation itself requires a " +
+            "change: proper nouns and names, usernames and @mentions, URLs and links, " +
+            "numbers, emoji, and any existing formatting or line breaks.\n\n" +
+            "Return only the finished translated text. Do not include quotation marks, " +
+            "labels, explanations, notes, alternative versions, or any other commentary " +
+            "— nothing but the translation itself."
+
+        // AUTO ("Automatyczna/nieokreślona") means the user deliberately
+        // declared no preference — say nothing about gender at all, rather
+        // than passing some default guess into the prompt.
+        val genderWord = when (speakerGender) {
+            UserGender.AUTO -> return base
+            UserGender.MALE -> "male"
+            UserGender.FEMALE -> "female"
+        }
+
+        // v1.7.1: text reaching this function is NOT necessarily something
+        // the app owner wrote themselves — they may have pasted someone
+        // else's message in and appended a trigger just to translate it
+        // (see the class doc's v1.7.1 note for the real-world example that
+        // exposed this). Without knowing the user's own preferred
+        // language, the "does this look like the user's own outgoing
+        // message" rule below cannot be evaluated at all — falling back to
+        // the ungendered base prompt is the safe choice (never guess),
+        // exactly like the AUTO branch above.
+        val preferredName = userPreferredLanguage?.englishName ?: return base
+
+        // The conditional rule below still deliberately leaves "does this
+        // target language even grammatically mark speaker gender" to
+        // Gemini itself, for the same reason as before v1.7.1: this app
+        // supports 40 target languages, most of which do NOT grammatically
+        // mark a first-person speaker's gender at all (English, Chinese,
+        // Turkish, Finnish, ...), and hand-maintaining a per-language
+        // lookup table would duplicate exactly the kind of unmaintainable,
+        // error-prone list this object's own class doc already warns
+        // against. What v1.7.1 adds on top is a second, independent gate —
+        // "does this even look like the user's own message" — which is NOT
+        // a linguistic judgment call the model needs to make; it is a
+        // simple language-equality check this prompt gives Gemini the two
+        // facts (preferred language, target language) to perform itself,
+        // using the source-language detection the base prompt above
+        // already asks for. No separate detection request is made for
+        // this — it rides along on the one translation request.
+        return base + "\n\n" +
+            "The person using this translator has set their own gender as $genderWord, " +
+            "and their preferred/primary language is $preferredName. Automatically " +
+            "detect the source language of the text below, as already instructed. Treat " +
+            "the declared gender as the AUTHOR's gender ONLY when both of the following " +
+            "hold: the detected source language is $preferredName, AND the translation " +
+            "target ($name) is a different language from $preferredName. In that case, " +
+            "apply the declared gender only to grammatical forms that refer directly to " +
+            "the speaker/author (for example first-person verb agreement, past-tense or " +
+            "perfective participles, or adjectives describing the speaker — the kind of " +
+            "form languages like Polish inflect for \"I was\"/\"tired\"). If the source " +
+            "text is not in $preferredName, or the translation target is $preferredName " +
+            "itself, do NOT apply the declared gender at all — text like that may have " +
+            "been written by someone else and simply pasted in for translation, not by " +
+            "the person using this translator. Regardless of whether it applies, never " +
+            "use the declared gender to infer, assume, or change the gender of anyone " +
+            "else mentioned in the text — every other person's gender, and their " +
+            "grammatical number, must be preserved exactly as the source expresses it, " +
+            "or left unspecified if the source does not specify it. If the source text " +
+            "gives no gender information and the conditions above do not allow safely " +
+            "applying the declared gender, do not guess — preserve the ambiguity, or use " +
+            "the most natural gender-neutral construction the target language allows."
     }
 
     /** Kept for source compatibility with anything still constructing the
      * original two prompts directly (e.g. SettingsActivity's "Test API
      * connection" button, which always tests with a fixed, non-sensitive
-     * string regardless of the user's chosen target language). */
+     * string regardless of the user's chosen target language or gender
+     * preference — [speakerGender] intentionally defaults to
+     * [UserGender.AUTO] here). */
     val EN_TRANSLATION_SYSTEM_PROMPT: String get() = systemPromptFor(TriggerDetector.Target.ENGLISH)
     val PL_TRANSLATION_SYSTEM_PROMPT: String get() = systemPromptFor(TriggerDetector.Target.POLISH)
 }

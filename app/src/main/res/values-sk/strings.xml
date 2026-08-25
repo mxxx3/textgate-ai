@@ -14,6 +14,12 @@
     <string name="bubble_language_label">Jazyk aplikácie &amp; prekladu</string>
     <string name="bubble_language_description">Tu si raz zvoľte svoj jazyk. Nastavuje predvolený jazyk pre bublinu prekladu pri dlhom podržaní A zároveň jazyk, v ktorom sa zobrazujú vlastné obrazovky TextGate AI — obe sa menia spoločne.</string>
 
+    <string name="label_user_gender">Vaše pohlavie</string>
+    <string name="user_gender_description">Používa sa iba pri preklade správ, ktoré VY sami píšete pomocou spúšťača, napríklad ?en alebo ?de, aby slovesá a prídavné mená vzťahujúce sa na vás vyzneli správne v jazykoch, ktoré si to vyžadujú. Nikdy sa neuplatňuje na správy, ktoré prijímate a prekladáte dlhým podržaním — tie napísal niekto iný.</string>
+    <string name="label_gender_auto">Automaticky / neurčené</string>
+    <string name="label_gender_male">Muž</string>
+    <string name="label_gender_female">Žena</string>
+
     <string name="section_accessibility_status">Služba zjednodušenia ovládania</string>
     <string name="accessibility_status_enabled">Zapnuté</string>
     <string name="accessibility_status_disabled">Nezapnuté — TextGate AI nemôže nič robiť, kým ju nezapnete</string>
@@ -37,6 +43,17 @@
     <string name="btn_clear_api_key">Odstrániť uložený kľúč</string>
     <string name="api_key_status_present">Kľúč je uložený (zašifrovaný). Na obrazovke sa už nikdy nezobrazí.</string>
     <string name="api_key_status_absent">Zatiaľ nie je uložený žiadny kľúč</string>
+
+    <string name="label_saved_api_keys">Uložené kľúče API</string>
+    <string name="api_keys_multi_description">Môžete uložiť viac ako jeden bezplatný kľúč API Gemini. Ak aktívnemu kľúču dôjde mesačná bezplatná kvóta, aplikácia automaticky prepne na ďalší uložený kľúč — bez prerušenia a bez toho, aby ste museli čokoľvek robiť.</string>
+    <string name="label_add_api_key">Pridať ďalší kľúč</string>
+    <string name="btn_add_api_key">Pridať kľúč</string>
+    <string name="btn_remove_api_key">Odstrániť</string>
+    <string name="api_keys_empty">Zatiaľ nie je uložený žiadny kľúč. Pridajte ho nižšie a povoľte tak preklad.</string>
+    <string name="api_key_status_format">Uložené kľúče: %1$d. Aktívny: •••• %2$s</string>
+    <string name="api_key_row_label">•••• %1$s</string>
+    <string name="api_key_row_label_active">•••• %1$s  ·  aktívny</string>
+    <string name="error_all_keys_exhausted">Všetky vaše uložené kľúče dosiahli dnešný bezplatný limit. Pridajte ďalší kľúč alebo počkajte na obnovenie kvóty.</string>
 
     <string name="label_model">Model Gemini</string>
     <string name="hint_model">napr. gemini-3.5-flash-lite</string>

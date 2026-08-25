@@ -14,6 +14,12 @@
     <string name="bubble_language_label">ऐप और अनुवाद की भाषा</string>
     <string name="bubble_language_description">अपनी भाषा यहाँ एक बार चुनें। यह देर तक दबाने पर दिखने वाले अनुवाद बबल की डिफ़ॉल्ट भाषा और TextGate AI की अपनी स्क्रीन जिस भाषा में दिखाई जाती हैं, दोनों तय करती है — दोनों साथ-साथ बदलती हैं।</string>
 
+    <string name="label_user_gender">आपका लिंग</string>
+    <string name="user_gender_description">इसका उपयोग केवल तब होता है जब आप स्वयं ?en या ?de जैसे ट्रिगर से कोई संदेश लिखकर उसका अनुवाद करते हैं, ताकि आपसे जुड़ी क्रियाएँ और विशेषण उन भाषाओं में सही रूप में आएं जिन्हें इसकी आवश्यकता है। यह उन संदेशों पर कभी लागू नहीं होता जिन्हें आप प्राप्त करके देर तक दबाकर अनुवाद करते हैं — वे किसी और ने लिखे होते हैं।</string>
+    <string name="label_gender_auto">स्वचालित / अनिर्दिष्ट</string>
+    <string name="label_gender_male">पुरुष</string>
+    <string name="label_gender_female">महिला</string>
+
     <string name="section_accessibility_status">एक्सेसिबिलिटी सेवा</string>
     <string name="accessibility_status_enabled">सक्षम है</string>
     <string name="accessibility_status_disabled">सक्षम नहीं है — जब तक आप इसे सक्षम नहीं करते, TextGate AI कुछ भी नहीं कर सकता</string>
@@ -36,6 +42,17 @@
     <string name="btn_clear_api_key">सहेजी गई कुंजी हटाएं</string>
     <string name="api_key_status_present">एक कुंजी सहेजी गई है (एन्क्रिप्टेड)। यह स्क्रीन पर दोबारा कभी नहीं दिखाई जाती।</string>
     <string name="api_key_status_absent">अभी तक कोई कुंजी सहेजी नहीं गई है</string>
+
+    <string name="label_saved_api_keys">सहेजी गई API कुंजियाँ</string>
+    <string name="api_keys_multi_description">आप एक से अधिक मुफ़्त Gemini API कुंजियाँ सहेज सकते हैं। यदि सक्रिय कुंजी का मासिक मुफ़्त कोटा समाप्त हो जाता है, तो ऐप स्वचालित रूप से आपकी अगली सहेजी गई कुंजी पर स्विच हो जाता है — कोई रुकावट नहीं, आपको कुछ नहीं करना होगा।</string>
+    <string name="label_add_api_key">एक और कुंजी जोड़ें</string>
+    <string name="btn_add_api_key">कुंजी जोड़ें</string>
+    <string name="btn_remove_api_key">हटाएं</string>
+    <string name="api_keys_empty">अभी तक कोई कुंजी सहेजी नहीं गई है। अनुवाद सक्षम करने के लिए नीचे एक जोड़ें।</string>
+    <string name="api_key_status_format">%1$d कुंजी(याँ) सहेजी गईं। सक्रिय: •••• %2$s</string>
+    <string name="api_key_row_label">•••• %1$s</string>
+    <string name="api_key_row_label_active">•••• %1$s  ·  सक्रिय</string>
+    <string name="error_all_keys_exhausted">आपकी सभी सहेजी गई कुंजियाँ आज की मुफ़्त सीमा तक पहुँच गई हैं। एक और कुंजी जोड़ें, या कोटा रीसेट होने की प्रतीक्षा करें।</string>
 
     <string name="label_model">Gemini मॉडल</string>
     <string name="hint_model">जैसे gemini-3.5-flash-lite</string>

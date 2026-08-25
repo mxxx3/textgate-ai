@@ -14,6 +14,12 @@
     <string name="bubble_language_label">Alkalmazás- és fordítási nyelv</string>
     <string name="bubble_language_description">Itt egyszer válassza ki a nyelvét. Ez határozza meg a hosszú megnyomásra megjelenő fordítási buborék alapértelmezett nyelvét ÉS azt a nyelvet is, amelyen a TextGate AI saját képernyői megjelennek — a kettő együtt változik.</string>
 
+    <string name="label_user_gender">Az Ön neme</string>
+    <string name="user_gender_description">Csak akkor kerül felhasználásra, amikor az ÖN által egy aktiválóval, például ?en vagy ?de, írt üzeneteket fordítjuk, hogy az Önre vonatkozó igék és melléknevek helyesen jelenjenek meg azokban a nyelvekben, ahol ez szükséges. Soha nem alkalmazzuk azokra az üzenetekre, amelyeket Ön kap és hosszú megnyomással fordít le — azokat valaki más írta.</string>
+    <string name="label_gender_auto">Automatikus / nincs megadva</string>
+    <string name="label_gender_male">Férfi</string>
+    <string name="label_gender_female">Nő</string>
+
     <string name="section_accessibility_status">Kisegítő lehetőségek szolgáltatás</string>
     <string name="accessibility_status_enabled">Engedélyezve</string>
     <string name="accessibility_status_disabled">Nincs engedélyezve — a TextGate AI semmit sem tud tenni, amíg nem engedélyezi</string>
@@ -36,6 +42,17 @@
     <string name="btn_clear_api_key">Mentett kulcs eltávolítása</string>
     <string name="api_key_status_present">Egy kulcs el van mentve (titkosítva). Ez soha többé nem jelenik meg a képernyőn.</string>
     <string name="api_key_status_absent">Még nincs elmentett kulcs</string>
+
+    <string name="label_saved_api_keys">Mentett API-kulcsok</string>
+    <string name="api_keys_multi_description">Egynél több ingyenes Gemini API-kulcsot is elmenthetsz. Ha az aktív kulcs eléri a havi ingyenes kvótáját, az alkalmazás automatikusan átvált a következő mentett kulcsra — megszakítás nélkül, teendőd nincs.</string>
+    <string name="label_add_api_key">Másik kulcs hozzáadása</string>
+    <string name="btn_add_api_key">Kulcs hozzáadása</string>
+    <string name="btn_remove_api_key">Eltávolítás</string>
+    <string name="api_keys_empty">Még nincs elmentett kulcs. Adj hozzá egyet alább a fordítás engedélyezéséhez.</string>
+    <string name="api_key_status_format">%1$d kulcs mentve. Aktív: •••• %2$s</string>
+    <string name="api_key_row_label">•••• %1$s</string>
+    <string name="api_key_row_label_active">•••• %1$s  ·  aktív</string>
+    <string name="error_all_keys_exhausted">Az összes mentett kulcsod elérte a mai ingyenes limitet. Adj hozzá egy másikat, vagy várj a kvóta megújulására.</string>
 
     <string name="label_model">Gemini modell</string>
     <string name="hint_model">pl. gemini-3.5-flash-lite</string>

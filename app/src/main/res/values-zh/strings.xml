@@ -14,6 +14,12 @@
     <string name="bubble_language_label">应用和翻译语言</string>
     <string name="bubble_language_description">只需在此处选择一次您的语言。它会同时设置长按翻译气泡使用的默认语言,以及 TextGate AI 自身界面所使用的显示语言——两者会一起改变。</string>
 
+    <string name="label_user_gender">您的性別</string>
+    <string name="user_gender_description">僅在翻譯您自己使用 ?en 或 ?de 等觸發詞輸入的訊息時使用,以便在需要區分性別的語言中,涉及您的動詞和形容詞能夠正確顯示。絕不會用於您透過長按接收並翻譯的訊息——那些是他人所寫。</string>
+    <string name="label_gender_auto">自動/未指定</string>
+    <string name="label_gender_male">男</string>
+    <string name="label_gender_female">女</string>
+
     <string name="section_accessibility_status">无障碍服务</string>
     <string name="accessibility_status_enabled">已启用</string>
     <string name="accessibility_status_disabled">未启用——在您启用之前,TextGate AI 无法执行任何操作</string>
@@ -36,6 +42,17 @@
     <string name="btn_clear_api_key">移除已保存的密钥</string>
     <string name="api_key_status_present">已保存密钥(已加密)。该密钥不会再次显示在屏幕上。</string>
     <string name="api_key_status_absent">尚未保存密钥</string>
+
+    <string name="label_saved_api_keys">已儲存的 API 金鑰</string>
+    <string name="api_keys_multi_description">您可以儲存多個免費的 Gemini API 金鑰。當前使用的金鑰每月免費額度用完後,應用程式會自動切換到您儲存的下一個金鑰——不會中斷,也無需任何操作。</string>
+    <string name="label_add_api_key">新增其他金鑰</string>
+    <string name="btn_add_api_key">新增金鑰</string>
+    <string name="btn_remove_api_key">移除</string>
+    <string name="api_keys_empty">尚未儲存任何金鑰。請在下方新增一個以啟用翻譯。</string>
+    <string name="api_key_status_format">已儲存 %1$d 個金鑰。目前使用:•••• %2$s</string>
+    <string name="api_key_row_label">•••• %1$s</string>
+    <string name="api_key_row_label_active">•••• %1$s  ·  使用中</string>
+    <string name="error_all_keys_exhausted">您儲存的所有金鑰今天的免費額度都已用完。請新增其他金鑰,或等待額度重置。</string>
 
     <string name="label_model">Gemini 模型</string>
     <string name="hint_model">例如 gemini-3.5-flash-lite</string>

@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- "Rozmowa" tab (v2) — two-person live conversation translation via
+     Gemini Live API (see ConversationTabController / GeminiLiveClient).
+     Foreground-only: closes automatically if the user leaves this tab or
+     backgrounds the app — see ConversationTabController's class doc for
+     why this is deliberately NOT backed by a Foreground Service the way
+     Na żywo is. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/conversationRoot"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <Spinner
+            android:id="@+id/spinnerLanguageA"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1" />
+
+        <ImageButton
+            android:id="@+id/buttonSwapDirection"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginStart="4dp"
+            android:layout_marginEnd="4dp"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_swap"
+            android:contentDescription="@string/conversation_swap_direction" />
+
+        <Spinner
+            android:id="@+id/spinnerLanguageB"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/textConversationDirection"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:gravity="center"
+        android:textColor="@color/tg_text_secondary"
+        android:textSize="13sp" />
+
+    <TextView
+        android:id="@+id/textConversationStatus"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:gravity="center"
+        android:textColor="@color/tg_primary"
+        android:textStyle="bold"
+        android:textSize="14sp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginTop="12dp"
+        android:orientation="vertical"
+        android:background="@drawable/bg_card">
+
+        <TextView
+            android:id="@+id/labelConversationInput"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/conversation_label_original"
+            android:textColor="@color/tg_text_secondary"
+            android:textSize="12sp" />
+
+        <TextView
+            android:id="@+id/textConversationInputTranscript"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:textColor="@color/tg_text_primary"
+            android:textSize="16sp" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="12dp"
+            android:background="@color/tg_divider" />
+
+        <TextView
+            android:id="@+id/labelConversationOutput"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/conversation_label_translation"
+            android:textColor="@color/tg_text_secondary"
+            android:textSize="12sp" />
+
+        <TextView
+            android:id="@+id/textConversationOutputTranscript"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:layout_marginTop="4dp"
+            android:scrollbars="vertical"
+            android:textColor="@color/tg_text_primary"
+            android:textSize="16sp" />
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/buttonConversationStartStop"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:text="@string/conversation_button_start" />
+
+</LinearLayout>

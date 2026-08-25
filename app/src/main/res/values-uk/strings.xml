@@ -14,6 +14,12 @@
     <string name="bubble_language_label">Мова застосунку й перекладу</string>
     <string name="bubble_language_description">Оберіть свою мову тут один раз. Вона встановлює мову за замовчуванням для спливаючої бульбашки перекладу при довгому натисканні, А ТАКОЖ мову, якою відображаються власні екрани TextGate AI, — обидва параметри змінюються разом.</string>
 
+    <string name="label_user_gender">Ваша стать</string>
+    <string name="user_gender_description">Використовується лише під час перекладу повідомлень, які ВИ пишете за допомогою тригера, наприклад ?en або ?de, щоб дієслова та прикметники, що стосуються вас, звучали правильно в мовах, які цього потребують. Ніколи не застосовується до повідомлень, які ви отримуєте й перекладаєте довгим натисканням — їх написала інша людина.</string>
+    <string name="label_gender_auto">Автоматично / не вказано</string>
+    <string name="label_gender_male">Чоловік</string>
+    <string name="label_gender_female">Жінка</string>
+
     <string name="section_accessibility_status">Служба спеціальних можливостей</string>
     <string name="accessibility_status_enabled">Увімкнено</string>
     <string name="accessibility_status_disabled">Не ввімкнено — TextGate AI нічого не може робити, доки ви її не ввімкнете</string>
@@ -36,6 +42,17 @@
     <string name="btn_clear_api_key">Видалити збережений ключ</string>
     <string name="api_key_status_present">Ключ збережено (зашифровано). Він більше ніколи не показується на екрані.</string>
     <string name="api_key_status_absent">Ключ ще не збережено</string>
+
+    <string name="label_saved_api_keys">Збережені ключі API</string>
+    <string name="api_keys_multi_description">Ви можете зберегти більше одного безкоштовного ключа API Gemini. Якщо в активного ключа закінчується місячна безкоштовна квота, застосунок автоматично переходить на наступний збережений ключ — без переривань і без жодних дій з вашого боку.</string>
+    <string name="label_add_api_key">Додати ще один ключ</string>
+    <string name="btn_add_api_key">Додати ключ</string>
+    <string name="btn_remove_api_key">Видалити</string>
+    <string name="api_keys_empty">Ще немає збережених ключів. Додайте один нижче, щоб увімкнути переклад.</string>
+    <string name="api_key_status_format">Збережено ключів: %1$d. Активний: •••• %2$s</string>
+    <string name="api_key_row_label">•••• %1$s</string>
+    <string name="api_key_row_label_active">•••• %1$s  ·  активний</string>
+    <string name="error_all_keys_exhausted">Усі ваші збережені ключі досягли сьогоднішнього безкоштовного ліміту. Додайте ще один ключ або зачекайте на оновлення квоти.</string>
 
     <string name="label_model">Модель Gemini</string>
     <string name="hint_model">напр., gemini-3.5-flash-lite</string>

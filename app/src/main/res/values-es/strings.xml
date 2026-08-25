@@ -14,6 +14,12 @@
     <string name="bubble_language_label">Idioma de la aplicación y de traducción</string>
     <string name="bubble_language_description">Elige tu idioma una sola vez aquí. Este ajuste establece tanto el idioma predeterminado de la burbuja de traducción al mantener pulsado COMO el idioma en el que se muestran las propias pantallas de TextGate AI: ambos cambian juntos.</string>
 
+    <string name="label_user_gender">Tu género</string>
+    <string name="user_gender_description">Se usa solo al traducir los mensajes que escribes TÚ con una activación como ?en o ?de, para que los verbos y adjetivos que se refieren a ti sean correctos en los idiomas que lo requieren. Nunca se aplica a los mensajes que recibes y traduces manteniendo pulsado — esos los escribió otra persona.</string>
+    <string name="label_gender_auto">Automático / sin especificar</string>
+    <string name="label_gender_male">Hombre</string>
+    <string name="label_gender_female">Mujer</string>
+
     <string name="section_accessibility_status">Servicio de accesibilidad</string>
     <string name="accessibility_status_enabled">Activado</string>
     <string name="accessibility_status_disabled">No activado: TextGate AI no puede hacer nada hasta que lo actives</string>
@@ -37,6 +43,17 @@
     <string name="btn_clear_api_key">Eliminar clave guardada</string>
     <string name="api_key_status_present">Hay una clave guardada (cifrada). Nunca volverá a mostrarse en pantalla.</string>
     <string name="api_key_status_absent">Aún no se ha guardado ninguna clave</string>
+
+    <string name="label_saved_api_keys">Claves de API guardadas</string>
+    <string name="api_keys_multi_description">Puedes guardar más de una clave de API gratuita de Gemini. Si la clave activa agota su cuota gratuita mensual, la app cambia automáticamente a tu siguiente clave guardada, sin interrupciones y sin que tengas que hacer nada.</string>
+    <string name="label_add_api_key">Añadir otra clave</string>
+    <string name="btn_add_api_key">Añadir clave</string>
+    <string name="btn_remove_api_key">Quitar</string>
+    <string name="api_keys_empty">Aún no se ha guardado ninguna clave. Añade una abajo para activar la traducción.</string>
+    <string name="api_key_status_format">Claves guardadas: %1$d. Activa: •••• %2$s</string>
+    <string name="api_key_row_label">•••• %1$s</string>
+    <string name="api_key_row_label_active">•••• %1$s  ·  activa</string>
+    <string name="error_all_keys_exhausted">Todas tus claves guardadas han alcanzado el límite gratuito de hoy. Añade otra clave o espera a que se restablezca la cuota.</string>
 
     <string name="label_model">Modelo de Gemini</string>
     <string name="hint_model">p. ej., gemini-3.5-flash-lite</string>

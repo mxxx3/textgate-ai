@@ -14,6 +14,12 @@
     <string name="bubble_language_label">زبان برنامه و ترجمه</string>
     <string name="bubble_language_description">زبان خود را یک‌بار در همین‌جا انتخاب کنید. این هم زبان پیش‌فرض حباب ترجمهٔ فشار طولانی و هم زبانی را که صفحات خود TextGate AI با آن نمایش داده می‌شوند تعیین می‌کند — هر دو با هم تغییر می‌کنند.</string>
 
+    <string name="label_user_gender">جنسیت شما</string>
+    <string name="user_gender_description">فقط هنگام ترجمهٔ پیام‌هایی که خودِ شما با یک فعال‌ساز مانند ?en یا ?de تایپ می‌کنید استفاده می‌شود، تا فعل‌ها و صفت‌های مربوط به شما در زبان‌هایی که به آن نیاز دارند درست بیایند. هرگز برای پیام‌هایی که دریافت می‌کنید و با فشار طولانی ترجمه می‌کنید اعمال نمی‌شود — آن‌ها را شخص دیگری نوشته است.</string>
+    <string name="label_gender_auto">خودکار / نامشخص</string>
+    <string name="label_gender_male">مرد</string>
+    <string name="label_gender_female">زن</string>
+
     <string name="section_accessibility_status">سرویس دسترس‌پذیری</string>
     <string name="accessibility_status_enabled">فعال</string>
     <string name="accessibility_status_disabled">فعال نیست — TextGate AI تا زمانی که آن را فعال نکنید نمی‌تواند کاری انجام دهد</string>
@@ -37,6 +43,17 @@
     <string name="btn_clear_api_key">حذف کلید ذخیره‌شده</string>
     <string name="api_key_status_present">یک کلید ذخیره شده است (رمزگذاری‌شده). این کلید دیگر هرگز روی صفحه نمایش داده نمی‌شود.</string>
     <string name="api_key_status_absent">هنوز کلیدی ذخیره نشده است</string>
+
+    <string name="label_saved_api_keys">کلیدهای API ذخیره‌شده</string>
+    <string name="api_keys_multi_description">می‌توانید بیش از یک کلید رایگان API Gemini ذخیره کنید. اگر سهمیهٔ رایگان ماهانهٔ کلید فعال تمام شود، برنامه به‌طور خودکار به کلید ذخیره‌شدهٔ بعدی شما تغییر می‌کند — بدون وقفه و بدون نیاز به هیچ کاری از سوی شما.</string>
+    <string name="label_add_api_key">افزودن کلید دیگر</string>
+    <string name="btn_add_api_key">افزودن کلید</string>
+    <string name="btn_remove_api_key">حذف</string>
+    <string name="api_keys_empty">هنوز هیچ کلیدی ذخیره نشده است. برای فعال کردن ترجمه، یکی را در پایین اضافه کنید.</string>
+    <string name="api_key_status_format">تعداد کلیدهای ذخیره‌شده: %1$d. کلید فعال: •••• %2$s</string>
+    <string name="api_key_row_label">•••• %1$s</string>
+    <string name="api_key_row_label_active">•••• %1$s  ·  فعال</string>
+    <string name="error_all_keys_exhausted">همهٔ کلیدهای ذخیره‌شدهٔ شما به سقف رایگان امروز رسیده‌اند. کلید دیگری اضافه کنید یا صبر کنید تا سهمیه بازنشانی شود.</string>
 
     <string name="label_model">مدل Gemini</string>
     <string name="hint_model">مثلاً gemini-3.5-flash-lite</string>

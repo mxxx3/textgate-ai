@@ -1857,6 +1857,262 @@ string to revisit, and per-locale translation of `app_name` (e.g.
 "Translator TextGate AI" for English) is a straightforward follow-up if
 wanted.
 
+**Multiple Gemini API keys with automatic rotation (v1.6.0).** A single
+Gemini API key's free tier is capped at a modest number of requests per
+month, which a regular user of the long-press "translate a received
+message" bubble can exhaust well before the month is over. Rather than
+build any kind of paid-tier billing integration, `SecureApiKeyStore` was
+rewritten to hold an ORDERED LIST of independently encrypted keys instead
+of a single one, and a new `KeyRotationTranslator` object transparently
+tries the user's next saved key whenever the currently active one comes
+back HTTP 429 (Gemini's quota-exceeded response) — so translation keeps
+working for as long as *any* of the user's saved free-tier keys still has
+headroom, without the user ever having to notice a failure or manually
+switch keys themselves.
+
+**What changed, file by file:**
+
+- `SecureApiKeyStore.kt` — completely rewritten. Each key is still
+  encrypted with the same single Keystore-resident AES-256-GCM wrapping
+  key as before (`KeystoreCrypto`) — one wrapping key safely seals many
+  independent (iv, ciphertext) pairs, since GCM's security only requires a
+  fresh random IV per encryption, which `KeystoreCrypto.encrypt` already
+  guarantees on every call. Keys are addressed by an internally generated
+  random id (never derived from the key itself) and kept in an ordered
+  JSON id-list (`org.json.JSONArray`, already part of the Android SDK —
+  no new dependency). New public API: `listKeys()`, `keyCount()`,
+  `hasAnyKey()`, `addKey(CharArray): Boolean` (appends; only the very
+  first key ever added becomes active automatically), `removeKey(id)`,
+  `clearAllKeys()`, `activeKeyId()`, `getActiveKeyPlaintext()`, and
+  `advanceActiveKey()` (moves the active pointer to the next key in
+  add-order, wrapping back to the first after the last). The old
+  single-key methods (`saveApiKey`/`getApiKey`/`hasApiKey`/`clearApiKey`)
+  no longer exist. As with the previous version, no plaintext key is ever
+  written to disk, nothing here calls `android.util.Log` with a key or
+  ciphertext, and the only plaintext ever persisted per key is its last 4
+  characters — purely so the Settings screen can show which saved key is
+  which ("•••• aB12"), the same convention Stripe, AWS, and Google Cloud's
+  own consoles use for exactly this reason.
+
+- `KeyRotationTranslator.kt` — new file. A thin, stateless orchestration
+  layer on top of `GeminiClient.translateBlocking`: calls it once with the
+  active key; on any failure other than an HTTP 429, returns that result
+  immediately unrotated (a timeout, network error, or malformed response
+  is not fixed by trying a different key, and silently retrying it would
+  only delay the user seeing the real error); on a 429, advances to the
+  next stored key and retries, at most once per stored key, then returns
+  `AllKeysExhausted` if every key was tried and every one came back
+  quota-exceeded. `GeminiClient` itself is deliberately left untouched and
+  stateless — it still has no concept of "more than one key" — with a new
+  `GeminiClient.Result.Failure.AllKeysExhausted` sealed subtype added
+  purely so callers can distinguish "every saved key is out of quota"
+  from an ordinary single-key `HttpError(429)`.
+
+- `TextGateAccessibilityService.kt` — both translation entry points (the
+  typed `?en`/`?de`-style trigger in `confirmAndProcess`, and the
+  long-press "translate a received message" bubble in
+  `startBubbleTranslation`) now check `apiKeyStore.hasAnyKey()` instead of
+  reading a single key, and both route the actual network call through
+  `KeyRotationTranslator.translateWithRotation` instead of calling
+  `GeminiClient.translateBlocking` directly. `mapFailureMessage`'s
+  exhaustive `when` gained the new `AllKeysExhausted` branch
+  (`error_all_keys_exhausted`).
+
+- `SettingsActivity.kt` / `activity_settings.xml` / the new
+  `item_api_key_row.xml` — the single "paste one key, save" field was
+  replaced with a real list UI: a "Saved API keys" section
+  (`layoutApiKeyList`) rendering one row per stored key (its last 4
+  characters, plus a " · active" marker on whichever key is currently in
+  use), each with its own "Remove" button; an "Add another key" field
+  below it (`buttonAddApiKey`, appends rather than replaces); and a
+  "Remove all" button that clears the whole list at once
+  (`apiKeyStore.clearAllKeys()`). The status line now reads e.g. "3 keys
+  saved. Active: •••• aB12" (`api_key_status_format`) instead of a plain
+  present/absent line. "Test API" (`runApiTest`) now runs through
+  `KeyRotationTranslator.translateWithRotation` too, rather than testing
+  only the active key directly — so it reports whether translation will
+  actually work right now, including a transparent rotation past an
+  exhausted key — and refreshes the key list afterward in case rotation
+  moved the active pointer during the test.
+
+- Ten new string keys (`label_saved_api_keys`, `api_keys_multi_description`,
+  `label_add_api_key`, `btn_add_api_key`, `btn_remove_api_key`,
+  `api_keys_empty`, `api_key_status_format`, `api_key_row_label`,
+  `api_key_row_label_active`, `error_all_keys_exhausted`) were added to
+  all 40 language files this app ships, each translated natively rather
+  than machine-translated, matching the existing tone/register already
+  used in that same file — same process as the v1.4.0 multi-language
+  rebuild and the v1.5.0 disclosure-screen strings. Verified afterward
+  that every one of the 40 `strings.xml` files parses as valid XML and
+  carries exactly the same 75 string keys as the English base file, with
+  no duplicates.
+
+- `KeystoreCryptoInstrumentedTest.kt` (`app/src/androidTest/`) — rewritten
+  against the new multi-key API. Covers: add-then-read-back, clearing
+  every key, a blank key being rejected and nothing stored, a second
+  added key appending rather than replacing (and the first key staying
+  active), `advanceActiveKey` cycling through stored keys and wrapping
+  back to the first after the last, `advanceActiveKey` being a no-op with
+  only one stored key, and `removeKey`'s active-pointer reassignment in
+  three cases (removing the active key from the middle of the order,
+  removing it when it was the last key — the specific case the
+  `removedIndex % newOrder.size` wraparound formula exists for — and
+  removing the last remaining key, which clears the active pointer
+  entirely).
+
+**Known limitation, not yet addressed:** a user who saved a single key
+under the old (pre-v1.6.0) `SecureApiKeyStore` schema will find that key
+silently unreadable after updating — the old and new schemas use
+different SharedPreferences entries under the same file name. Since this
+app has not yet been published to real users, this is treated as an
+accepted breaking change for now rather than a migration path that was
+built; if the app already has real users by the time this ships, writing
+a one-time migration (read the old `api_key_iv`/`api_key_ciphertext`
+entries if present, `addKey()` them into the new schema, then delete the
+old entries) would be a small, contained follow-up.
+
+**User gender preference and a rewritten, precision-focused translation
+prompt (v1.7.0).** Two related changes, requested together: a new Settings
+option for the app owner's own grammatical gender, and a stricter system
+prompt built specifically to stop the model from silently "improving"
+things it should have left alone (changing a plural to a singular,
+resolving an intentionally vague pronoun, dropping formality) — a
+real-world complaint the app owner raised about occasional mistranslation.
+
+**New setting — "Your gender" (Automatic/unspecified, Male, Female).**
+Added `UserGender` (`app/src/main/java/com/textgate/ai/model/UserGender.kt`),
+a 3-value enum, plus `AppSettingsStore.userGender` (defaults to `AUTO`,
+persisted in the existing plain — not Keystore-encrypted — settings
+prefs file, same as `selectedModel`). A new Spinner
+(`spinnerUserGender`) was added to `activity_settings.xml`, right under
+the language picker in the "AI transformation" card, wired up by
+`SettingsActivity.setupUserGenderSection()` — same deferred-listener
+pattern as the existing language Spinner, so the initial programmatic
+selection doesn't immediately re-save itself. Five new string keys
+(`label_user_gender`, `user_gender_description`, `label_gender_auto`,
+`label_gender_male`, `label_gender_female`) were added to all 40 language
+files, each translated natively — for languages with grammatical gender,
+the Male/Female labels use a short, natural self-descriptive noun a
+person would actually pick to describe themselves (e.g. German
+"Männlich"/"Weiblich", Russian "Мужчина"/"Женщина"), not a clinical term.
+
+**Scope is deliberately asymmetric between the two translation
+pathways — this was the actual point of the request.** This preference is
+read in exactly ONE place: `TextGateAccessibilityService.confirmAndProcess`,
+the typed `?xx`-trigger path, which translates text the phone owner
+themselves wrote. `startBubbleTranslation` — the long-press "translate a
+received message" bubble — explicitly passes `UserGender.AUTO` regardless
+of the stored setting, with a comment at that exact call site explaining
+why: that text was written by someone else, so the phone owner's own
+gender has no bearing on it and must never be sent for it. Both
+`AppSettingsStore.userGender`'s and `UserGender`'s own doc comments state
+this constraint too, so it stays visible from three different places in
+the code, not just one.
+
+**The rewritten system prompt** (`TranslationPrompts.systemPromptFor`,
+`app/src/main/java/com/textgate/ai/model/TranslationPrompts.kt`) now
+explicitly instructs Gemini to preserve — never invent, smooth over, or
+"improve" — exact meaning, grammatical number (singular vs. plural),
+person, tense, any gender the source text itself expresses, tone, and
+formality; to never flip a singular to a plural or vice versa; to keep
+source ambiguity as ambiguity when the target language allows it, rather
+than resolving it by guessing; and to leave proper nouns, usernames,
+`@mentions`, URLs, numbers, emoji, and existing formatting untouched
+unless translating literally requires a change. Text already in the
+target language is now explicitly scoped to a grammar-only pass ("only
+correct grammar, spelling, and phrasing... without changing its
+meaning") rather than the vaguer "lightly polish" wording it replaced.
+The "return only the finished text, nothing else" constraint from the
+original prompt is unchanged.
+
+`systemPromptFor` gained a second, optional parameter —
+`speakerGender: UserGender = UserGender.AUTO` — so every pre-existing call
+site (the long-press bubble, and `SettingsActivity`'s fixed "Test API"
+string) keeps compiling and behaving exactly as before with no change at
+their call sites' meaning. When a non-`AUTO` gender is passed, one further
+paragraph is appended identifying the message's author (first-person
+"I"/"me"/"my"/"myself" only) as male or female, but — deliberately —
+worded as *conditional*: "Apply this only where \[language\]
+grammatically requires marking the speaker's own gender... otherwise
+ignore it entirely." This app supports 40 target languages, and most of
+them (English, Chinese, Turkish, Finnish, ...) do not grammatically mark
+a first-person speaker's gender at all; hand-maintaining a 40-language
+"does this language need it" lookup table would have reproduced exactly
+the kind of unmaintainable, error-prone per-language list
+`TranslationPrompts`' own class doc already warns against for the
+language-name templating it already does. That judgment is left to
+Gemini instead, which already knows which languages inflect for speaker
+gender and which don't. The one unconditional sentence in that paragraph
+is the actual security/correctness-relevant part: "Never use this to
+infer, assume, or change the gender of anyone else mentioned in the
+text" — without it, a model could plausibly "help" by assuming every
+other person named in the message shares the user's declared gender,
+which is exactly the kind of invented detail the rest of the prompt
+forbids.
+
+**Lowest available "thinking" budget for the default model.**
+`GeminiClient.buildRequestBody` now attaches
+`generationConfig.thinkingConfig.thinkingBudget = 0` whenever the
+resolved model id is exactly `gemini-3.5-flash-lite` (this app's default,
+see `AppSettingsStore.DEFAULT_MODEL`) — a plain translation is not a
+reasoning task, so there is no reason to pay for or wait on "thinking"
+tokens on the one model this app specifically knows supports disabling
+them. Every other model is left exactly as before (no `thinkingConfig`
+key at all in the request body), since different Gemini model families
+expose different thinking-budget ranges, defaults, and requirements, and
+guessing a value for a model this app doesn't specifically know about
+risks a rejected request rather than a faster one. No other part of the
+request shape, the endpoint, the retry/rotation behavior
+(`KeyRotationTranslator`), or conversation-history handling (still none —
+every request remains a single, stateless, non-streaming `generateContent`
+call with no prior messages attached) changed.
+
+**Tests added:** `TranslationPromptsTest.kt`
+(`app/src/test/java/com/textgate/ai/model/`, new file/new test package)
+covers: `AUTO` produces no speaker-gender clause; the default parameter
+value behaves identically to passing `AUTO` explicitly; `MALE`/`FEMALE`
+each add a clause that says so; that clause always includes the
+"never apply to anyone else" sentence and the "only where the language
+requires it... otherwise ignore it" conditioning; and, separately, that
+the base prompt (regardless of gender) still asserts every
+preserve-don't-invent constraint described above. `AppSettingsStoreTest.kt`
+gained two cases: `userGender` defaults to `AUTO`, and persists correctly
+across separate `AppSettingsStore` instances backed by the same
+`Context` (the same persistence-proof pattern already used for
+`isAiEnabled`/allow-listed packages in that file).
+
+**Correction: gender preference no longer assumes the trigger pipeline's
+text is the user's own writing (v1.7.1).** v1.7.0's gendered clause
+applied the declared gender to "the author" unconditionally whenever a
+non-`AUTO` gender was set — wrong, because the typed-trigger pipeline
+(`?en`, `?pl`, ...) translates whatever text sits before the trigger,
+which the user may well have pasted in from someone else before typing
+the trigger themselves (e.g. "I was tired yesterday ?pl" — the English
+sentence could be a quote from another person, not the user's own words).
+
+`TranslationPrompts.systemPromptFor` gained a third parameter,
+`userPreferredLanguage: SupportedLanguage? = null` — the user's own
+primary language, resolved from `AppSettingsStore.appInterfaceLanguage`
+(a stored code used directly; `null`, "follow the device's system
+language", resolved via a new `LocaleHelper.resolvePreferredLanguage`
+using the `Context`'s own current `Configuration` locale — no network
+call, no extra AI request). The appended gender clause is now
+conditional: it tells Gemini to treat the declared gender as the
+author's gender ONLY when the request's own already-instructed
+source-language auto-detection lands on the user's preferred language
+AND the translation target is a different language (i.e. the shape of
+"I wrote this myself, translate it out") — scoped to first-person
+grammatical forms only, never applied when translating text that is
+already in another language or when translating INTO the user's own
+preferred language, and, as before, never allowed to change any other
+person's gender mentioned in the text. `TextGateAccessibilityService.
+confirmAndProcess` now resolves and passes this preferred language
+alongside the existing gender preference;
+`startBubbleTranslation` is unchanged — it still always passes
+`UserGender.AUTO` for the long-press "translate a received message"
+bubble. `TranslationPromptsTest.kt` was rewritten against the new
+three-argument shape and the new conditional wording.
+
 ## 15. Verified build result (GitHub Actions)
 
 Confirmed on `https://github.com/mxxx3/textgate-ai`, workflow run
@@ -1904,3 +2160,196 @@ of truth for `AppBlocklist.kt`, `SettingsActivity.kt`,
 `signingConfigs.debug` block, plus the new tracked `app/debug.keystore`
 binary file itself, and the version bump to 1.2.0 / versionCode 7 for this
 feature).
+
+## 16. v2.0.0 — new interface, voice translation, Gemini Live, model
+fallback, and background Live operation
+
+The single biggest change since this app existed: a new bottom-navigation
+UI (Tłumacz / Rozmowa / Na żywo / Ustawienia) replacing the old
+single-screen layout, two new real-time voice-translation modes built on
+the Gemini Live API, an automatic text-model fallback with
+timezone-correct daily-quota handling, and a Foreground Service that keeps
+an ambient Live session alive through screen-off and backgrounding. None
+of the pre-v2 functionality listed in every earlier section of this
+changelog was rebuilt or altered beyond what is described below — the
+`?xx` triggers, the long-press bubble, key rotation, encrypted key storage,
+the allow-list, and every existing setting all still work exactly as
+before.
+
+**New launcher & navigation.** `MainActivity` (new) replaces
+`SettingsActivity` as the app's launcher Activity and hosts a hand-rolled
+bottom navigation bar — four plain `LinearLayout` tab items, each tab a
+separate inflated layout kept alive for the Activity's lifetime with only
+one visible at a time (`MainActivity.showTab`). No Jetpack Navigation, no
+Fragments, no `BottomNavigationView` — consistent with this app's
+"no UI library" precedent in `SettingsActivity`. `SettingsActivity` is
+still the exact same Activity it always was; the Ustawienia tab simply
+starts it, unchanged, via `startActivity`.
+
+**One new production dependency, narrowly scoped.** Every version through
+1.7.1 shipped with zero third-party runtime libraries — a deliberate,
+documented security stance. v2 adds exactly one: OkHttp
+(`com.squareup.okhttp3:okhttp:4.12.0`), used for exactly one thing — the
+WebSocket connection to the Gemini Live API
+(`com.textgate.ai.live.GeminiLiveClient`). The Android SDK has no built-in
+WebSocket client; the only zero-dependency alternative was hand-rolling
+RFC 6455 framing over a raw `SSLSocket` for a feature that streams live
+microphone audio bidirectionally and must reconnect cleanly — judged too
+high-risk to hand-roll correctly with no device or live endpoint available
+to test against in this project's development environment (see the note
+on unverifiable pieces at the end of this section). Every other v2 addition
+— the new UI, speech-to-text/text-to-speech, audio capture/playback, audio
+focus, the Foreground Service — uses only platform APIs, exactly like
+everything before it. See `app/build.gradle.kts`'s `dependencies {}` block
+for the full reasoning, kept in place as a code comment.
+
+**Tłumacz tab** (`content_translate.xml` /
+`com.textgate.ai.translate.TranslateTabController`) is a
+Google-Translate-style screen — source language (with "Automatycznie") +
+swap + target language, a large text field with one-shot mic dictation
+(platform `SpeechRecognizer`, no library), a debounced auto-translate (700ms,
+reusing the existing `Debouncer` class), a result field with copy
+(`ClipboardManager`) and text-to-speech playback (platform
+`TextToSpeech`), and a clear button. Translation itself goes through the
+*exact same* call the typed-trigger pipeline uses —
+`TranslationOrchestrator.translateText` with
+`TranslationPrompts.systemPromptFor` conditioned on the user's gender and
+preferred language, precisely as `TextGateAccessibilityService.
+confirmAndProcess` already does — no parallel translation logic was
+written for this screen. The `?xx` trigger mechanism and the long-press
+bubble are completely untouched by this tab.
+
+**Rozmowa tab** (`content_conversation.xml` /
+`com.textgate.ai.conversation.ConversationTabController`) is a two-person,
+in-person conversation mode using `GeminiLiveClient` directly for
+`gemini-3.5-live-translate-preview`'s native audio-to-audio translation —
+never a text model. Deliberately foreground-only (no Foreground Service):
+leaving the tab or backgrounding the app always ends the session; this was
+judged the correct fit for a mode both participants are actively looking
+at the screen for, unlike Na żywo's ambient use case. One simplification
+worth flagging explicitly: the Live API's `translationConfig` carries one
+`targetLanguageCode` per session, with no documented way found to change
+it on an already-open connection — so a two-person conversation is modeled
+as one active translation DIRECTION at a time (Language A → B, or the
+reverse), with a swap button that closes and reopens the session with the
+other target language. This is the most defensible reading available
+without being able to test against the real API from this environment;
+revisit once a real device confirms whether direction can be changed
+in-session instead.
+
+**Na żywo tab** (`content_live.xml` /
+`com.textgate.ai.live.LiveTabController`, backed by
+`com.textgate.ai.live.LiveTranslationService`) is the ambient
+"phone-in-your-pocket" mode. The Foreground Service — never the Activity —
+owns the entire session: mic capture (`AudioRecord`, 16kHz mono PCM16),
+the `GeminiLiveClient` WebSocket, translated-audio playback (`AudioTrack`,
+24kHz mono PCM16), `AudioFocusRequest`, a bounded/backed-off reconnect
+(2s/4s/8s/16s/30s, max 5 attempts before transitioning to BŁĄD), audio-route
+monitoring (`AudioRouteMonitor`, platform `AudioDeviceCallback` — no
+Bluetooth library needed), and a conditional `PARTIAL_WAKE_LOCK` (acquired
+right after START, always released on STOP/BŁĄD/`onDestroy`, never a
+`FLAG_KEEP_SCREEN_ON` — the screen is allowed to turn off normally). All
+seven required states (ZATRZYMANO, ŁĄCZENIE, SŁUCHAM, TŁUMACZĘ, PONOWNE
+ŁĄCZENIE, WSTRZYMANO, BŁĄD — `LiveSessionState`) are implemented exactly as
+specified. The service is started only via `LiveTranslationService.start()`
+from an explicit user tap on the Na żywo tab's START button while the app
+is in the foreground — never on boot, never on app launch, never silently;
+`START_NOT_STICKY` is used deliberately so a process kill under memory
+pressure requires a fresh, deliberate START rather than silently
+resurrecting mic capture. Reopening the app binds to whatever the service's
+real current state is (`LiveTabController.onStart`/`onStop` only
+attach/detach the UI listener — they never start or stop the session
+itself), and a second `ACTION_START` while already connecting/active is a
+no-op, so two parallel sessions can never run.
+
+**Headset-disconnect behavior** (`HeadsetDisconnectBehavior`, new
+`AppSettingsStore.headsetDisconnectBehavior` setting, "Audio i Live"
+section of Settings) defaults to "Wstrzymaj tłumaczenie": if the headset
+disconnects mid-session, playback stops immediately, output never falls
+back to the speaker, the Gemini session is left open underneath for an
+instant resume, and the screen/notification show WSTRZYMANO —
+reconnecting a headset resumes automatically. The alternative,
+"Przełącz na głośnik," is an explicit opt-in the user must choose
+themselves. The persistent Live notification
+(`live_notification_channel_name`/`live_notification_title`) always shows
+current status and a ZATRZYMAJ action that stops the mic, closes the
+Gemini session, releases audio focus and the WakeLock, and stops the
+Foreground Service.
+
+**Text-model fallback (3.5 → 3.1) with real RPD/RPM distinction.**
+`GeminiClient.Result.Failure` gained two new cases:
+`QuotaExceeded(scope: QuotaScope, retryAfterSeconds: Long?)` (replacing
+what used to surface as a plain `HttpError(429)`) and `AllKeysExhausted`
+became a `data class` carrying the last observed `QuotaExceeded` detail
+instead of a bare `data object`. `GeminiClient.parseQuotaFailure` reads the
+429 response body's `error.details[].violations[]` (Google's standard
+QuotaFailure error-detail shape) to classify DAILY vs. SHORT_TERM vs.
+UNKNOWN — and deliberately treats UNKNOWN exactly like SHORT_TERM, never
+like DAILY, so an ambiguous 429 can never block a model for a whole day on
+a guess. New `ModelAvailabilityStore` persists a per-model
+"unavailable-until" instant — for DAILY, always the next
+`America/Los_Angeles` local midnight (DST-aware via `ZonedDateTime`, not a
+fixed UTC offset — see `ModelAvailabilityStoreTest`'s spring-forward/
+fall-back test cases); for SHORT_TERM/UNKNOWN, the server's own
+`Retry-After`/`retryDelay` hint or a 60s default, capped at 30 minutes. New
+`TranslationOrchestrator` is now the single entry point for every TEXT
+translation (`TextGateAccessibilityService`'s both pipelines, the Tłumacz
+tab, and the "Test API" button all route through it): it checks
+`ModelAvailabilityStore` before choosing `gemini-3.5-flash-lite` or
+`gemini-3.1-flash-lite`, and on a fresh exhaustion, marks the store and
+immediately retries the *current* request against the fallback model once,
+so the user is never kept waiting on a request that has already failed. No
+separate probe request is ever made to check recovery — the very next real
+translation after a stored cooldown/reset naturally tries the primary model
+again. `KeyRotationTranslator`'s existing per-key rotation is completely
+unchanged and untouched by any of this — the two mechanisms are layered,
+not merged, exactly per the app owner's own note that Gemini quotas are
+project-level, not per-key, so blind key rotation stays exactly as
+conservative as before.
+
+**Android 16 / manifest.** New permissions: `RECORD_AUDIO`,
+`FOREGROUND_SERVICE`, `FOREGROUND_SERVICE_MICROPHONE` (the Android 14+
+mandatory service-type permission for a microphone-capturing foreground
+service), `POST_NOTIFICATIONS`. `LiveTranslationService` declares
+`android:foregroundServiceType="microphone"`. `RECORD_AUDIO`/
+`POST_NOTIFICATIONS` are requested at runtime only the first time the user
+actually taps into Rozmowa or Na żywo — never at launch.
+
+**Settings reorganization.** `activity_settings.xml` was regrouped under
+six labeled headers (Tłumaczenie / Audio i Live / AI / Integracje /
+Prywatność / Zaawansowane, new `TgGroupHeader` style) — a labeling and
+grouping change only; every existing card, id, and Kotlin handler inside
+`SettingsActivity.kt` is unchanged, plus one new card (headset-disconnect
+behavior) under "Audio i Live".
+
+**Everything the spec asked not to touch, confirmed untouched:** the `?xx`
+trigger mechanism (`TriggerDetector`), the long-press bubble
+(`BubbleTranslateGate`, `TranslationBubble`), `TextGateAccessibilityService`'s
+event-gating chain, `SecureApiKeyStore`/`KeystoreCrypto` encryption,
+`AppBlocklist`, the allow-list, `TranslationPrompts`' v1.7.1 gender logic,
+and every pre-existing Settings string/behavior.
+
+**What could not be verified in this environment, and must be checked on a
+real device before release:** this sandbox has no Android SDK, no
+compiler, no emulator, and no network path to a real Gemini Live endpoint
+— exactly the same constraint noted throughout this file for every prior
+change, but materially more consequential here. Verified by careful manual
+review, exhaustive `when`-branch coverage (the Kotlin compiler's own
+guarantee once compiled), and — for the pure, non-Android logic —real unit
+tests (`GeminiClientTest`'s new `parseQuotaFailure` cases,
+`ModelAvailabilityStoreTest`'s DST-crossing reset math independently
+cross-checked against a Python `zoneinfo` simulation using epoch-timestamp
+arithmetic, `GeminiLiveClientTest`'s message-parsing cases). NOT verified
+by compilation or execution, and needing real-device confirmation: every
+Gemini Live WebSocket message shape in `GeminiLiveClient` (built from the
+field names specified plus this project's best understanding of the
+BidiGenerateContent protocol — flagged in that file's own class doc as the
+first thing to check against Google's current reference); `AudioRecord`/
+`AudioTrack`/`AudioFocusRequest` behavior on a real device; Bluetooth/wired/
+USB route detection and the headset-disconnect pause/resume flow; the
+Foreground Service's behavior across real screen-off/lock/backgrounding;
+the persistent notification's STOP action; and the Rozmowa "swap direction
+by reconnecting" simplification noted above. No Gradle build, lint pass, or
+test run was executed for this release — unlike section 15's verified CI
+run, there is no green-build confirmation yet for versionCode 26 /
+versionName "2.0.0".

@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.res.Configuration
 import android.os.LocaleList
 import com.textgate.ai.model.Languages
+import com.textgate.ai.model.SupportedLanguage
 import com.textgate.ai.security.AppSettingsStore
 import java.util.Locale
 
@@ -60,5 +61,56 @@ object LocaleHelper {
         config.setLocales(LocaleList(locale))
 
         return base.createConfigurationContext(config)
+    }
+
+    /**
+     * Resolves [AppSettingsStore.appInterfaceLanguage] down to one concrete
+     * [SupportedLanguage] — used by the typed-trigger translation prompt
+     * (see [com.textgate.ai.model.TranslationPrompts.systemPromptFor]'s
+     * `userPreferredLanguage` parameter, added in v1.7.1) so a stored
+     * `null` ("follow the device's system language") still yields one real
+     * language to reason about, rather than the prompt needing to handle
+     * "unknown". A stored code is already unambiguous and is returned
+     * directly; `null` is resolved from [context]'s own current
+     * [Configuration] locale — the exact same signal Android itself
+     * already used to pick this very [context]'s `values-<code>/
+     * strings.xml` — so this reuses information the platform already
+     * computed instead of guessing independently or making any network
+     * call.
+     */
+    fun resolvePreferredLanguage(context: Context): SupportedLanguage {
+        val storedCode = AppSettingsStore(context).appInterfaceLanguage
+        if (storedCode != null) {
+            return Languages.byCode(storedCode) ?: Languages.DEFAULT
+        }
+
+        val locales = context.resources.configuration.locales
+        val systemLocale = if (!locales.isEmpty()) locales[0] else Locale.getDefault()
+        return matchToSupportedLanguage(systemLocale)
+    }
+
+    /**
+     * Best-effort match of an arbitrary device [Locale] to one entry in
+     * [Languages.ALL]. Tries an exact language+country match first — so
+     * e.g. a device set to "pt-BR" resolves to Brazilian Portuguese and
+     * "zh-CN" to Simplified Chinese, not their generic same-language
+     * sibling — then falls back to the first [Languages.ALL] entry sharing
+     * just the bare language subtag (list order breaks the tie, same as
+     * every other "closest match" fallback in this app), then finally to
+     * [Languages.DEFAULT] if nothing shares even that much — the same
+     * "never crash, fall back to a sane default" shape [Languages.byCode]
+     * already uses for an unrecognized stored code.
+     */
+    private fun matchToSupportedLanguage(locale: Locale): SupportedLanguage {
+        val exact = Languages.ALL.firstOrNull { candidate ->
+            val candidateLocale = Locale.forLanguageTag(candidate.localeLanguageTag)
+            candidateLocale.language == locale.language && candidateLocale.country == locale.country
+        }
+        if (exact != null) return exact
+
+        val byLanguageOnly = Languages.ALL.firstOrNull { candidate ->
+            Locale.forLanguageTag(candidate.localeLanguageTag).language == locale.language
+        }
+        return byLanguageOnly ?: Languages.DEFAULT
     }
 }

@@ -111,4 +111,92 @@ class GeminiClientTest {
         val result = GeminiClient.classifyException(IllegalStateException("unexpected"))
         assertTrue(result is GeminiClient.Result.Failure.InvalidResponse)
     }
+
+    // --- parseQuotaFailure: RPD vs. RPM/TPM vs. unrecognized 429 bodies ---
+
+    @Test
+    fun `quota body naming a per-day violation is classified DAILY`() {
+        val body = """
+            {"error":{"code":429,"status":"RESOURCE_EXHAUSTED","details":[
+                {"@type":"type.googleapis.com/google.rpc.QuotaFailure","violations":[
+                    {"quotaId":"GenerateRequestsPerDayPerProjectPerModel-FreeTier","quotaMetric":"generativelanguage.googleapis.com/generate_requests"}
+                ]}
+            ]}}
+        """.trimIndent()
+        val result = GeminiClient.parseQuotaFailure(body, retryAfterHeader = null)
+        assertEquals(GeminiClient.Result.Failure.QuotaScope.DAILY, result.scope)
+    }
+
+    @Test
+    fun `quota body naming a per-minute violation is classified SHORT_TERM, never DAILY`() {
+        val body = """
+            {"error":{"code":429,"status":"RESOURCE_EXHAUSTED","details":[
+                {"@type":"type.googleapis.com/google.rpc.QuotaFailure","violations":[
+                    {"quotaId":"GenerateRequestsPerMinutePerProjectPerModel-FreeTier"}
+                ]}
+            ]}}
+        """.trimIndent()
+        val result = GeminiClient.parseQuotaFailure(body, retryAfterHeader = null)
+        assertEquals(GeminiClient.Result.Failure.QuotaScope.SHORT_TERM, result.scope)
+    }
+
+    @Test
+    fun `a daily violation among several never gets demoted to SHORT_TERM`() {
+        val body = """
+            {"error":{"code":429,"status":"RESOURCE_EXHAUSTED","details":[
+                {"@type":"type.googleapis.com/google.rpc.QuotaFailure","violations":[
+                    {"quotaId":"GenerateRequestsPerMinutePerProjectPerModel-FreeTier"},
+                    {"quotaId":"GenerateRequestsPerDayPerProjectPerModel-FreeTier"}
+                ]}
+            ]}}
+        """.trimIndent()
+        val result = GeminiClient.parseQuotaFailure(body, retryAfterHeader = null)
+        assertEquals(GeminiClient.Result.Failure.QuotaScope.DAILY, result.scope)
+    }
+
+    @Test
+    fun `unparseable or unrecognized 429 body falls back to UNKNOWN, never DAILY`() {
+        assertEquals(
+            GeminiClient.Result.Failure.QuotaScope.UNKNOWN,
+            GeminiClient.parseQuotaFailure("not json at all {{{", retryAfterHeader = null).scope
+        )
+        assertEquals(
+            GeminiClient.Result.Failure.QuotaScope.UNKNOWN,
+            GeminiClient.parseQuotaFailure("""{"error":{"code":429}}""", retryAfterHeader = null).scope
+        )
+    }
+
+    @Test
+    fun `Retry-After header is used when present`() {
+        val result = GeminiClient.parseQuotaFailure("""{"error":{}}""", retryAfterHeader = "42")
+        assertEquals(42L, result.retryAfterSeconds)
+    }
+
+    @Test
+    fun `RetryInfo detail's retryDelay is used when no header is present`() {
+        val body = """
+            {"error":{"details":[
+                {"@type":"type.googleapis.com/google.rpc.RetryInfo","retryDelay":"35s"}
+            ]}}
+        """.trimIndent()
+        val result = GeminiClient.parseQuotaFailure(body, retryAfterHeader = null)
+        assertEquals(35L, result.retryAfterSeconds)
+    }
+
+    @Test
+    fun `header takes priority over RetryInfo detail when both are present`() {
+        val body = """
+            {"error":{"details":[
+                {"@type":"type.googleapis.com/google.rpc.RetryInfo","retryDelay":"35s"}
+            ]}}
+        """.trimIndent()
+        val result = GeminiClient.parseQuotaFailure(body, retryAfterHeader = "10")
+        assertEquals(10L, result.retryAfterSeconds)
+    }
+
+    @Test
+    fun `no retry hint anywhere leaves retryAfterSeconds null`() {
+        val result = GeminiClient.parseQuotaFailure("""{"error":{}}""", retryAfterHeader = null)
+        assertEquals(null, result.retryAfterSeconds)
+    }
 }

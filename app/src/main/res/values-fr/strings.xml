@@ -14,6 +14,12 @@
     <string name="bubble_language_label">Langue de l\'application et de traduction</string>
     <string name="bubble_language_description">Choisissez votre langue une seule fois ici. Cela définit à la fois la langue par défaut de la bulle de traduction de l\'appui long ET la langue dans laquelle les écrans de TextGate AI sont affichés — les deux changent ensemble.</string>
 
+    <string name="label_user_gender">Votre genre</string>
+    <string name="user_gender_description">Utilisé uniquement lors de la traduction des messages que VOUS écrivez avec un déclencheur comme ?en ou ?de, afin que les verbes et adjectifs qui vous concernent soient correctement accordés dans les langues qui en ont besoin. Jamais appliqué aux messages que vous recevez et traduisez par appui long — ceux-ci ont été écrits par quelqu\'un d\'autre.</string>
+    <string name="label_gender_auto">Automatique / non précisé</string>
+    <string name="label_gender_male">Homme</string>
+    <string name="label_gender_female">Femme</string>
+
     <string name="section_accessibility_status">Service d\'accessibilité</string>
     <string name="accessibility_status_enabled">Activé</string>
     <string name="accessibility_status_disabled">Non activé — TextGate AI ne peut rien faire tant que vous ne l\'activez pas</string>
@@ -37,6 +43,17 @@
     <string name="btn_clear_api_key">Supprimer la clé enregistrée</string>
     <string name="api_key_status_present">Une clé est enregistrée (chiffrée). Elle ne s\'affiche plus jamais à l\'écran.</string>
     <string name="api_key_status_absent">Aucune clé enregistrée pour le moment</string>
+
+    <string name="label_saved_api_keys">Clés API enregistrées</string>
+    <string name="api_keys_multi_description">Vous pouvez enregistrer plusieurs clés API Gemini gratuites. Si la clé active atteint son quota gratuit mensuel, l\'application bascule automatiquement sur votre prochaine clé enregistrée — sans interruption, sans aucune action de votre part.</string>
+    <string name="label_add_api_key">Ajouter une autre clé</string>
+    <string name="btn_add_api_key">Ajouter la clé</string>
+    <string name="btn_remove_api_key">Supprimer</string>
+    <string name="api_keys_empty">Aucune clé enregistrée pour le moment. Ajoutez-en une ci-dessous pour activer la traduction.</string>
+    <string name="api_key_status_format">%1$d clé(s) enregistrée(s). Active : •••• %2$s</string>
+    <string name="api_key_row_label">•••• %1$s</string>
+    <string name="api_key_row_label_active">•••• %1$s  ·  active</string>
+    <string name="error_all_keys_exhausted">Toutes vos clés enregistrées ont atteint la limite gratuite quotidienne. Ajoutez une autre clé, ou attendez la réinitialisation du quota.</string>
 
     <string name="label_model">Modèle Gemini</string>
     <string name="hint_model">par ex. gemini-3.5-flash-lite</string>

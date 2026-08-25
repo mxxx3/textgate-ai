@@ -14,6 +14,12 @@
     <string name="bubble_language_label">Lingua dell\'app e della traduzione</string>
     <string name="bubble_language_description">Scegli qui la tua lingua una sola volta. Imposta sia la lingua predefinita per la bolla di traduzione a pressione prolungata, sia la lingua in cui vengono mostrate le schermate di TextGate AI — cambiano entrambe insieme.</string>
 
+    <string name="label_user_gender">Il tuo genere</string>
+    <string name="user_gender_description">Usato solo quando traduci messaggi che scrivi TU con un trigger come ?en o ?de, così che i verbi e gli aggettivi che si riferiscono a te risultino corretti nelle lingue che lo richiedono. Non viene mai applicato ai messaggi che ricevi e traduci con la pressione prolungata — quelli li ha scritti qualcun altro.</string>
+    <string name="label_gender_auto">Automatico / non specificato</string>
+    <string name="label_gender_male">Uomo</string>
+    <string name="label_gender_female">Donna</string>
+
     <string name="section_accessibility_status">Servizio di accessibilità</string>
     <string name="accessibility_status_enabled">Attivo</string>
     <string name="accessibility_status_disabled">Non attivo — TextGate AI non può fare nulla finché non lo attivi</string>
@@ -37,6 +43,17 @@
     <string name="btn_clear_api_key">Rimuovi chiave salvata</string>
     <string name="api_key_status_present">È stata salvata una chiave (criptata). Non viene più mostrata sullo schermo.</string>
     <string name="api_key_status_absent">Nessuna chiave salvata</string>
+
+    <string name="label_saved_api_keys">Chiavi API salvate</string>
+    <string name="api_keys_multi_description">Puoi salvare più di una chiave API Gemini gratuita. Se la chiave attiva esaurisce la sua quota gratuita mensile, l\'app passa automaticamente alla chiave salvata successiva — senza interruzioni, senza che tu debba fare nulla.</string>
+    <string name="label_add_api_key">Aggiungi un\'altra chiave</string>
+    <string name="btn_add_api_key">Aggiungi chiave</string>
+    <string name="btn_remove_api_key">Rimuovi</string>
+    <string name="api_keys_empty">Nessuna chiave salvata. Aggiungine una qui sotto per abilitare la traduzione.</string>
+    <string name="api_key_status_format">Chiavi salvate: %1$d. Attiva: •••• %2$s</string>
+    <string name="api_key_row_label">•••• %1$s</string>
+    <string name="api_key_row_label_active">•••• %1$s  ·  attiva</string>
+    <string name="error_all_keys_exhausted">Tutte le chiavi salvate hanno raggiunto il limite gratuito di oggi. Aggiungi un\'altra chiave oppure attendi il ripristino della quota.</string>
 
     <string name="label_model">Modello Gemini</string>
     <string name="hint_model">es. gemini-3.5-flash-lite</string>

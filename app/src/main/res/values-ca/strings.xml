@@ -14,6 +14,12 @@
     <string name="bubble_language_label">Idioma de l\'aplicació i la traducció</string>
     <string name="bubble_language_description">Tria el teu idioma una vegada aquí. Estableix l\'idioma predeterminat per a la bombolla de traducció en mantenir premut I l\'idioma en què es mostren les pantalles pròpies de TextGate AI — tots dos canvien alhora.</string>
 
+    <string name="label_user_gender">El teu gènere</string>
+    <string name="user_gender_description">Només s\'utilitza en traduir missatges que TU escrius amb un disparador com ?en o ?de, perquè els verbs i adjectius que et fan referència surtin correctes en els idiomes que ho necessiten. Mai s\'aplica als missatges que reps i tradueixes en mantenir premut — aquests els ha escrit una altra persona.</string>
+    <string name="label_gender_auto">Automàtic / no especificat</string>
+    <string name="label_gender_male">Home</string>
+    <string name="label_gender_female">Dona</string>
+
     <string name="section_accessibility_status">Servei d\'accessibilitat</string>
     <string name="accessibility_status_enabled">Activat</string>
     <string name="accessibility_status_disabled">No activat — TextGate AI no pot fer res fins que l\'activis</string>
@@ -36,6 +42,17 @@
     <string name="btn_clear_api_key">Elimina la clau desada</string>
     <string name="api_key_status_present">Hi ha una clau desada (xifrada). No es torna a mostrar mai a la pantalla.</string>
     <string name="api_key_status_absent">Encara no hi ha cap clau desada</string>
+
+    <string name="label_saved_api_keys">Claus API desades</string>
+    <string name="api_keys_multi_description">Pots desar més d\'una clau API gratuïta de Gemini. Si la clau activa esgota la seva quota gratuïta mensual, l\'aplicació canvia automàticament a la següent clau desada — sense interrupcions i sense que hagis de fer res.</string>
+    <string name="label_add_api_key">Afegeix una altra clau</string>
+    <string name="btn_add_api_key">Afegeix la clau</string>
+    <string name="btn_remove_api_key">Elimina</string>
+    <string name="api_keys_empty">Encara no hi ha cap clau desada. Afegeix-ne una a continuació per activar la traducció.</string>
+    <string name="api_key_status_format">%1$d clau(s) desada(es). Activa: •••• %2$s</string>
+    <string name="api_key_row_label">•••• %1$s</string>
+    <string name="api_key_row_label_active">•••• %1$s  ·  activa</string>
+    <string name="error_all_keys_exhausted">Totes les claus desades han arribat al límit gratuït d\'avui. Afegeix una altra clau, o espera que es restableixi la quota.</string>
 
     <string name="label_model">Model de Gemini</string>
     <string name="hint_model">p. ex. gemini-3.5-flash-lite</string>

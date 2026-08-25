@@ -7,4 +7,22 @@
         <item name="android:textStyle">bold</item>
         <item name="android:textColor">@color/tg_text_primary</item>
     </style>
+
+    <!-- v2: the outer group headers (Tłumaczenie / Audio i Live / AI /
+         Integracje / Prywatność / Zaawansowane) that organize
+         activity_settings.xml's existing per-feature cards (each still
+         titled internally with TgSectionTitle) into the sections described
+         in the v2 rebuild spec — a labeling change only, not a rebuild:
+         every existing card, its ids, and its Kotlin logic are unchanged. -->
+    <style name="TgGroupHeader">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:letterSpacing">0.08</item>
+        <item name="android:textColor">@color/tg_primary</item>
+        <item name="android:layout_marginTop">20dp</item>
+        <item name="android:layout_marginBottom">8dp</item>
+    </style>
 </resources>

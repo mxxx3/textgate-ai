@@ -15,7 +15,7 @@
     <string name="bubble_language_description">ここで一度だけ言語を選択してください。長押し翻訳バブルのデフォルト言語と、TextGate AI 自体の画面表示言語の両方が設定され、両方が連動して変わります。</string>
 
     <string name="label_user_gender">あなたの性別</string>
-    <string name="user_gender_description">?en や ?de のようなトリガーを使ってあなた自身が入力したメッセージを翻訳するときにのみ使用され、あなたを指す動詞や形容詞の形が必要な言語で正しく表示されるようにします。長押しで受け取ったメッセージ(他の人が書いたもの)を翻訳する場合には、一切適用されません。</string>
+    <string name="user_gender_description">\?en や ?de のようなトリガーを使ってあなた自身が入力したメッセージを翻訳するときにのみ使用され、あなたを指す動詞や形容詞の形が必要な言語で正しく表示されるようにします。長押しで受け取ったメッセージ(他の人が書いたもの)を翻訳する場合には、一切適用されません。</string>
     <string name="label_gender_auto">自動 / 指定しない</string>
     <string name="label_gender_male">男性</string>
     <string name="label_gender_female">女性</string>

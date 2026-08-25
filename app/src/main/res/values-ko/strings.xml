@@ -15,7 +15,7 @@
     <string name="bubble_language_description">여기서 언어를 한 번만 선택하세요. 길게 눌러 번역하는 말풍선의 기본 언어와 TextGate AI 자체 화면에 표시되는 언어가 함께 설정되며, 두 가지가 동시에 변경됩니다.</string>
 
     <string name="label_user_gender">본인 성별</string>
-    <string name="user_gender_description">?en, ?de와 같은 트리거를 사용해 직접 입력한 메시지를 번역할 때만 사용되며, 이를 통해 문법상 성별 구분이 필요한 언어에서 본인을 가리키는 동사와 형용사가 올바르게 표현됩니다. 길게 눌러 번역하는, 다른 사람이 작성한 수신 메시지에는 전혀 적용되지 않습니다.</string>
+    <string name="user_gender_description">\?en, ?de와 같은 트리거를 사용해 직접 입력한 메시지를 번역할 때만 사용되며, 이를 통해 문법상 성별 구분이 필요한 언어에서 본인을 가리키는 동사와 형용사가 올바르게 표현됩니다. 길게 눌러 번역하는, 다른 사람이 작성한 수신 메시지에는 전혀 적용되지 않습니다.</string>
     <string name="label_gender_auto">자동 / 지정 안 함</string>
     <string name="label_gender_male">남성</string>
     <string name="label_gender_female">여성</string>

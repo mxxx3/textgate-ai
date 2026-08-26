@@ -2741,3 +2741,83 @@ unit-testable here — audio routing/attenuation behavior is real hardware
 behavior that varies by device, so this needs an on-device retest to
 confirm audio is actually audible now, on the same device/route (speaker)
 that reproduced the silent report.
+
+**Update — "TRANSLATING but literally nothing, not even a transcript" —
+regression confirmed and root-caused.** After the `MODE_IN_COMMUNICATION`
+fix above, the app owner retested and reported it was now WORSE, not
+fixed: no audio, and — new, more precise information — both the input and
+output transcript boxes stayed completely empty, meaning Gemini was never
+transcribing any speech at all, not merely "translated but inaudible."
+Crucially, the owner also reported that on the OLD build (before the
+`AudioSource.VOICE_COMMUNICATION`/echo-cancellation fix), playing a
+recorded conversation from a PC near the phone worked correctly — and on
+the CURRENT build, even speaking directly into the phone (as suggested,
+specifically to rule out "PC speaker too quiet/far away" as the cause)
+produced nothing either. That combination is exactly the evidence this
+project's own standing rule requires before shipping another fix: it
+rules out a testing-method explanation and points squarely at a real
+regression introduced by this project's own two most recent audio
+changes (`AudioSource.VOICE_COMMUNICATION` and `MODE_IN_COMMUNICATION`).
+
+Root cause, found via a 2026 Android audio-routing reference (see Sources
+below) rather than guesswork: switching `AudioManager.mode` to
+`MODE_IN_COMMUNICATION` only tells the platform a call-like session is
+active — it does **not** by itself pick which physical device that
+session's audio actually uses. Quoting the source directly: "mode-setting
+alone establishes communication context; active device selection controls
+actual output routing... without calling `setCommunicationDevice()`, the
+system may default to the earpiece, but this behavior isn't guaranteed
+across OEMs." On this project's own reporting device, entering
+`MODE_IN_COMMUNICATION` with no explicit device selection evidently routed
+BOTH playback and capture through the earpiece-oriented path — the same
+audio path a real phone call uses before you press the speaker button,
+tuned for a mouth pressed against the top of the phone. That explains
+every symptom at once: inaudible/near-silent output (earpiece speaker,
+not the loudspeaker), and — this is the new piece — essentially no
+microphone pickup either for anything that isn't right at the earpiece,
+which is exactly why direct speech at normal distance and PC-speaker audio
+across a room both produced zero transcripts. The Na żywo screen's own
+"Current audio device: Phone speaker" label did not catch this because
+`AudioRouteMonitor` only reports whether a wired/Bluetooth/USB device is
+*connected* — it has no way to see which device `MODE_IN_COMMUNICATION`
+actually activated underneath.
+
+Fixed in both `LiveTranslationService.beginCapturePlayback` and
+`ConversationTabController.beginCapturePlayback`, immediately after
+setting `MODE_IN_COMMUNICATION`, via a new `applyCommunicationRouting()`
+in each: on API 31+ (this app's target), calls
+`AudioManager.setCommunicationDevice()` with the device whose type is
+`TYPE_BUILTIN_SPEAKER` from `availableCommunicationDevices`; on the
+pre-31 fallback (minSdk 26), sets the legacy `AudioManager.isSpeakerphoneOn
+= true`. `LiveTranslationService` only forces the speaker when there is
+NO private (headset) route available — i.e. exactly the case its own
+`SetupComplete` handler already restricts `beginCapturePlayback` to
+alongside "a headset is connected" (see the "voice/proximity/volume"
+update above); when a headset IS connected, this deliberately does
+nothing and lets the platform's own automatic communication-device
+selection use it, matching the pre-existing headset-routing design rather
+than overriding it. `ConversationTabController` (Rozmowa) has no headset
+concept at all — see its own class doc — so it always forces the speaker
+unconditionally. Both are reset symmetrically (`clearCommunicationDevice()`
+/ `isSpeakerphoneOn = false`) in `stopCapturePlayback`/`stopSession`,
+alongside the existing `MODE_NORMAL` reset, so this app never leaves a
+phone's audio routing forced after a session ends.
+
+Also added `android.permission.MODIFY_AUDIO_SETTINGS` to the manifest — a
+normal, install-time-granted permission (no runtime prompt, no user-facing
+change) that `setSpeakerphoneOn`/`setCommunicationDevice` are documented to
+require; without it these calls can silently no-op or throw (caught
+defensively here, so no crash either way) on devices that enforce it,
+which would have made this exact fix look like it did nothing.
+
+Not unit-testable here for the same reason as the update above — real
+device-specific audio routing behavior. Needs on-device confirmation
+against the precise report that prompted it: speaking directly into the
+phone (no PC, no headset) should now produce both live transcript text
+and audible translated speech; if it does, then a PC-speaker-audio retest
+would additionally confirm nothing about VOICE_COMMUNICATION's gain
+staging is separately suppressing distant/speaker-played audio.
+
+Sources consulted for `setCommunicationDevice()`/`MODE_IN_COMMUNICATION`
+routing behavior: ["How to Implement Audio Output Switching on Android
+(2026): Kotlin Playbook"](https://www.forasoft.com/blog/article/implement-audio-output-switching-on-android-575).

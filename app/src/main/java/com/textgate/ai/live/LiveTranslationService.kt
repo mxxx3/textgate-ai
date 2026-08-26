@@ -8,6 +8,7 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.media.AudioAttributes
+import android.media.AudioDeviceInfo
 import android.media.AudioFocusRequest
 import android.media.AudioFormat
 import android.media.AudioManager
@@ -351,6 +352,27 @@ class LiveTranslationService : Service() {
         // like. Reset to MODE_NORMAL in stopCapturePlayback().
         audioManager.mode = AudioManager.MODE_IN_COMMUNICATION
 
+        // MODE_IN_COMMUNICATION alone does NOT guarantee speaker routing —
+        // confirmed via a 2026 Android audio-routing writeup: mode-setting
+        // only establishes communication context, and "without calling
+        // setCommunicationDevice(), the system may default to the earpiece,
+        // but this behavior isn't guaranteed across OEMs." This is the real,
+        // evidenced explanation for a report that survived the
+        // MODE_IN_COMMUNICATION fix above: on the reporting device, entering
+        // communication mode silently routed BOTH playback and capture
+        // through the earpiece path (tuned for a phone held to the ear),
+        // which is why nothing was audible AND no speech was transcribed —
+        // that earpiece-oriented gain staging barely picks up anything that
+        // isn't a mouth pressed right against the top of the phone, let
+        // alone speech from across a room or audio played from a PC. This
+        // call only forces the loudspeaker when there is no private route to
+        // use instead (see the SetupComplete branch above, the only caller
+        // of this method: it's reached either because a headset IS
+        // connected, or because the user opted into SWITCH_TO_SPEAKER) — a
+        // connected headset should keep using the platform's own automatic
+        // communication-device selection, not be overridden here.
+        applyCommunicationRouting(forceSpeaker = !audioRouteMonitor.hasPrivateOutputRoute())
+
         val minBufferSize = AudioRecord.getMinBufferSize(
             CAPTURE_SAMPLE_RATE_HZ, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT
         ).coerceAtLeast(MIN_BUFFER_FLOOR)
@@ -379,6 +401,54 @@ class LiveTranslationService : Service() {
         val thread = Thread({ runCaptureLoop(minBufferSize) }, "TextGateLiveCapture")
         captureThread = thread
         thread.start()
+    }
+
+    /** See [beginCapturePlayback]'s call site for why this exists at all.
+     * [android.media.AudioManager.setCommunicationDevice] is the modern
+     * (API 31+) way to pick the device MODE_IN_COMMUNICATION actually
+     * routes to; the legacy [android.media.AudioManager.isSpeakerphoneOn]
+     * setter is kept only as the pre-31 fallback, since minSdk here is 26
+     * (see AudioRouteMonitor's class doc). Always best-effort — never worth
+     * failing the session over a routing call an OEM's HAL rejects. */
+    private fun applyCommunicationRouting(forceSpeaker: Boolean) {
+        if (forceSpeaker) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                val speakerDevice = audioManager.availableCommunicationDevices
+                    .firstOrNull { it.type == AudioDeviceInfo.TYPE_BUILTIN_SPEAKER }
+                try {
+                    if (speakerDevice != null) audioManager.setCommunicationDevice(speakerDevice)
+                } catch (_: Exception) {
+                    // Best-effort only.
+                }
+            } else {
+                try {
+                    @Suppress("DEPRECATION")
+                    audioManager.isSpeakerphoneOn = true
+                } catch (_: Exception) {
+                    // Best-effort only.
+                }
+            }
+        }
+        // forceSpeaker == false: a private route (headset) is connected —
+        // leave routing to the platform's own automatic communication-device
+        // selection rather than overriding it.
+    }
+
+    private fun resetCommunicationRouting() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            try {
+                audioManager.clearCommunicationDevice()
+            } catch (_: Exception) {
+                // Best-effort only.
+            }
+        } else {
+            try {
+                @Suppress("DEPRECATION")
+                audioManager.isSpeakerphoneOn = false
+            } catch (_: Exception) {
+                // Best-effort only.
+            }
+        }
     }
 
     @Suppress("MissingPermission") // RECORD_AUDIO is checked by the caller (Na żywo screen) before ACTION_START is ever sent.
@@ -484,10 +554,12 @@ class LiveTranslationService : Service() {
             }
         }
         playbackTrack = null
-        // Symmetric with beginCapturePlayback's MODE_IN_COMMUNICATION —
-        // never leave the device's audio mode changed after this session's
-        // own capture/playback has actually stopped, since MODE_IN_COMMUNICATION
-        // affects routing/volume behavior for every app, not just this one.
+        // Symmetric with beginCapturePlayback's MODE_IN_COMMUNICATION and
+        // applyCommunicationRouting — never leave the device's audio mode or
+        // forced routing changed after this session's own capture/playback
+        // has actually stopped, since both affect every app, not just this
+        // one.
+        resetCommunicationRouting()
         audioManager.mode = AudioManager.MODE_NORMAL
     }
 

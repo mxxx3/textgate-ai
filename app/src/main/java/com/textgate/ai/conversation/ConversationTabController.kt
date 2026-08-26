@@ -3,12 +3,14 @@ package com.textgate.ai.conversation
 import android.Manifest
 import android.app.Activity
 import android.media.AudioAttributes
+import android.media.AudioDeviceInfo
 import android.media.AudioFormat
 import android.media.AudioManager
 import android.media.AudioRecord
 import android.media.AudioTrack
 import android.media.MediaRecorder
 import android.media.audiofx.AcousticEchoCanceler
+import android.os.Build
 import android.widget.ArrayAdapter
 import android.widget.Toast
 import com.textgate.ai.MainActivity
@@ -238,7 +240,9 @@ class ConversationTabController(
         liveClient?.close()
         liveClient = null
         activity.volumeControlStream = AudioManager.USE_DEFAULT_STREAM_TYPE
-        // Symmetric with beginCapturePlayback's MODE_IN_COMMUNICATION below.
+        // Symmetric with beginCapturePlayback's MODE_IN_COMMUNICATION and
+        // applyCommunicationRouting below.
+        resetCommunicationRouting()
         audioManager.mode = AudioManager.MODE_NORMAL
         binding.textConversationStatus.text = activity.getString(R.string.live_state_stopped)
         binding.buttonConversationStartStop.setText(R.string.conversation_button_start)
@@ -254,6 +258,20 @@ class ConversationTabController(
         // even though capture and AudioTrack.write() both appear to work,
         // which looks exactly like "status says translating, but silence."
         audioManager.mode = AudioManager.MODE_IN_COMMUNICATION
+
+        // MODE_IN_COMMUNICATION alone does not guarantee loudspeaker
+        // routing — see LiveTranslationService.applyCommunicationRouting's
+        // doc comment for the full, sourced reasoning (a 2026 Android
+        // audio-routing writeup: without setCommunicationDevice(), the
+        // system may silently default to the earpiece path, which is tuned
+        // for a mouth pressed against the top of the phone and barely picks
+        // up anything else — explaining a report of "TRANSLATING but
+        // literally nothing captured or heard" that survived the earlier
+        // MODE_IN_COMMUNICATION fix). Rozmowa always forces the speaker,
+        // unconditionally — unlike Na żywo it has no headset concept at all
+        // (see this class's own doc: it's a face-to-face, loudspeaker mode
+        // by design).
+        applyCommunicationRouting()
 
         val minBufferSize = AudioRecord.getMinBufferSize(
             CAPTURE_SAMPLE_RATE_HZ, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT
@@ -281,6 +299,47 @@ class ConversationTabController(
         val thread = Thread({ runCaptureLoop(minBufferSize) }, "TextGateConversationCapture")
         captureThread = thread
         thread.start()
+    }
+
+    /** See [beginCapturePlayback]'s call site for the full reasoning; kept
+     * as a near-identical twin of LiveTranslationService's version of the
+     * same fix rather than shared, since the two controllers have no common
+     * base to share it from and each has its own [audioManager] instance.
+     * Always forces the speaker here — Rozmowa has no headset branch. */
+    private fun applyCommunicationRouting() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val speakerDevice = audioManager.availableCommunicationDevices
+                .firstOrNull { it.type == AudioDeviceInfo.TYPE_BUILTIN_SPEAKER }
+            try {
+                if (speakerDevice != null) audioManager.setCommunicationDevice(speakerDevice)
+            } catch (_: Exception) {
+                // Best-effort only.
+            }
+        } else {
+            try {
+                @Suppress("DEPRECATION")
+                audioManager.isSpeakerphoneOn = true
+            } catch (_: Exception) {
+                // Best-effort only.
+            }
+        }
+    }
+
+    private fun resetCommunicationRouting() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            try {
+                audioManager.clearCommunicationDevice()
+            } catch (_: Exception) {
+                // Best-effort only.
+            }
+        } else {
+            try {
+                @Suppress("DEPRECATION")
+                audioManager.isSpeakerphoneOn = false
+            } catch (_: Exception) {
+                // Best-effort only.
+            }
+        }
     }
 
     @Suppress("MissingPermission") // RECORD_AUDIO is checked in startSession() before this capture thread is ever started.

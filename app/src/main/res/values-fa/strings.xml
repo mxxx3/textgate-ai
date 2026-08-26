@@ -163,4 +163,9 @@
     <string name="label_headset_disconnect_pause">توقف موقت ترجمه (توصیه‌شده)</string>
     <string name="label_headset_disconnect_speaker">تغییر به بلندگو</string>
     <string name="live_settings_hint">زبان محیط، زبان مقصد و START/STOP جلسه زنده مستقیماً در تب Na żywo تنظیم می‌شوند.</string>
+    <!-- v2.0.1: audio capture mode setting -->
+    <string name="section_audio_capture_mode">حالت ضبط صدا</string>
+    <string name="audio_capture_mode_description">نحوه ضبط و پخش صدا در مکالمه و زنده. «حذف پژواک» مانع از این می‌شود که میکروفون گفتار ترجمه‌شده خود گوشی را از بلندگو بشنود، اما پردازش بیشتری اضافه می‌کند و ممکن است در برخی گوشی‌ها باعث تأخیر یا قطع‌شدن نوبت‌ها شود. حالت «استاندارد» سریع‌تر و ساده‌تر است، اما فقط با هدفون استفاده کنید — روی بلندگو ممکن است خروجی خودش را دوباره بگیرد و آن را در یک حلقه دوباره ترجمه کند.</string>
+    <string name="label_audio_capture_echo_cancelled">حذف پژواک (توصیه‌شده)</string>
+    <string name="label_audio_capture_standard">استاندارد (تأخیر کمتر)</string>
 </resources>

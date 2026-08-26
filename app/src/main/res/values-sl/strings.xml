@@ -163,4 +163,9 @@
     <string name="label_headset_disconnect_pause">Zaustavi prevajanje (priporočeno)</string>
     <string name="label_headset_disconnect_speaker">Preklopi na zvočnik</string>
     <string name="live_settings_hint">Jezik okolice, ciljni jezik ter START/STOP seje V živo nastavite neposredno v zavihku Na żywo.</string>
+    <!-- v2.0.1: audio capture mode setting -->
+    <string name="section_audio_capture_mode">Način zajema zvoka</string>
+    <string name="audio_capture_mode_description">Kako Pogovor in V živo snemata in predvajata zvok. »Odpravljanje odmeva« mikrofonu preprečuje, da bi slišal lasten preveden govor telefona iz zvočnika, vendar doda obdelavo in lahko na nekaterih telefonih povzroči zamik ali prekinjene replike. »Standardni« je hitrejši in preprostejši, vendar ga uporabljajte le s slušalkami — na zvočniku lahko zazna svoj lastni izhod in ga znova prevede v zanki.</string>
+    <string name="label_audio_capture_echo_cancelled">Odpravljanje odmeva (priporočeno)</string>
+    <string name="label_audio_capture_standard">Standardni (manjša zakasnitev)</string>
 </resources>

@@ -162,4 +162,9 @@
     <string name="label_headset_disconnect_pause">暂停翻译(推荐)</string>
     <string name="label_headset_disconnect_speaker">切换到扬声器</string>
     <string name="live_settings_hint">周围环境语言、目标语言以及实时会话的 START/STOP 均在 Na żywo 标签页中直接设置。</string>
+    <!-- v2.0.1: audio capture mode setting -->
+    <string name="section_audio_capture_mode">音频采集模式</string>
+    <string name="audio_capture_mode_description">\"对话\"和\"实时\"如何录制和播放音频。\"回声消除\"可防止麦克风从扬声器中听到手机自己已翻译的语音,但会增加处理开销,在部分手机上可能导致延迟或对话中断。\"标准\"模式更快更简单,但请仅在使用耳机时使用——若使用扬声器,可能会再次拾取自己的输出并循环翻译。</string>
+    <string name="label_audio_capture_echo_cancelled">回声消除(推荐)</string>
+    <string name="label_audio_capture_standard">标准(延迟更低)</string>
 </resources>

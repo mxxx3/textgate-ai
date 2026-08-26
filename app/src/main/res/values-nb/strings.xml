@@ -163,4 +163,9 @@
     <string name="label_headset_disconnect_pause">Sett oversettelse på pause (anbefalt)</string>
     <string name="label_headset_disconnect_speaker">Bytt til høyttaler</string>
     <string name="live_settings_hint">Omgivelsesspråk, målspråk og START/STOPP for en Direkte-økt stilles inn direkte på fanen Na żywo.</string>
+    <!-- v2.0.1: audio capture mode setting -->
+    <string name="section_audio_capture_mode">Lydopptaksmodus</string>
+    <string name="audio_capture_mode_description">Hvordan Samtale og Direkte tar opp og spiller av lyd. \"Ekkokansellering\" hindrer mikrofonen i å høre telefonens egen oversatte tale fra høyttaleren, men legger til prosessering og kan gi forsinkelse eller avbrutte replikker på enkelte telefoner. \"Standard\" er raskere og enklere, men bruk den kun med hodetelefoner — på høyttaleren kan den plukke opp sin egen lyd og oversette den på nytt i en løkke.</string>
+    <string name="label_audio_capture_echo_cancelled">Ekkokansellering (anbefalt)</string>
+    <string name="label_audio_capture_standard">Standard (lavere forsinkelse)</string>
 </resources>

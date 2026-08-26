@@ -14,8 +14,10 @@ import com.textgate.ai.LocaleHelper
 import com.textgate.ai.MainActivity
 import com.textgate.ai.R
 import com.textgate.ai.databinding.ContentLiveBinding
+import com.textgate.ai.model.AudioCaptureMode
 import com.textgate.ai.model.Languages
 import com.textgate.ai.model.SupportedLanguage
+import com.textgate.ai.security.AppSettingsStore
 
 /**
  * Drives the "Na żywo" tab — binds to the already-independent
@@ -46,6 +48,7 @@ class LiveTabController(
     private val ambientLanguageValues: List<SupportedLanguage?> = listOf(null) + Languages.ALL
 
     private val displayRouteMonitor = AudioRouteMonitor(activity.applicationContext)
+    private val settingsStore = AppSettingsStore(activity.applicationContext)
     private var service: LiveTranslationService? = null
     private var bound = false
     private val stateListener: (LiveSessionState) -> Unit = { state -> activity.runOnUiThread { render(state) } }
@@ -79,14 +82,20 @@ class LiveTabController(
             }
             if (proximityWakeLock?.isHeld == false) proximityWakeLock?.acquire()
             // AudioTrack playback for this session uses
-            // AudioAttributes.USAGE_VOICE_COMMUNICATION (see
+            // AudioAttributes.USAGE_VOICE_COMMUNICATION in ECHO_CANCELLED
+            // mode (the default — see AudioCaptureMode's class doc), or
+            // USAGE_MEDIA in STANDARD mode (see
             // LiveTranslationService.beginCapturePlayback), which the
-            // platform maps to the legacy STREAM_VOICE_CALL stream — but
-            // the hardware volume keys only follow that mapping if this
-            // Activity explicitly says so; left at the default they'd
-            // silently adjust STREAM_MUSIC instead, which nothing here
-            // uses, so vol+/- would appear to do nothing.
-            activity.volumeControlStream = AudioManager.STREAM_VOICE_CALL
+            // platform maps to STREAM_VOICE_CALL or STREAM_MUSIC
+            // respectively — but the hardware volume keys only follow that
+            // mapping if this Activity explicitly says so; left at the
+            // default they'd silently adjust whichever stream isn't
+            // actually in use, so vol+/- would appear to do nothing.
+            activity.volumeControlStream = if (settingsStore.audioCaptureMode == AudioCaptureMode.ECHO_CANCELLED) {
+                AudioManager.STREAM_VOICE_CALL
+            } else {
+                AudioManager.STREAM_MUSIC
+            }
         } else {
             if (proximityWakeLock?.isHeld == true) proximityWakeLock?.release()
             activity.volumeControlStream = AudioManager.USE_DEFAULT_STREAM_TYPE

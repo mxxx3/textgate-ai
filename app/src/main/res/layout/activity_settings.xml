@@ -183,6 +183,39 @@
                 android:textColor="@color/tg_text_secondary" />
         </LinearLayout>
 
+        <!-- Audio capture mode (v2.0.1, new) — see
+             com.textgate.ai.model.AudioCaptureMode's class doc for the full
+             reasoning: a user-facing choice between echo-cancelled
+             (call-style, avoids the speaker echo loop, may add latency) and
+             standard (faster/simpler, headphones-only) capture, since which
+             one works better is real per-device behavior this project has
+             no way to detect automatically. -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/bg_card"
+            android:layout_marginBottom="12dp">
+
+            <TextView
+                style="@style/TgSectionTitle"
+                android:text="@string/section_audio_capture_mode" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="@string/audio_capture_mode_description"
+                android:textSize="13sp"
+                android:textColor="@color/tg_text_secondary" />
+
+            <Spinner
+                android:id="@+id/spinnerAudioCaptureMode"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp" />
+        </LinearLayout>
+
         <TextView
             style="@style/TgGroupHeader"
             android:text="@string/settings_group_ai" />

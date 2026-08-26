@@ -163,4 +163,9 @@
     <string name="label_headset_disconnect_pause">Peata tõlge (soovitatav)</string>
     <string name="label_headset_disconnect_speaker">Lülitu kõlarile</string>
     <string name="live_settings_hint">Ümbritseva keele, sihtkeele ning Otse-seansi START/STOP saad seadistada otse Na żywo vahekaardil.</string>
+    <!-- v2.0.1: audio capture mode setting -->
+    <string name="section_audio_capture_mode">Heli salvestamise režiim</string>
+    <string name="audio_capture_mode_description">Kuidas Vestlus ja Live heli salvestavad ja esitavad. \"Kaja summutus\" takistab mikrofonil telefoni enda tõlgitud kõnet valjuhääldist kuulmast, kuid lisab töötlust ning võib mõnel telefonil põhjustada viivitust või katkenud vooru. \"Standardne\" on kiirem ja lihtsam, kuid kasuta seda ainult kõrvaklappidega — valjuhääldis võib see püüda kinni oma väljundi ja tõlkida seda uuesti ringiga.</string>
+    <string name="label_audio_capture_echo_cancelled">Kaja summutus (soovitatav)</string>
+    <string name="label_audio_capture_standard">Standardne (väiksem viivitus)</string>
 </resources>

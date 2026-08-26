@@ -26,6 +26,7 @@ import com.textgate.ai.LocaleHelper
 import com.textgate.ai.MainActivity
 import com.textgate.ai.R
 import com.textgate.ai.live.GeminiLiveClient.ServerEvent
+import com.textgate.ai.model.AudioCaptureMode
 import com.textgate.ai.model.HeadsetDisconnectBehavior
 import com.textgate.ai.model.Languages
 import com.textgate.ai.model.SupportedLanguage
@@ -336,42 +337,38 @@ class LiveTranslationService : Service() {
             return
         }
 
-        // MODE_IN_COMMUNICATION, paired with runCaptureLoop's
+        // Which capture/playback path to use is a user setting as of
+        // v2.0.1 — see AudioCaptureMode's own class doc for the full story:
+        // ECHO_CANCELLED (MODE_IN_COMMUNICATION, paired with runCaptureLoop's
         // AudioSource.VOICE_COMMUNICATION and this method's own
-        // AudioAttributes.USAGE_VOICE_COMMUNICATION below: all three exist
-        // together as one unit on every VoIP-style app for a reason — the
-        // "voice communication" audio source/usage/attributes only get the
-        // platform's special call-style routing and volume behavior applied
-        // while AudioManager itself is told a communication session is
-        // active. Left at the default MODE_NORMAL, some devices still
-        // record fine (AudioSource.VOICE_COMMUNICATION alone can still
-        // engage AEC) but route or attenuate USAGE_VOICE_COMMUNICATION
-        // *playback* incorrectly — inaudible or near-silent output despite
-        // AudioTrack.write() succeeding and the session otherwise working,
-        // which is exactly what "shows Tłumaczę but nothing is heard" looks
-        // like. Reset to MODE_NORMAL in stopCapturePlayback().
-        audioManager.mode = AudioManager.MODE_IN_COMMUNICATION
+        // AudioAttributes.USAGE_VOICE_COMMUNICATION below — the standard
+        // VoIP-app triple) avoids the speaker echo loop but, on at least one
+        // reporting device, added noticeable lag and cut off turns. STANDARD
+        // reverts to this app's original v2.0.0 path (plain AudioSource.MIC,
+        // no mode/routing changes, USAGE_MEDIA playback) — faster and
+        // simpler, but intended for headphone use, since without a headset
+        // the mic can hear the phone's own translated output and re-translate
+        // it in a loop.
+        val captureMode = settingsStore.audioCaptureMode
+        if (captureMode == AudioCaptureMode.ECHO_CANCELLED) {
+            audioManager.mode = AudioManager.MODE_IN_COMMUNICATION
 
-        // MODE_IN_COMMUNICATION alone does NOT guarantee speaker routing —
-        // confirmed via a 2026 Android audio-routing writeup: mode-setting
-        // only establishes communication context, and "without calling
-        // setCommunicationDevice(), the system may default to the earpiece,
-        // but this behavior isn't guaranteed across OEMs." This is the real,
-        // evidenced explanation for a report that survived the
-        // MODE_IN_COMMUNICATION fix above: on the reporting device, entering
-        // communication mode silently routed BOTH playback and capture
-        // through the earpiece path (tuned for a phone held to the ear),
-        // which is why nothing was audible AND no speech was transcribed —
-        // that earpiece-oriented gain staging barely picks up anything that
-        // isn't a mouth pressed right against the top of the phone, let
-        // alone speech from across a room or audio played from a PC. This
-        // call only forces the loudspeaker when there is no private route to
-        // use instead (see the SetupComplete branch above, the only caller
-        // of this method: it's reached either because a headset IS
-        // connected, or because the user opted into SWITCH_TO_SPEAKER) — a
-        // connected headset should keep using the platform's own automatic
-        // communication-device selection, not be overridden here.
-        applyCommunicationRouting(forceSpeaker = !audioRouteMonitor.hasPrivateOutputRoute())
+            // MODE_IN_COMMUNICATION alone does NOT guarantee speaker
+            // routing — confirmed via a 2026 Android audio-routing
+            // writeup: mode-setting only establishes communication context,
+            // and "without calling setCommunicationDevice(), the system may
+            // default to the earpiece, but this behavior isn't guaranteed
+            // across OEMs." This call only forces the loudspeaker when
+            // there is no private route to use instead (see the
+            // SetupComplete branch above, the only caller of this method:
+            // it's reached either because a headset IS connected, or
+            // because the user opted into SWITCH_TO_SPEAKER) — a connected
+            // headset should keep using the platform's own automatic
+            // communication-device selection, not be overridden here.
+            applyCommunicationRouting(forceSpeaker = !audioRouteMonitor.hasPrivateOutputRoute())
+        }
+        // STANDARD: deliberately leave AudioManager.mode and device routing
+        // untouched — see AudioCaptureMode's doc for why.
 
         val minBufferSize = AudioRecord.getMinBufferSize(
             CAPTURE_SAMPLE_RATE_HZ, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT
@@ -380,7 +377,13 @@ class LiveTranslationService : Service() {
         playbackTrack = AudioTrack.Builder()
             .setAudioAttributes(
                 AudioAttributes.Builder()
-                    .setUsage(AudioAttributes.USAGE_VOICE_COMMUNICATION)
+                    .setUsage(
+                        if (captureMode == AudioCaptureMode.ECHO_CANCELLED) {
+                            AudioAttributes.USAGE_VOICE_COMMUNICATION
+                        } else {
+                            AudioAttributes.USAGE_MEDIA
+                        }
+                    )
                     .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
                     .build()
             )
@@ -398,7 +401,7 @@ class LiveTranslationService : Service() {
         micActive.set(true)
         transitionTo(LiveSessionState.LISTENING)
 
-        val thread = Thread({ runCaptureLoop(minBufferSize) }, "TextGateLiveCapture")
+        val thread = Thread({ runCaptureLoop(minBufferSize, captureMode) }, "TextGateLiveCapture")
         captureThread = thread
         thread.start()
     }
@@ -452,27 +455,34 @@ class LiveTranslationService : Service() {
     }
 
     @Suppress("MissingPermission") // RECORD_AUDIO is checked by the caller (Na żywo screen) before ACTION_START is ever sent.
-    private fun runCaptureLoop(bufferSize: Int) {
+    private fun runCaptureLoop(bufferSize: Int, captureMode: AudioCaptureMode) {
         val record = try {
             AudioRecord(
-                // VOICE_COMMUNICATION, not MIC: this session plays translated
-                // audio out loud (speaker, per playbackTrack's own
-                // USAGE_VOICE_COMMUNICATION above) WHILE simultaneously
-                // capturing — exactly the "phone call" scenario Android's
-                // audio source enum exists to distinguish. AudioSource.MIC
-                // is a raw capture path with no echo handling, so on a
-                // speaker (no headset) the mic keeps hearing the phone's own
-                // translated output, sends it back to Gemini as new "speech",
-                // and Gemini translates its own prior output again — a
-                // self-sustaining loop that looks like "hears one sentence,
-                // then repeats it forever" (a real report from this app's
-                // own speaker testing). VOICE_COMMUNICATION routes capture
-                // through the platform's telephony audio pipeline, which
-                // applies acoustic echo cancellation (AEC) when the device
-                // supports it. See [echoCanceler] below for the explicit,
-                // defense-in-depth AEC attachment on top of this — some
-                // devices' VOICE_COMMUNICATION source alone isn't enough.
-                MediaRecorder.AudioSource.VOICE_COMMUNICATION,
+                // VOICE_COMMUNICATION (ECHO_CANCELLED mode), not MIC: this
+                // session plays translated audio out loud (speaker, per
+                // playbackTrack's own USAGE_VOICE_COMMUNICATION) WHILE
+                // simultaneously capturing — exactly the "phone call"
+                // scenario Android's audio source enum exists to
+                // distinguish. Plain AudioSource.MIC (STANDARD mode) is a
+                // raw capture path with no echo handling, so on a speaker
+                // (no headset) the mic keeps hearing the phone's own
+                // translated output, sends it back to Gemini as new
+                // "speech", and Gemini translates its own prior output
+                // again — a self-sustaining loop that looks like "hears one
+                // sentence, then repeats it forever" (a real report from
+                // this app's own speaker testing). VOICE_COMMUNICATION
+                // routes capture through the platform's telephony audio
+                // pipeline, which applies acoustic echo cancellation (AEC)
+                // when the device supports it — at the real cost, per a
+                // later report on the same device, of extra latency and
+                // occasionally cut-off turns. See AudioCaptureMode's class
+                // doc for why this trade-off is a user setting rather than
+                // a single hardcoded choice.
+                if (captureMode == AudioCaptureMode.ECHO_CANCELLED) {
+                    MediaRecorder.AudioSource.VOICE_COMMUNICATION
+                } else {
+                    MediaRecorder.AudioSource.MIC
+                },
                 CAPTURE_SAMPLE_RATE_HZ,
                 AudioFormat.CHANNEL_IN_MONO,
                 AudioFormat.ENCODING_PCM_16BIT,
@@ -493,14 +503,20 @@ class LiveTranslationService : Service() {
         // — belt-and-braces, since not every device's VOICE_COMMUNICATION
         // path includes effective echo cancellation on its own, but
         // AcousticEchoCanceler.isAvailable() is itself unreliable on some
-        // OEM builds, so this is best-effort and never fatal to the session.
-        val echoCanceler = try {
-            if (AcousticEchoCanceler.isAvailable()) {
-                AcousticEchoCanceler.create(record.audioSessionId)?.also { it.enabled = true }
-            } else {
+        // OEM builds, so this is best-effort and never fatal to the
+        // session. Only attempted in ECHO_CANCELLED mode — STANDARD mode
+        // uses AudioSource.MIC, which was never paired with this.
+        val echoCanceler = if (captureMode == AudioCaptureMode.ECHO_CANCELLED) {
+            try {
+                if (AcousticEchoCanceler.isAvailable()) {
+                    AcousticEchoCanceler.create(record.audioSessionId)?.also { it.enabled = true }
+                } else {
+                    null
+                }
+            } catch (_: Exception) {
                 null
             }
-        } catch (_: Exception) {
+        } else {
             null
         }
 

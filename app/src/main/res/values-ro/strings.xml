@@ -162,4 +162,9 @@
     <string name="label_headset_disconnect_pause">Întrerupe traducerea (recomandat)</string>
     <string name="label_headset_disconnect_speaker">Comută pe difuzor</string>
     <string name="live_settings_hint">Limba din jur, limba țintă și START/STOP pentru o sesiune Live se setează direct din fila Na żywo.</string>
+    <!-- v2.0.1: audio capture mode setting -->
+    <string name="section_audio_capture_mode">Mod de captare audio</string>
+    <string name="audio_capture_mode_description">Cum înregistrează și redau sunet Conversație și În direct. „Anularea ecoului” împiedică microfonul să audă propriul discurs tradus al telefonului din difuzor, dar adaugă procesare și poate provoca întârzieri sau replici întrerupte pe unele telefoane. „Standard” este mai rapid și mai simplu, dar folosiți-l doar cu căști — pe difuzor poate capta propria ieșire și o poate retraduce într-o buclă.</string>
+    <string name="label_audio_capture_echo_cancelled">Anularea ecoului (recomandat)</string>
+    <string name="label_audio_capture_standard">Standard (latență mai mică)</string>
 </resources>

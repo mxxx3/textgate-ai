@@ -2,6 +2,7 @@ package com.textgate.ai.security
 
 import android.content.Context
 import android.content.SharedPreferences
+import com.textgate.ai.model.AudioCaptureMode
 import com.textgate.ai.model.HeadsetDisconnectBehavior
 import com.textgate.ai.model.Languages
 import com.textgate.ai.model.UserGender
@@ -133,6 +134,22 @@ class AppSettingsStore(context: Context) {
         set(value) = prefs.edit().putString(KEY_HEADSET_DISCONNECT_BEHAVIOR, value.prefValue).apply()
 
     /**
+     * How Rozmowa and Na żywo capture and play audio — see
+     * [AudioCaptureMode]'s own class doc for the full story: this is a
+     * user-facing choice specifically because the two options trade off two
+     * real, conflicting on-device reports (a speaker echo loop vs. lag and
+     * cut-off turns) that this project cannot detect or resolve
+     * automatically per-device. Read by
+     * [com.textgate.ai.live.LiveTranslationService] and
+     * [com.textgate.ai.conversation.ConversationTabController] at the start
+     * of each capture/playback session — a mid-session change does not
+     * retroactively affect an already-running session, only the next one.
+     */
+    var audioCaptureMode: AudioCaptureMode
+        get() = AudioCaptureMode.fromPrefValue(prefs.getString(KEY_AUDIO_CAPTURE_MODE, null))
+        set(value) = prefs.edit().putString(KEY_AUDIO_CAPTURE_MODE, value.prefValue).apply()
+
+    /**
      * The allow-list as it stands: the user's own explicit choices once
      * they have made any (even down to an empty set, e.g. after removing
      * every default), or else [DEFAULT_ALLOWED_PACKAGES] as long as the
@@ -165,6 +182,7 @@ class AppSettingsStore(context: Context) {
         private const val KEY_APP_INTERFACE_LANGUAGE = "app_interface_language"
         private const val KEY_USER_GENDER = "user_gender"
         private const val KEY_HEADSET_DISCONNECT_BEHAVIOR = "headset_disconnect_behavior"
+        private const val KEY_AUDIO_CAPTURE_MODE = "audio_capture_mode"
 
         /**
          * Chosen from the app owner's own Google AI Studio rate-limit

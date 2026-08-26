@@ -27,6 +27,7 @@ import com.textgate.ai.R
 import com.textgate.ai.accessibility.AccessibilityDisclosureActivity
 import com.textgate.ai.accessibility.TextGateAccessibilityService
 import com.textgate.ai.databinding.ActivitySettingsBinding
+import com.textgate.ai.model.AudioCaptureMode
 import com.textgate.ai.model.HeadsetDisconnectBehavior
 import com.textgate.ai.model.Languages
 import com.textgate.ai.model.SupportedLanguage
@@ -140,6 +141,7 @@ class SettingsActivity : Activity() {
         setupLanguageSection()
         setupUserGenderSection()
         setupHeadsetDisconnectSection()
+        setupAudioCaptureModeSection()
         setupAccessibilitySection()
         setupApiKeySection()
         setupModelSection()
@@ -361,6 +363,45 @@ class SettingsActivity : Activity() {
                 override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                     val selected = headsetDisconnectOptions.getOrNull(position) ?: return
                     settingsStore.headsetDisconnectBehavior = selected
+                }
+
+                override fun onNothingSelected(parent: AdapterView<*>?) = Unit
+            }
+        }
+    }
+
+    // ---------------------------------------------------------------
+    // Audio capture mode (v2.0.1, "Audio i Live" section)
+    // ---------------------------------------------------------------
+
+    /** Fixed display order — [AudioCaptureMode.ECHO_CANCELLED] (the
+     * default) first, same Spinner + deferred-listener pattern as
+     * [setupHeadsetDisconnectSection] above and for the same reason. */
+    private val audioCaptureModeOptions = listOf(
+        AudioCaptureMode.ECHO_CANCELLED,
+        AudioCaptureMode.STANDARD
+    )
+
+    private fun audioCaptureModeLabelRes(mode: AudioCaptureMode): Int = when (mode) {
+        AudioCaptureMode.ECHO_CANCELLED -> R.string.label_audio_capture_echo_cancelled
+        AudioCaptureMode.STANDARD -> R.string.label_audio_capture_standard
+    }
+
+    private fun setupAudioCaptureModeSection() {
+        val labels = audioCaptureModeOptions.map { getString(audioCaptureModeLabelRes(it)) }
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, labels)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        binding.spinnerAudioCaptureMode.adapter = adapter
+
+        val currentIndex = audioCaptureModeOptions.indexOf(settingsStore.audioCaptureMode)
+            .let { if (it >= 0) it else 0 }
+        binding.spinnerAudioCaptureMode.setSelection(currentIndex, false)
+
+        binding.spinnerAudioCaptureMode.post {
+            binding.spinnerAudioCaptureMode.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                    val selected = audioCaptureModeOptions.getOrNull(position) ?: return
+                    settingsStore.audioCaptureMode = selected
                 }
 
                 override fun onNothingSelected(parent: AdapterView<*>?) = Unit

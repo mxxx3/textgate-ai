@@ -162,4 +162,9 @@
     <string name="label_headset_disconnect_pause">अनुवाद रोकें (अनुशंसित)</string>
     <string name="label_headset_disconnect_speaker">स्पीकर पर स्विच करें</string>
     <string name="live_settings_hint">आस-पास की भाषा, लक्ष्य भाषा और लाइव सत्र का START/STOP सीधे Na żywo टैब पर सेट किया जाता है।</string>
+    <!-- v2.0.1: audio capture mode setting -->
+    <string name="section_audio_capture_mode">ऑडियो कैप्चर मोड</string>
+    <string name="audio_capture_mode_description">बातचीत और लाइव ऑडियो को कैसे रिकॉर्ड और चलाते हैं। \"इको-कैंसिल्ड\" माइक्रोफ़ोन को स्पीकर पर फ़ोन की अपनी अनुवादित आवाज़ सुनने से रोकता है, लेकिन इससे प्रोसेसिंग बढ़ती है और कुछ फ़ोन पर देरी या बातचीत के बीच में कट सकती है। \"स्टैंडर्ड\" तेज़ और सरल है, लेकिन इसे केवल हेडफ़ोन के साथ उपयोग करें — स्पीकर पर यह अपनी ही आवाज़ पकड़कर उसे बार-बार अनुवाद कर सकता है।</string>
+    <string name="label_audio_capture_echo_cancelled">इको-कैंसिल्ड (अनुशंसित)</string>
+    <string name="label_audio_capture_standard">स्टैंडर्ड (कम विलंबता)</string>
 </resources>

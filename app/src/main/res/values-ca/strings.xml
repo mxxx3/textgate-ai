@@ -162,4 +162,9 @@
     <string name="label_headset_disconnect_pause">Posa la traducció en pausa (recomanat)</string>
     <string name="label_headset_disconnect_speaker">Canvia a l\'altaveu</string>
     <string name="live_settings_hint">L\'idioma de l\'entorn, l\'idioma de destinació i el START/STOP d\'una sessió En directe es configuren directament a la pestanya Na żywo.</string>
+    <!-- v2.0.1: audio capture mode setting -->
+    <string name="section_audio_capture_mode">Mode de captura d\'àudio</string>
+    <string name="audio_capture_mode_description">Com Conversa i En directe capturen i reprodueixen àudio. \"Sense eco\" evita que el micròfon senti la pròpia veu traduïda del telèfon a l\'altaveu, però afegeix processament i pot causar retard o talls en alguns telèfons. \"Estàndard\" és més ràpid i senzill, però useu-lo només amb auriculars — a l\'altaveu pot captar la seva pròpia sortida i tornar-la a traduir en bucle.</string>
+    <string name="label_audio_capture_echo_cancelled">Sense eco (recomanat)</string>
+    <string name="label_audio_capture_standard">Estàndard (menys latència)</string>
 </resources>

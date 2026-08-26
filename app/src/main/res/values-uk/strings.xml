@@ -162,4 +162,9 @@
     <string name="label_headset_disconnect_pause">Призупинити переклад (рекомендовано)</string>
     <string name="label_headset_disconnect_speaker">Перемкнути на динамік</string>
     <string name="live_settings_hint">Мова оточення, цільова мова та START/STOP сесії Наживо налаштовуються безпосередньо на вкладці Na żywo.</string>
+    <!-- v2.0.1: audio capture mode setting -->
+    <string name="section_audio_capture_mode">Режим захоплення звуку</string>
+    <string name="audio_capture_mode_description">Як «Розмова» і «Наживо» записують і відтворюють звук. «Придушення луни» не дає мікрофону чути власне перекладене мовлення телефону з динаміка, але додає обробку і може спричинити затримку або обірвані репліки на деяких телефонах. «Стандартний» швидший і простіший, але використовуйте його лише з навушниками — на динаміку він може вловити власний звук і знову перекласти його по колу.</string>
+    <string name="label_audio_capture_echo_cancelled">Придушення луни (рекомендовано)</string>
+    <string name="label_audio_capture_standard">Стандартний (менша затримка)</string>
 </resources>

@@ -2821,3 +2821,72 @@ staging is separately suppressing distant/speaker-played audio.
 Sources consulted for `setCommunicationDevice()`/`MODE_IN_COMMUNICATION`
 routing behavior: ["How to Implement Audio Output Switching on Android
 (2026): Kotlin Playbook"](https://www.forasoft.com/blog/article/implement-audio-output-switching-on-android-575).
+
+**Update — v2.0.1: audio capture mode is now a user setting.** Retested on
+the same device: the `setCommunicationDevice()` fix above did not resolve
+things — instead the app owner reported "spore lagi i urywa rozmowe
+zastepujac nowa" (significant lag, and it cuts a turn off and replaces it
+with a new one). Put together with the earlier "shows Tłumaczę but nothing
+is heard" and "hears one sentence then loops forever" reports, this
+project has now collected three real, evidenced symptoms from the SAME
+device across its two capture/playback approaches, and neither approach is
+strictly better:
+
+- Plain `AudioSource.MIC`, no `AudioManager.mode` change (this app's
+  original v2.0.0 behavior): fast and simple, but on the speaker (no
+  headset) the mic hears the phone's own translated output and re-translates
+  it in a loop.
+- `AudioSource.VOICE_COMMUNICATION` + explicit `AcousticEchoCanceler` +
+  `MODE_IN_COMMUNICATION` + forced `setCommunicationDevice()` (the fixes
+  above): stops the echo loop, but on this device adds enough processing
+  latency/discontinuity that Gemini's own turn-detection appears to read
+  it as the end of one utterance and the start of a new one — matching
+  "urywa rozmowe zastepujac nowa" exactly.
+
+Which one actually works better is real per-device/OEM audio-HAL behavior
+this project has no way to detect or test automatically (still no Android
+SDK, compiler, emulator, or device fleet in this sandbox — see this
+project's standing sandbox-limitation note). Rather than keep guessing at
+a single hardcoded default that will inevitably regress one report or the
+other, the app owner explicitly asked for this to be "do wyboru" (a
+choice) — so it now is: a new **Audio capture mode** setting under
+Settings > Audio i Live, with two options, `AudioCaptureMode.
+ECHO_CANCELLED` (all the fixes above; default, since a self-sustaining
+echo loop is a worse default experience than extra latency for most users)
+and `AudioCaptureMode.STANDARD` (reverts fully to the original v2.0.0
+path: plain `AudioSource.MIC`, no `AudioManager.mode` change, no forced
+device routing, no `AcousticEchoCanceler`, `AudioAttributes.USAGE_MEDIA`
+playback instead of `USAGE_VOICE_COMMUNICATION` — intended for headphone
+use, where there's no loudspeaker for the mic to hear in the first place).
+
+Implementation: a new `AudioCaptureMode` enum
+(`app/src/main/java/com/textgate/ai/model/AudioCaptureMode.kt`, same
+`fromPrefValue`/never-throws pattern as `HeadsetDisconnectBehavior`), a new
+`AppSettingsStore.audioCaptureMode` property, a new Settings card
+(`section_audio_capture_mode` + a `Spinner`, same deferred-listener pattern
+as the existing headset-disconnect setting), and both
+`LiveTranslationService.beginCapturePlayback`/`runCaptureLoop` and
+`ConversationTabController`'s counterparts now branch on
+`settingsStore.audioCaptureMode` at the start of each session — reading it
+once per session start, not live, so a mid-session change only takes
+effect on the next START, never retroactively. `LiveTabController` and
+`ConversationTabController` also now pick `STREAM_VOICE_CALL` vs.
+`STREAM_MUSIC` for `volumeControlStream` to match whichever `AudioAttributes.
+USAGE_*` the active mode's `AudioTrack` actually uses, so the earlier
+hardware-volume-key fix keeps working correctly in both modes.
+
+Added the 4 new string keys to `values/` (English) and `values-pl/`
+directly, then translated and injected them into all 38 other locale
+files via `scripts/v2_0_1_audio_capture_translations.py` +
+`scripts/inject_v2_0_1_audio_capture_translations.py` (same
+escaping/`MissingTranslation`-avoidance approach as the original
+`v2_translations.py`/`inject_v2_translations.py` from the v2.0.0 CI-fix
+round) — every `values-XX/strings.xml` file was re-validated with `xmllint
+--noout` afterward.
+
+Not unit-testable here for the same real-hardware-behavior reason as the
+updates above. Needs on-device confirmation of two separate things: that
+`STANDARD` mode (the new option) actually avoids the lag/cut-off-turn
+symptom — ideally tested with headphones, since that mode has no echo
+protection on speaker — and that switching between the two options in
+Settings correctly changes behavior on the NEXT session start.

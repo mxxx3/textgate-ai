@@ -163,4 +163,9 @@
     <string name="label_headset_disconnect_pause">Pozastaviť preklad (odporúčané)</string>
     <string name="label_headset_disconnect_speaker">Prepnúť na reproduktor</string>
     <string name="live_settings_hint">Jazyk okolia, cieľový jazyk a START/STOP relácie Naživo sa nastavujú priamo na karte Na żywo.</string>
+    <!-- v2.0.1: audio capture mode setting -->
+    <string name="section_audio_capture_mode">Režim zaznamenávania zvuku</string>
+    <string name="audio_capture_mode_description">Ako Rozhovor a Naživo zaznamenávajú a prehrávajú zvuk. „Potlačenie ozveny“ bráni mikrofónu počuť vlastnú preloženú reč telefónu z reproduktora, no pridáva spracovanie a na niektorých telefónoch môže spôsobiť oneskorenie alebo prerušené repliky. „Štandardný“ je rýchlejší a jednoduchší, ale používajte ho iba so slúchadlami — na reproduktore môže zachytiť vlastný výstup a znova ho preložiť v slučke.</string>
+    <string name="label_audio_capture_echo_cancelled">Potlačenie ozveny (odporúčané)</string>
+    <string name="label_audio_capture_standard">Štandardný (nižšia latencia)</string>
 </resources>

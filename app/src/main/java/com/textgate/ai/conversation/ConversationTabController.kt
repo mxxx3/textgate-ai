@@ -19,8 +19,10 @@ import com.textgate.ai.databinding.ContentConversationBinding
 import com.textgate.ai.live.GeminiLiveClient
 import com.textgate.ai.live.GeminiLiveClient.ServerEvent
 import com.textgate.ai.live.LiveTranslationService
+import com.textgate.ai.model.AudioCaptureMode
 import com.textgate.ai.model.Languages
 import com.textgate.ai.model.SupportedLanguage
+import com.textgate.ai.security.AppSettingsStore
 import com.textgate.ai.security.SecureApiKeyStore
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -59,6 +61,7 @@ class ConversationTabController(
 ) {
 
     private val apiKeyStore = SecureApiKeyStore(activity.applicationContext)
+    private val settingsStore = AppSettingsStore(activity.applicationContext)
     private val mainHandler = android.os.Handler(android.os.Looper.getMainLooper())
     private val audioManager = activity.getSystemService(android.content.Context.AUDIO_SERVICE) as AudioManager
 
@@ -173,15 +176,22 @@ class ConversationTabController(
         binding.buttonConversationStartStop.setText(R.string.conversation_button_stop)
 
         // playbackTrack (built in beginCapturePlayback, below) uses
-        // AudioAttributes.USAGE_VOICE_COMMUNICATION, which the platform maps
-        // to the legacy STREAM_VOICE_CALL stream — but the hardware volume
-        // keys only follow that mapping if this Activity says so; left at
-        // the default they'd silently adjust STREAM_MUSIC instead, which
-        // nothing here uses, so vol+/- would appear to do nothing. No
-        // proximity/screen-off wake lock here on purpose, unlike Na żywo:
-        // Rozmowa is a face-to-face mode both people look at the screen
-        // during (see this class's own doc), not a to-the-ear call.
-        activity.volumeControlStream = AudioManager.STREAM_VOICE_CALL
+        // AudioAttributes.USAGE_VOICE_COMMUNICATION in ECHO_CANCELLED mode
+        // (the default — see AudioCaptureMode's class doc), which the
+        // platform maps to the legacy STREAM_VOICE_CALL stream, or
+        // USAGE_MEDIA in STANDARD mode, which maps to STREAM_MUSIC — either
+        // way the hardware volume keys only follow that mapping if this
+        // Activity says so; left at the default they'd silently adjust
+        // whichever stream isn't actually in use, so vol+/- would appear to
+        // do nothing. No proximity/screen-off wake lock here on purpose,
+        // unlike Na żywo: Rozmowa is a face-to-face mode both people look at
+        // the screen during (see this class's own doc), not a to-the-ear
+        // call.
+        activity.volumeControlStream = if (settingsStore.audioCaptureMode == AudioCaptureMode.ECHO_CANCELLED) {
+            AudioManager.STREAM_VOICE_CALL
+        } else {
+            AudioManager.STREAM_MUSIC
+        }
 
         val client = GeminiLiveClient()
         liveClient = client
@@ -249,29 +259,37 @@ class ConversationTabController(
     }
 
     private fun beginCapturePlayback() {
-        // MODE_IN_COMMUNICATION, paired with runCaptureLoop's
-        // AudioSource.VOICE_COMMUNICATION and this method's own
-        // AudioAttributes.USAGE_VOICE_COMMUNICATION below — see
-        // LiveTranslationService.beginCapturePlayback's identical comment
-        // for the full reasoning: without this, USAGE_VOICE_COMMUNICATION
-        // *playback* can be routed/attenuated incorrectly on some devices
-        // even though capture and AudioTrack.write() both appear to work,
-        // which looks exactly like "status says translating, but silence."
-        audioManager.mode = AudioManager.MODE_IN_COMMUNICATION
+        // Which capture/playback path to use is a user setting as of
+        // v2.0.1 — see AudioCaptureMode's own class doc for the full story
+        // and LiveTranslationService.beginCapturePlayback's identical
+        // branch for the twin implementation.
+        val captureMode = settingsStore.audioCaptureMode
+        if (captureMode == AudioCaptureMode.ECHO_CANCELLED) {
+            // MODE_IN_COMMUNICATION, paired with runCaptureLoop's
+            // AudioSource.VOICE_COMMUNICATION and this method's own
+            // AudioAttributes.USAGE_VOICE_COMMUNICATION below — see
+            // LiveTranslationService.beginCapturePlayback's identical
+            // comment for the full reasoning: without this,
+            // USAGE_VOICE_COMMUNICATION *playback* can be routed/attenuated
+            // incorrectly on some devices even though capture and
+            // AudioTrack.write() both appear to work, which looks exactly
+            // like "status says translating, but silence."
+            audioManager.mode = AudioManager.MODE_IN_COMMUNICATION
 
-        // MODE_IN_COMMUNICATION alone does not guarantee loudspeaker
-        // routing — see LiveTranslationService.applyCommunicationRouting's
-        // doc comment for the full, sourced reasoning (a 2026 Android
-        // audio-routing writeup: without setCommunicationDevice(), the
-        // system may silently default to the earpiece path, which is tuned
-        // for a mouth pressed against the top of the phone and barely picks
-        // up anything else — explaining a report of "TRANSLATING but
-        // literally nothing captured or heard" that survived the earlier
-        // MODE_IN_COMMUNICATION fix). Rozmowa always forces the speaker,
-        // unconditionally — unlike Na żywo it has no headset concept at all
-        // (see this class's own doc: it's a face-to-face, loudspeaker mode
-        // by design).
-        applyCommunicationRouting()
+            // MODE_IN_COMMUNICATION alone does not guarantee loudspeaker
+            // routing — see LiveTranslationService.applyCommunicationRouting's
+            // doc comment for the full, sourced reasoning (a 2026 Android
+            // audio-routing writeup: without setCommunicationDevice(), the
+            // system may silently default to the earpiece path, which is
+            // tuned for a mouth pressed against the top of the phone and
+            // barely picks up anything else). Rozmowa always forces the
+            // speaker, unconditionally, in this mode — unlike Na żywo it has
+            // no headset concept at all (see this class's own doc: it's a
+            // face-to-face, loudspeaker mode by design).
+            applyCommunicationRouting()
+        }
+        // STANDARD: deliberately leave AudioManager.mode and device routing
+        // untouched — see AudioCaptureMode's doc for why.
 
         val minBufferSize = AudioRecord.getMinBufferSize(
             CAPTURE_SAMPLE_RATE_HZ, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT
@@ -280,7 +298,13 @@ class ConversationTabController(
         playbackTrack = AudioTrack.Builder()
             .setAudioAttributes(
                 AudioAttributes.Builder()
-                    .setUsage(AudioAttributes.USAGE_VOICE_COMMUNICATION)
+                    .setUsage(
+                        if (captureMode == AudioCaptureMode.ECHO_CANCELLED) {
+                            AudioAttributes.USAGE_VOICE_COMMUNICATION
+                        } else {
+                            AudioAttributes.USAGE_MEDIA
+                        }
+                    )
                     .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
                     .build()
             )
@@ -296,7 +320,7 @@ class ConversationTabController(
         playbackTrack?.play()
 
         micActive.set(true)
-        val thread = Thread({ runCaptureLoop(minBufferSize) }, "TextGateConversationCapture")
+        val thread = Thread({ runCaptureLoop(minBufferSize, captureMode) }, "TextGateConversationCapture")
         captureThread = thread
         thread.start()
     }
@@ -343,20 +367,27 @@ class ConversationTabController(
     }
 
     @Suppress("MissingPermission") // RECORD_AUDIO is checked in startSession() before this capture thread is ever started.
-    private fun runCaptureLoop(bufferSize: Int) {
+    private fun runCaptureLoop(bufferSize: Int, captureMode: AudioCaptureMode) {
         val record = try {
             AudioRecord(
-                // VOICE_COMMUNICATION, not MIC — see LiveTranslationService's
-                // own runCaptureLoop for the full reasoning: this screen
-                // plays translated audio out loud while simultaneously
-                // capturing, and AudioSource.MIC has no echo handling, so on
-                // a speaker (no headset) the mic hears the phone's own
-                // translated output and sends it back as "new speech" —
-                // a real, reported bug ("hears one sentence, then loops").
-                // VOICE_COMMUNICATION routes through the platform's
-                // telephony audio pipeline, which applies acoustic echo
-                // cancellation (AEC) where the device supports it.
-                MediaRecorder.AudioSource.VOICE_COMMUNICATION,
+                // VOICE_COMMUNICATION in ECHO_CANCELLED mode, plain MIC in
+                // STANDARD mode — see AudioCaptureMode's class doc and
+                // LiveTranslationService's own runCaptureLoop for the full
+                // reasoning: this screen plays translated audio out loud
+                // while simultaneously capturing, and AudioSource.MIC has no
+                // echo handling, so on a speaker (no headset) the mic hears
+                // the phone's own translated output and sends it back as
+                // "new speech" — a real, reported bug ("hears one sentence,
+                // then loops"). VOICE_COMMUNICATION routes through the
+                // platform's telephony audio pipeline, which applies
+                // acoustic echo cancellation (AEC) where the device supports
+                // it — at the cost, per a later report, of extra latency and
+                // occasionally cut-off turns on some devices.
+                if (captureMode == AudioCaptureMode.ECHO_CANCELLED) {
+                    MediaRecorder.AudioSource.VOICE_COMMUNICATION
+                } else {
+                    MediaRecorder.AudioSource.MIC
+                },
                 CAPTURE_SAMPLE_RATE_HZ,
                 AudioFormat.CHANNEL_IN_MONO,
                 AudioFormat.ENCODING_PCM_16BIT,
@@ -372,13 +403,18 @@ class ConversationTabController(
         // Explicit AEC on top of the VOICE_COMMUNICATION source — see
         // LiveTranslationService's runCaptureLoop for why this is kept as a
         // best-effort, never-fatal addition rather than relied on alone.
-        val echoCanceler = try {
-            if (AcousticEchoCanceler.isAvailable()) {
-                AcousticEchoCanceler.create(record.audioSessionId)?.also { it.enabled = true }
-            } else {
+        // Only attempted in ECHO_CANCELLED mode.
+        val echoCanceler = if (captureMode == AudioCaptureMode.ECHO_CANCELLED) {
+            try {
+                if (AcousticEchoCanceler.isAvailable()) {
+                    AcousticEchoCanceler.create(record.audioSessionId)?.also { it.enabled = true }
+                } else {
+                    null
+                }
+            } catch (_: Exception) {
                 null
             }
-        } catch (_: Exception) {
+        } else {
             null
         }
         try {

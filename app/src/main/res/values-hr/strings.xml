@@ -162,4 +162,9 @@
     <string name="label_headset_disconnect_pause">Pauziraj prijevod (preporučeno)</string>
     <string name="label_headset_disconnect_speaker">Prebaci na zvučnik</string>
     <string name="live_settings_hint">Jezik okoline, ciljni jezik te START/STOP sesije Uživo postavljaju se izravno na kartici Na żywo.</string>
+    <!-- v2.0.1: audio capture mode setting -->
+    <string name="section_audio_capture_mode">Način snimanja zvuka</string>
+    <string name="audio_capture_mode_description">Kako Razgovor i Uživo snimaju i reproduciraju zvuk. \"Uklanjanje jeke\" sprječava mikrofon da čuje vlastiti prevedeni govor telefona s zvučnika, no dodaje obradu i na nekim telefonima može uzrokovati kašnjenje ili prekinute replike. \"Standardni\" je brži i jednostavniji, ali koristite ga samo sa slušalicama — na zvučniku može uhvatiti vlastiti izlaz i ponovno ga prevesti u petlji.</string>
+    <string name="label_audio_capture_echo_cancelled">Uklanjanje jeke (preporučeno)</string>
+    <string name="label_audio_capture_standard">Standardni (manja latencija)</string>
 </resources>

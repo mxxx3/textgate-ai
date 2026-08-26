@@ -162,4 +162,9 @@
     <string name="label_headset_disconnect_pause">Пауза на превода (препоръчително)</string>
     <string name="label_headset_disconnect_speaker">Превключи на високоговорител</string>
     <string name="live_settings_hint">Езикът на околната среда, целевият език и START/STOP на сесия На живо се задават директно в раздела Na żywo.</string>
+    <!-- v2.0.1: audio capture mode setting -->
+    <string name="section_audio_capture_mode">Режим на записване на звук</string>
+    <string name="audio_capture_mode_description">Как „Разговор“ и „На живо“ записват и възпроизвеждат звук. „Без ехо“ пречи на микрофона да чуе собствената преведена реч на телефона от високоговорителя, но добавя обработка и може да причини забавяне или прекъснати реплики на някои телефони. „Стандартен“ е по-бърз и по-прост, но го използвайте само със слушалки — на високоговорител може да улови собствения си изход и да го преведе отново в цикъл.</string>
+    <string name="label_audio_capture_echo_cancelled">Без ехо (препоръчително)</string>
+    <string name="label_audio_capture_standard">Стандартен (по-ниско закъснение)</string>
 </resources>

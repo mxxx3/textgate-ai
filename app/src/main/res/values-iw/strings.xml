@@ -163,4 +163,9 @@
     <string name="label_headset_disconnect_pause">השהה את התרגום (מומלץ)</string>
     <string name="label_headset_disconnect_speaker">עבור לרמקול</string>
     <string name="live_settings_hint">שפת הסביבה, שפת היעד וכפתורי START/STOP של פגישת שידור חי נקבעים ישירות בלשונית Na żywo.</string>
+    <!-- v2.0.1: audio capture mode setting -->
+    <string name="section_audio_capture_mode">מצב הקלטת שמע</string>
+    <string name="audio_capture_mode_description">כיצד שיחה ובשידור חי מקליטים ומנגנים שמע. \"ביטול הד\" מונע מהמיקרופון לשמוע את הדיבור המתורגם של הטלפון עצמו מהרמקול, אך מוסיף עיבוד ועלול לגרום להשהיה או לתורות שנקטעות בטלפונים מסוימים. \"רגיל\" מהיר ופשוט יותר, אך יש להשתמש בו רק עם אוזניות — ברמקול הוא עלול לקלוט את הפלט של עצמו ולתרגם אותו שוב ושוב בלולאה.</string>
+    <string name="label_audio_capture_echo_cancelled">ביטול הד (מומלץ)</string>
+    <string name="label_audio_capture_standard">רגיל (השהיה נמוכה יותר)</string>
 </resources>

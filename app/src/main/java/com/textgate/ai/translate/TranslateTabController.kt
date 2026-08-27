@@ -21,7 +21,6 @@ import com.textgate.ai.databinding.ContentTranslateBinding
 import com.textgate.ai.model.Languages
 import com.textgate.ai.model.SupportedLanguage
 import com.textgate.ai.model.TranslationPrompts
-import com.textgate.ai.model.pickerLabel
 import com.textgate.ai.network.GeminiClient
 import com.textgate.ai.network.ModelAvailabilityStore
 import com.textgate.ai.network.TranslationOrchestrator
@@ -88,13 +87,13 @@ class TranslateTabController(
 
     private fun setupLanguageSpinners() {
         val sourceLabels = listOf(activity.getString(R.string.label_language_auto)) +
-            Languages.ALL.map { it.pickerLabel() }
+            Languages.ALL.map { it.nativeName }
         val sourceAdapter = ArrayAdapter(activity, android.R.layout.simple_spinner_item, sourceLabels)
         sourceAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         binding.spinnerSourceLanguage.adapter = sourceAdapter
         binding.spinnerSourceLanguage.setSelection(0, false)
 
-        val targetLabels = Languages.ALL.map { it.pickerLabel() }
+        val targetLabels = Languages.ALL.map { it.nativeName }
         val targetAdapter = ArrayAdapter(activity, android.R.layout.simple_spinner_item, targetLabels)
         targetAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         binding.spinnerTargetLanguage.adapter = targetAdapter

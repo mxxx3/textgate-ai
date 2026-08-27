@@ -195,7 +195,7 @@
 
     <!-- v2.0.1: tryb przechwytywania dźwięku -->
     <string name="section_audio_capture_mode">Tryb przechwytywania dźwięku</string>
-    <string name="audio_capture_mode_description">Jak Rozmowa i Na żywo nagrywają i odtwarzają dźwięk. \"Redukcja echa\" zapobiega słyszeniu przez mikrofon własnego przetłumaczonego dźwięku z głośnika, ale dodaje przetwarzanie i może powodować opóźnienia lub urywanie wypowiedzi na niektórych telefonach. \"Standardowy\" jest szybszy i prostszy, ale używaj go tylko ze słuchawkami — na głośniku może wychwycić własny dźwięk i tłumaczyć go w kółko.</string>
+    <string name="audio_capture_mode_description">Jak Rozmowa i Na żywo nagrywają i odtwarzają dźwięk. \"Głośnik multimedialny\" zapobiega słyszeniu przez mikrofon własnego przetłumaczonego dźwięku z głośnika, ale dodaje przetwarzanie i może powodować opóźnienia lub urywanie wypowiedzi na niektórych telefonach. \"Głośnik rozmowy\" jest szybszy i prostszy, ale używaj go tylko ze słuchawkami — na głośniku może wychwycić własny dźwięk i tłumaczyć go w kółko.</string>
     <string name="label_audio_capture_echo_cancelled">Głośnik multimedialny</string>
     <string name="label_audio_capture_standard">Głośnik rozmowy</string>
 </resources>

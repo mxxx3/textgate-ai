@@ -164,7 +164,7 @@
     <string name="live_settings_hint">O idioma do ambiente, o idioma de destino e o START/STOP de uma sessão Em direto definem-se diretamente no separador Na żywo.</string>
     <!-- v2.0.1: audio capture mode setting -->
     <string name="section_audio_capture_mode">Modo de captura de áudio</string>
-    <string name="audio_capture_mode_description">Como Conversa e Ao vivo capturam e reproduzem áudio. \"Cancelamento de eco\" impede que o microfone ouça a própria fala traduzida do telefone pelo alto-falante, mas acrescenta processamento e pode causar atraso ou cortes em algumas conversas em certos telefones. \"Padrão\" é mais rápido e simples, mas use-o apenas com fones de ouvido — no alto-falante pode captar a própria saída e traduzi-la novamente em loop.</string>
+    <string name="audio_capture_mode_description">Como Conversa e Ao vivo capturam e reproduzem áudio. \"Altifalante multimédia\" impede que o microfone ouça a própria fala traduzida do telefone pelo alto-falante, mas acrescenta processamento e pode causar atraso ou cortes em algumas conversas em certos telefones. \"Altifalante de chamada\" é mais rápido e simples, mas use-o apenas com fones de ouvido — no alto-falante pode captar a própria saída e traduzi-la novamente em loop.</string>
     <string name="label_audio_capture_echo_cancelled">Altifalante multimédia</string>
     <string name="label_audio_capture_standard">Altifalante de chamada</string>
     <!-- v2.x: Live routing/detected-language/error-category strings -->

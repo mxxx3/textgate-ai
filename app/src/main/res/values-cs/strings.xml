@@ -164,7 +164,7 @@
     <string name="live_settings_hint">Jazyk okolí, cílový jazyk a START/STOP relace Naživo se nastavují přímo na kartě Na żywo.</string>
     <!-- v2.0.1: audio capture mode setting -->
     <string name="section_audio_capture_mode">Režim snímání zvuku</string>
-    <string name="audio_capture_mode_description">Jak Rozhovor a Naživo zaznamenávají a přehrávají zvuk. „Potlačení ozvěny“ brání mikrofonu slyšet vlastní přeloženou řeč telefonu z reproduktoru, ale přidává zpracování a na některých telefonech může způsobit zpoždění nebo přerušené repliky. „Standardní“ je rychlejší a jednodušší, ale používejte jej pouze se sluchátky — na reproduktoru může zachytit vlastní výstup a znovu jej přeložit ve smyčce.</string>
+    <string name="audio_capture_mode_description">Jak Rozhovor a Naživo zaznamenávají a přehrávají zvuk. „Multimediální reproduktor“ brání mikrofonu slyšet vlastní přeloženou řeč telefonu z reproduktoru, ale přidává zpracování a na některých telefonech může způsobit zpoždění nebo přerušené repliky. „Hovorový reproduktor“ je rychlejší a jednodušší, ale používejte jej pouze se sluchátky — na reproduktoru může zachytit vlastní výstup a znovu jej přeložit ve smyčce.</string>
     <string name="label_audio_capture_echo_cancelled">Multimediální reproduktor</string>
     <string name="label_audio_capture_standard">Hovorový reproduktor</string>
     <!-- v2.x: Live routing/detected-language/error-category strings -->

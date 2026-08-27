@@ -113,14 +113,17 @@ object Languages {
     val DEFAULT: SupportedLanguage = BY_CODE.getValue("en")
 }
 
-/** `"<nativeName> ?<code>"` — the label every language PICKER in this app
- * (Settings' language spinner, Tłumacz's source/target spinners, Rozmowa's
- * two language spinners) shows, so the typed-trigger shortcut for each
- * language (e.g. "?de" at the end of a message — see [SupportedLanguage
- * .code]'s own doc) is visible right where the user is already choosing
- * that language, not something they have to already know or look up
- * separately. Deliberately NOT used for plain status/display text that
- * isn't a pick-one-from-a-list control (e.g. [LiveTabController]'s
- * "detected language" line, or Rozmowa's "A → B" direction label) — this
- * is specifically for picker option lists. */
+/** `"<nativeName> ?<code>"` — the label shown ONLY by Settings' own
+ * language-picker spinner (see [com.textgate.ai.settings.SettingsActivity
+ * .setupLanguageSection]), so the typed-trigger shortcut for each language
+ * (e.g. "?de" at the end of a message — see [SupportedLanguage.code]'s own
+ * doc) is visible right where the user is already choosing a language, not
+ * something they have to already know or look up separately.
+ *
+ * Deliberately scoped to Settings alone, per the app owner's explicit
+ * request — NOT used by Tłumacz's or Rozmowa's language spinners (both use
+ * plain [SupportedLanguage.nativeName], same as before this function
+ * existed), and NOT used for plain status/display text that isn't a
+ * pick-one-from-a-list control (e.g. [LiveTabController]'s "detected
+ * language" line, or Rozmowa's "A → B" direction label). */
 fun SupportedLanguage.pickerLabel(): String = "$nativeName ?$code"

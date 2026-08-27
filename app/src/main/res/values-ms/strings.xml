@@ -165,7 +165,7 @@
     <string name="live_settings_hint">Bahasa sekeliling, bahasa sasaran dan START/STOP sesi Langsung ditetapkan terus pada tab Na żywo.</string>
     <!-- v2.0.1: audio capture mode setting -->
     <string name="section_audio_capture_mode">Mod tangkapan audio</string>
-    <string name="audio_capture_mode_description">Cara Perbualan dan Langsung merakam dan memainkan audio. \"Penghapusan gema\" menghalang mikrofon daripada mendengar pertuturan terjemahan telefon itu sendiri daripada pembesar suara, tetapi menambah pemprosesan dan boleh menyebabkan lengah atau giliran terputus pada sesetengah telefon. \"Standard\" lebih pantas dan mudah, tetapi gunakan hanya dengan fon kepala — pada pembesar suara ia mungkin menangkap outputnya sendiri dan menterjemah semula secara berulang.</string>
+    <string name="audio_capture_mode_description">Cara Perbualan dan Langsung merakam dan memainkan audio. \"Pembesar suara media\" menghalang mikrofon daripada mendengar pertuturan terjemahan telefon itu sendiri daripada pembesar suara, tetapi menambah pemprosesan dan boleh menyebabkan lengah atau giliran terputus pada sesetengah telefon. \"Pembesar suara panggilan\" lebih pantas dan mudah, tetapi gunakan hanya dengan fon kepala — pada pembesar suara ia mungkin menangkap outputnya sendiri dan menterjemah semula secara berulang.</string>
     <string name="label_audio_capture_echo_cancelled">Pembesar suara media</string>
     <string name="label_audio_capture_standard">Pembesar suara panggilan</string>
     <!-- v2.x: Live routing/detected-language/error-category strings -->

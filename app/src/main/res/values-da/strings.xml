@@ -165,7 +165,7 @@
     <string name="live_settings_hint">Omgivelsessprog, målsprog og START/STOP for en Live-session indstilles direkte på fanen Na żywo.</string>
     <!-- v2.0.1: audio capture mode setting -->
     <string name="section_audio_capture_mode">Lydoptagelsestilstand</string>
-    <string name="audio_capture_mode_description">Hvordan Samtale og Live optager og afspiller lyd. \"Ekkoannullering\" forhindrer mikrofonen i at høre telefonens egen oversatte tale i højttaleren, men tilføjer behandling og kan give forsinkelse eller afbrudte replikker på nogle telefoner. \"Standard\" er hurtigere og enklere, men brug den kun med hovedtelefoner — i højttaleren kan den opfange sin egen lyd og oversætte den igen i en løkke.</string>
+    <string name="audio_capture_mode_description">Hvordan Samtale og Live optager og afspiller lyd. \"Medie-højttaler\" forhindrer mikrofonen i at høre telefonens egen oversatte tale i højttaleren, men tilføjer behandling og kan give forsinkelse eller afbrudte replikker på nogle telefoner. \"Opkalds-højttaler\" er hurtigere og enklere, men brug den kun med hovedtelefoner — i højttaleren kan den opfange sin egen lyd og oversætte den igen i en løkke.</string>
     <string name="label_audio_capture_echo_cancelled">Medie-højttaler</string>
     <string name="label_audio_capture_standard">Opkalds-højttaler</string>
     <!-- v2.x: Live routing/detected-language/error-category strings -->

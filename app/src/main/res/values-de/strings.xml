@@ -165,7 +165,7 @@
     <string name="live_settings_hint">Umgebungssprache, Zielsprache und START/STOPP für eine Live-Sitzung werden direkt im Tab „Na żywo“ eingestellt.</string>
     <!-- v2.0.1: audio capture mode setting -->
     <string name="section_audio_capture_mode">Audioaufnahmemodus</string>
-    <string name="audio_capture_mode_description">Wie Gespräch und Live Audio aufnehmen und wiedergeben. \"Echounterdrückung\" verhindert, dass das Mikrofon die eigene übersetzte Sprachausgabe des Telefons über den Lautsprecher hört, fügt aber Verarbeitung hinzu und kann bei manchen Telefonen zu Verzögerungen oder abgebrochenen Wortmeldungen führen. \"Standard\" ist schneller und einfacher, sollte aber nur mit Kopfhörern verwendet werden — über den Lautsprecher kann es die eigene Ausgabe aufnehmen und in einer Schleife erneut übersetzen.</string>
+    <string name="audio_capture_mode_description">Wie Gespräch und Live Audio aufnehmen und wiedergeben. \"Multimedia-Lautsprecher\" verhindert, dass das Mikrofon die eigene übersetzte Sprachausgabe des Telefons über den Lautsprecher hört, fügt aber Verarbeitung hinzu und kann bei manchen Telefonen zu Verzögerungen oder abgebrochenen Wortmeldungen führen. \"Gesprächslautsprecher\" ist schneller und einfacher, sollte aber nur mit Kopfhörern verwendet werden — über den Lautsprecher kann es die eigene Ausgabe aufnehmen und in einer Schleife erneut übersetzen.</string>
     <string name="label_audio_capture_echo_cancelled">Multimedia-Lautsprecher</string>
     <string name="label_audio_capture_standard">Gesprächslautsprecher</string>
     <!-- v2.x: Live routing/detected-language/error-category strings -->

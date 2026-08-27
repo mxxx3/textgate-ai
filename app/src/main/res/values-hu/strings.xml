@@ -164,7 +164,7 @@
     <string name="live_settings_hint">A környezet nyelvét, a célnyelvet és az Élő munkamenet START/STOP gombját közvetlenül a Na żywo fülön állíthatod be.</string>
     <!-- v2.0.1: audio capture mode setting -->
     <string name="section_audio_capture_mode">Hangrögzítési mód</string>
-    <string name="audio_capture_mode_description">Hogyan rögzíti és játssza le a hangot a Beszélgetés és az Élő mód. A \"Visszhangmentesítés\" megakadályozza, hogy a mikrofon meghallja a telefon saját lefordított beszédét a hangszóróból, de több feldolgozást igényel, és egyes telefonokon késést vagy megszakadó köröket okozhat. A \"Standard\" gyorsabb és egyszerűbb, de csak fülhallgatóval használja — hangszórón felveheti a saját kimenetét, és körkörösen újra lefordíthatja.</string>
+    <string name="audio_capture_mode_description">Hogyan rögzíti és játssza le a hangot a Beszélgetés és az Élő mód. A \"Médiahangszóró\" megakadályozza, hogy a mikrofon meghallja a telefon saját lefordított beszédét a hangszóróból, de több feldolgozást igényel, és egyes telefonokon késést vagy megszakadó köröket okozhat. A \"Híváshangszóró\" gyorsabb és egyszerűbb, de csak fülhallgatóval használja — hangszórón felveheti a saját kimenetét, és körkörösen újra lefordíthatja.</string>
     <string name="label_audio_capture_echo_cancelled">Médiahangszóró</string>
     <string name="label_audio_capture_standard">Híváshangszóró</string>
     <!-- v2.x: Live routing/detected-language/error-category strings -->

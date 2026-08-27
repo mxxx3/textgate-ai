@@ -22,7 +22,6 @@ import com.textgate.ai.live.liveErrorMessageRes
 import com.textgate.ai.model.AudioCaptureMode
 import com.textgate.ai.model.Languages
 import com.textgate.ai.model.SupportedLanguage
-import com.textgate.ai.model.pickerLabel
 import com.textgate.ai.security.AppSettingsStore
 import com.textgate.ai.security.SecureApiKeyStore
 import java.util.concurrent.atomic.AtomicBoolean
@@ -108,7 +107,7 @@ class ConversationTabController(
     }
 
     private fun setupLanguageSpinners() {
-        val labels = languages.map { it.pickerLabel() }
+        val labels = languages.map { it.nativeName }
         val adapterA = ArrayAdapter(activity, android.R.layout.simple_spinner_item, labels)
         adapterA.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         binding.spinnerLanguageA.adapter = adapterA

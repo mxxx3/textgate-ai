@@ -165,7 +165,7 @@
     <string name="live_settings_hint">Apkārtējās vides valodu, mērķa valodu un Tiešraides sesijas START/STOP iestata tieši cilnē Na żywo.</string>
     <!-- v2.0.1: audio capture mode setting -->
     <string name="section_audio_capture_mode">Audio uztveršanas režīms</string>
-    <string name="audio_capture_mode_description">Kā \"Saruna\" un \"Tiešraide\" ieraksta un atskaņo audio. \"Atbalss slāpēšana\" neļauj mikrofonam dzirdēt paša tālruņa tulkoto runu no skaļruņa, taču pievieno apstrādi un dažos tālruņos var izraisīt aizkavi vai pārtrauktas kārtas. \"Standarta\" ir ātrāks un vienkāršāks, taču izmantojiet to tikai ar austiņām — skaļrunī tas var uztvert savu paša izvadi un atkal to tulkot ciklā.</string>
+    <string name="audio_capture_mode_description">Kā \"Saruna\" un \"Tiešraide\" ieraksta un atskaņo audio. \"Multivides skaļrunis\" neļauj mikrofonam dzirdēt paša tālruņa tulkoto runu no skaļruņa, taču pievieno apstrādi un dažos tālruņos var izraisīt aizkavi vai pārtrauktas kārtas. \"Zvana skaļrunis\" ir ātrāks un vienkāršāks, taču izmantojiet to tikai ar austiņām — skaļrunī tas var uztvert savu paša izvadi un atkal to tulkot ciklā.</string>
     <string name="label_audio_capture_echo_cancelled">Multivides skaļrunis</string>
     <string name="label_audio_capture_standard">Zvana skaļrunis</string>
     <!-- v2.x: Live routing/detected-language/error-category strings -->

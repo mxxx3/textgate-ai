@@ -507,14 +507,15 @@ class LiveTranslationService : Service() {
     private fun engageEarpieceCommunicationRouting() {
         val earpiece = findEarpieceDevice()
         if (earpiece == null) {
-            // No earpiece hardware on this device (e.g. a tablet) — fall
-            // back to the normal main-loudspeaker path used everywhere
-            // else in the app, nothing to engage.
-            try {
-                playbackTrack?.setPreferredDevice(audioRouteMonitor.selectPreferredOutputDevice())
-            } catch (_: Exception) {
-                // Best-effort only.
-            }
+            // No earpiece hardware on this device (e.g. a tablet), or the
+            // platform doesn't currently consider it available for
+            // communication use — fall back to building/pinning the
+            // normal main-loudspeaker path used everywhere else in the
+            // app (rebuildPlaybackTrack, not a raw setPreferredDevice()
+            // call: playbackTrack may still be null here, e.g. when this
+            // is called from beginCapturePlayback at session start, before
+            // any track has been built yet).
+            rebuildPlaybackTrack(AudioAttributes.USAGE_MEDIA, audioRouteMonitor.selectPreferredOutputDevice())
             return
         }
 
@@ -525,10 +526,20 @@ class LiveTranslationService : Service() {
         earpieceCommunicationActive = true
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            // setCommunicationDevice() RETURNS false (not an exception) if
+            // the platform rejects the request — e.g. the AudioDeviceInfo
+            // passed isn't one currently reported by
+            // getAvailableCommunicationDevices() (see findEarpieceDevice's
+            // doc for why that specific method matters, confirmed against
+            // Android's own reference docs: "a list of AudioDeviceInfo
+            // suitable for use with setCommunicationDevice()"). Logged
+            // rather than silently discarded, so a real-device failure
+            // shows up in logcat instead of looking identical to success.
             try {
-                audioManager.setCommunicationDevice(earpiece)
+                val accepted = audioManager.setCommunicationDevice(earpiece)
+                android.util.Log.d("TextGateLiveRoute", "setCommunicationDevice(EARPIECE) accepted=$accepted")
             } catch (_: Exception) {
-                // Best-effort only.
+                android.util.Log.d("TextGateLiveRoute", "setCommunicationDevice(EARPIECE) threw")
             }
         } else {
             // Pre-31: no per-device communication pin exists. The
@@ -632,10 +643,41 @@ class LiveTranslationService : Service() {
      * used ONLY by [engageEarpieceCommunicationRouting]. Deliberately
      * separate from [AudioRouteMonitor.selectPreferredOutputDevice], which
      * resolves the phone's MAIN loudspeaker instead and is what every
-     * other "no headset" fallback in this app still uses. Null if the
-     * device genuinely reports no earpiece (e.g. a tablet with no
-     * telephony hardware). */
+     * other "no headset" fallback in this app still uses.
+     *
+     * On API 31+, sourced from `AudioManager.getAvailableCommunicationDevices()`,
+     * NOT `getDevices(GET_DEVICES_OUTPUTS)` — confirmed against Android's own
+     * reference docs (mirrored at learn.microsoft.com/dotnet/api/
+     * android.media.audiomanager.setcommunicationdevice and
+     * .availablecommunicationdevices, same "read the real docs" methodology
+     * this project uses throughout): `setCommunicationDevice(AudioDeviceInfo)`
+     * documents the device as "expressed as an AudioDeviceInfo among devices
+     * returned by getAvailableCommunicationDevices()", and that method's own
+     * doc calls its result "a list of AudioDeviceInfo suitable for use with
+     * setCommunicationDevice()". The two device lists are NOT guaranteed
+     * interchangeable — an `AudioDeviceInfo` instance from the general-purpose
+     * `getDevices(GET_DEVICES_OUTPUTS)` is not documented as valid input to
+     * `setCommunicationDevice()`, and a first attempt at this feature that
+     * passed one anyway resulted in `setCommunicationDevice()` silently
+     * returning `false` (rejected) on real hardware — no exception, so the
+     * earlier code never noticed the request was refused. Below API 31,
+     * `getAvailableCommunicationDevices()` doesn't exist, but nothing on
+     * that path needs a real `AudioDeviceInfo` object beyond a null-check —
+     * see [engageEarpieceCommunicationRouting]'s pre-31 `isSpeakerphoneOn`
+     * branch — so `getDevices(GET_DEVICES_OUTPUTS)` is still fine there.
+     *
+     * Null if the device genuinely reports no earpiece (e.g. a tablet with
+     * no telephony hardware), or, on API 31+, if the platform doesn't
+     * currently consider it available for a communication use case. */
     private fun findEarpieceDevice(): AudioDeviceInfo? {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val communicationDevices = try {
+                audioManager.availableCommunicationDevices
+            } catch (_: Exception) {
+                emptyList()
+            }
+            return communicationDevices.firstOrNull { it.type == AudioDeviceInfo.TYPE_BUILTIN_EARPIECE }
+        }
         val devices = try {
             audioManager.getDevices(AudioManager.GET_DEVICES_OUTPUTS)
         } catch (_: Exception) {
@@ -722,38 +764,53 @@ class LiveTranslationService : Service() {
             CAPTURE_SAMPLE_RATE_HZ, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT
         ).coerceAtLeast(MIN_BUFFER_FLOOR)
 
-        // USAGE_MEDIA unconditionally now (previously switched to
-        // USAGE_VOICE_COMMUNICATION in ECHO_CANCELLED mode, mapped to the
-        // legacy STREAM_VOICE_CALL) — output routing is handled explicitly
-        // by setPreferredDevice() above regardless of usage, so there is no
-        // remaining reason to pair this with the telephony-style usage;
-        // volumeControlStream (see LiveTabController.setAudioActive)
-        // follows this same simplification to STREAM_MUSIC.
-        playbackTrack = AudioTrack.Builder()
-            .setAudioAttributes(
-                AudioAttributes.Builder()
-                    .setUsage(AudioAttributes.USAGE_MEDIA)
-                    .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
-                    .build()
-            )
-            .setAudioFormat(
-                AudioFormat.Builder()
-                    .setSampleRate(PLAYBACK_SAMPLE_RATE_HZ)
-                    .setChannelMask(AudioFormat.CHANNEL_OUT_MONO)
-                    .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
-                    .build()
-            )
-            .setTransferMode(AudioTrack.MODE_STREAM)
-            .build()
-        if (outputDevice != null) {
-            try {
-                playbackTrack?.setPreferredDevice(outputDevice)
-            } catch (_: Exception) {
-                // Best-effort only — playback still works via the
-                // platform's own default routing if an OEM rejects the pin.
+        if (captureMode == AudioCaptureMode.STANDARD && !hasPrivateOutput) {
+            // STANDARD mode with no headset connected: route via
+            // engageEarpieceCommunicationRouting (MODE_IN_COMMUNICATION +
+            // setCommunicationDevice(EARPIECE), see that function's doc for
+            // the full mechanism and why plain setPreferredDevice() alone
+            // doesn't move a USAGE_MEDIA track off the main loudspeaker).
+            // Wired in HERE too, not only from onRouteChanged's disconnect
+            // handling — the AudioDeviceCallback that drives onRouteChanged
+            // only fires on an actual connect/disconnect EVENT, so a
+            // session simply started (or resumed) with no headset ever
+            // having been plugged in during this process's lifetime would
+            // otherwise never reach that code at all.
+            engageEarpieceCommunicationRouting()
+        } else {
+            // USAGE_MEDIA (previously switched to USAGE_VOICE_COMMUNICATION
+            // in ECHO_CANCELLED mode, mapped to the legacy STREAM_VOICE_CALL)
+            // — output routing is handled explicitly by setPreferredDevice()
+            // below regardless of usage, so there is no remaining reason to
+            // pair this with the telephony-style usage; volumeControlStream
+            // (see LiveTabController.setAudioActive) follows this same
+            // simplification to STREAM_MUSIC.
+            playbackTrack = AudioTrack.Builder()
+                .setAudioAttributes(
+                    AudioAttributes.Builder()
+                        .setUsage(AudioAttributes.USAGE_MEDIA)
+                        .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
+                        .build()
+                )
+                .setAudioFormat(
+                    AudioFormat.Builder()
+                        .setSampleRate(PLAYBACK_SAMPLE_RATE_HZ)
+                        .setChannelMask(AudioFormat.CHANNEL_OUT_MONO)
+                        .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
+                        .build()
+                )
+                .setTransferMode(AudioTrack.MODE_STREAM)
+                .build()
+            if (outputDevice != null) {
+                try {
+                    playbackTrack?.setPreferredDevice(outputDevice)
+                } catch (_: Exception) {
+                    // Best-effort only — playback still works via the
+                    // platform's own default routing if an OEM rejects the pin.
+                }
             }
+            playbackTrack?.play()
         }
-        playbackTrack?.play()
 
         micActive.set(true)
         transitionTo(LiveSessionState.LISTENING)

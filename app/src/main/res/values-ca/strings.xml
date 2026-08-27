@@ -167,4 +167,10 @@
     <string name="audio_capture_mode_description">Com Conversa i En directe capturen i reprodueixen àudio. \"Sense eco\" evita que el micròfon senti la pròpia veu traduïda del telèfon a l\'altaveu, però afegeix processament i pot causar retard o talls en alguns telèfons. \"Estàndard\" és més ràpid i senzill, però useu-lo només amb auriculars — a l\'altaveu pot captar la seva pròpia sortida i tornar-la a traduir en bucle.</string>
     <string name="label_audio_capture_echo_cancelled">Sense eco (recomanat)</string>
     <string name="label_audio_capture_standard">Estàndard (menys latència)</string>
+    <!-- v2.x: Live routing/detected-language/error-category strings -->
+    <string name="live_ambient_language_auto">Detecció automàtica</string>
+    <string name="live_detected_language_format">Detectat: %1$s</string>
+    <string name="live_error_quota">S\'ha arribat al límit de Gemini Live — torneu-ho a provar més tard.</string>
+    <string name="live_error_auth">Problema amb la clau API — comproveu la clau a Configuració.</string>
+    <string name="live_error_config">Configuració de sessió no vàlida (p. ex. idioma no compatible).</string>
 </resources>

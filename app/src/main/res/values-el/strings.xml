@@ -168,4 +168,10 @@
     <string name="audio_capture_mode_description">Πώς οι λειτουργίες Συνομιλία και Ζωντανά καταγράφουν και αναπαράγουν ήχο. Η \"Απόρριψη ηχούς\" εμποδίζει το μικρόφωνο να ακούει τη μεταφρασμένη ομιλία του ίδιου του τηλεφώνου από το ηχείο, αλλά προσθέτει επεξεργασία και μπορεί να προκαλέσει καθυστέρηση ή διακοπές σε ορισμένα τηλέφωνα. Η \"Τυπική\" είναι πιο γρήγορη και απλή, αλλά χρησιμοποιήστε την μόνο με ακουστικά — στο ηχείο μπορεί να καταγράψει τη δική της έξοδο και να τη μεταφράσει ξανά σε βρόχο.</string>
     <string name="label_audio_capture_echo_cancelled">Απόρριψη ηχούς (προτείνεται)</string>
     <string name="label_audio_capture_standard">Τυπική (χαμηλότερη καθυστέρηση)</string>
+    <!-- v2.x: Live routing/detected-language/error-category strings -->
+    <string name="live_ambient_language_auto">Αυτόματος εντοπισμός</string>
+    <string name="live_detected_language_format">Εντοπίστηκε: %1$s</string>
+    <string name="live_error_quota">Το όριο του Gemini Live έχει εξαντληθεί — δοκιμάστε ξανά αργότερα.</string>
+    <string name="live_error_auth">Πρόβλημα με το κλειδί API — ελέγξτε το κλειδί σας στις Ρυθμίσεις.</string>
+    <string name="live_error_config">Μη έγκυρη διαμόρφωση περιόδου σύνδεσης (π.χ. μη υποστηριζόμενη γλώσσα).</string>
 </resources>

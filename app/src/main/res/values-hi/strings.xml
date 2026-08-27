@@ -167,4 +167,10 @@
     <string name="audio_capture_mode_description">बातचीत और लाइव ऑडियो को कैसे रिकॉर्ड और चलाते हैं। \"इको-कैंसिल्ड\" माइक्रोफ़ोन को स्पीकर पर फ़ोन की अपनी अनुवादित आवाज़ सुनने से रोकता है, लेकिन इससे प्रोसेसिंग बढ़ती है और कुछ फ़ोन पर देरी या बातचीत के बीच में कट सकती है। \"स्टैंडर्ड\" तेज़ और सरल है, लेकिन इसे केवल हेडफ़ोन के साथ उपयोग करें — स्पीकर पर यह अपनी ही आवाज़ पकड़कर उसे बार-बार अनुवाद कर सकता है।</string>
     <string name="label_audio_capture_echo_cancelled">इको-कैंसिल्ड (अनुशंसित)</string>
     <string name="label_audio_capture_standard">स्टैंडर्ड (कम विलंबता)</string>
+    <!-- v2.x: Live routing/detected-language/error-category strings -->
+    <string name="live_ambient_language_auto">स्वचालित पहचान</string>
+    <string name="live_detected_language_format">पहचाना गया: %1$s</string>
+    <string name="live_error_quota">Gemini Live सीमा पूरी हो गई — कृपया बाद में फिर से प्रयास करें।</string>
+    <string name="live_error_auth">API कुंजी की समस्या — सेटिंग्स में अपनी कुंजी जांचें।</string>
+    <string name="live_error_config">सत्र कॉन्फ़िगरेशन अमान्य है (जैसे असमर्थित भाषा)।</string>
 </resources>

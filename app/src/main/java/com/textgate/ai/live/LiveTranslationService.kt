@@ -8,7 +8,6 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.media.AudioAttributes
-import android.media.AudioDeviceInfo
 import android.media.AudioFocusRequest
 import android.media.AudioFormat
 import android.media.AudioManager
@@ -92,13 +91,35 @@ class LiveTranslationService : Service() {
 
     var state: LiveSessionState = LiveSessionState.STOPPED
         private set
-    var sourceLanguage: SupportedLanguage? = null // null = "Automatycznie" (ambient auto-detect)
+
+    /** The ambient language Gemini itself reported detecting, via
+     * `serverContent.inputTranscription.languageCode` — see
+     * [GeminiLiveClient.ServerEvent.InputTranscript]'s doc for why this,
+     * not a user-facing picker, is the only real signal: there is no
+     * request field that lets this app FORCE a source language (confirmed:
+     * no such field exists in TranslationConfig/LiveConnectConfig). Null
+     * until the first transcript with a language code arrives, or if the
+     * server never includes one. Shown in the UI as "Wykryto: X" — see
+     * [LiveTabController]. */
+    var detectedSourceLanguage: SupportedLanguage? = null
         private set
     var targetLanguage: SupportedLanguage = Languages.DEFAULT
         private set
     var latestInputTranscript: String = ""
         private set
     var latestOutputTranscript: String = ""
+        private set
+
+    /** A category-specific, user-readable message set whenever [state]
+     * becomes [LiveSessionState.ERROR] — see [handleLiveError]/
+     * [failSession]/[handleDisconnect]'s exhausted-attempts branch, the
+     * only three writers. Read by [LiveTabController] and by
+     * [buildNotification] so the ERROR state always shows something more
+     * specific than a generic "coś poszło nie tak" when the cause is
+     * known (quota, API key, or config problem — see point 9 of the v2.x
+     * request this was added for). Null only before any error has
+     * occurred this process lifetime. */
+    var lastErrorMessage: String? = null
         private set
 
     private val stateListeners = mutableListOf<(LiveSessionState) -> Unit>()
@@ -139,8 +160,6 @@ class LiveTranslationService : Service() {
                     // sessions (see class doc).
                     return START_NOT_STICKY
                 }
-                val sourceCode = intent.getStringExtra(EXTRA_SOURCE_LANGUAGE_CODE)
-                sourceLanguage = sourceCode?.let { Languages.byCode(it) }
                 targetLanguage = intent.getStringExtra(EXTRA_TARGET_LANGUAGE_CODE)
                     ?.let { Languages.byCode(it) }
                     ?: LocaleHelper.resolvePreferredLanguage(applicationContext)
@@ -170,6 +189,7 @@ class LiveTranslationService : Service() {
     // ---------------------------------------------------------------
 
     private fun startSession() {
+        lastErrorMessage = null
         transitionTo(LiveSessionState.CONNECTING)
         // Acquired right after START (per spec), not only once the mic
         // actually starts — the risk window between pressing START and the
@@ -235,6 +255,7 @@ class LiveTranslationService : Service() {
             }
             is ServerEvent.InputTranscript -> {
                 latestInputTranscript = event.text
+                event.languageCode?.let { code -> Languages.byCode(code)?.let { detectedSourceLanguage = it } }
                 notifyListeners()
             }
             is ServerEvent.OutputTranscript -> {
@@ -248,10 +269,48 @@ class LiveTranslationService : Service() {
             is ServerEvent.TurnComplete -> {
                 if (state == LiveSessionState.TRANSLATING) transitionTo(LiveSessionState.LISTENING)
             }
-            is ServerEvent.Error -> handleDisconnect()
-            is ServerEvent.Closed -> if (event.code != 1000) handleDisconnect()
+            is ServerEvent.Error -> handleLiveError(event.category)
+            is ServerEvent.Closed -> if (event.code != 1000) handleLiveError(event.category)
         }
         updateNotification()
+    }
+
+    /** Routes a Live error/close event to either a bounded, backed-off
+     * reconnect (genuine network trouble — the existing, proven behavior,
+     * unchanged) or an immediate, non-retrying failure with a specific
+     * message (quota/rate-limit, bad API key, or invalid config/unsupported
+     * language — none of these are fixed by reconnecting, so retrying them
+     * in a loop would just spam the same rejection). See
+     * [GeminiLiveClient.classifyLiveError]'s doc for how [category] is
+     * determined, and [liveErrorMessageRes] (shared with
+     * [com.textgate.ai.conversation.ConversationTabController], per this
+     * same request's point about reusing this without duplicating it) for
+     * the message mapping. */
+    private fun handleLiveError(category: GeminiLiveClient.LiveErrorCategory) {
+        when (category) {
+            GeminiLiveClient.LiveErrorCategory.QUOTA,
+            GeminiLiveClient.LiveErrorCategory.AUTH,
+            GeminiLiveClient.LiveErrorCategory.CONFIG -> failSession(category)
+            GeminiLiveClient.LiveErrorCategory.NETWORK,
+            GeminiLiveClient.LiveErrorCategory.UNKNOWN -> handleDisconnect()
+        }
+    }
+
+    /** Terminal, non-retrying failure — the counterpart to
+     * [handleDisconnect]'s reconnect path, for error categories a
+     * reconnect can never fix (see [handleLiveError]). Releases exactly
+     * the same resources [handleDisconnect]'s exhausted-attempts branch
+     * does, but immediately, without spending any of the 5 reconnect
+     * attempts on a rejection that would just repeat identically. */
+    private fun failSession(category: GeminiLiveClient.LiveErrorCategory) {
+        stopCapturePlayback()
+        liveClient?.close()
+        liveClient = null
+        releaseWakeLock()
+        releaseAudioFocus()
+        audioRouteMonitor.stop()
+        lastErrorMessage = getString(liveErrorMessageRes(category))
+        transitionTo(LiveSessionState.ERROR)
     }
 
     private fun handleDisconnect() {
@@ -263,6 +322,7 @@ class LiveTranslationService : Service() {
             releaseWakeLock()
             releaseAudioFocus()
             audioRouteMonitor.stop()
+            lastErrorMessage = getString(R.string.live_notification_error)
             transitionTo(LiveSessionState.ERROR)
             return
         }
@@ -286,6 +346,7 @@ class LiveTranslationService : Service() {
         releaseWakeLock()
         latestInputTranscript = ""
         latestOutputTranscript = ""
+        detectedSourceLanguage = null
         transitionTo(LiveSessionState.STOPPED)
         if (userInitiated) {
             stopForeground(STOP_FOREGROUND_REMOVE)
@@ -337,53 +398,52 @@ class LiveTranslationService : Service() {
             return
         }
 
-        // Which capture/playback path to use is a user setting as of
-        // v2.0.1 — see AudioCaptureMode's own class doc for the full story:
-        // ECHO_CANCELLED (MODE_IN_COMMUNICATION, paired with runCaptureLoop's
-        // AudioSource.VOICE_COMMUNICATION and this method's own
-        // AudioAttributes.USAGE_VOICE_COMMUNICATION below — the standard
-        // VoIP-app triple) avoids the speaker echo loop but, on at least one
-        // reporting device, added noticeable lag and cut off turns. STANDARD
-        // reverts to this app's original v2.0.0 path (plain AudioSource.MIC,
-        // no mode/routing changes, USAGE_MEDIA playback) — faster and
-        // simpler, but intended for headphone use, since without a headset
-        // the mic can hear the phone's own translated output and re-translate
-        // it in a loop.
-        val captureMode = settingsStore.audioCaptureMode
-        if (captureMode == AudioCaptureMode.ECHO_CANCELLED) {
-            audioManager.mode = AudioManager.MODE_IN_COMMUNICATION
+        // v2.x routing rework (points 3/4/5 of the request that replaced
+        // the MODE_IN_COMMUNICATION/setCommunicationDevice approach below):
+        // rather than relying on Android's own call-style routing — which,
+        // on at least one reporting device, added noticeable lag and cut
+        // off turns even with headphones connected — pin OUTPUT explicitly
+        // via AudioTrack.setPreferredDevice() to the best resolved device
+        // (private route if connected, else the phone's own speaker,
+        // deterministic either way), and pin INPUT explicitly via
+        // AudioRecord.setPreferredDevice() (in runCaptureLoop) to the
+        // phone's own built-in mic — regardless of what output is
+        // connected, so a Bluetooth/TWS headset's mic is never silently
+        // used for ambient capture. Both are per-instance API-24+ calls
+        // (this app's minSdk is 26), so nothing here touches
+        // AudioManager.mode or any other app's routing.
+        val outputDevice = audioRouteMonitor.selectPreferredOutputDevice()
+        val hasPrivateOutput = outputDevice != null && outputDevice.type in AudioRouteMonitor.PRIVATE_OUTPUT_TYPES
 
-            // MODE_IN_COMMUNICATION alone does NOT guarantee speaker
-            // routing — confirmed via a 2026 Android audio-routing
-            // writeup: mode-setting only establishes communication context,
-            // and "without calling setCommunicationDevice(), the system may
-            // default to the earpiece, but this behavior isn't guaranteed
-            // across OEMs." This call only forces the loudspeaker when
-            // there is no private route to use instead (see the
-            // SetupComplete branch above, the only caller of this method:
-            // it's reached either because a headset IS connected, or
-            // because the user opted into SWITCH_TO_SPEAKER) — a connected
-            // headset should keep using the platform's own automatic
-            // communication-device selection, not be overridden here.
-            applyCommunicationRouting(forceSpeaker = !audioRouteMonitor.hasPrivateOutputRoute())
-        }
-        // STANDARD: deliberately leave AudioManager.mode and device routing
-        // untouched — see AudioCaptureMode's doc for why.
+        // AEC/VOICE_COMMUNICATION is now decided AUTOMATICALLY from the
+        // real resolved output route rather than applied unconditionally —
+        // see AudioCaptureMode's class doc for the full story.
+        // ECHO_CANCELLED (default): use the heavier echo-cancelled pipeline
+        // ONLY when there is no private route (about to play on the
+        // phone's own speaker, where the mic really can hear it);
+        // headphones/Bluetooth/USB skip it entirely, since the mic
+        // essentially can't hear headphone output and the heavier pipeline
+        // was the evidenced source of added latency and cut-off turns.
+        // STANDARD: always use the light path, even on speaker, as an
+        // explicit user override.
+        val captureMode = settingsStore.audioCaptureMode
+        val useAec = captureMode == AudioCaptureMode.ECHO_CANCELLED && !hasPrivateOutput
 
         val minBufferSize = AudioRecord.getMinBufferSize(
             CAPTURE_SAMPLE_RATE_HZ, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT
         ).coerceAtLeast(MIN_BUFFER_FLOOR)
 
+        // USAGE_MEDIA unconditionally now (previously switched to
+        // USAGE_VOICE_COMMUNICATION in ECHO_CANCELLED mode, mapped to the
+        // legacy STREAM_VOICE_CALL) — output routing is handled explicitly
+        // by setPreferredDevice() above regardless of usage, so there is no
+        // remaining reason to pair this with the telephony-style usage;
+        // volumeControlStream (see LiveTabController.setAudioActive)
+        // follows this same simplification to STREAM_MUSIC.
         playbackTrack = AudioTrack.Builder()
             .setAudioAttributes(
                 AudioAttributes.Builder()
-                    .setUsage(
-                        if (captureMode == AudioCaptureMode.ECHO_CANCELLED) {
-                            AudioAttributes.USAGE_VOICE_COMMUNICATION
-                        } else {
-                            AudioAttributes.USAGE_MEDIA
-                        }
-                    )
+                    .setUsage(AudioAttributes.USAGE_MEDIA)
                     .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
                     .build()
             )
@@ -396,93 +456,37 @@ class LiveTranslationService : Service() {
             )
             .setTransferMode(AudioTrack.MODE_STREAM)
             .build()
+        if (outputDevice != null) {
+            try {
+                playbackTrack?.setPreferredDevice(outputDevice)
+            } catch (_: Exception) {
+                // Best-effort only — playback still works via the
+                // platform's own default routing if an OEM rejects the pin.
+            }
+        }
         playbackTrack?.play()
 
         micActive.set(true)
         transitionTo(LiveSessionState.LISTENING)
 
-        val thread = Thread({ runCaptureLoop(minBufferSize, captureMode) }, "TextGateLiveCapture")
+        val thread = Thread({ runCaptureLoop(minBufferSize, useAec) }, "TextGateLiveCapture")
         captureThread = thread
         thread.start()
     }
 
-    /** See [beginCapturePlayback]'s call site for why this exists at all.
-     * [android.media.AudioManager.setCommunicationDevice] is the modern
-     * (API 31+) way to pick the device MODE_IN_COMMUNICATION actually
-     * routes to; the legacy [android.media.AudioManager.isSpeakerphoneOn]
-     * setter is kept only as the pre-31 fallback, since minSdk here is 26
-     * (see AudioRouteMonitor's class doc). Always best-effort — never worth
-     * failing the session over a routing call an OEM's HAL rejects. */
-    private fun applyCommunicationRouting(forceSpeaker: Boolean) {
-        if (forceSpeaker) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                val speakerDevice = audioManager.availableCommunicationDevices
-                    .firstOrNull { it.type == AudioDeviceInfo.TYPE_BUILTIN_SPEAKER }
-                try {
-                    if (speakerDevice != null) audioManager.setCommunicationDevice(speakerDevice)
-                } catch (_: Exception) {
-                    // Best-effort only.
-                }
-            } else {
-                try {
-                    @Suppress("DEPRECATION")
-                    audioManager.isSpeakerphoneOn = true
-                } catch (_: Exception) {
-                    // Best-effort only.
-                }
-            }
-        }
-        // forceSpeaker == false: a private route (headset) is connected —
-        // leave routing to the platform's own automatic communication-device
-        // selection rather than overriding it.
-    }
-
-    private fun resetCommunicationRouting() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            try {
-                audioManager.clearCommunicationDevice()
-            } catch (_: Exception) {
-                // Best-effort only.
-            }
-        } else {
-            try {
-                @Suppress("DEPRECATION")
-                audioManager.isSpeakerphoneOn = false
-            } catch (_: Exception) {
-                // Best-effort only.
-            }
-        }
-    }
-
     @Suppress("MissingPermission") // RECORD_AUDIO is checked by the caller (Na żywo screen) before ACTION_START is ever sent.
-    private fun runCaptureLoop(bufferSize: Int, captureMode: AudioCaptureMode) {
+    private fun runCaptureLoop(bufferSize: Int, useAec: Boolean) {
         val record = try {
             AudioRecord(
-                // VOICE_COMMUNICATION (ECHO_CANCELLED mode), not MIC: this
-                // session plays translated audio out loud (speaker, per
-                // playbackTrack's own USAGE_VOICE_COMMUNICATION) WHILE
-                // simultaneously capturing — exactly the "phone call"
-                // scenario Android's audio source enum exists to
-                // distinguish. Plain AudioSource.MIC (STANDARD mode) is a
-                // raw capture path with no echo handling, so on a speaker
-                // (no headset) the mic keeps hearing the phone's own
-                // translated output, sends it back to Gemini as new
-                // "speech", and Gemini translates its own prior output
-                // again — a self-sustaining loop that looks like "hears one
-                // sentence, then repeats it forever" (a real report from
-                // this app's own speaker testing). VOICE_COMMUNICATION
-                // routes capture through the platform's telephony audio
-                // pipeline, which applies acoustic echo cancellation (AEC)
-                // when the device supports it — at the real cost, per a
-                // later report on the same device, of extra latency and
-                // occasionally cut-off turns. See AudioCaptureMode's class
-                // doc for why this trade-off is a user setting rather than
-                // a single hardcoded choice.
-                if (captureMode == AudioCaptureMode.ECHO_CANCELLED) {
-                    MediaRecorder.AudioSource.VOICE_COMMUNICATION
-                } else {
-                    MediaRecorder.AudioSource.MIC
-                },
+                // VOICE_COMMUNICATION only when useAec (resolved output is
+                // the speaker, ECHO_CANCELLED mode) — see
+                // beginCapturePlayback's doc for the full, now automatic,
+                // per-session reasoning. Plain AudioSource.MIC otherwise
+                // (headphones connected, or STANDARD mode's explicit
+                // override): a raw capture path with no echo handling,
+                // correct exactly when the mic can't hear the output in the
+                // first place.
+                if (useAec) MediaRecorder.AudioSource.VOICE_COMMUNICATION else MediaRecorder.AudioSource.MIC,
                 CAPTURE_SAMPLE_RATE_HZ,
                 AudioFormat.CHANNEL_IN_MONO,
                 AudioFormat.ENCODING_PCM_16BIT,
@@ -499,14 +503,27 @@ class LiveTranslationService : Service() {
             return
         }
 
+        // Always pin capture to the phone's own built-in mic — see
+        // beginCapturePlayback's doc (point 4 of the routing request: never
+        // silently let a connected Bluetooth/TWS headset's mic take over
+        // ambient capture). Best-effort: some OEMs may reject this for a
+        // given AudioSource, in which case capture simply continues on
+        // whatever device the platform picked by default.
+        audioRouteMonitor.selectBuiltInMicDevice()?.let { mic ->
+            try {
+                record.setPreferredDevice(mic)
+            } catch (_: Exception) {
+                // Best-effort only.
+            }
+        }
+
         // Explicit AEC on top of the VOICE_COMMUNICATION source (see above)
         // — belt-and-braces, since not every device's VOICE_COMMUNICATION
         // path includes effective echo cancellation on its own, but
         // AcousticEchoCanceler.isAvailable() is itself unreliable on some
         // OEM builds, so this is best-effort and never fatal to the
-        // session. Only attempted in ECHO_CANCELLED mode — STANDARD mode
-        // uses AudioSource.MIC, which was never paired with this.
-        val echoCanceler = if (captureMode == AudioCaptureMode.ECHO_CANCELLED) {
+        // session. Only attempted when useAec.
+        val echoCanceler = if (useAec) {
             try {
                 if (AcousticEchoCanceler.isAvailable()) {
                     AcousticEchoCanceler.create(record.audioSessionId)?.also { it.enabled = true }
@@ -570,13 +587,11 @@ class LiveTranslationService : Service() {
             }
         }
         playbackTrack = null
-        // Symmetric with beginCapturePlayback's MODE_IN_COMMUNICATION and
-        // applyCommunicationRouting — never leave the device's audio mode or
-        // forced routing changed after this session's own capture/playback
-        // has actually stopped, since both affect every app, not just this
-        // one.
-        resetCommunicationRouting()
-        audioManager.mode = AudioManager.MODE_NORMAL
+        // No AudioManager.mode/communication-device state to reset any
+        // more — see beginCapturePlayback's doc: routing is now pinned
+        // per-instance via setPreferredDevice() (AudioTrack/AudioRecord),
+        // never through the global AudioManager.mode, so there is nothing
+        // session-wide left over that could affect another app.
     }
 
     // ---------------------------------------------------------------
@@ -686,12 +701,12 @@ class LiveTranslationService : Service() {
             LiveSessionState.STOPPED, LiveSessionState.CONNECTING -> getString(R.string.live_state_connecting)
             LiveSessionState.LISTENING, LiveSessionState.TRANSLATING -> getString(
                 R.string.live_notification_active_format,
-                (sourceLanguage?.englishName ?: getString(R.string.label_language_auto)),
+                (detectedSourceLanguage?.englishName ?: getString(R.string.label_language_auto)),
                 targetLanguage.englishName
             )
             LiveSessionState.RECONNECTING -> getString(R.string.live_state_reconnecting)
             LiveSessionState.PAUSED -> getString(R.string.live_notification_paused)
-            LiveSessionState.ERROR -> getString(R.string.live_notification_error)
+            LiveSessionState.ERROR -> lastErrorMessage ?: getString(R.string.live_notification_error)
         }
 
         val contentIntent = PendingIntent.getActivity(
@@ -719,7 +734,6 @@ class LiveTranslationService : Service() {
         const val ACTION_START = "com.textgate.ai.live.action.START"
         const val ACTION_STOP = "com.textgate.ai.live.action.STOP"
         const val ACTION_RETRY = "com.textgate.ai.live.action.RETRY"
-        const val EXTRA_SOURCE_LANGUAGE_CODE = "source_language_code"
         const val EXTRA_TARGET_LANGUAGE_CODE = "target_language_code"
 
         /** Independent of the two TEXT models — see GeminiLiveClient's and
@@ -742,17 +756,16 @@ class LiveTranslationService : Service() {
          * explicitly well before this. */
         private const val WAKELOCK_SAFETY_TIMEOUT_MS = 12 * 60 * 60 * 1000L
 
-        fun startIntent(context: Context, sourceLanguageCode: String?, targetLanguageCode: String): Intent =
+        fun startIntent(context: Context, targetLanguageCode: String): Intent =
             Intent(context, LiveTranslationService::class.java)
                 .setAction(ACTION_START)
-                .putExtra(EXTRA_SOURCE_LANGUAGE_CODE, sourceLanguageCode)
                 .putExtra(EXTRA_TARGET_LANGUAGE_CODE, targetLanguageCode)
 
         fun stopIntent(context: Context): Intent =
             Intent(context, LiveTranslationService::class.java).setAction(ACTION_STOP)
 
-        fun start(context: Context, sourceLanguageCode: String?, targetLanguageCode: String) {
-            val intent = startIntent(context, sourceLanguageCode, targetLanguageCode)
+        fun start(context: Context, targetLanguageCode: String) {
+            val intent = startIntent(context, targetLanguageCode)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 context.startForegroundService(intent)
             } else {

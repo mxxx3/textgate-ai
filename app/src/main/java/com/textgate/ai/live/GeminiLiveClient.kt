@@ -70,6 +70,23 @@ import java.util.concurrent.TimeUnit
  *   fields) — `audio` is simply the current, simpler, single-chunk form
  *   this class already moved to. No further change needed.
  *
+ * - v2.x follow-up (routing/latency/error-handling request): added
+ *   generationConfig.translationConfig.echoTargetLanguage=false (stops
+ *   Gemini parroting speech already in the target language — confirmed
+ *   real field, previously left at its undocumented server default),
+ *   setup.realtimeInputConfig.automaticActivityDetection.silenceDurationMs
+ *   (confirmed real, top-level sibling of generationConfig — tunes how
+ *   long Gemini's own server-side VAD waits for silence before it commits
+ *   end-of-speech; no client-side VAD was added), and parsing of
+ *   serverContent.{input,output}Transcription.languageCode (confirmed
+ *   real — the one genuine "what language did Gemini detect" signal,
+ *   since no sourceLanguageCode request field exists anywhere in
+ *   TranslationConfig/LiveConnectConfig). All three confirmed the same
+ *   way: reading google-genai's types.py/_live_converters.py directly,
+ *   never guessed. See classifyLiveError's own doc for the accompanying,
+ *   separately-sourced finding about how Live errors actually surface
+ *   (WebSocket close code/reason, not an in-band error field).
+ *
  * If a future server response still hangs at setup after this fix, check
  * first whether Google has since changed this preview model's schema again
  * (preview APIs are the most likely to move) — re-installing `google-genai`
@@ -95,7 +112,76 @@ class GeminiLiveClient {
          * giving up on its own, regardless of what OkHttp/the OS/the
          * network are doing underneath. See [connect]'s doc. */
         private const val SETUP_TIMEOUT_MS = 20_000L
+
+        /** `realtimeInputConfig.automaticActivityDetection.
+         * silenceDurationMs` sent in [buildSetupMessage] — see that
+         * function's doc comment for the full reasoning. Within the
+         * 500-600ms band this was deliberately tuned to. */
+        private const val VAD_SILENCE_DURATION_MS = 550
+
+        /**
+         * Classifies a Live-specific error/close-reason string into a
+         * [LiveErrorCategory] the callers ([LiveTranslationService],
+         * [com.textgate.ai.conversation.ConversationTabController], via the
+         * shared `liveErrorMessageRes()` helper) use to decide whether to
+         * reconnect with backoff or fail immediately with a specific
+         * message.
+         *
+         * IMPLEMENTATION NOTE, ground-truthed the same way as this class's
+         * wire format (see the class doc's IMPLEMENTATION NOTE): read
+         * `google-genai`'s own `live.py`/`errors.py` source directly.
+         * `LiveServerMessage` does NOT model an in-band JSON `error` field
+         * at all — its real fields are `setupComplete`, `serverContent`,
+         * `toolCall`, `toolCallCancellation`, `usageMetadata`, `goAway`,
+         * `sessionResumptionUpdate`, `voiceActivityDetectionSignal`,
+         * `voiceActivity`; the shared Pydantic base model the whole SDK
+         * uses is even configured `extra='forbid'`, meaning an unmodeled
+         * top-level key would be REJECTED, not silently accepted. Instead,
+         * the SDK's own `_receive()` catches `ConnectionClosed` and calls
+         * `errors.APIError.raise_error(close_code, close_reason, None)` —
+         * i.e. real Live API errors surface via the WEBSOCKET CLOSE
+         * CODE/REASON, exactly what this class already reports as
+         * [ServerEvent.Closed]. There is no documented, stable numeric
+         * code-to-category mapping for Live's close codes the way the
+         * plain REST API has gRPC-style status codes (see
+         * [com.textgate.ai.network.GeminiClient.classifyQuotaText] for
+         * that REST-side equivalent) — inventing one would violate this
+         * project's own "don't guess an unverified API detail" rule — so
+         * this classifies by matching known text fragments in the
+         * close/error [text] instead, the same proven text-matching
+         * approach already used for the text model's quota detection,
+         * applied here to the one signal Live actually gives us. The
+         * `error.optJSONObject("error")` parse kept in [parseServerMessage]
+         * is a harmless defensive fallback only, in case a future API
+         * revision or intermediary ever does send one; its message is
+         * classified through this same function.
+         */
+        internal fun classifyLiveError(text: String): LiveErrorCategory {
+            val t = text.lowercase()
+            return when {
+                t.contains("resource_exhausted") || t.contains("quota") ||
+                    t.contains("rate limit") || t.contains("rate_limit") ||
+                    t.contains(" 429") ->
+                    LiveErrorCategory.QUOTA
+                t.contains("unauthenticated") || t.contains("api key") ||
+                    t.contains("api_key") || t.contains("permission_denied") ||
+                    t.contains(" 401") || t.contains(" 403") ->
+                    LiveErrorCategory.AUTH
+                t.contains("invalid_argument") || t.contains("invalid argument") ||
+                    t.contains("unsupported") || t.contains("failed_precondition") ->
+                    LiveErrorCategory.CONFIG
+                else -> LiveErrorCategory.UNKNOWN
+            }
+        }
     }
+
+    /** See [classifyLiveError]'s doc for how/why this is derived from a
+     * close code's reason text rather than a structured field. NETWORK and
+     * UNKNOWN are both treated identically by every caller (reconnect with
+     * the existing backoff) — kept as two separate values only so a
+     * genuinely unrecognized message is never silently folded into
+     * "definitely network", which it isn't confirmed to be. */
+    enum class LiveErrorCategory { NETWORK, QUOTA, AUTH, CONFIG, UNKNOWN }
 
     sealed class ServerEvent {
         /** The server accepted [connect]'s setup message; audio may now be
@@ -103,12 +189,23 @@ class GeminiLiveClient {
         data object SetupComplete : ServerEvent()
 
         /** A transcript fragment of the ORIGINAL (source) audio being
-         * translated — for on-screen "live transcript of original speech". */
-        data class InputTranscript(val text: String) : ServerEvent()
+         * translated — for on-screen "live transcript of original speech".
+         * [languageCode] is the server's own BCP-47 detected-language tag
+         * for this fragment (`serverContent.inputTranscription.
+         * languageCode` — confirmed real via `Transcription.language_code`
+         * in the `google-genai` SDK), null if the server didn't include one
+         * for this particular fragment. This is the ONLY real signal of
+         * what ambient language Gemini detected — there is no
+         * `sourceLanguageCode` request field to force it (confirmed: no
+         * such field exists anywhere in `TranslationConfig`/
+         * `LiveConnectConfig`), so the UI shows this as "Wykryto: X"
+         * rather than offering a picker that would silently do nothing. */
+        data class InputTranscript(val text: String, val languageCode: String? = null) : ServerEvent()
 
         /** A transcript fragment of the TRANSLATED audio — for on-screen
-         * "live transcript of the translation". */
-        data class OutputTranscript(val text: String) : ServerEvent()
+         * "live transcript of the translation". [languageCode] mirrors
+         * [InputTranscript.languageCode] but for the output side. */
+        data class OutputTranscript(val text: String, val languageCode: String? = null) : ServerEvent()
 
         /** One chunk of translated, playable PCM16 audio (24kHz mono, per
          * the Live API's documented output format) to hand to an
@@ -119,13 +216,16 @@ class GeminiLiveClient {
         data object TurnComplete : ServerEvent()
 
         /** A Live-specific error or limit was reported by the server —
-         * NEVER causes a fallback to a text model; the caller shows this
-         * message and, if appropriate, offers to retry the Live session. */
-        data class Error(val message: String) : ServerEvent()
+         * NEVER causes a fallback to a text model; the caller shows a
+         * message picked from [category] and, if appropriate, offers to
+         * retry the Live session. */
+        data class Error(val message: String, val category: LiveErrorCategory) : ServerEvent()
 
         /** The socket closed, cleanly or not — [code]/[reason] follow the
-         * WebSocket close-frame convention (1000 = normal). */
-        data class Closed(val code: Int, val reason: String) : ServerEvent()
+         * WebSocket close-frame convention (1000 = normal). [category] is
+         * [classifyLiveError] applied to [reason] — see that function's doc
+         * for why this, not [code], is what actually carries the signal. */
+        data class Closed(val code: Int, val reason: String, val category: LiveErrorCategory) : ServerEvent()
     }
 
     private var webSocket: WebSocket? = null
@@ -208,7 +308,8 @@ class GeminiLiveClient {
             onEvent(
                 ServerEvent.Error(
                     "Brak odpowiedzi serwera przez ${SETUP_TIMEOUT_MS / 1000}s podczas łączenia " +
-                        "(setup timeout) — sprawdź połączenie sieciowe."
+                        "(setup timeout) — sprawdź połączenie sieciowe.",
+                    LiveErrorCategory.NETWORK
                 )
             )
             webSocket?.close(1000, "setup timeout")
@@ -249,12 +350,20 @@ class GeminiLiveClient {
                     // needing a full device log.
                     val exceptionDetail = "${t.javaClass.simpleName}: ${t.message ?: "no message"}"
                     val responseDetail = response?.let { " (HTTP ${it.code} ${it.message})" }.orEmpty()
-                    onEvent(ServerEvent.Error("$exceptionDetail$responseDetail"))
+                    // classifyLiveError on the FULL combined message (not
+                    // just responseDetail) so an HTTP status embedded there
+                    // (e.g. "(HTTP 401 Unauthorized)" for a bad API key
+                    // rejected at the WebSocket upgrade handshake itself)
+                    // is still picked up even though it's Kotlin's own
+                    // exception/response text, not Gemini's own error
+                    // wording.
+                    val fullMessage = "$exceptionDetail$responseDetail"
+                    onEvent(ServerEvent.Error(fullMessage, classifyLiveError(fullMessage)))
                 }
 
                 override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
                     cancelSetupTimeout()
-                    onEvent(ServerEvent.Closed(code, reason))
+                    onEvent(ServerEvent.Closed(code, reason, classifyLiveError(reason)))
                 }
             }
         )
@@ -308,12 +417,51 @@ class GeminiLiveClient {
         // session that never leaves "connecting": the server has nothing to
         // configure a *translation* session with if translationConfig isn't
         // where it's expected.
+        // echoTargetLanguage: confirmed real (TranslationConfig.
+        // echo_target_language in google-genai's types.py, wire path
+        // generationConfig.translationConfig.echoTargetLanguage) —
+        // "Optional. If true, the model will generate audio when the
+        // target language is spoken, essentially it will parrot the
+        // input. If false, we will not produce audio for the target
+        // language." The server default is undocumented (None) and
+        // evidently parrots back speech that's already in the target
+        // language on at least some sessions — a real reported symptom
+        // ("Gemini powtarza zdanie, które już jest w języku docelowym").
+        // Explicit false here rather than relying on that default — this
+        // one function serves both Na żywo and Rozmowa (see class doc), so
+        // one change covers both.
+        val translationConfig = JSONObject()
+            .put("targetLanguageCode", targetLanguageCode)
+            .put("echoTargetLanguage", false)
         val generationConfig = JSONObject()
             .put("responseModalities", JSONArray().put("AUDIO"))
-            .put("translationConfig", JSONObject().put("targetLanguageCode", targetLanguageCode))
+            .put("translationConfig", translationConfig)
+        // realtimeInputConfig.automaticActivityDetection.silenceDurationMs:
+        // confirmed real (AutomaticActivityDetection.silence_duration_ms in
+        // google-genai's types.py — "The required duration of detected
+        // non-speech ... before end-of-speech is committed. The larger
+        // this value, the longer speech gaps can be ... but this will
+        // increase the model's latency.") realtimeInputConfig is a
+        // TOP-LEVEL sibling of generationConfig inside setup, NOT nested
+        // inside it — confirmed via _live_converters.py: `setv(...,
+        // ['setup', 'realtimeInputConfig'], ...)` is a separate call from
+        // the generationConfig one. VAD_SILENCE_DURATION_MS (550) sits in
+        // the 500-600ms band this was deliberately tuned to: short enough
+        // to start translating soon after a sentence genuinely ends,
+        // without being so low it risks cutting off a natural mid-sentence
+        // pause the way an aggressive 100-200ms value would. No local
+        // client-side VAD/silence-trimming is added anywhere in this
+        // class — this only configures Gemini's OWN server-side detector,
+        // which already exists and runs regardless.
+        val realtimeInputConfig = JSONObject()
+            .put(
+                "automaticActivityDetection",
+                JSONObject().put("silenceDurationMs", VAD_SILENCE_DURATION_MS)
+            )
         val setup = JSONObject()
             .put("model", "models/$model")
             .put("generationConfig", generationConfig)
+            .put("realtimeInputConfig", realtimeInputConfig)
             .put("inputAudioTranscription", JSONObject())
             .put("outputAudioTranscription", JSONObject())
         return JSONObject().put("setup", setup)
@@ -345,11 +493,23 @@ class GeminiLiveClient {
             }
 
             json.optJSONObject("serverContent")?.let { serverContent ->
-                val inputText = serverContent.optJSONObject("inputTranscription")?.optString("text").orEmpty()
-                if (inputText.isNotEmpty()) events += ServerEvent.InputTranscript(inputText)
+                serverContent.optJSONObject("inputTranscription")?.let { input ->
+                    val inputText = input.optString("text").orEmpty()
+                    if (inputText.isNotEmpty()) {
+                        val rawLanguageCode = input.optString("languageCode")
+                        val languageCode: String? = if (rawLanguageCode.isEmpty()) null else rawLanguageCode
+                        events += ServerEvent.InputTranscript(inputText, languageCode)
+                    }
+                }
 
-                val outputText = serverContent.optJSONObject("outputTranscription")?.optString("text").orEmpty()
-                if (outputText.isNotEmpty()) events += ServerEvent.OutputTranscript(outputText)
+                serverContent.optJSONObject("outputTranscription")?.let { output ->
+                    val outputText = output.optString("text").orEmpty()
+                    if (outputText.isNotEmpty()) {
+                        val rawLanguageCode = output.optString("languageCode")
+                        val languageCode: String? = if (rawLanguageCode.isEmpty()) null else rawLanguageCode
+                        events += ServerEvent.OutputTranscript(outputText, languageCode)
+                    }
+                }
 
                 serverContent.optJSONObject("modelTurn")?.optJSONArray("parts")?.let { parts ->
                     for (i in 0 until parts.length()) {
@@ -367,7 +527,11 @@ class GeminiLiveClient {
             }
 
             json.optJSONObject("error")?.let { error ->
-                events += ServerEvent.Error(error.optString("message", "unknown error"))
+                // Defensive fallback only — see classifyLiveError's doc for
+                // why real Live errors are not actually expected to arrive
+                // this way.
+                val message = error.optString("message", "unknown error")
+                events += ServerEvent.Error(message, classifyLiveError(message))
             }
         } catch (_: Exception) {
             // Malformed/unrecognized message: ignore rather than tear down

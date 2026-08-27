@@ -168,4 +168,10 @@
     <string name="audio_capture_mode_description">Hvordan Samtale og Live optager og afspiller lyd. \"Ekkoannullering\" forhindrer mikrofonen i at høre telefonens egen oversatte tale i højttaleren, men tilføjer behandling og kan give forsinkelse eller afbrudte replikker på nogle telefoner. \"Standard\" er hurtigere og enklere, men brug den kun med hovedtelefoner — i højttaleren kan den opfange sin egen lyd og oversætte den igen i en løkke.</string>
     <string name="label_audio_capture_echo_cancelled">Ekkoannullering (anbefalet)</string>
     <string name="label_audio_capture_standard">Standard (lavere forsinkelse)</string>
+    <!-- v2.x: Live routing/detected-language/error-category strings -->
+    <string name="live_ambient_language_auto">Automatisk registrering</string>
+    <string name="live_detected_language_format">Registreret: %1$s</string>
+    <string name="live_error_quota">Gemini Live-grænsen er nået — prøv igen senere.</string>
+    <string name="live_error_auth">Problem med API-nøgle — tjek din nøgle i Indstillinger.</string>
+    <string name="live_error_config">Ugyldig sessionskonfiguration (f.eks. et sprog der ikke understøttes).</string>
 </resources>

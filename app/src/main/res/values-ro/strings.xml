@@ -167,4 +167,10 @@
     <string name="audio_capture_mode_description">Cum înregistrează și redau sunet Conversație și În direct. „Anularea ecoului” împiedică microfonul să audă propriul discurs tradus al telefonului din difuzor, dar adaugă procesare și poate provoca întârzieri sau replici întrerupte pe unele telefoane. „Standard” este mai rapid și mai simplu, dar folosiți-l doar cu căști — pe difuzor poate capta propria ieșire și o poate retraduce într-o buclă.</string>
     <string name="label_audio_capture_echo_cancelled">Anularea ecoului (recomandat)</string>
     <string name="label_audio_capture_standard">Standard (latență mai mică)</string>
+    <!-- v2.x: Live routing/detected-language/error-category strings -->
+    <string name="live_ambient_language_auto">Detectare automată</string>
+    <string name="live_detected_language_format">Detectat: %1$s</string>
+    <string name="live_error_quota">Limita Gemini Live a fost atinsă — încearcă din nou mai târziu.</string>
+    <string name="live_error_auth">Problemă cu cheia API — verifică cheia în Setări.</string>
+    <string name="live_error_config">Configurație de sesiune nevalidă (de ex. limbă neacceptată).</string>
 </resources>

@@ -167,4 +167,10 @@
     <string name="audio_capture_mode_description">Hogyan rögzíti és játssza le a hangot a Beszélgetés és az Élő mód. A \"Visszhangmentesítés\" megakadályozza, hogy a mikrofon meghallja a telefon saját lefordított beszédét a hangszóróból, de több feldolgozást igényel, és egyes telefonokon késést vagy megszakadó köröket okozhat. A \"Standard\" gyorsabb és egyszerűbb, de csak fülhallgatóval használja — hangszórón felveheti a saját kimenetét, és körkörösen újra lefordíthatja.</string>
     <string name="label_audio_capture_echo_cancelled">Visszhangmentesítés (ajánlott)</string>
     <string name="label_audio_capture_standard">Standard (alacsonyabb késleltetés)</string>
+    <!-- v2.x: Live routing/detected-language/error-category strings -->
+    <string name="live_ambient_language_auto">Automatikus felismerés</string>
+    <string name="live_detected_language_format">Felismerve: %1$s</string>
+    <string name="live_error_quota">Elérted a Gemini Live limitjét — próbáld újra később.</string>
+    <string name="live_error_auth">API-kulcs probléma — ellenőrizd a kulcsot a Beállításokban.</string>
+    <string name="live_error_config">Érvénytelen munkamenet-konfiguráció (pl. nem támogatott nyelv).</string>
 </resources>

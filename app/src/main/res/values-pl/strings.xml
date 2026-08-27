@@ -141,6 +141,8 @@
 
     <!-- v2: zakładka Na żywo -->
     <string name="live_label_ambient_language">Język otoczenia</string>
+    <string name="live_ambient_language_auto">Automatyczne wykrywanie</string>
+    <string name="live_detected_language_format">Wykryto: %1$s</string>
     <string name="live_target_language_format">Tłumaczenie na: %1$s (zmień w Ustawieniach)</string>
     <string name="live_current_device_format">Bieżące urządzenie audio: %1$s</string>
     <string name="live_device_speaker">Głośnik telefonu</string>
@@ -169,6 +171,11 @@
     <string name="live_notification_paused">Wstrzymano — słuchawki odłączone</string>
     <string name="live_notification_error">Błąd — dotknij, aby spróbować ponownie</string>
     <string name="live_notification_stop_action">ZATRZYMAJ</string>
+
+    <!-- v2.x: kategorie błędów specyficzne dla Live (Na żywo + Rozmowa) -->
+    <string name="live_error_quota">Osiągnięto limit Gemini Live — spróbuj ponownie później.</string>
+    <string name="live_error_auth">Problem z kluczem API — sprawdź klucz w Ustawieniach.</string>
+    <string name="live_error_config">Nieprawidłowa konfiguracja sesji (np. nieobsługiwany język).</string>
 
     <!-- v2: nagłówki grup w Ustawieniach -->
     <string name="settings_group_translation">Tłumaczenie</string>

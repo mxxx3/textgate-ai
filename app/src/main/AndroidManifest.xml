@@ -44,16 +44,21 @@
         Foreground Service the moment a session starts — this was missing in
         the initial v2.0.0 drop and is the fix for that crash.
 
-    android.permission.MODIFY_AUDIO_SETTINGS (v2)
-        Another normal, install-time-granted permission (no runtime prompt).
-        Required by AudioManager.setSpeakerphoneOn()/setCommunicationDevice(),
-        which LiveTranslationController and ConversationTabController's
-        applyCommunicationRouting() call to force loudspeaker output once
-        AudioManager.mode is switched to MODE_IN_COMMUNICATION — without it,
-        those calls can silently no-op or throw (caught defensively, so no
-        crash, but the forced routing never actually applies) on devices
-        that enforce it. See both controllers' applyCommunicationRouting()
-        doc comments for the full story.
+    android.permission.MODIFY_AUDIO_SETTINGS — REMOVED as of the v2.x
+        routing rework. Previously required by AudioManager.
+        setSpeakerphoneOn()/setCommunicationDevice(), which
+        LiveTranslationService and ConversationTabController's
+        applyCommunicationRouting() called to force loudspeaker output once
+        AudioManager.mode was switched to MODE_IN_COMMUNICATION. Both
+        controllers now pin routing per-instance via AudioTrack.
+        setPreferredDevice()/AudioRecord.setPreferredDevice() instead (API
+        24+, no permission required, no global AudioManager.mode change at
+        all) — see LiveTranslationService.beginCapturePlayback's doc for
+        the full reasoning, and AudioRouteMonitor.selectPreferredOutputDevice/
+        selectBuiltInMicDevice for where the target device comes from. Left
+        this entry in place (rather than deleting it outright) so the
+        removal itself stays visible in this permission audit, per this
+        file's own transparency purpose.
 
     In particular this app still requests NONE of: contacts, SMS, call
     logs, location, camera, storage, phone state, or QUERY_ALL_PACKAGES.
@@ -69,7 +74,6 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
-    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
 
     <!--
         Declarative package-visibility filter (Android 11+ / API 30+).

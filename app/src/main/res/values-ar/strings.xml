@@ -167,4 +167,10 @@
     <string name="audio_capture_mode_description">كيف تلتقط ميزتا \"محادثة\" و\"مباشر\" الصوت وتشغلانه. يمنع وضع \"إلغاء الصدى\" الميكروفون من التقاط كلام الهاتف المترجم نفسه من مكبر الصوت، لكنه يضيف معالجة وقد يسبب تأخيرًا أو انقطاع الأدوار على بعض الهواتف. وضع \"قياسي\" أسرع وأبسط، لكن استخدمه فقط مع سماعات الرأس — فعلى مكبر الصوت قد يلتقط مخرجاته الخاصة ويترجمها في حلقة متكررة.</string>
     <string name="label_audio_capture_echo_cancelled">إلغاء الصدى (موصى به)</string>
     <string name="label_audio_capture_standard">قياسي (زمن استجابة أقل)</string>
+    <!-- v2.x: Live routing/detected-language/error-category strings -->
+    <string name="live_ambient_language_auto">الكشف التلقائي</string>
+    <string name="live_detected_language_format">تم الكشف عن: %1$s</string>
+    <string name="live_error_quota">تم الوصول إلى حد Gemini Live — يرجى المحاولة مرة أخرى لاحقًا.</string>
+    <string name="live_error_auth">مشكلة في مفتاح API — تحقق من المفتاح في الإعدادات.</string>
+    <string name="live_error_config">تكوين الجلسة غير صالح (مثل لغة غير مدعومة).</string>
 </resources>

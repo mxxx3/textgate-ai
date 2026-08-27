@@ -168,4 +168,10 @@
     <string name="audio_capture_mode_description">نحوه ضبط و پخش صدا در مکالمه و زنده. «حذف پژواک» مانع از این می‌شود که میکروفون گفتار ترجمه‌شده خود گوشی را از بلندگو بشنود، اما پردازش بیشتری اضافه می‌کند و ممکن است در برخی گوشی‌ها باعث تأخیر یا قطع‌شدن نوبت‌ها شود. حالت «استاندارد» سریع‌تر و ساده‌تر است، اما فقط با هدفون استفاده کنید — روی بلندگو ممکن است خروجی خودش را دوباره بگیرد و آن را در یک حلقه دوباره ترجمه کند.</string>
     <string name="label_audio_capture_echo_cancelled">حذف پژواک (توصیه‌شده)</string>
     <string name="label_audio_capture_standard">استاندارد (تأخیر کمتر)</string>
+    <!-- v2.x: Live routing/detected-language/error-category strings -->
+    <string name="live_ambient_language_auto">تشخیص خودکار</string>
+    <string name="live_detected_language_format">شناسایی‌شده: %1$s</string>
+    <string name="live_error_quota">به محدودیت Gemini Live رسیده‌اید — لطفاً بعداً دوباره امتحان کنید.</string>
+    <string name="live_error_auth">مشکل کلید API — کلید خود را در تنظیمات بررسی کنید.</string>
+    <string name="live_error_config">پیکربندی نشست نامعتبر است (مثلاً زبان پشتیبانی‌نشده).</string>
 </resources>

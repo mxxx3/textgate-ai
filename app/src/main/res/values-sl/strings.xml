@@ -168,4 +168,10 @@
     <string name="audio_capture_mode_description">Kako Pogovor in V živo snemata in predvajata zvok. »Odpravljanje odmeva« mikrofonu preprečuje, da bi slišal lasten preveden govor telefona iz zvočnika, vendar doda obdelavo in lahko na nekaterih telefonih povzroči zamik ali prekinjene replike. »Standardni« je hitrejši in preprostejši, vendar ga uporabljajte le s slušalkami — na zvočniku lahko zazna svoj lastni izhod in ga znova prevede v zanki.</string>
     <string name="label_audio_capture_echo_cancelled">Odpravljanje odmeva (priporočeno)</string>
     <string name="label_audio_capture_standard">Standardni (manjša zakasnitev)</string>
+    <!-- v2.x: Live routing/detected-language/error-category strings -->
+    <string name="live_ambient_language_auto">Samodejno zaznavanje</string>
+    <string name="live_detected_language_format">Zaznano: %1$s</string>
+    <string name="live_error_quota">Dosežena je omejitev Gemini Live — poskusite znova pozneje.</string>
+    <string name="live_error_auth">Težava s ključem API — preverite ključ v Nastavitvah.</string>
+    <string name="live_error_config">Neveljavna konfiguracija seje (npr. nepodprt jezik).</string>
 </resources>

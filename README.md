@@ -624,7 +624,15 @@ user's saved `bubbleTargetLanguage`.
 
 ## 11. Tests
 
-### Unit tests (`./gradlew test`) — 87 tests, no device required
+### Unit tests (`./gradlew test`) — 151 tests, no device required
+
+(Count as of the v2.x Live routing/error-handling update; the table below
+predates several Live-related test files, including
+`GeminiLiveClientTest` — see section 16's v2.x changelog entry above for
+what it covers: `echoTargetLanguage`, VAD `silenceDurationMs`,
+transcription `languageCode` parsing, and `classifyLiveError`'s
+text-matching rules, alongside its pre-existing wire-format regression
+coverage.)
 
 | File | Scenarios covered |
 |---|---|
@@ -2890,3 +2898,205 @@ updates above. Needs on-device confirmation of two separate things: that
 symptom — ideally tested with headphones, since that mode has no echo
 protection on speaker — and that switching between the two options in
 Settings correctly changes behavior on the NEXT session start.
+
+**Update — v2.x: Live routing rework, echoTargetLanguage, VAD tuning,
+error classification (12-point request, following a read-only analysis of
+the then-current Live implementation).** Before writing any code, spent a
+research pass installing and reading Google's own official `google-genai`
+Python SDK source directly (`pip install google-genai`, package version
+2.20.0, at `/usr/local/lib/python3.11/dist-packages/google/genai/` —
+`types.py`, `_live_converters.py`, `live.py`, `errors.py`) rather than
+guessing at undocumented Live API behavior, per the app owner's own
+explicit instruction ("Nie próbuj wymyślać nieistniejącego parametru
+API"). This is the same "read the SDK source, it IS the wire format"
+methodology `GeminiLiveClient`'s own class doc already documents, applied
+to five new questions this request raised:
+
+1. **`echoTargetLanguage`.** Confirmed real:
+   `TranslationConfig.echo_target_language` (`Optional[bool]`, sibling of
+   `target_language_code`), wire path
+   `setup.generationConfig.translationConfig.echoTargetLanguage`. Server
+   default is undocumented (`None`) and evidently parrots back speech
+   already in the target language on some sessions — the app owner's
+   exact complaint. `GeminiLiveClient.buildSetupMessage` now sends
+   `false` explicitly. One function serves both Na żywo and Rozmowa, so
+   one change covers both.
+2. **Source-language forcing.** Confirmed there is genuinely no
+   `sourceLanguageCode`-equivalent field anywhere in
+   `TranslationConfig`/`LiveConnectConfig` (grepped `types.py` for
+   `source_language`: zero matches) — this settles the earlier read-only
+   analysis's finding that the old ambient-language spinner never
+   actually reached Gemini. The spinner is now GONE from the Na żywo
+   screen (`content_live.xml`'s `Spinner spinnerAmbientLanguage` replaced
+   with a static `TextView textLiveAmbientLanguage`,
+   `LiveTabController.setupAmbientLanguageSpinner()` removed) — it always
+   reads "Automatyczne wykrywanie" (`live_ambient_language_auto`).
+   Separately confirmed `Transcription.language_code` (wire:
+   `languageCode`) is real and present on both `inputTranscription` and
+   `outputTranscription` — the one genuine "what did Gemini detect"
+   signal. `GeminiLiveClient.ServerEvent.InputTranscript`/
+   `OutputTranscript` now carry an optional `languageCode`;
+   `LiveTranslationService.detectedSourceLanguage` tracks the latest one,
+   and the Na żywo screen shows "Wykryto: <język>"
+   (`live_detected_language_format`) once one arrives.
+3. **Audio routing rework (the largest single piece).** Replaced the
+   `AudioManager.mode = MODE_IN_COMMUNICATION` +
+   `setCommunicationDevice()`/`isSpeakerphoneOn` approach from the v2.0.0
+   update above — which the app owner had by this point reported BOTH
+   working-but-laggy AND, on retest, silently not routing to speaker at
+   all depending on device state — with the modern, documented,
+   per-instance `AudioTrack.setPreferredDevice(AudioDeviceInfo)` /
+   `AudioRecord.setPreferredDevice(AudioDeviceInfo)` API (`AudioRouting`
+   interface, confirmed API 24+ via Android's own reference docs; this
+   app's minSdk is 26, so no version gate is needed). Two new
+   `AudioRouteMonitor` methods do the device selection:
+   `selectPreferredOutputDevice()` (first connected private route —
+   wired/Bluetooth/USB — else the phone's own `TYPE_BUILTIN_SPEAKER`,
+   explicit either way rather than left to the platform default) and
+   `selectBuiltInMicDevice()` (always `TYPE_BUILTIN_MIC`, regardless of
+   what's connected — a Bluetooth/TWS headset's own mic is never silently
+   substituted, satisfying the app owner's explicit `mikrofon telefonu →
+   Gemini → słuchawki Bluetooth` preference). Both
+   `LiveTranslationService.beginCapturePlayback`/`runCaptureLoop` and
+   `ConversationTabController`'s twin now pin OUTPUT via
+   `AudioTrack.setPreferredDevice()` and INPUT via
+   `AudioRecord.setPreferredDevice()` at session start; neither controller
+   touches `AudioManager.mode`, `setCommunicationDevice()`, or
+   `isSpeakerphoneOn` any more, so `android.permission.
+   MODIFY_AUDIO_SETTINGS` (added for the earlier fix) is no longer needed
+   and has been removed from the manifest (left as a struck-through entry
+   in the permission audit rather than silently deleted, so the removal
+   itself stays visible there). The existing `HeadsetDisconnectBehavior`
+   (`PAUSE_TRANSLATION` default / `SWITCH_TO_SPEAKER` opt-in) is untouched
+   — this rework only changes HOW a device is selected/pinned, not the
+   pause-on-disconnect policy around it.
+4. **AEC decision is now automatic and route-aware**, resolving the
+   `AudioCaptureMode` design question left open by point 3: the heavier
+   `AudioSource.VOICE_COMMUNICATION` + `AcousticEchoCanceler` pipeline now
+   engages ONLY when the resolved output device is the phone's own
+   speaker (no private route) — headphones/Bluetooth/USB always get the
+   plain, light `AudioSource.MIC` path, since the mic essentially can't
+   hear headphone output and the heavier pipeline was the evidenced
+   source of the v2.0.1 lag/cut-off-turn reports. `AudioCaptureMode.
+   ECHO_CANCELLED` (default) is now this automatic behavior;
+   `AudioCaptureMode.STANDARD` is kept as an explicit override that forces
+   the light path even on speaker (for a device/HAL where AEC itself
+   misbehaves) — the enum and its persisted `prefValue`s are unchanged, so
+   no settings migration is needed. `AudioTrack` playback now always uses
+   `AudioAttributes.USAGE_MEDIA` (previously switched to
+   `USAGE_VOICE_COMMUNICATION` in `ECHO_CANCELLED` mode) since output
+   routing is now handled explicitly by `setPreferredDevice()` regardless
+   of usage; `volumeControlStream` in both `LiveTabController` and
+   `ConversationTabController` simplifies to always `STREAM_MUSIC` to
+   match.
+5. **Latency**: analyzed the pipeline (capture chunking, buffer size,
+   the WebSocket send/receive path, `AudioTrack` playback, Android audio
+   processing) rather than guessing — the ~100ms chunk size
+   (`MIN_BUFFER_FLOOR = 3_200` bytes) is unchanged, since nothing in this
+   analysis pointed at chunk size as the bottleneck; the real, evidenced
+   latency source was the `MODE_IN_COMMUNICATION`/AEC pipeline itself
+   (point 4), which removing/making conditional directly addresses. No
+   additional buffering was added anywhere; `AudioChunk` events still go
+   straight to `AudioTrack.write()`.
+6. **Server-side VAD.** Confirmed real:
+   `AutomaticActivityDetection.silence_duration_ms` (`Optional[int]`,
+   nested in `RealtimeInputConfig.automatic_activity_detection`), wire
+   path `setup.realtimeInputConfig.automaticActivityDetection.
+   silenceDurationMs` — confirmed via `_live_converters.py` to be a
+   TOP-LEVEL sibling of `generationConfig` inside `setup`, NOT nested
+   inside it. `GeminiLiveClient.buildSetupMessage` now sends `550`ms
+   (within the requested 500-600ms band) instead of leaving this at
+   Gemini's own undocumented default. No client-side VAD/silence-trimming
+   was added — per the app owner's explicit instruction, the continuous
+   audio stream and Gemini's own server-side detector are unchanged in
+   every other respect.
+7. **Error classification (the other largest piece).** Investigated the
+   real shape of Live API errors the same way — and found the existing
+   `GeminiLiveClient.parseServerMessage`'s `error.optJSONObject("error")`
+   handling was based on an unconfirmed assumption: `LiveServerMessage`'s
+   Pydantic model has no `error` field at all (its real fields:
+   `setupComplete`, `serverContent`, `toolCall`, `toolCallCancellation`,
+   `usageMetadata`, `goAway`, `sessionResumptionUpdate`,
+   `voiceActivityDetectionSignal`, `voiceActivity`), and the shared base
+   model the whole SDK uses is configured `extra='forbid'` (an unmodeled
+   key would be rejected, not silently accepted). Confirmed instead, by
+   reading `live.py`'s own `_receive()`: real Live errors surface via the
+   WebSocket close code/reason — `except ConnectionClosed: ...
+   errors.APIError.raise_error(close_code, close_reason, None)` — exactly
+   what `GeminiLiveClient.ServerEvent.Closed` already carries. Since
+   there's no documented, stable numeric code-to-category mapping for
+   Live's close codes (unlike the plain REST API's gRPC-style status
+   codes `GeminiClient.classifyQuotaText` already handles), the new
+   `GeminiLiveClient.classifyLiveError(text: String): LiveErrorCategory`
+   classifies by matching known text fragments in the close reason
+   instead — the same proven text-matching approach, applied to the one
+   signal Live actually gives. `ServerEvent.Error`/`Closed` now both carry
+   a `LiveErrorCategory` (`NETWORK`, `QUOTA`, `AUTH`, `CONFIG`,
+   `UNKNOWN`); the original `error.optJSONObject("error")` parse is kept
+   as a harmless defensive fallback, classified through the same
+   function. `LiveTranslationService.handleServerEvent` now routes
+   through a new `handleLiveError`: `NETWORK`/`UNKNOWN` keep the existing,
+   unchanged reconnect-with-backoff path (`handleDisconnect`); `QUOTA`/
+   `AUTH`/`CONFIG` go straight to a new `failSession` that releases the
+   same resources immediately, without spending any of the 5 reconnect
+   attempts on a rejection reconnecting can never fix. A normal STOP close
+   (code 1000) still never reconnects at all — unchanged. A new
+   `lastErrorMessage` property (backed by 3 new category-specific strings,
+   `live_error_quota`/`live_error_auth`/`live_error_config`) is shown in
+   both the persistent notification and (new) the Na żywo screen when in
+   the `ERROR` state.
+8. **Rozmowa reuse without duplication (point 10).** `ConversationTabController`
+   already never reconnected in a loop on any error (it always calls
+   `stopSession()`), so nothing changed there — what it now shares with
+   Na żywo is the MESSAGE mapping: a new small file,
+   `live/LiveErrorMessages.kt`, exposes one `liveErrorMessageRes(category)`
+   function both controllers call, instead of each picking its own text.
+   Rozmowa also picked up the same `setPreferredDevice()`-based routing
+   and automatic AEC decision from point 3/4 (via a new, session-start-only
+   `AudioRouteMonitor` instance — never `.start()`'d, since Rozmowa
+   deliberately still has no background/screen-off monitoring, matching
+   its own class doc: "Rozmowa nie musi działać po zablokowaniu telefonu
+   tak jak Na żywo").
+
+Left unchanged, per the request's explicit list: the
+`gemini-3.5-live-translate-preview` model, audio-to-audio translation via
+the Gemini Live WebSocket API, OkHttp, PCM16 mono 16kHz in / 24kHz out,
+~100ms audio chunks, `inputAudioTranscription`/`outputAudioTranscription`,
+the Foreground Service architecture, screen-off operation,
+`PARTIAL_WAKE_LOCK`, STOP-from-notification, the existing reconnect/backoff
+constants, and all existing text-translator (`?xx` triggers, long-press,
+model-fallback) logic — none of it was touched.
+
+New/changed string keys (`live_ambient_language_auto`,
+`live_detected_language_format`, `live_error_quota`, `live_error_auth`,
+`live_error_config`) were added to `values/` (English) and `values-pl/`
+directly, then translated and injected into all 37 other locale files via
+`scripts/v2_x_error_routing_translations.py` +
+`scripts/inject_v2_x_error_routing_translations.py` (same pattern as the
+v2.0.1 round above) — every `values-XX/strings.xml` re-validated with
+`xmllint --noout` afterward, alongside `content_live.xml` and
+`AndroidManifest.xml`. `GeminiLiveClientTest.kt` gained coverage for
+`echoTargetLanguage`, `realtimeInputConfig.automaticActivityDetection.
+silenceDurationMs`, transcription `languageCode` parsing, and
+`classifyLiveError`'s text-matching rules.
+
+Sources consulted: `google-genai` (PyPI package, `pip install
+google-genai`, v2.20.0) source directly — the same methodology this file
+already documents for `GeminiLiveClient`'s wire format — and [Android's
+`AudioRouting.setPreferredDevice(AudioDeviceInfo)` reference
+docs](https://learn.microsoft.com/en-us/dotnet/api/android.media.iaudiorouting.setpreferreddevice)
+(mirrors the official `developer.android.com` reference; confirms API 24+,
+per-instance, independent input/output routing).
+
+Not unit-testable here for the same real-hardware-behavior reason as every
+audio-routing update above — `setPreferredDevice()`'s actual effect on a
+given phone/OEM/Bluetooth-stack combination cannot be verified in this
+sandbox. Needs on-device confirmation of: (a) with plain Bluetooth/TWS
+earbuds connected, the phone's OWN mic is used for capture (not the
+earbuds' mic) while translated audio plays through the earbuds; (b) no
+speaker-echo loop with no headset connected; (c) no lag/cut-off-turn
+regression with headphones connected, now that AEC is skipped in that
+case; (d) the Na żywo screen shows "Wykryto: <język>" once Gemini reports
+a detected language; (e) a real quota/rate-limit or invalid-API-key
+condition shows the new specific message and does NOT enter a reconnect
+loop.

@@ -168,4 +168,10 @@
     <string name="audio_capture_mode_description">Kaip „Pokalbis“ ir „Tiesiogiai“ įrašo ir atkuria garsą. „Aido naikinimas“ neleidžia mikrofonui girdėti paties telefono išversto garso iš garsiakalbio, tačiau prideda apdorojimą ir kai kuriuose telefonuose gali sukelti vėlavimą ar nutrūkstančias eiles. „Standartinis“ yra greitesnis ir paprastesnis, tačiau naudokite jį tik su ausinėmis — per garsiakalbį jis gali užfiksuoti savo paties garsą ir vėl jį versti ratu.</string>
     <string name="label_audio_capture_echo_cancelled">Aido naikinimas (rekomenduojama)</string>
     <string name="label_audio_capture_standard">Standartinis (mažesnė delsa)</string>
+    <!-- v2.x: Live routing/detected-language/error-category strings -->
+    <string name="live_ambient_language_auto">Automatinis aptikimas</string>
+    <string name="live_detected_language_format">Aptikta: %1$s</string>
+    <string name="live_error_quota">Pasiekta „Gemini Live“ riba — bandykite dar kartą vėliau.</string>
+    <string name="live_error_auth">API rakto problema — patikrinkite raktą Nustatymuose.</string>
+    <string name="live_error_config">Neteisinga sesijos konfigūracija (pvz., nepalaikoma kalba).</string>
 </resources>

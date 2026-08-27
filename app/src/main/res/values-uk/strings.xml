@@ -167,4 +167,10 @@
     <string name="audio_capture_mode_description">Як «Розмова» і «Наживо» записують і відтворюють звук. «Придушення луни» не дає мікрофону чути власне перекладене мовлення телефону з динаміка, але додає обробку і може спричинити затримку або обірвані репліки на деяких телефонах. «Стандартний» швидший і простіший, але використовуйте його лише з навушниками — на динаміку він може вловити власний звук і знову перекласти його по колу.</string>
     <string name="label_audio_capture_echo_cancelled">Придушення луни (рекомендовано)</string>
     <string name="label_audio_capture_standard">Стандартний (менша затримка)</string>
+    <!-- v2.x: Live routing/detected-language/error-category strings -->
+    <string name="live_ambient_language_auto">Автоматичне визначення</string>
+    <string name="live_detected_language_format">Визначено: %1$s</string>
+    <string name="live_error_quota">Досягнуто ліміту Gemini Live — спробуйте пізніше.</string>
+    <string name="live_error_auth">Проблема з ключем API — перевірте ключ у Налаштуваннях.</string>
+    <string name="live_error_config">Недійсна конфігурація сеансу (напр., непідтримувана мова).</string>
 </resources>

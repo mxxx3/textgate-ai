@@ -167,4 +167,10 @@
     <string name="audio_capture_mode_description">Cách Trò chuyện và Trực tiếp ghi và phát âm thanh. \"Khử tiếng vọng\" ngăn micrô nghe thấy giọng nói đã dịch của chính điện thoại phát ra từ loa, nhưng thêm xử lý và có thể gây độ trễ hoặc ngắt quãng lượt nói trên một số điện thoại. \"Tiêu chuẩn\" nhanh và đơn giản hơn, nhưng chỉ nên dùng với tai nghe — trên loa, nó có thể thu lại chính âm thanh đầu ra của mình và dịch lại liên tục.</string>
     <string name="label_audio_capture_echo_cancelled">Khử tiếng vọng (khuyên dùng)</string>
     <string name="label_audio_capture_standard">Tiêu chuẩn (độ trễ thấp hơn)</string>
+    <!-- v2.x: Live routing/detected-language/error-category strings -->
+    <string name="live_ambient_language_auto">Tự động phát hiện</string>
+    <string name="live_detected_language_format">Đã phát hiện: %1$s</string>
+    <string name="live_error_quota">Đã đạt giới hạn Gemini Live — vui lòng thử lại sau.</string>
+    <string name="live_error_auth">Sự cố khóa API — kiểm tra khóa của bạn trong Cài đặt.</string>
+    <string name="live_error_config">Cấu hình phiên không hợp lệ (ví dụ: ngôn ngữ không được hỗ trợ).</string>
 </resources>

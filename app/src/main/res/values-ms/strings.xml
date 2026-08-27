@@ -168,4 +168,10 @@
     <string name="audio_capture_mode_description">Cara Perbualan dan Langsung merakam dan memainkan audio. \"Penghapusan gema\" menghalang mikrofon daripada mendengar pertuturan terjemahan telefon itu sendiri daripada pembesar suara, tetapi menambah pemprosesan dan boleh menyebabkan lengah atau giliran terputus pada sesetengah telefon. \"Standard\" lebih pantas dan mudah, tetapi gunakan hanya dengan fon kepala — pada pembesar suara ia mungkin menangkap outputnya sendiri dan menterjemah semula secara berulang.</string>
     <string name="label_audio_capture_echo_cancelled">Penghapusan gema (disyorkan)</string>
     <string name="label_audio_capture_standard">Standard (kependaman lebih rendah)</string>
+    <!-- v2.x: Live routing/detected-language/error-category strings -->
+    <string name="live_ambient_language_auto">Pengesanan automatik</string>
+    <string name="live_detected_language_format">Dikesan: %1$s</string>
+    <string name="live_error_quota">Had Gemini Live telah dicapai — sila cuba lagi kemudian.</string>
+    <string name="live_error_auth">Masalah kunci API — semak kunci anda dalam Tetapan.</string>
+    <string name="live_error_config">Konfigurasi sesi tidak sah (cth. bahasa tidak disokong).</string>
 </resources>

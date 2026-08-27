@@ -20,11 +20,18 @@
             android:textColor="@color/tg_text_secondary"
             android:textSize="12sp" />
 
-        <Spinner
-            android:id="@+id/spinnerAmbientLanguage"
+        <!-- Static, not a picker — there is no request field that lets
+             this app force a source language on Gemini, so the UI must
+             not imply one (see LiveTabController's class doc). Reads
+             "Automatyczne wykrywanie" until Gemini itself reports a
+             detected language, then "Wykryto: <language>". -->
+        <TextView
+            android:id="@+id/textLiveAmbientLanguage"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp" />
+            android:layout_marginTop="4dp"
+            android:textColor="@color/tg_text_primary"
+            android:textSize="14sp" />
 
         <TextView
             android:id="@+id/textLiveTargetLanguage"

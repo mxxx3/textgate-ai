@@ -168,4 +168,10 @@
     <string name="audio_capture_mode_description">כיצד שיחה ובשידור חי מקליטים ומנגנים שמע. \"ביטול הד\" מונע מהמיקרופון לשמוע את הדיבור המתורגם של הטלפון עצמו מהרמקול, אך מוסיף עיבוד ועלול לגרום להשהיה או לתורות שנקטעות בטלפונים מסוימים. \"רגיל\" מהיר ופשוט יותר, אך יש להשתמש בו רק עם אוזניות — ברמקול הוא עלול לקלוט את הפלט של עצמו ולתרגם אותו שוב ושוב בלולאה.</string>
     <string name="label_audio_capture_echo_cancelled">ביטול הד (מומלץ)</string>
     <string name="label_audio_capture_standard">רגיל (השהיה נמוכה יותר)</string>
+    <!-- v2.x: Live routing/detected-language/error-category strings -->
+    <string name="live_ambient_language_auto">זיהוי אוטומטי</string>
+    <string name="live_detected_language_format">זוהתה: %1$s</string>
+    <string name="live_error_quota">הגעת למגבלת Gemini Live — נסה שוב מאוחר יותר.</string>
+    <string name="live_error_auth">בעיה במפתח API — בדוק את המפתח שלך בהגדרות.</string>
+    <string name="live_error_config">תצורת הפעלה לא תקינה (למשל שפה שאינה נתמכת).</string>
 </resources>

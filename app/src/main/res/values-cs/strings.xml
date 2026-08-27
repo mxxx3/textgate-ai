@@ -167,4 +167,10 @@
     <string name="audio_capture_mode_description">Jak Rozhovor a Naživo zaznamenávají a přehrávají zvuk. „Potlačení ozvěny“ brání mikrofonu slyšet vlastní přeloženou řeč telefonu z reproduktoru, ale přidává zpracování a na některých telefonech může způsobit zpoždění nebo přerušené repliky. „Standardní“ je rychlejší a jednodušší, ale používejte jej pouze se sluchátky — na reproduktoru může zachytit vlastní výstup a znovu jej přeložit ve smyčce.</string>
     <string name="label_audio_capture_echo_cancelled">Potlačení ozvěny (doporučeno)</string>
     <string name="label_audio_capture_standard">Standardní (nižší latence)</string>
+    <!-- v2.x: Live routing/detected-language/error-category strings -->
+    <string name="live_ambient_language_auto">Automatická detekce</string>
+    <string name="live_detected_language_format">Rozpoznáno: %1$s</string>
+    <string name="live_error_quota">Dosažen limit Gemini Live — zkuste to prosím znovu později.</string>
+    <string name="live_error_auth">Problém s klíčem API — zkontrolujte klíč v Nastavení.</string>
+    <string name="live_error_config">Neplatná konfigurace relace (např. nepodporovaný jazyk).</string>
 </resources>

@@ -168,4 +168,10 @@
     <string name="audio_capture_mode_description">Kuidas Vestlus ja Live heli salvestavad ja esitavad. \"Kaja summutus\" takistab mikrofonil telefoni enda tõlgitud kõnet valjuhääldist kuulmast, kuid lisab töötlust ning võib mõnel telefonil põhjustada viivitust või katkenud vooru. \"Standardne\" on kiirem ja lihtsam, kuid kasuta seda ainult kõrvaklappidega — valjuhääldis võib see püüda kinni oma väljundi ja tõlkida seda uuesti ringiga.</string>
     <string name="label_audio_capture_echo_cancelled">Kaja summutus (soovitatav)</string>
     <string name="label_audio_capture_standard">Standardne (väiksem viivitus)</string>
+    <!-- v2.x: Live routing/detected-language/error-category strings -->
+    <string name="live_ambient_language_auto">Automaatne tuvastus</string>
+    <string name="live_detected_language_format">Tuvastatud: %1$s</string>
+    <string name="live_error_quota">Gemini Live\'i piirang on saavutatud — proovi hiljem uuesti.</string>
+    <string name="live_error_auth">API-võtme probleem — kontrolli oma võtit Seadete alt.</string>
+    <string name="live_error_config">Sobimatu seansi seadistus (nt toetamata keel).</string>
 </resources>

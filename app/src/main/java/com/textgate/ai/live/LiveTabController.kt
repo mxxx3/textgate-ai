@@ -9,15 +9,10 @@ import android.content.ServiceConnection
 import android.media.AudioManager
 import android.os.IBinder
 import android.os.PowerManager
-import android.widget.ArrayAdapter
 import com.textgate.ai.LocaleHelper
 import com.textgate.ai.MainActivity
 import com.textgate.ai.R
 import com.textgate.ai.databinding.ContentLiveBinding
-import com.textgate.ai.model.AudioCaptureMode
-import com.textgate.ai.model.Languages
-import com.textgate.ai.model.SupportedLanguage
-import com.textgate.ai.security.AppSettingsStore
 
 /**
  * Drives the "Na żywo" tab — binds to the already-independent
@@ -35,20 +30,25 @@ import com.textgate.ai.security.AppSettingsStore
  * — the SAME setting the typed-trigger pipeline and the Tłumacz tab use —
  * shown read-only with a pointer to where to change it, per the spec's
  * explicit "reuse the existing language-preference logic, don't duplicate
- * the setting" instruction. Only the AMBIENT (source) language has a
- * picker on this screen, since that concept is new in v2.
+ * the setting" instruction.
+ *
+ * The ambient (source) language is NOT a picker — as of the v2.x
+ * routing/UI request, this screen no longer implies the user can choose
+ * or influence what language Gemini hears: there is no request field that
+ * lets this app force a source language (confirmed: no such field exists
+ * anywhere in TranslationConfig/LiveConnectConfig — see
+ * [GeminiLiveClient.ServerEvent.InputTranscript]'s doc). The ambient
+ * language line always reads "Automatyczne wykrywanie" until
+ * [LiveTranslationService.detectedSourceLanguage] reports what Gemini
+ * itself detected, at which point it switches to "Wykryto: <language>" —
+ * see [updateAmbientLanguageDisplay].
  */
 class LiveTabController(
     private val activity: Activity,
     private val binding: ContentLiveBinding
 ) {
 
-    /** index 0 is "Automatycznie" (null = let Gemini detect the ambient
-     * language); the rest mirror [Languages.ALL]. */
-    private val ambientLanguageValues: List<SupportedLanguage?> = listOf(null) + Languages.ALL
-
     private val displayRouteMonitor = AudioRouteMonitor(activity.applicationContext)
-    private val settingsStore = AppSettingsStore(activity.applicationContext)
     private var service: LiveTranslationService? = null
     private var bound = false
     private val stateListener: (LiveSessionState) -> Unit = { state -> activity.runOnUiThread { render(state) } }
@@ -81,21 +81,18 @@ class LiveTabController(
                 )
             }
             if (proximityWakeLock?.isHeld == false) proximityWakeLock?.acquire()
-            // AudioTrack playback for this session uses
-            // AudioAttributes.USAGE_VOICE_COMMUNICATION in ECHO_CANCELLED
-            // mode (the default — see AudioCaptureMode's class doc), or
-            // USAGE_MEDIA in STANDARD mode (see
-            // LiveTranslationService.beginCapturePlayback), which the
-            // platform maps to STREAM_VOICE_CALL or STREAM_MUSIC
-            // respectively — but the hardware volume keys only follow that
-            // mapping if this Activity explicitly says so; left at the
-            // default they'd silently adjust whichever stream isn't
-            // actually in use, so vol+/- would appear to do nothing.
-            activity.volumeControlStream = if (settingsStore.audioCaptureMode == AudioCaptureMode.ECHO_CANCELLED) {
-                AudioManager.STREAM_VOICE_CALL
-            } else {
-                AudioManager.STREAM_MUSIC
-            }
+            // AudioTrack playback for this session always uses
+            // AudioAttributes.USAGE_MEDIA now (see
+            // LiveTranslationService.beginCapturePlayback's doc — output
+            // routing is pinned explicitly via setPreferredDevice()
+            // regardless of usage, so ECHO_CANCELLED no longer pairs with
+            // USAGE_VOICE_COMMUNICATION/STREAM_VOICE_CALL), which the
+            // platform maps to STREAM_MUSIC — but the hardware volume keys
+            // only follow that mapping if this Activity explicitly says
+            // so; left at the default they'd silently adjust whichever
+            // stream isn't actually in use, so vol+/- would appear to do
+            // nothing.
+            activity.volumeControlStream = AudioManager.STREAM_MUSIC
         } else {
             if (proximityWakeLock?.isHeld == true) proximityWakeLock?.release()
             activity.volumeControlStream = AudioManager.USE_DEFAULT_STREAM_TYPE
@@ -116,7 +113,7 @@ class LiveTabController(
     }
 
     init {
-        setupAmbientLanguageSpinner()
+        updateAmbientLanguageDisplay()
         updateTargetLanguageLabel()
         updateDeviceStatus()
         displayRouteMonitor.start { updateDeviceStatus() }
@@ -158,12 +155,19 @@ class LiveTabController(
         displayRouteMonitor.stop()
     }
 
-    private fun setupAmbientLanguageSpinner() {
-        val labels = listOf(activity.getString(R.string.label_language_auto)) + Languages.ALL.map { it.nativeName }
-        val adapter = ArrayAdapter(activity, android.R.layout.simple_spinner_item, labels)
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        binding.spinnerAmbientLanguage.adapter = adapter
-        binding.spinnerAmbientLanguage.setSelection(0, false)
+    /** Static "Automatyczne wykrywanie" until Gemini itself reports a
+     * detected language for this session — see this class's own doc for
+     * why there is deliberately no picker here any more. Called from
+     * [init] (before any session exists) and from every [render] (so it
+     * picks up [LiveTranslationService.detectedSourceLanguage] as soon as
+     * the first transcript with a language code arrives). */
+    private fun updateAmbientLanguageDisplay() {
+        val detected = service?.detectedSourceLanguage
+        binding.textLiveAmbientLanguage.text = if (detected != null) {
+            activity.getString(R.string.live_detected_language_format, detected.nativeName)
+        } else {
+            activity.getString(R.string.live_ambient_language_auto)
+        }
     }
 
     private fun updateTargetLanguageLabel() {
@@ -213,10 +217,8 @@ class LiveTabController(
     }
 
     private fun startLiveService() {
-        val ambientIndex = binding.spinnerAmbientLanguage.selectedItemPosition
-        val ambientLanguage = ambientLanguageValues.getOrNull(ambientIndex)
         val targetLanguage = LocaleHelper.resolvePreferredLanguage(activity.applicationContext)
-        LiveTranslationService.start(activity, ambientLanguage?.code, targetLanguage.code)
+        LiveTranslationService.start(activity, targetLanguage.code)
     }
 
     fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
@@ -243,6 +245,7 @@ class LiveTabController(
             binding.textLiveInputTranscript.text = activeService.latestInputTranscript
             binding.textLiveOutputTranscript.text = activeService.latestOutputTranscript
         }
+        updateAmbientLanguageDisplay()
 
         // CONNECTING is included so the screen already behaves like a call
         // the moment the user presses start, not only once audio actually

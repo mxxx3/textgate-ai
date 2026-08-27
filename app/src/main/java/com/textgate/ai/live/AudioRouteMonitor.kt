@@ -43,6 +43,47 @@ class AudioRouteMonitor(context: Context) {
         false
     }
 
+    /** The specific output [AudioDeviceInfo] a session should pin playback
+     * to via `AudioTrack.setPreferredDevice()` (API 24+; per-instance, not
+     * global — see [LiveTranslationService.beginCapturePlayback] and
+     * [com.textgate.ai.conversation.ConversationTabController.
+     * beginCapturePlayback] for the callers) — the first available private
+     * route (wired/Bluetooth/USB), or, when none is connected, the phone's
+     * OWN built-in speaker, explicit rather than left to the platform's
+     * default so routing stays as deterministic as possible across
+     * different OEMs (this app's minSdk is 26, well above the API-24
+     * requirement, so no version check is needed). Null only if the device
+     * genuinely reports no output devices at all — not expected in
+     * practice, but `getDevices()` documents no non-empty guarantee. */
+    fun selectPreferredOutputDevice(): AudioDeviceInfo? {
+        val devices = try {
+            audioManager.getDevices(AudioManager.GET_DEVICES_OUTPUTS)
+        } catch (_: Exception) {
+            emptyArray()
+        }
+        return devices.firstOrNull { it.type in PRIVATE_OUTPUT_TYPES }
+            ?: devices.firstOrNull { it.type == AudioDeviceInfo.TYPE_BUILTIN_SPEAKER }
+    }
+
+    /** The phone's own built-in microphone, for `AudioRecord.
+     * setPreferredDevice()` — always pinned here by the callers above
+     * REGARDLESS of what output is connected, so a Bluetooth/TWS headset's
+     * own mic is never silently used for ambient capture instead: the
+     * whole point of Na żywo/Rozmowa capturing from the phone itself is
+     * that it hears the room, not whatever a tiny earbud mic happens to
+     * pick up pressed into an ear canal. Null only if the device genuinely
+     * has no built-in mic reported (not expected on a phone, but
+     * defensive all the same — the callers fall back to the platform's
+     * default input in that case). */
+    fun selectBuiltInMicDevice(): AudioDeviceInfo? {
+        val devices = try {
+            audioManager.getDevices(AudioManager.GET_DEVICES_INPUTS)
+        } catch (_: Exception) {
+            emptyArray()
+        }
+        return devices.firstOrNull { it.type == AudioDeviceInfo.TYPE_BUILTIN_MIC }
+    }
+
     /** A short, human-readable category for the CURRENT best output route —
      * used by the Na żywo screen's "current audio device" line. Never more
      * specific than the device category (no device names), consistent
@@ -95,7 +136,14 @@ class AudioRouteMonitor(context: Context) {
     enum class OutputRoute { SPEAKER, WIRED, BLUETOOTH, USB }
 
     companion object {
-        private val PRIVATE_OUTPUT_TYPES = setOf(
+        /** `internal`, not `private` — [LiveTranslationService] and
+         * [com.textgate.ai.conversation.ConversationTabController] both
+         * need this exact same device-type set to decide whether the
+         * output device [selectPreferredOutputDevice] resolved is a
+         * private route (skip the heavier AEC pipeline) or the phone's own
+         * speaker (use it) — reusing this one definition rather than each
+         * keeping its own copy. */
+        internal val PRIVATE_OUTPUT_TYPES = setOf(
             AudioDeviceInfo.TYPE_WIRED_HEADSET,
             AudioDeviceInfo.TYPE_WIRED_HEADPHONES,
             AudioDeviceInfo.TYPE_BLUETOOTH_SCO,

@@ -168,4 +168,10 @@
     <string name="audio_capture_mode_description">Kā \"Saruna\" un \"Tiešraide\" ieraksta un atskaņo audio. \"Atbalss slāpēšana\" neļauj mikrofonam dzirdēt paša tālruņa tulkoto runu no skaļruņa, taču pievieno apstrādi un dažos tālruņos var izraisīt aizkavi vai pārtrauktas kārtas. \"Standarta\" ir ātrāks un vienkāršāks, taču izmantojiet to tikai ar austiņām — skaļrunī tas var uztvert savu paša izvadi un atkal to tulkot ciklā.</string>
     <string name="label_audio_capture_echo_cancelled">Atbalss slāpēšana (ieteicams)</string>
     <string name="label_audio_capture_standard">Standarta (mazāka aizkave)</string>
+    <!-- v2.x: Live routing/detected-language/error-category strings -->
+    <string name="live_ambient_language_auto">Automātiska noteikšana</string>
+    <string name="live_detected_language_format">Noteikts: %1$s</string>
+    <string name="live_error_quota">Sasniegts Gemini Live limits — mēģiniet vēlreiz vēlāk.</string>
+    <string name="live_error_auth">API atslēgas problēma — pārbaudiet atslēgu Iestatījumos.</string>
+    <string name="live_error_config">Nederīga sesijas konfigurācija (piem., neatbalstīta valoda).</string>
 </resources>

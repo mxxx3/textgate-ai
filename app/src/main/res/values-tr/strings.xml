@@ -167,4 +167,10 @@
     <string name="audio_capture_mode_description">Konuşma ve Canlı, sesi nasıl kaydedip oynatır. \"Yankı giderme\" mikrofonun telefonun kendi çevrilmiş konuşmasını hoparlörden duymasını engeller, ancak işlem ekler ve bazı telefonlarda gecikmeye veya kesilen konuşmalara neden olabilir. \"Standart\" daha hızlı ve basittir, ancak yalnızca kulaklıkla kullanın — hoparlörde kendi çıkışını yakalayıp döngü halinde tekrar çevirebilir.</string>
     <string name="label_audio_capture_echo_cancelled">Yankı giderme (önerilir)</string>
     <string name="label_audio_capture_standard">Standart (daha düşük gecikme)</string>
+    <!-- v2.x: Live routing/detected-language/error-category strings -->
+    <string name="live_ambient_language_auto">Otomatik algılama</string>
+    <string name="live_detected_language_format">Algılandı: %1$s</string>
+    <string name="live_error_quota">Gemini Live sınırına ulaşıldı — lütfen daha sonra tekrar deneyin.</string>
+    <string name="live_error_auth">API anahtarı sorunu — anahtarınızı Ayarlar\'da kontrol edin.</string>
+    <string name="live_error_config">Geçersiz oturum yapılandırması (örn. desteklenmeyen dil).</string>
 </resources>

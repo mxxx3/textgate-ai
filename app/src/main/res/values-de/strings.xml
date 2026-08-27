@@ -168,4 +168,10 @@
     <string name="audio_capture_mode_description">Wie Gespräch und Live Audio aufnehmen und wiedergeben. \"Echounterdrückung\" verhindert, dass das Mikrofon die eigene übersetzte Sprachausgabe des Telefons über den Lautsprecher hört, fügt aber Verarbeitung hinzu und kann bei manchen Telefonen zu Verzögerungen oder abgebrochenen Wortmeldungen führen. \"Standard\" ist schneller und einfacher, sollte aber nur mit Kopfhörern verwendet werden — über den Lautsprecher kann es die eigene Ausgabe aufnehmen und in einer Schleife erneut übersetzen.</string>
     <string name="label_audio_capture_echo_cancelled">Echounterdrückung (empfohlen)</string>
     <string name="label_audio_capture_standard">Standard (geringere Verzögerung)</string>
+    <!-- v2.x: Live routing/detected-language/error-category strings -->
+    <string name="live_ambient_language_auto">Automatische Erkennung</string>
+    <string name="live_detected_language_format">Erkannt: %1$s</string>
+    <string name="live_error_quota">Gemini Live-Limit erreicht — bitte später erneut versuchen.</string>
+    <string name="live_error_auth">Problem mit dem API-Schlüssel — überprüfe deinen Schlüssel in den Einstellungen.</string>
+    <string name="live_error_config">Ungültige Sitzungskonfiguration (z. B. nicht unterstützte Sprache).</string>
 </resources>

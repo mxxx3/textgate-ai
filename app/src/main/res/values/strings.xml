@@ -139,6 +139,8 @@
 
     <!-- v2: Na żywo tab -->
     <string name="live_label_ambient_language">Surrounding language</string>
+    <string name="live_ambient_language_auto">Automatic detection</string>
+    <string name="live_detected_language_format">Detected: %1$s</string>
     <string name="live_target_language_format">Translating into: %1$s (change in Settings)</string>
     <string name="live_current_device_format">Current audio device: %1$s</string>
     <string name="live_device_speaker">Phone speaker</string>
@@ -167,6 +169,11 @@
     <string name="live_notification_paused">Paused — headset disconnected</string>
     <string name="live_notification_error">Error — tap to try again</string>
     <string name="live_notification_stop_action">STOP</string>
+
+    <!-- v2.x: Live-specific error categories (Na żywo + Rozmowa) -->
+    <string name="live_error_quota">Gemini Live limit reached — please try again later.</string>
+    <string name="live_error_auth">API key problem — check your key in Settings.</string>
+    <string name="live_error_config">Invalid session configuration (e.g. unsupported language).</string>
 
     <!-- v2: Settings reorganization group headers -->
     <string name="settings_group_translation">Translation</string>

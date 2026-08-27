@@ -168,4 +168,10 @@
     <string name="audio_capture_mode_description">Cómo Conversación y En directo capturan y reproducen audio. \"Cancelación de eco\" evita que el micrófono escuche el propio habla traducida del teléfono por el altavoz, pero añade procesamiento y puede causar retraso o cortes en algunos teléfonos. \"Estándar\" es más rápido y sencillo, pero úsalo solo con auriculares — en el altavoz puede captar su propia salida y volver a traducirla en bucle.</string>
     <string name="label_audio_capture_echo_cancelled">Cancelación de eco (recomendado)</string>
     <string name="label_audio_capture_standard">Estándar (menor latencia)</string>
+    <!-- v2.x: Live routing/detected-language/error-category strings -->
+    <string name="live_ambient_language_auto">Detección automática</string>
+    <string name="live_detected_language_format">Detectado: %1$s</string>
+    <string name="live_error_quota">Se alcanzó el límite de Gemini Live — inténtalo de nuevo más tarde.</string>
+    <string name="live_error_auth">Problema con la clave API — comprueba tu clave en Ajustes.</string>
+    <string name="live_error_config">Configuración de sesión no válida (p. ej., idioma no compatible).</string>
 </resources>

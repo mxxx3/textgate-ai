@@ -37,7 +37,10 @@ TRANSLATIONS = {
     "et":     ("Multimeediumikõlar", "Kõnekõlar"),
     "fa":     ("بلندگوی رسانه", "بلندگوی تماس"),
     "fi":     ("Multimediakaiutin", "Puhelukaiutin"),
-    "fr":     ("Haut-parleur multimédia", "Haut-parleur d'appel"),
+    # Apostrophe must be escaped (\') in Android string resources — an
+    # unescaped ' broke the v2.0.1 CI build with "Invalid unicode escape
+    # sequence in string" / aapt "Can not extract resource" on values-fr.
+    "fr":     ("Haut-parleur multimédia", "Haut-parleur d\\'appel"),
     "hi":     ("मीडिया स्पीकर", "कॉल स्पीकर"),
     "hr":     ("Multimedijski zvučnik", "Zvučnik za pozive"),
     "hu":     ("Médiahangszóró", "Híváshangszóró"),

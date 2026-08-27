@@ -165,8 +165,8 @@
     <!-- v2.0.1: audio capture mode setting -->
     <string name="section_audio_capture_mode">Режим на записване на звук</string>
     <string name="audio_capture_mode_description">Как „Разговор“ и „На живо“ записват и възпроизвеждат звук. „Без ехо“ пречи на микрофона да чуе собствената преведена реч на телефона от високоговорителя, но добавя обработка и може да причини забавяне или прекъснати реплики на някои телефони. „Стандартен“ е по-бърз и по-прост, но го използвайте само със слушалки — на високоговорител може да улови собствения си изход и да го преведе отново в цикъл.</string>
-    <string name="label_audio_capture_echo_cancelled">Без ехо (препоръчително)</string>
-    <string name="label_audio_capture_standard">Стандартен (по-ниско закъснение)</string>
+    <string name="label_audio_capture_echo_cancelled">Мултимедиен високоговорител</string>
+    <string name="label_audio_capture_standard">Говорител за разговори</string>
     <!-- v2.x: Live routing/detected-language/error-category strings -->
     <string name="live_ambient_language_auto">Автоматично разпознаване</string>
     <string name="live_detected_language_format">Разпознат: %1$s</string>

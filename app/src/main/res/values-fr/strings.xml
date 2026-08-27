@@ -166,8 +166,8 @@
     <!-- v2.0.1: audio capture mode setting -->
     <string name="section_audio_capture_mode">Mode de capture audio</string>
     <string name="audio_capture_mode_description">Comment Conversation et En direct capturent et lisent l\'audio. « Suppression d\'écho » empêche le micro d\'entendre la propre voix traduite du téléphone via le haut-parleur, mais ajoute du traitement et peut provoquer un décalage ou des tours coupés sur certains téléphones. « Standard » est plus rapide et plus simple, mais à n\'utiliser qu\'avec un casque — au haut-parleur, il peut capter sa propre sortie et la retraduire en boucle.</string>
-    <string name="label_audio_capture_echo_cancelled">Suppression d\'écho (recommandé)</string>
-    <string name="label_audio_capture_standard">Standard (latence réduite)</string>
+    <string name="label_audio_capture_echo_cancelled">Haut-parleur multimédia</string>
+    <string name="label_audio_capture_standard">Haut-parleur d'appel</string>
     <!-- v2.x: Live routing/detected-language/error-category strings -->
     <string name="live_ambient_language_auto">Détection automatique</string>
     <string name="live_detected_language_format">Détecté : %1$s</string>

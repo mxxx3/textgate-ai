@@ -4,7 +4,6 @@
 <ScrollView
     android:id="@+id/liveRoot"
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -136,71 +135,6 @@
                 android:minHeight="48dp"
                 android:textColor="@color/tg_text_primary"
                 android:textSize="15sp" />
-        </LinearLayout>
-
-        <!-- TEMPORARY diagnostics card — see
-             LiveTranslationService's "TEMPORARY diagnostics" section
-             (above addStateListener) and LiveTabController.updateDiagnosticsDisplay.
-             Measures Gemini Live turn latency and AudioTrack output
-             backlog only; delete this card + those two references to
-             remove the feature once the measurement is done. Labels are
-             deliberately plain, hardcoded, unlocalized debug text (set in
-             Kotlin, not string resources) since this is not meant to stay
-             in the app. -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:orientation="vertical"
-            android:background="@drawable/bg_card">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Diagnostics (temporary)"
-                android:textColor="@color/tg_text_secondary"
-                android:textStyle="bold"
-                android:textSize="12sp" />
-
-            <TextView
-                android:id="@+id/textLiveDiagLatencyCurrent"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
-                android:fontFamily="monospace"
-                android:textColor="@color/tg_text_primary"
-                android:textSize="13sp"
-                tools:text="Latency: 0.0 s" />
-
-            <TextView
-                android:id="@+id/textLiveDiagLatencyAverage"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
-                android:fontFamily="monospace"
-                android:textColor="@color/tg_text_primary"
-                android:textSize="13sp"
-                tools:text="Average: 0.0 s" />
-
-            <TextView
-                android:id="@+id/textLiveDiagLatencyMax"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
-                android:fontFamily="monospace"
-                android:textColor="@color/tg_text_primary"
-                android:textSize="13sp"
-                tools:text="Max: 0.0 s" />
-
-            <TextView
-                android:id="@+id/textLiveDiagAudioBacklog"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
-                android:fontFamily="monospace"
-                android:textColor="@color/tg_text_primary"
-                android:textSize="13sp"
-                tools:text="Audio backlog: 0.0 s" />
         </LinearLayout>
 
     </LinearLayout>

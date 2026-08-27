@@ -166,8 +166,8 @@
     <!-- v2.0.1: audio capture mode setting -->
     <string name="section_audio_capture_mode">Режим захвата звука</string>
     <string name="audio_capture_mode_description">Как «Разговор» и «Прямой эфир» записывают и воспроизводят звук. «Подавление эха» не даёт микрофону слышать собственную переведённую речь телефона из динамика, но добавляет обработку и может вызывать задержки или обрывы реплик на некоторых телефонах. «Стандартный» режим быстрее и проще, но используйте его только с наушниками — через динамик он может улавливать собственный звук и переводить его снова по кругу.</string>
-    <string name="label_audio_capture_echo_cancelled">Подавление эха (рекомендуется)</string>
-    <string name="label_audio_capture_standard">Стандартный (меньшая задержка)</string>
+    <string name="label_audio_capture_echo_cancelled">Мультимедийный динамик</string>
+    <string name="label_audio_capture_standard">Динамик для звонков</string>
     <!-- v2.x: Live routing/detected-language/error-category strings -->
     <string name="live_ambient_language_auto">Автоматическое определение</string>
     <string name="live_detected_language_format">Определено: %1$s</string>

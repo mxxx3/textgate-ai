@@ -165,8 +165,8 @@
     <!-- v2.0.1: audio capture mode setting -->
     <string name="section_audio_capture_mode">Audio-opnamemodus</string>
     <string name="audio_capture_mode_description">Hoe Gesprek en Live audio opnemen en afspelen. \"Echo-onderdrukking\" voorkomt dat de microfoon de eigen vertaalde spraak van de telefoon via de luidspreker hoort, maar voegt verwerking toe en kan op sommige telefoons vertraging of afgebroken beurten veroorzaken. \"Standaard\" is sneller en eenvoudiger, maar gebruik dit alleen met een koptelefoon — via de luidspreker kan het zijn eigen uitvoer oppikken en steeds opnieuw vertalen.</string>
-    <string name="label_audio_capture_echo_cancelled">Echo-onderdrukking (aanbevolen)</string>
-    <string name="label_audio_capture_standard">Standaard (lagere latentie)</string>
+    <string name="label_audio_capture_echo_cancelled">Mediaspeaker</string>
+    <string name="label_audio_capture_standard">Gespreksspeaker</string>
     <!-- v2.x: Live routing/detected-language/error-category strings -->
     <string name="live_ambient_language_auto">Automatische detectie</string>
     <string name="live_detected_language_format">Gedetecteerd: %1$s</string>

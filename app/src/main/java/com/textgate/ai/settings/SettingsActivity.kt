@@ -33,6 +33,7 @@ import com.textgate.ai.model.Languages
 import com.textgate.ai.model.SupportedLanguage
 import com.textgate.ai.model.TranslationPrompts
 import com.textgate.ai.model.UserGender
+import com.textgate.ai.model.pickerLabel
 import com.textgate.ai.network.GeminiClient
 import com.textgate.ai.network.ModelAvailabilityStore
 import com.textgate.ai.network.TranslationOrchestrator
@@ -240,7 +241,7 @@ class SettingsActivity : Activity() {
         val adapter = ArrayAdapter(
             this,
             android.R.layout.simple_spinner_item,
-            languages.map { it.nativeName }
+            languages.map { it.pickerLabel() }
         )
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         binding.spinnerAppLanguage.adapter = adapter

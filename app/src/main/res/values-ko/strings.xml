@@ -166,8 +166,8 @@
     <!-- v2.0.1: audio capture mode setting -->
     <string name="section_audio_capture_mode">오디오 캡처 모드</string>
     <string name="audio_capture_mode_description">대화 및 라이브 기능이 오디오를 녹음하고 재생하는 방식입니다. \"에코 제거\"는 마이크가 스피커에서 나오는 휴대폰 자신의 번역된 음성을 듣지 못하게 하지만, 처리 과정이 추가되어 일부 휴대폰에서 지연이나 대화 끊김이 발생할 수 있습니다. \"표준\"은 더 빠르고 간단하지만 헤드폰과 함께만 사용하세요 — 스피커에서는 자신의 출력을 다시 감지해 반복적으로 번역할 수 있습니다.</string>
-    <string name="label_audio_capture_echo_cancelled">에코 제거(권장)</string>
-    <string name="label_audio_capture_standard">표준(지연 시간 감소)</string>
+    <string name="label_audio_capture_echo_cancelled">미디어 스피커</string>
+    <string name="label_audio_capture_standard">통화 스피커</string>
     <!-- v2.x: Live routing/detected-language/error-category strings -->
     <string name="live_ambient_language_auto">자동 감지</string>
     <string name="live_detected_language_format">감지됨: %1$s</string>

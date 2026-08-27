@@ -102,7 +102,25 @@ object Languages {
     fun byCode(code: String): SupportedLanguage? = BY_CODE[code] ?: BY_CODE[code.lowercase()]
 
     /** The language TextGate AI falls back to whenever a stored code is
-     * missing or no longer recognized (e.g. after a downgrade). Polish,
-     * matching this app's original, pre-multi-language default. */
-    val DEFAULT: SupportedLanguage = BY_CODE.getValue("pl")
+     * missing or no longer recognized (e.g. after a downgrade), AND the
+     * app's own default interface/translation-target language for a fresh
+     * install that has never touched Settings — see
+     * [com.textgate.ai.LocaleHelper.resolvePreferredLanguage]/[com.textgate.ai
+     * .LocaleHelper.applyOverride], which resolve straight to this instead
+     * of the device's own system language. English, per the app owner's
+     * explicit request to make the whole app default to English rather
+     * than this app's original, pre-multi-language Polish default. */
+    val DEFAULT: SupportedLanguage = BY_CODE.getValue("en")
 }
+
+/** `"<nativeName> ?<code>"` — the label every language PICKER in this app
+ * (Settings' language spinner, Tłumacz's source/target spinners, Rozmowa's
+ * two language spinners) shows, so the typed-trigger shortcut for each
+ * language (e.g. "?de" at the end of a message — see [SupportedLanguage
+ * .code]'s own doc) is visible right where the user is already choosing
+ * that language, not something they have to already know or look up
+ * separately. Deliberately NOT used for plain status/display text that
+ * isn't a pick-one-from-a-list control (e.g. [LiveTabController]'s
+ * "detected language" line, or Rozmowa's "A → B" direction label) — this
+ * is specifically for picker option lists. */
+fun SupportedLanguage.pickerLabel(): String = "$nativeName ?$code"

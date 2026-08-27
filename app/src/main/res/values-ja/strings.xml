@@ -166,8 +166,8 @@
     <!-- v2.0.1: audio capture mode setting -->
     <string name="section_audio_capture_mode">音声キャプチャモード</string>
     <string name="audio_capture_mode_description">「会話」と「ライブ」が音声をどのように録音・再生するか。「エコーキャンセル」はマイクがスピーカーから流れる端末自身の翻訳音声を拾うのを防ぎますが、処理が増えるため一部の端末で遅延や会話の途切れが発生することがあります。「標準」はより高速でシンプルですが、ヘッドフォンと併用してください — スピーカーでは自分自身の出力を拾って繰り返し翻訳してしまうことがあります。</string>
-    <string name="label_audio_capture_echo_cancelled">エコーキャンセル(推奨)</string>
-    <string name="label_audio_capture_standard">標準(低遅延)</string>
+    <string name="label_audio_capture_echo_cancelled">メディアスピーカー</string>
+    <string name="label_audio_capture_standard">通話スピーカー</string>
     <!-- v2.x: Live routing/detected-language/error-category strings -->
     <string name="live_ambient_language_auto">自動検出</string>
     <string name="live_detected_language_format">検出: %1$s</string>

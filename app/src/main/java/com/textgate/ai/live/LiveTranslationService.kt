@@ -33,7 +33,6 @@ import com.textgate.ai.model.SupportedLanguage
 import com.textgate.ai.security.AppSettingsStore
 import com.textgate.ai.security.SecureApiKeyStore
 import java.util.concurrent.atomic.AtomicBoolean
-import java.util.concurrent.atomic.AtomicLong
 
 /**
  * Owns the ENTIRE lifecycle of one ambient "Na żywo" Live translation
@@ -142,169 +141,6 @@ class LiveTranslationService : Service() {
 
     fun removeStateListener(listener: (LiveSessionState) -> Unit) {
         stateListeners.remove(listener)
-    }
-
-    // ---------------------------------------------------------------
-    // TEMPORARY diagnostics (latency + output backlog measurement)
-    // ---------------------------------------------------------------
-    //
-    // Added to answer one specific question: is Gemini Live's translation
-    // delay roughly constant, or does it grow during fast/continuous
-    // speech? This section is purely OBSERVATIONAL — it reads timestamps
-    // and byte counts that already exist as a side effect of the real
-    // capture/playback code below, and writes them nowhere the real
-    // pipeline reads from. It never touches VAD, chunk sizes/timing,
-    // audio routing, playback speed (removed entirely in the update
-    // above), or any Gemini connection config. [LIVE_DIAGNOSTICS_ENABLED]
-    // is one flag to flip (or this whole section to delete) once the
-    // measurement is done — every call site below is guarded by it.
-    //
-    // Numbers exposed, all in seconds (see [updateDiagnosticsTick]):
-    //  - diagLatencyCurrentSeconds: most recent single-turn latency.
-    //  - diagLatencyAverageSeconds: mean over every turn this session.
-    //  - diagLatencyMaxSeconds: worst single-turn latency this session.
-    //  - diagAudioBacklogSeconds: how much received-but-unplayed PCM is
-    //    sitting in the CURRENT playbackTrack right now.
-    // All four reset to 0 on STOP (see [stopCapturePlayback]).
-
-    /** Timestamp of the most recently sent MIC chunk — written from
-     * [runCaptureLoop] (a background thread, `TextGateLiveCapture`), read
-     * from [recordTurnLatency] on [mainHandler]. The only diagnostic field
-     * that crosses threads, hence the only one that needs to be atomic;
-     * every other diagnostic field below is touched exclusively from
-     * [mainHandler] (both [handleServerEvent] and [updateDiagnosticsTick]
-     * run there), same as [latestInputTranscript]/[latestOutputTranscript]
-     * already do, so plain `var`s are safe for those. */
-    private val diagLastInputSentAtMs = AtomicLong(0L)
-
-    /** Total bytes of Gemini output PCM written to the CURRENT
-     * [playbackTrack] — reset to 0 every time a new track is built (both
-     * [beginCapturePlayback]'s normal-path branch and
-     * [rebuildPlaybackTrack]), exactly like the (now-removed)
-     * `framesWrittenThisTrack` from the reverted playback-speed feature.
-     * `playbackTrack.write()` is blocking and this app has no separate
-     * application-level queue in front of it — by the time this counter
-     * is incremented (right after `write()` returns), the bytes are
-     * guaranteed to already be inside the track's own internal buffer, so
-     * "received from Gemini" and "written to the track" are the same
-     * number here; there is nothing upstream of `write()` that could be
-     * queued elsewhere. */
-    private var diagBytesWrittenCurrentTrack: Long = 0L
-
-    private var diagLatencyCurrentMs: Long = 0L
-    private var diagLatencySumMs: Long = 0L
-    private var diagLatencyCount: Long = 0L
-    private var diagLatencyMaxMs: Long = 0L
-
-    /** Published, UI-facing values — recomputed every [DIAG_TICK_INTERVAL_MS]
-     * by [updateDiagnosticsTick] and read by [LiveTabController]. */
-    var diagLatencyCurrentSeconds: Float = 0f
-        private set
-    var diagLatencyAverageSeconds: Float = 0f
-        private set
-    var diagLatencyMaxSeconds: Float = 0f
-        private set
-    var diagAudioBacklogSeconds: Float = 0f
-        private set
-
-    private val diagnosticsListeners = mutableListOf<() -> Unit>()
-
-    fun addDiagnosticsListener(listener: () -> Unit) {
-        diagnosticsListeners.add(listener)
-    }
-
-    fun removeDiagnosticsListener(listener: () -> Unit) {
-        diagnosticsListeners.remove(listener)
-    }
-
-    private fun notifyDiagnosticsListeners() {
-        diagnosticsListeners.toList().forEach { it() }
-    }
-
-    private val diagTickRunnable = object : Runnable {
-        override fun run() {
-            updateDiagnosticsTick()
-            mainHandler.postDelayed(this, DIAG_TICK_INTERVAL_MS)
-        }
-    }
-
-    /** "Current latency" per the request: time from the LAST mic chunk
-     * sent to Gemini, to the FIRST output chunk of the response that
-     * follows it — captured at exactly the point [handleServerEvent]
-     * already detects a new turn starting (`state == LISTENING`, about to
-     * transition to `TRANSLATING`). Mic capture streams continuously
-     * regardless of session state (Gemini's own VAD decides turns, this
-     * app never gates sending on state), so "the last chunk sent right
-     * before the response's first byte arrived" is a direct, honest
-     * measurement of this round trip — not an approximation that needs a
-     * separate "end of input" event this app doesn't have. */
-    private fun recordTurnLatency() {
-        val sentAt = diagLastInputSentAtMs.get()
-        if (sentAt <= 0L) return // no mic chunk sent yet this session.
-        val latencyMs = (System.currentTimeMillis() - sentAt).coerceAtLeast(0L)
-        diagLatencyCurrentMs = latencyMs
-        diagLatencySumMs += latencyMs
-        diagLatencyCount += 1
-        if (latencyMs > diagLatencyMaxMs) diagLatencyMaxMs = latencyMs
-    }
-
-    /** Recomputes every published `diag*Seconds` value from the raw
-     * counters and fires [notifyDiagnosticsListeners] — runs on
-     * [mainHandler] every [DIAG_TICK_INTERVAL_MS] while a session is
-     * active (started/stopped alongside real capture/playback, see
-     * [beginCapturePlayback]/[stopCapturePlayback]), completely separate
-     * from [notifyListeners]/[stateListeners] so this ticking never forces
-     * an unrelated full state re-render several times a second.
-     *
-     * Backlog derivation — the part of the request asking how to estimate
-     * real buffered audio when `write()` is blocking and there is no
-     * separate app queue: `AudioTrack.getPlaybackHeadPosition()` is
-     * documented as the number of frames actually PLAYED so far on the
-     * current track (reinterpreted as unsigned per its own doc, same as
-     * the reverted speed feature used). `diagBytesWrittenCurrentTrack`
-     * (see that field's doc) is exactly how many bytes have been handed
-     * to (and accepted by, since `write()` already returned) that same
-     * track. Their difference, converted with the request's own formula
-     * (`seconds = pendingBytes / (24000 * 2)`), is the real amount of
-     * received PCM still waiting inside `AudioTrack`'s internal buffer —
-     * no separate queue needed because `AudioTrack`'s own ring buffer IS
-     * the only queue in this pipeline. */
-    private fun updateDiagnosticsTick() {
-        val track = playbackTrack
-        diagAudioBacklogSeconds = if (track != null) {
-            val playedFrames = track.playbackHeadPosition.toLong() and 0xFFFFFFFFL
-            val consumedBytes = playedFrames * DIAG_BYTES_PER_FRAME
-            val pendingBytes = (diagBytesWrittenCurrentTrack - consumedBytes).coerceAtLeast(0L)
-            pendingBytes.toFloat() / (PLAYBACK_SAMPLE_RATE_HZ * DIAG_BYTES_PER_FRAME)
-        } else {
-            0f
-        }
-        diagLatencyCurrentSeconds = diagLatencyCurrentMs / 1000f
-        diagLatencyAverageSeconds = if (diagLatencyCount > 0) {
-            (diagLatencySumMs.toFloat() / diagLatencyCount) / 1000f
-        } else {
-            0f
-        }
-        diagLatencyMaxSeconds = diagLatencyMaxMs / 1000f
-        notifyDiagnosticsListeners()
-    }
-
-    /** Zeroes every diagnostic counter/published value — called from
-     * [stopCapturePlayback] so a new session (or the next START) never
-     * shows stale numbers from a previous one, per the request's "Po STOP
-     * wyzeruj statystyki". */
-    private fun resetDiagnostics() {
-        diagLastInputSentAtMs.set(0L)
-        diagBytesWrittenCurrentTrack = 0L
-        diagLatencyCurrentMs = 0L
-        diagLatencySumMs = 0L
-        diagLatencyCount = 0L
-        diagLatencyMaxMs = 0L
-        diagLatencyCurrentSeconds = 0f
-        diagLatencyAverageSeconds = 0f
-        diagLatencyMaxSeconds = 0f
-        diagAudioBacklogSeconds = 0f
-        notifyDiagnosticsListeners()
     }
 
     override fun onCreate() {
@@ -437,20 +273,8 @@ class LiveTranslationService : Service() {
                 notifyListeners()
             }
             is ServerEvent.AudioChunk -> {
-                // DIAGNOSTIC ONLY (see the section above [addStateListener]):
-                // this is exactly the existing "a new turn just started"
-                // detection this line already did before any diagnostics
-                // existed — reused as the "first output audio of this
-                // turn" moment, never added to or changed.
-                if (LIVE_DIAGNOSTICS_ENABLED && state == LiveSessionState.LISTENING) recordTurnLatency()
                 if (state == LiveSessionState.LISTENING) transitionTo(LiveSessionState.TRANSLATING)
-                val track = playbackTrack
-                track?.write(event.pcm16, 0, event.pcm16.size)
-                // Only counted when there was actually a track to accept
-                // it — otherwise this byte was never written anywhere, and
-                // counting it would make the next backlog reading larger
-                // than what is really buffered.
-                if (LIVE_DIAGNOSTICS_ENABLED && track != null) diagBytesWrittenCurrentTrack += event.pcm16.size
+                playbackTrack?.write(event.pcm16, 0, event.pcm16.size)
             }
             is ServerEvent.TurnComplete -> {
                 if (state == LiveSessionState.TRANSLATING) transitionTo(LiveSessionState.LISTENING)
@@ -805,12 +629,6 @@ class LiveTranslationService : Service() {
             }
         }
         playbackTrack = newTrack
-        // DIAGNOSTIC ONLY — see the section above [addStateListener]. A
-        // route/mode switch mid-session (e.g. earpiece engage/disengage)
-        // means a brand new AudioTrack with its own playbackHeadPosition
-        // starting back at 0, so the backlog byte counter must restart
-        // with it or every switch would read as a huge, fake backlog.
-        if (LIVE_DIAGNOSTICS_ENABLED) diagBytesWrittenCurrentTrack = 0L
         newTrack.play()
         try {
             oldTrack?.stop()
@@ -1052,24 +870,11 @@ class LiveTranslationService : Service() {
                     // platform's own default routing if an OEM rejects the pin.
                 }
             }
-            // DIAGNOSTIC ONLY — see the section above [addStateListener];
-            // matches the reset done on this same branch's counterpart
-            // inside rebuildPlaybackTrack.
-            if (LIVE_DIAGNOSTICS_ENABLED) diagBytesWrittenCurrentTrack = 0L
             playbackTrack?.play()
         }
 
         micActive.set(true)
         transitionTo(LiveSessionState.LISTENING)
-
-        // DIAGNOSTIC ONLY — see the section above [addStateListener].
-        // Started here (session actually has audio flowing) rather than
-        // in onCreate(), so it never polls/ticks while idle between
-        // sessions; stopped and zeroed in stopCapturePlayback.
-        if (LIVE_DIAGNOSTICS_ENABLED) {
-            mainHandler.removeCallbacks(diagTickRunnable)
-            mainHandler.postDelayed(diagTickRunnable, DIAG_TICK_INTERVAL_MS)
-        }
 
         val thread = Thread({ runCaptureLoop(minBufferSize, micSource, useAec) }, "TextGateLiveCapture")
         captureThread = thread
@@ -1150,9 +955,6 @@ class LiveTranslationService : Service() {
                 if (read > 0) {
                     val chunk = if (read == buffer.size) buffer else buffer.copyOf(read)
                     liveClient?.sendAudioChunk(chunk)
-                    // DIAGNOSTIC ONLY — see the section above [addStateListener].
-                    // Does not change what is sent, how it's chunked, or when.
-                    if (LIVE_DIAGNOSTICS_ENABLED) diagLastInputSentAtMs.set(System.currentTimeMillis())
                 }
             }
         } catch (_: Exception) {
@@ -1178,14 +980,6 @@ class LiveTranslationService : Service() {
 
     private fun stopCapturePlayback() {
         micActive.set(false)
-        // DIAGNOSTIC ONLY — see the section above [addStateListener]. Per
-        // the request: "Po STOP wyzeruj statystyki" — every published
-        // number goes back to 0 the moment a session stops, rather than
-        // showing the previous session's numbers until a new one starts.
-        if (LIVE_DIAGNOSTICS_ENABLED) {
-            mainHandler.removeCallbacks(diagTickRunnable)
-            resetDiagnostics()
-        }
         // Unconditional, cheap no-op unless engageEarpieceCommunicationRouting
         // (STANDARD-mode headset-disconnect only) actually engaged this
         // session — guarantees AudioManager.mode and the pinned
@@ -1373,21 +1167,6 @@ class LiveTranslationService : Service() {
         private const val PLAYBACK_SAMPLE_RATE_HZ = 24_000
         private const val MIN_BUFFER_FLOOR = 3_200 // 100ms of 16kHz mono 16-bit audio
         private const val CAPTURE_THREAD_JOIN_TIMEOUT_MS = 500L
-
-        /** TEMPORARY — see the diagnostics section above [addStateListener].
-         * Flip to `false` (or delete that whole section plus every call
-         * site guarded by this flag) once the latency/backlog measurement
-         * this was added for is done. */
-        private const val LIVE_DIAGNOSTICS_ENABLED = true
-
-        /** How often [updateDiagnosticsTick] recomputes and republishes the
-         * diagnostic numbers — within the requested 250-500ms range. */
-        private const val DIAG_TICK_INTERVAL_MS = 300L
-
-        /** 16-bit mono PCM output: 2 bytes per frame — the request's own
-         * `seconds = pendingBytes / (24000 * 2)` formula, named instead of
-         * a bare `2` at its one call site. */
-        private const val DIAG_BYTES_PER_FRAME = 2
 
         private const val MAX_RECONNECT_ATTEMPTS = 5
         private val RECONNECT_BACKOFF_MS = longArrayOf(2_000, 4_000, 8_000, 16_000, 30_000)

@@ -166,8 +166,8 @@
     <!-- v2.0.1: audio capture mode setting -->
     <string name="section_audio_capture_mode">Äänen tallennustila</string>
     <string name="audio_capture_mode_description">Miten Keskustelu ja Live tallentavat ja toistavat ääntä. \"Kaiunpoisto\" estää mikrofonia kuulemasta puhelimen omaa käännettyä puhetta kaiuttimesta, mutta lisää käsittelyä ja voi aiheuttaa viivettä tai katkenneita vuoroja joissakin puhelimissa. \"Vakio\" on nopeampi ja yksinkertaisempi, mutta käytä sitä vain kuulokkeiden kanssa — kaiuttimessa se saattaa poimia oman äänensä ja kääntää sen uudelleen silmukassa.</string>
-    <string name="label_audio_capture_echo_cancelled">Kaiunpoisto (suositeltu)</string>
-    <string name="label_audio_capture_standard">Vakio (pienempi viive)</string>
+    <string name="label_audio_capture_echo_cancelled">Multimediakaiutin</string>
+    <string name="label_audio_capture_standard">Puhelukaiutin</string>
     <!-- v2.x: Live routing/detected-language/error-category strings -->
     <string name="live_ambient_language_auto">Automaattinen tunnistus</string>
     <string name="live_detected_language_format">Tunnistettu: %1$s</string>

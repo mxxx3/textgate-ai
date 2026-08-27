@@ -53,18 +53,6 @@ class LiveTabController(
     private var bound = false
     private val stateListener: (LiveSessionState) -> Unit = { state -> activity.runOnUiThread { render(state) } }
 
-    /** TEMPORARY — see [LiveTranslationService]'s "TEMPORARY diagnostics"
-     * section (above `addStateListener`). Separate from [stateListener] on
-     * purpose: it fires every ~300ms while a session is active, and piggy-
-     * backing that onto the real state-change listener would force a full
-     * [render] several times a second for no reason. Delete this listener,
-     * [updateDiagnosticsDisplay], and the registration/unregistration
-     * calls below to remove the feature. Already runs on the UI thread —
-     * [LiveTranslationService.notifyDiagnosticsListeners] is only ever
-     * called from that service's own `mainHandler`, which is the main
-     * Looper, same as every other cross-thread hand-off in this app. */
-    private val diagnosticsListener: () -> Unit = { updateDiagnosticsDisplay() }
-
     /** Held only while a session actually has audio flowing (mic listening
      * or translated audio playing) — see [render], which is the only
      * caller of [setAudioActive]. Two things a real phone call gets "for
@@ -116,13 +104,10 @@ class LiveTabController(
             val bindService = (binderService as? LiveTranslationService.LocalBinder)?.getService() ?: return
             service = bindService
             bindService.addStateListener(stateListener)
-            bindService.addDiagnosticsListener(diagnosticsListener) // TEMPORARY — see diagnosticsListener's doc.
-            updateDiagnosticsDisplay()
         }
 
         override fun onServiceDisconnected(name: ComponentName?) {
             service?.removeStateListener(stateListener)
-            service?.removeDiagnosticsListener(diagnosticsListener) // TEMPORARY — see diagnosticsListener's doc.
             service = null
         }
     }
@@ -155,7 +140,6 @@ class LiveTabController(
         // should. See this class's own doc comment.
         if (bound) {
             service?.removeStateListener(stateListener)
-            service?.removeDiagnosticsListener(diagnosticsListener) // TEMPORARY — see diagnosticsListener's doc.
             activity.unbindService(connection)
             bound = false
         }
@@ -274,27 +258,5 @@ class LiveTabController(
             state == LiveSessionState.TRANSLATING ||
             state == LiveSessionState.RECONNECTING
         setAudioActive(isAudioActive)
-    }
-
-    /** TEMPORARY — see [diagnosticsListener]'s doc and
-     * [LiveTranslationService]'s "TEMPORARY diagnostics" section. Formats
-     * with `Locale.US` explicitly (not the device/app locale, e.g. Polish)
-     * so the decimal separator is always "." per the requested
-     * "Latency: X.X s" format — plain `String.format`/`"%.1f".format`
-     * would silently use "," on a Polish-locale device instead. */
-    private fun updateDiagnosticsDisplay() {
-        val activeService = service ?: return
-        binding.textLiveDiagLatencyCurrent.text = String.format(
-            java.util.Locale.US, "Latency: %.1f s", activeService.diagLatencyCurrentSeconds
-        )
-        binding.textLiveDiagLatencyAverage.text = String.format(
-            java.util.Locale.US, "Average: %.1f s", activeService.diagLatencyAverageSeconds
-        )
-        binding.textLiveDiagLatencyMax.text = String.format(
-            java.util.Locale.US, "Max: %.1f s", activeService.diagLatencyMaxSeconds
-        )
-        binding.textLiveDiagAudioBacklog.text = String.format(
-            java.util.Locale.US, "Audio backlog: %.1f s", activeService.diagAudioBacklogSeconds
-        )
     }
 }

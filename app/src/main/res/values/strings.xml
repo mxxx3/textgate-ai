@@ -194,6 +194,6 @@
     <!-- v2.0.1: audio capture mode setting -->
     <string name="section_audio_capture_mode">Audio capture mode</string>
     <string name="audio_capture_mode_description">How Rozmowa and Na żywo capture and play audio. \"Echo-cancelled\" stops the microphone from hearing the phone\'s own translated speech on speaker, but adds processing and can cause lag or cut-off turns on some phones. \"Standard\" is faster and simpler, but only use it with headphones — on speaker it can pick up and re-translate its own output in a loop.</string>
-    <string name="label_audio_capture_echo_cancelled">Echo-cancelled (recommended)</string>
-    <string name="label_audio_capture_standard">Standard (lower latency)</string>
+    <string name="label_audio_capture_echo_cancelled">Multimedia speaker</string>
+    <string name="label_audio_capture_standard">Call speaker</string>
 </resources>

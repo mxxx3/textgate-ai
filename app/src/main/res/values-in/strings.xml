@@ -165,8 +165,8 @@
     <!-- v2.0.1: audio capture mode setting -->
     <string name="section_audio_capture_mode">Mode perekaman audio</string>
     <string name="audio_capture_mode_description">Cara Percakapan dan Langsung merekam dan memutar audio. \"Peredam gema\" mencegah mikrofon mendengar suara terjemahan ponsel sendiri dari speaker, tetapi menambah pemrosesan dan bisa menyebabkan jeda atau giliran terputus di beberapa ponsel. \"Standar\" lebih cepat dan sederhana, tetapi gunakan hanya dengan headphone — pada speaker bisa menangkap keluarannya sendiri dan menerjemahkannya lagi berulang-ulang.</string>
-    <string name="label_audio_capture_echo_cancelled">Peredam gema (disarankan)</string>
-    <string name="label_audio_capture_standard">Standar (latensi lebih rendah)</string>
+    <string name="label_audio_capture_echo_cancelled">Speaker media</string>
+    <string name="label_audio_capture_standard">Speaker panggilan</string>
     <!-- v2.x: Live routing/detected-language/error-category strings -->
     <string name="live_ambient_language_auto">Deteksi otomatis</string>
     <string name="live_detected_language_format">Terdeteksi: %1$s</string>

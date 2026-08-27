@@ -166,8 +166,8 @@
     <!-- v2.0.1: audio capture mode setting -->
     <string name="section_audio_capture_mode">Modalità di acquisizione audio</string>
     <string name="audio_capture_mode_description">Come Conversazione e Dal vivo acquisiscono e riproducono l\'audio. \"Cancellazione eco\" impedisce al microfono di sentire il parlato tradotto del telefono stesso dall\'altoparlante, ma aggiunge elaborazione e può causare ritardi o interruzioni dei turni su alcuni telefoni. \"Standard\" è più veloce e semplice, ma usalo solo con le cuffie — sull\'altoparlante potrebbe captare il proprio output e ritradurlo in un ciclo.</string>
-    <string name="label_audio_capture_echo_cancelled">Cancellazione eco (consigliato)</string>
-    <string name="label_audio_capture_standard">Standard (latenza inferiore)</string>
+    <string name="label_audio_capture_echo_cancelled">Altoparlante multimediale</string>
+    <string name="label_audio_capture_standard">Altoparlante per chiamate</string>
     <!-- v2.x: Live routing/detected-language/error-category strings -->
     <string name="live_ambient_language_auto">Rilevamento automatico</string>
     <string name="live_detected_language_format">Rilevata: %1$s</string>

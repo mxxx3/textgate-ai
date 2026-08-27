@@ -22,6 +22,7 @@ import com.textgate.ai.live.liveErrorMessageRes
 import com.textgate.ai.model.AudioCaptureMode
 import com.textgate.ai.model.Languages
 import com.textgate.ai.model.SupportedLanguage
+import com.textgate.ai.model.pickerLabel
 import com.textgate.ai.security.AppSettingsStore
 import com.textgate.ai.security.SecureApiKeyStore
 import java.util.concurrent.atomic.AtomicBoolean
@@ -45,15 +46,20 @@ import java.util.concurrent.atomic.AtomicBoolean
  * `targetLanguageCode` per session (see [GeminiLiveClient]'s wire-format
  * note) — there is no per-utterance "translate the other direction this
  * time" switch documented. This controller models a two-person
- * conversation as ONE active translation DIRECTION at a time (Language A
- * → Language B, or the reverse), shown in [ContentConversationBinding.
- * textConversationDirection], with [ContentConversationBinding.
- * buttonSwapDirection] closing and reopening the Live session with the
- * other target language when the conversation's speaker changes. This is
- * a deliberate simplification, not a misunderstanding of the two-person
- * requirement — see this project's final summary for why: without a
- * confirmed way to change `targetLanguageCode` on an already-open session,
- * reconnecting is the only reliable option available.
+ * conversation as ONE active translation DIRECTION at a time, always
+ * Language A → Language B (see [currentTargetLanguage]), shown in
+ * [ContentConversationBinding.textConversationDirection]. When the
+ * conversation's speaker changes, [ContentConversationBinding.
+ * buttonSwapDirection] doesn't flip a direction flag — it calls
+ * [swapLanguages] to exchange languageA/languageB's actual values (and
+ * both spinners' selections) directly, the same mechanism as
+ * [com.textgate.ai.translate.TranslateTabController]'s own swap button,
+ * then closes and reopens the Live session with the new target language.
+ * This reconnect-on-change is a deliberate simplification, not a
+ * misunderstanding of the two-person requirement — see this project's
+ * final summary for why: without a confirmed way to change
+ * `targetLanguageCode` on an already-open session, reconnecting is the
+ * only reliable option available.
  */
 class ConversationTabController(
     private val activity: Activity,
@@ -76,9 +82,7 @@ class ConversationTabController(
 
     private val languages: List<SupportedLanguage> = Languages.ALL
     private var languageA: SupportedLanguage = Languages.DEFAULT
-    private var languageB: SupportedLanguage = Languages.byCode("en") ?: Languages.DEFAULT
-    /** true: translating A's speech into B; false: the reverse. */
-    private var directionAtoB = true
+    private var languageB: SupportedLanguage = Languages.byCode("pl") ?: Languages.DEFAULT
 
     private var liveClient: GeminiLiveClient? = null
     private var captureThread: Thread? = null
@@ -89,7 +93,7 @@ class ConversationTabController(
     init {
         setupLanguageSpinners()
         updateDirectionLabel()
-        binding.buttonSwapDirection.setOnClickListener { onSwapDirection() }
+        binding.buttonSwapDirection.setOnClickListener { swapLanguages() }
         binding.buttonConversationStartStop.setOnClickListener { onStartStopClicked() }
     }
 
@@ -104,7 +108,7 @@ class ConversationTabController(
     }
 
     private fun setupLanguageSpinners() {
-        val labels = languages.map { it.nativeName }
+        val labels = languages.map { it.pickerLabel() }
         val adapterA = ArrayAdapter(activity, android.R.layout.simple_spinner_item, labels)
         adapterA.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         binding.spinnerLanguageA.adapter = adapterA
@@ -115,16 +119,27 @@ class ConversationTabController(
         binding.spinnerLanguageB.adapter = adapterB
         binding.spinnerLanguageB.setSelection(languages.indexOfFirst { it.code == languageB.code }.coerceAtLeast(0))
 
+        binding.spinnerLanguageA.post {
+            attachLanguageSpinnerListeners()
+        }
+    }
+
+    /** Re-reads [languageA]/[languageB] from the two spinners' current
+     * selections whenever the user picks a different language from either
+     * dropdown directly (as opposed to via [swapLanguages], which detaches
+     * these listeners first — see that function's doc for why). Broken out
+     * into its own function so both [setupLanguageSpinners] (initial
+     * attach) and [swapLanguages] (re-attach after swapping) install the
+     * exact same behavior. */
+    private fun attachLanguageSpinnerListeners() {
         val listener = { _: Any? ->
             languageA = languages.getOrNull(binding.spinnerLanguageA.selectedItemPosition) ?: languageA
             languageB = languages.getOrNull(binding.spinnerLanguageB.selectedItemPosition) ?: languageB
             updateDirectionLabel()
             if (liveClient != null) restartSessionWithCurrentDirection()
         }
-        binding.spinnerLanguageA.post {
-            binding.spinnerLanguageA.onItemSelectedListener = simpleSelectionListener { listener(null) }
-            binding.spinnerLanguageB.onItemSelectedListener = simpleSelectionListener { listener(null) }
-        }
+        binding.spinnerLanguageA.onItemSelectedListener = simpleSelectionListener { listener(null) }
+        binding.spinnerLanguageB.onItemSelectedListener = simpleSelectionListener { listener(null) }
     }
 
     private fun simpleSelectionListener(onSelected: () -> Unit) =
@@ -134,20 +149,52 @@ class ConversationTabController(
             override fun onNothingSelected(parent: android.widget.AdapterView<*>?) = Unit
         }
 
-    private fun onSwapDirection() {
-        directionAtoB = !directionAtoB
+    /** Same pattern as [com.textgate.ai.translate.TranslateTabController
+     * .swapLanguages] — per the app owner's explicit request that Rozmowa's
+     * swap work the same way as Tłumacz's: exchange the two spinners'
+     * selected VALUES directly, rather than the previous "flip an internal
+     * direction flag, keep both spinners exactly where they were" design.
+     * [currentTargetLanguage] always resolves to [languageB], so after a
+     * swap the language that used to be "being translated FROM" is now
+     * literally sitting in the "being translated TO" spinner slot, exactly
+     * mirroring how Tłumacz's swap exchanges its source and target
+     * spinners' contents.
+     *
+     * The two spinners' listeners are detached before changing their
+     * selection and re-attached after — [android.widget.Spinner
+     * .setSelection] fires [android.widget.AdapterView
+     * .OnItemSelectedListener] same as a user tap would, so leaving them
+     * attached here would run [attachLanguageSpinnerListeners]'s listener
+     * body (which itself restarts a live session) once per spinner, i.e.
+     * twice for one swap — restarting the Gemini Live connection twice in
+     * a row for a single button press. */
+    private fun swapLanguages() {
+        val newLanguageA = languageB
+        val newLanguageB = languageA
+
+        binding.spinnerLanguageA.onItemSelectedListener = null
+        binding.spinnerLanguageB.onItemSelectedListener = null
+
+        languageA = newLanguageA
+        languageB = newLanguageB
+        binding.spinnerLanguageA.setSelection(languages.indexOfFirst { it.code == languageA.code }.coerceAtLeast(0))
+        binding.spinnerLanguageB.setSelection(languages.indexOfFirst { it.code == languageB.code }.coerceAtLeast(0))
+
+        attachLanguageSpinnerListeners()
+
         updateDirectionLabel()
         if (liveClient != null) restartSessionWithCurrentDirection()
     }
 
     private fun updateDirectionLabel() {
-        val from = if (directionAtoB) languageA else languageB
-        val to = if (directionAtoB) languageB else languageA
         binding.textConversationDirection.text =
-            activity.getString(R.string.conversation_direction_format, from.nativeName, to.nativeName)
+            activity.getString(R.string.conversation_direction_format, languageA.nativeName, languageB.nativeName)
     }
 
-    private fun currentTargetLanguage(): SupportedLanguage = if (directionAtoB) languageB else languageA
+    /** Always [languageB] — see [swapLanguages]'s doc for why this no
+     * longer needs a separate direction flag: swapping exchanges which
+     * language sits in the A/B spinner slots instead. */
+    private fun currentTargetLanguage(): SupportedLanguage = languageB
 
     // ---------------------------------------------------------------
     // Session control

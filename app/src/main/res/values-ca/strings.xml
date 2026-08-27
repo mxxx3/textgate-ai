@@ -165,8 +165,8 @@
     <!-- v2.0.1: audio capture mode setting -->
     <string name="section_audio_capture_mode">Mode de captura d\'àudio</string>
     <string name="audio_capture_mode_description">Com Conversa i En directe capturen i reprodueixen àudio. \"Sense eco\" evita que el micròfon senti la pròpia veu traduïda del telèfon a l\'altaveu, però afegeix processament i pot causar retard o talls en alguns telèfons. \"Estàndard\" és més ràpid i senzill, però useu-lo només amb auriculars — a l\'altaveu pot captar la seva pròpia sortida i tornar-la a traduir en bucle.</string>
-    <string name="label_audio_capture_echo_cancelled">Sense eco (recomanat)</string>
-    <string name="label_audio_capture_standard">Estàndard (menys latència)</string>
+    <string name="label_audio_capture_echo_cancelled">Altaveu multimèdia</string>
+    <string name="label_audio_capture_standard">Altaveu de trucada</string>
     <!-- v2.x: Live routing/detected-language/error-category strings -->
     <string name="live_ambient_language_auto">Detecció automàtica</string>
     <string name="live_detected_language_format">Detectat: %1$s</string>

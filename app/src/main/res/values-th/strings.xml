@@ -165,8 +165,8 @@
     <!-- v2.0.1: audio capture mode setting -->
     <string name="section_audio_capture_mode">โหมดการจับเสียง</string>
     <string name="audio_capture_mode_description">วิธีที่ \"สนทนา\" และ \"สด\" บันทึกและเล่นเสียง \"ตัดเสียงสะท้อน\" ป้องกันไม่ให้ไมโครโฟนได้ยินเสียงพูดที่แปลแล้วของโทรศัพท์เองจากลำโพง แต่เพิ่มการประมวลผลและอาจทำให้เกิดความล่าช้าหรือบทสนทนาขาดหายในโทรศัพท์บางเครื่อง \"มาตรฐาน\" เร็วกว่าและง่ายกว่า แต่ควรใช้กับหูฟังเท่านั้น — บนลำโพงอาจจับเสียงเอาต์พุตของตัวเองแล้วแปลซ้ำวนไป</string>
-    <string name="label_audio_capture_echo_cancelled">ตัดเสียงสะท้อน (แนะนำ)</string>
-    <string name="label_audio_capture_standard">มาตรฐาน (ความหน่วงต่ำกว่า)</string>
+    <string name="label_audio_capture_echo_cancelled">ลำโพงมัลติมีเดีย</string>
+    <string name="label_audio_capture_standard">ลำโพงสนทนา</string>
     <!-- v2.x: Live routing/detected-language/error-category strings -->
     <string name="live_ambient_language_auto">ตรวจจับอัตโนมัติ</string>
     <string name="live_detected_language_format">ตรวจพบ: %1$s</string>

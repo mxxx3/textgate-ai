@@ -84,10 +84,12 @@ class AppSettingsStore(context: Context) {
      * The app's own interface language — what every Activity and the
      * accessibility service's user-visible strings (toasts, notification
      * text) are shown in, applied via [com.textgate.ai.LocaleHelper]. Null
-     * means "follow the device's system language" (this app's original,
-     * pre-v1.4.0 behavior — it always just used whatever locale Android
-     * picked); a non-null value is one of [Languages.ALL]'s codes and forces
-     * that specific language regardless of the device's own setting.
+     * means "no explicit choice made yet" — [LocaleHelper.applyOverride]/
+     * [LocaleHelper.resolvePreferredLanguage] resolve that to
+     * [com.textgate.ai.model.Languages.DEFAULT] (English), this app's own
+     * default, regardless of the device's own system language; a non-null
+     * value is one of [Languages.ALL]'s codes and forces that specific
+     * language instead.
      *
      * Deliberately separate from [bubbleTargetLanguage]: the user answered
      * "Jedno i drugie" (both) when asked whether choosing a language from

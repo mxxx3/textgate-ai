@@ -12,6 +12,18 @@ package com.textgate.ai.model
  * adding the latency [com.textgate.ai.model.AudioCaptureMode.ECHO_CANCELLED]'s
  * heavier capture pipeline has.
  *
+ * This is a CEILING, not a speed that is always actually applied. Real
+ * on-device testing found that playing back a live-streamed source
+ * permanently at a fixed speed above 1.0x eventually stutters — Gemini
+ * cannot deliver translated audio faster on average than it plays in real
+ * time, so a track always running fast drains its own buffer faster than
+ * it can be refilled. [com.textgate.ai.live.LiveTranslationService
+ * .updateAdaptivePlaybackSpeed] only engages this value while enough
+ * already-received audio is actually queued up to safely speed through,
+ * and drops back to 1.0x otherwise — see that function's doc for the full
+ * mechanism, thresholds, and the `TextGateLiveSpeed` logcat tag used to
+ * confirm it on a real device.
+ *
  * This setting only ever affects [com.textgate.ai.live.LiveTranslationService
  * .playbackTrack] — the audio already received from Gemini and about to be
  * played back — via `AudioTrack.PlaybackParams` (confirmed against

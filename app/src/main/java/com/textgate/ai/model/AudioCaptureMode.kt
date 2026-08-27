@@ -47,6 +47,27 @@ package com.textgate.ai.model
  * sandbox — see this project's standing sandbox-limitation note), so it
  * stays a user-facing override (Settings > Audio i Live > "Tryb
  * przechwytywania dźwięku") rather than being removed.
+ *
+ * **Na żywo only, as of the STANDARD-mode headset-disconnect follow-up:**
+ * when [STANDARD] has no private output route (no headset — the app's own
+ * mic would otherwise pick up bleed from the phone's own earpiece, which
+ * [com.textgate.ai.live.LiveTranslationService.engageEarpieceCommunicationRouting]
+ * now routes translated audio through instead of the main loudspeaker),
+ * `LiveTranslationService.beginCapturePlayback`'s `micSource` switches to
+ * [MediaRecorder.AudioSource.VOICE_COMMUNICATION] — still with NO explicit
+ * [android.media.audiofx.AcousticEchoCanceler] SDK effect (that stays
+ * exclusive to [ECHO_CANCELLED]), but inviting whatever default platform/
+ * HAL-level preprocessing that source itself carries on a given device
+ * (Android 10+ compliance requires implementations provide AEC on a
+ * VOICE_COMMUNICATION capture path — see that function's own doc for the
+ * full reasoning and sources). This is a genuinely different, real
+ * on-device-feedback-driven nuance from the STANDARD-with-headphones case
+ * (still plain [MediaRecorder.AudioSource.MIC], nothing to cancel) and is
+ * unverified in this sandbox — needs on-device confirmation of both
+ * reduced mic bleed and unchanged latency before being treated as settled.
+ * `ConversationTabController` (Rozmowa) is NOT part of this nuance —
+ * Rozmowa's STANDARD mode is still unconditionally plain
+ * [MediaRecorder.AudioSource.MIC], exactly as described below.
  */
 enum class AudioCaptureMode(val prefValue: String) {
     /** Automatic (recommended): [MediaRecorder.AudioSource.
@@ -60,14 +81,20 @@ enum class AudioCaptureMode(val prefValue: String) {
      * at all under this mode. */
     ECHO_CANCELLED("echo_cancelled"),
 
-    /** Always [MediaRecorder.AudioSource.MIC], never
-     * [android.media.audiofx.AcousticEchoCanceler], regardless of the
-     * resolved output route — this app's original v2.0.0 capture path,
-     * forced unconditionally. Fastest and simplest, at the real cost of
-     * the speaker echo loop described above if used without headphones;
-     * an explicit override for a device where AEC itself is the problem,
-     * not the recommended everyday choice now that [ECHO_CANCELLED]
-     * already skips the heavy path automatically whenever headphones are
+    /** Never the explicit [android.media.audiofx.AcousticEchoCanceler] SDK
+     * effect, regardless of the resolved output route — this app's
+     * original v2.0.0 capture path. In Rozmowa, and in Na żywo whenever a
+     * private route (headphones) is connected, this also means plain
+     * [MediaRecorder.AudioSource.MIC]. In Na żywo specifically, when there
+     * is NO private route, the mic source is
+     * [MediaRecorder.AudioSource.VOICE_COMMUNICATION] instead (still no
+     * explicit AEC effect) — see this enum's class doc, "Na żywo only",
+     * for the real on-device-feedback story behind that one nuance.
+     * Fastest and simplest, at the real cost of at least some echo/bleed
+     * risk if used without headphones; an explicit override for a device
+     * where the full [ECHO_CANCELLED] pipeline itself is the problem, not
+     * the recommended everyday choice now that [ECHO_CANCELLED] already
+     * skips the heavy path automatically whenever headphones are
      * connected. */
     STANDARD("standard");
 

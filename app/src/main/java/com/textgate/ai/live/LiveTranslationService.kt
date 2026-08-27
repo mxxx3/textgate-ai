@@ -750,15 +750,76 @@ class LiveTranslationService : Service() {
         // real resolved output route rather than applied unconditionally —
         // see AudioCaptureMode's class doc for the full story.
         // ECHO_CANCELLED (default): use the heavier echo-cancelled pipeline
-        // ONLY when there is no private route (about to play on the
-        // phone's own speaker, where the mic really can hear it);
-        // headphones/Bluetooth/USB skip it entirely, since the mic
+        // (VOICE_COMMUNICATION source + the explicit AcousticEchoCanceler
+        // SDK effect below) ONLY when there is no private route (about to
+        // play on the phone's own speaker, where the mic really can hear
+        // it); headphones/Bluetooth/USB skip it entirely, since the mic
         // essentially can't hear headphone output and the heavier pipeline
-        // was the evidenced source of added latency and cut-off turns.
-        // STANDARD: always use the light path, even on speaker, as an
-        // explicit user override.
+        // was the evidenced source of added latency and cut-off turns on
+        // the (loud, acoustically-hard) speaker path.
+        // STANDARD + private route (headphones): the light MIC path, no
+        // AEC — the mic genuinely can't hear headphone output, so there is
+        // nothing to cancel.
+        // STANDARD + no private route (the new earpiece-communication
+        // path): still no EXPLICIT AcousticEchoCanceler effect — this
+        // app's long-standing "STANDARD = the light path" contract stays
+        // true for that piece — but the mic source is VOICE_COMMUNICATION,
+        // not plain MIC, so the OS's own platform/HAL-level echo handling
+        // for that source can apply. See micSource's own doc below for why
+        // this is different from (and expected to be lighter than) the
+        // full ECHO_CANCELLED pipeline, and why it needs real on-device
+        // confirmation of both mic-bleed AND latency before being called
+        // solved.
         val captureMode = settingsStore.audioCaptureMode
         val useAec = captureMode == AudioCaptureMode.ECHO_CANCELLED && !hasPrivateOutput
+
+        /** Real on-device feedback: even through the earpiece
+         * (engageEarpieceCommunicationRouting), the phone's mic still
+         * picks up audible bleed from it when capturing with plain
+         * `AudioSource.MIC` — expected, since STANDARD mode's whole
+         * documented contract has always been "no echo protection, on
+         * whatever the phone's own speaker/earpiece is" (see
+         * AudioCaptureMode's class doc). The app owner asked specifically
+         * for a fix that does NOT reintroduce ECHO_CANCELLED's observed
+         * extra latency.
+         *
+         * Checked Android's own AOSP source docs
+         * (source.android.com/docs/core/audio/implement-pre-processing,
+         * same "read the real docs" methodology as the routing fixes
+         * above): "Implementations should provide an acoustic echo
+         * canceler (AEC) on the capture path when capturing with
+         * VOICE_COMMUNICATION" (an Android 10+ compliance requirement) —
+         * i.e. selecting `AudioSource.VOICE_COMMUNICATION` alone, with NO
+         * explicit `AcousticEchoCanceler` SDK object at all, is documented
+         * to already invite the platform/HAL's own default echo-cancelling
+         * preprocessing for that source on compliant devices, configured
+         * per-device in `/vendor/etc/audio_effects.xml`. The explicit
+         * `AcousticEchoCanceler.create()`/`.enabled = true` calls below
+         * (only reached when [useAec] is true, i.e. ECHO_CANCELLED mode)
+         * are for programmatic control/discovery of that effect, not the
+         * sole trigger for AEC processing to exist on this source at all.
+         *
+         * So: for the earpiece-communication case specifically, [micSource]
+         * switches to VOICE_COMMUNICATION (inviting the OS's own default
+         * handling for that source) while [useAec] stays FALSE (no
+         * explicit SDK effect object) — a genuinely different, in-between
+         * configuration from both STANDARD's previous plain-MIC path and
+         * ECHO_CANCELLED's full explicit-effect pipeline. Whether this
+         * actually reduces the reported bleed, and whether it avoids
+         * ECHO_CANCELLED's reported extra latency, are BOTH open questions
+         * this sandbox cannot answer (no microphone, no speaker, no real
+         * HAL) — the official docs above could not find written latency
+         * figures either. Needs real on-device A/B confirmation of both
+         * before this is treated as solved; if it still bleeds, or if it's
+         * just as laggy as ECHO_CANCELLED, that is real, useful
+         * information to report back, not a sign anything here is broken.
+         * Every other case ([hasPrivateOutput] true, or ECHO_CANCELLED) is
+         * completely unaffected. */
+        val micSource = if (hasPrivateOutput) {
+            MediaRecorder.AudioSource.MIC
+        } else {
+            MediaRecorder.AudioSource.VOICE_COMMUNICATION
+        }
 
         val minBufferSize = AudioRecord.getMinBufferSize(
             CAPTURE_SAMPLE_RATE_HZ, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT
@@ -815,24 +876,27 @@ class LiveTranslationService : Service() {
         micActive.set(true)
         transitionTo(LiveSessionState.LISTENING)
 
-        val thread = Thread({ runCaptureLoop(minBufferSize, useAec) }, "TextGateLiveCapture")
+        val thread = Thread({ runCaptureLoop(minBufferSize, micSource, useAec) }, "TextGateLiveCapture")
         captureThread = thread
         thread.start()
     }
 
     @Suppress("MissingPermission") // RECORD_AUDIO is checked by the caller (Na żywo screen) before ACTION_START is ever sent.
-    private fun runCaptureLoop(bufferSize: Int, useAec: Boolean) {
+    private fun runCaptureLoop(bufferSize: Int, micSource: Int, useAec: Boolean) {
         val record = try {
             AudioRecord(
-                // VOICE_COMMUNICATION only when useAec (resolved output is
-                // the speaker, ECHO_CANCELLED mode) — see
-                // beginCapturePlayback's doc for the full, now automatic,
-                // per-session reasoning. Plain AudioSource.MIC otherwise
-                // (headphones connected, or STANDARD mode's explicit
-                // override): a raw capture path with no echo handling,
-                // correct exactly when the mic can't hear the output in the
-                // first place.
-                if (useAec) MediaRecorder.AudioSource.VOICE_COMMUNICATION else MediaRecorder.AudioSource.MIC,
+                // micSource — computed by beginCapturePlayback, see that
+                // function's doc for the full, now automatic, per-session
+                // reasoning: plain AudioSource.MIC when a private route
+                // (headphones) is connected — the mic can't hear that
+                // output at all, nothing to cancel — otherwise
+                // AudioSource.VOICE_COMMUNICATION, for BOTH ECHO_CANCELLED
+                // (paired below with the explicit AcousticEchoCanceler
+                // effect when useAec) and STANDARD's earpiece-communication
+                // case (useAec stays false — no explicit effect object,
+                // relying only on whatever default platform/HAL processing
+                // that source itself invites).
+                micSource,
                 CAPTURE_SAMPLE_RATE_HZ,
                 AudioFormat.CHANNEL_IN_MONO,
                 AudioFormat.ENCODING_PCM_16BIT,

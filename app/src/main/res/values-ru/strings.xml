@@ -174,12 +174,4 @@
     <string name="live_error_quota">Достигнут лимит Gemini Live — повторите попытку позже.</string>
     <string name="live_error_auth">Проблема с ключом API — проверьте ключ в Настройках.</string>
     <string name="live_error_config">Недопустимая конфигурация сеанса (например, неподдерживаемый язык).</string>
-    <!-- Translation voice speed (AudioTrack.PlaybackParams, Na żywo playback only) -->
-    <string name="section_translation_speed">Скорость голоса перевода</string>
-    <string name="translation_speed_description">Как быстро воспроизводится переведённый голос Gemini в Na żywo. Ускорение не меняет высоту голоса — влияет только на переведённый звук, который вы слышите, но никогда на то, что микрофон отправляет в Gemini.</string>
-    <string name="label_translation_speed_1_0">1.0x (обычная)</string>
-    <string name="label_translation_speed_1_15">1.15x</string>
-    <string name="label_translation_speed_1_25">1.25x (по умолчанию)</string>
-    <string name="label_translation_speed_1_35">1.35x</string>
-    <string name="label_translation_speed_1_5">1.5x (самая быстрая)</string>
 </resources>

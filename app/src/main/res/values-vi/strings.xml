@@ -173,12 +173,4 @@
     <string name="live_error_quota">Đã đạt giới hạn Gemini Live — vui lòng thử lại sau.</string>
     <string name="live_error_auth">Sự cố khóa API — kiểm tra khóa của bạn trong Cài đặt.</string>
     <string name="live_error_config">Cấu hình phiên không hợp lệ (ví dụ: ngôn ngữ không được hỗ trợ).</string>
-    <!-- Translation voice speed (AudioTrack.PlaybackParams, Na żywo playback only) -->
-    <string name="section_translation_speed">Tốc độ giọng dịch</string>
-    <string name="translation_speed_description">Giọng dịch của Gemini được phát nhanh đến mức nào trong Na żywo. Tăng tốc không thay đổi cao độ giọng nói — chỉ ảnh hưởng đến âm thanh đã dịch mà bạn nghe, không bao giờ ảnh hưởng đến âm thanh micro gửi đến Gemini.</string>
-    <string name="label_translation_speed_1_0">1.0x (bình thường)</string>
-    <string name="label_translation_speed_1_15">1.15x</string>
-    <string name="label_translation_speed_1_25">1.25x (mặc định)</string>
-    <string name="label_translation_speed_1_35">1.35x</string>
-    <string name="label_translation_speed_1_5">1.5x (nhanh nhất)</string>
 </resources>

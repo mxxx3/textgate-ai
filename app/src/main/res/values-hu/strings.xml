@@ -173,12 +173,4 @@
     <string name="live_error_quota">Elérted a Gemini Live limitjét — próbáld újra később.</string>
     <string name="live_error_auth">API-kulcs probléma — ellenőrizd a kulcsot a Beállításokban.</string>
     <string name="live_error_config">Érvénytelen munkamenet-konfiguráció (pl. nem támogatott nyelv).</string>
-    <!-- Translation voice speed (AudioTrack.PlaybackParams, Na żywo playback only) -->
-    <string name="section_translation_speed">Fordítási hang sebessége</string>
-    <string name="translation_speed_description">Milyen gyorsan játssza le a Gemini lefordított hangját a Na żywo. A gyorsítás nem változtatja meg a hangmagasságot — csak a hallott lefordított hangra hat, soha nem arra, amit a mikrofon küld a Geminihez.</string>
-    <string name="label_translation_speed_1_0">1.0x (normál)</string>
-    <string name="label_translation_speed_1_15">1.15x</string>
-    <string name="label_translation_speed_1_25">1.25x (alapértelmezett)</string>
-    <string name="label_translation_speed_1_35">1.35x</string>
-    <string name="label_translation_speed_1_5">1.5x (leggyorsabb)</string>
 </resources>

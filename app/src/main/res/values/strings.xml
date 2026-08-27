@@ -196,13 +196,4 @@
     <string name="audio_capture_mode_description">How Rozmowa and Na żywo capture and play audio. \"Echo-cancelled\" stops the microphone from hearing the phone\'s own translated speech on speaker, but adds processing and can cause lag or cut-off turns on some phones. \"Standard\" is faster and simpler, but only use it with headphones — on speaker it can pick up and re-translate its own output in a loop.</string>
     <string name="label_audio_capture_echo_cancelled">Echo-cancelled (recommended)</string>
     <string name="label_audio_capture_standard">Standard (lower latency)</string>
-
-    <!-- v2.x: translation voice speed setting (Na żywo playback only) -->
-    <string name="section_translation_speed">Translation voice speed</string>
-    <string name="translation_speed_description">How fast Gemini\'s translated voice plays back in Na żywo. Speeding it up does not change its pitch — this only affects the translated audio you hear, never what your microphone sends to Gemini.</string>
-    <string name="label_translation_speed_1_0">1.0x (normal)</string>
-    <string name="label_translation_speed_1_15">1.15x</string>
-    <string name="label_translation_speed_1_25">1.25x (default)</string>
-    <string name="label_translation_speed_1_35">1.35x</string>
-    <string name="label_translation_speed_1_5">1.5x (fastest)</string>
 </resources>

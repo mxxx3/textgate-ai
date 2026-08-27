@@ -15,7 +15,6 @@ import android.media.AudioManager
 import android.media.AudioRecord
 import android.media.AudioTrack
 import android.media.MediaRecorder
-import android.media.PlaybackParams
 import android.media.audiofx.AcousticEchoCanceler
 import android.os.Binder
 import android.os.Build
@@ -34,6 +33,7 @@ import com.textgate.ai.model.SupportedLanguage
 import com.textgate.ai.security.AppSettingsStore
 import com.textgate.ai.security.SecureApiKeyStore
 import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicLong
 
 /**
  * Owns the ENTIRE lifecycle of one ambient "Na żywo" Live translation
@@ -91,22 +91,6 @@ class LiveTranslationService : Service() {
     private var reconnectAttempt = 0
     private var reconnectRunnable: Runnable? = null
 
-    /** Total frames written to the CURRENT [playbackTrack] since it was
-     * built — reset to 0 every time a new track is built (both call sites
-     * in [beginCapturePlayback] and [rebuildPlaybackTrack]). Paired with
-     * `playbackTrack.playbackHeadPosition` (frames actually played so far)
-     * in [updateAdaptivePlaybackSpeed] to compute how much received-but-
-     * unplayed audio is currently sitting in the track's buffer — see that
-     * function's doc for why this backlog, not a fixed setting, is what
-     * decides whether speeding up playback is currently safe. */
-    private var framesWrittenThisTrack: Long = 0L
-
-    /** True while [updateAdaptivePlaybackSpeed] currently has the
-     * configured [AppSettingsStore.translationPlaybackSpeed] engaged on
-     * [playbackTrack] (false = running at plain 1.0x). Reset to false
-     * every time a new track is built, matching [framesWrittenThisTrack]. */
-    private var fastSpeedEngaged: Boolean = false
-
     /** True only while [engageEarpieceCommunicationRouting]'s
      * `AudioManager.MODE_IN_COMMUNICATION` + `setCommunicationDevice()`
      * path is active (STANDARD-mode headset-disconnect only — see that
@@ -158,6 +142,169 @@ class LiveTranslationService : Service() {
 
     fun removeStateListener(listener: (LiveSessionState) -> Unit) {
         stateListeners.remove(listener)
+    }
+
+    // ---------------------------------------------------------------
+    // TEMPORARY diagnostics (latency + output backlog measurement)
+    // ---------------------------------------------------------------
+    //
+    // Added to answer one specific question: is Gemini Live's translation
+    // delay roughly constant, or does it grow during fast/continuous
+    // speech? This section is purely OBSERVATIONAL — it reads timestamps
+    // and byte counts that already exist as a side effect of the real
+    // capture/playback code below, and writes them nowhere the real
+    // pipeline reads from. It never touches VAD, chunk sizes/timing,
+    // audio routing, playback speed (removed entirely in the update
+    // above), or any Gemini connection config. [LIVE_DIAGNOSTICS_ENABLED]
+    // is one flag to flip (or this whole section to delete) once the
+    // measurement is done — every call site below is guarded by it.
+    //
+    // Numbers exposed, all in seconds (see [updateDiagnosticsTick]):
+    //  - diagLatencyCurrentSeconds: most recent single-turn latency.
+    //  - diagLatencyAverageSeconds: mean over every turn this session.
+    //  - diagLatencyMaxSeconds: worst single-turn latency this session.
+    //  - diagAudioBacklogSeconds: how much received-but-unplayed PCM is
+    //    sitting in the CURRENT playbackTrack right now.
+    // All four reset to 0 on STOP (see [stopCapturePlayback]).
+
+    /** Timestamp of the most recently sent MIC chunk — written from
+     * [runCaptureLoop] (a background thread, `TextGateLiveCapture`), read
+     * from [recordTurnLatency] on [mainHandler]. The only diagnostic field
+     * that crosses threads, hence the only one that needs to be atomic;
+     * every other diagnostic field below is touched exclusively from
+     * [mainHandler] (both [handleServerEvent] and [updateDiagnosticsTick]
+     * run there), same as [latestInputTranscript]/[latestOutputTranscript]
+     * already do, so plain `var`s are safe for those. */
+    private val diagLastInputSentAtMs = AtomicLong(0L)
+
+    /** Total bytes of Gemini output PCM written to the CURRENT
+     * [playbackTrack] — reset to 0 every time a new track is built (both
+     * [beginCapturePlayback]'s normal-path branch and
+     * [rebuildPlaybackTrack]), exactly like the (now-removed)
+     * `framesWrittenThisTrack` from the reverted playback-speed feature.
+     * `playbackTrack.write()` is blocking and this app has no separate
+     * application-level queue in front of it — by the time this counter
+     * is incremented (right after `write()` returns), the bytes are
+     * guaranteed to already be inside the track's own internal buffer, so
+     * "received from Gemini" and "written to the track" are the same
+     * number here; there is nothing upstream of `write()` that could be
+     * queued elsewhere. */
+    private var diagBytesWrittenCurrentTrack: Long = 0L
+
+    private var diagLatencyCurrentMs: Long = 0L
+    private var diagLatencySumMs: Long = 0L
+    private var diagLatencyCount: Long = 0L
+    private var diagLatencyMaxMs: Long = 0L
+
+    /** Published, UI-facing values — recomputed every [DIAG_TICK_INTERVAL_MS]
+     * by [updateDiagnosticsTick] and read by [LiveTabController]. */
+    var diagLatencyCurrentSeconds: Float = 0f
+        private set
+    var diagLatencyAverageSeconds: Float = 0f
+        private set
+    var diagLatencyMaxSeconds: Float = 0f
+        private set
+    var diagAudioBacklogSeconds: Float = 0f
+        private set
+
+    private val diagnosticsListeners = mutableListOf<() -> Unit>()
+
+    fun addDiagnosticsListener(listener: () -> Unit) {
+        diagnosticsListeners.add(listener)
+    }
+
+    fun removeDiagnosticsListener(listener: () -> Unit) {
+        diagnosticsListeners.remove(listener)
+    }
+
+    private fun notifyDiagnosticsListeners() {
+        diagnosticsListeners.toList().forEach { it() }
+    }
+
+    private val diagTickRunnable = object : Runnable {
+        override fun run() {
+            updateDiagnosticsTick()
+            mainHandler.postDelayed(this, DIAG_TICK_INTERVAL_MS)
+        }
+    }
+
+    /** "Current latency" per the request: time from the LAST mic chunk
+     * sent to Gemini, to the FIRST output chunk of the response that
+     * follows it — captured at exactly the point [handleServerEvent]
+     * already detects a new turn starting (`state == LISTENING`, about to
+     * transition to `TRANSLATING`). Mic capture streams continuously
+     * regardless of session state (Gemini's own VAD decides turns, this
+     * app never gates sending on state), so "the last chunk sent right
+     * before the response's first byte arrived" is a direct, honest
+     * measurement of this round trip — not an approximation that needs a
+     * separate "end of input" event this app doesn't have. */
+    private fun recordTurnLatency() {
+        val sentAt = diagLastInputSentAtMs.get()
+        if (sentAt <= 0L) return // no mic chunk sent yet this session.
+        val latencyMs = (System.currentTimeMillis() - sentAt).coerceAtLeast(0L)
+        diagLatencyCurrentMs = latencyMs
+        diagLatencySumMs += latencyMs
+        diagLatencyCount += 1
+        if (latencyMs > diagLatencyMaxMs) diagLatencyMaxMs = latencyMs
+    }
+
+    /** Recomputes every published `diag*Seconds` value from the raw
+     * counters and fires [notifyDiagnosticsListeners] — runs on
+     * [mainHandler] every [DIAG_TICK_INTERVAL_MS] while a session is
+     * active (started/stopped alongside real capture/playback, see
+     * [beginCapturePlayback]/[stopCapturePlayback]), completely separate
+     * from [notifyListeners]/[stateListeners] so this ticking never forces
+     * an unrelated full state re-render several times a second.
+     *
+     * Backlog derivation — the part of the request asking how to estimate
+     * real buffered audio when `write()` is blocking and there is no
+     * separate app queue: `AudioTrack.getPlaybackHeadPosition()` is
+     * documented as the number of frames actually PLAYED so far on the
+     * current track (reinterpreted as unsigned per its own doc, same as
+     * the reverted speed feature used). `diagBytesWrittenCurrentTrack`
+     * (see that field's doc) is exactly how many bytes have been handed
+     * to (and accepted by, since `write()` already returned) that same
+     * track. Their difference, converted with the request's own formula
+     * (`seconds = pendingBytes / (24000 * 2)`), is the real amount of
+     * received PCM still waiting inside `AudioTrack`'s internal buffer —
+     * no separate queue needed because `AudioTrack`'s own ring buffer IS
+     * the only queue in this pipeline. */
+    private fun updateDiagnosticsTick() {
+        val track = playbackTrack
+        diagAudioBacklogSeconds = if (track != null) {
+            val playedFrames = track.playbackHeadPosition.toLong() and 0xFFFFFFFFL
+            val consumedBytes = playedFrames * DIAG_BYTES_PER_FRAME
+            val pendingBytes = (diagBytesWrittenCurrentTrack - consumedBytes).coerceAtLeast(0L)
+            pendingBytes.toFloat() / (PLAYBACK_SAMPLE_RATE_HZ * DIAG_BYTES_PER_FRAME)
+        } else {
+            0f
+        }
+        diagLatencyCurrentSeconds = diagLatencyCurrentMs / 1000f
+        diagLatencyAverageSeconds = if (diagLatencyCount > 0) {
+            (diagLatencySumMs.toFloat() / diagLatencyCount) / 1000f
+        } else {
+            0f
+        }
+        diagLatencyMaxSeconds = diagLatencyMaxMs / 1000f
+        notifyDiagnosticsListeners()
+    }
+
+    /** Zeroes every diagnostic counter/published value — called from
+     * [stopCapturePlayback] so a new session (or the next START) never
+     * shows stale numbers from a previous one, per the request's "Po STOP
+     * wyzeruj statystyki". */
+    private fun resetDiagnostics() {
+        diagLastInputSentAtMs.set(0L)
+        diagBytesWrittenCurrentTrack = 0L
+        diagLatencyCurrentMs = 0L
+        diagLatencySumMs = 0L
+        diagLatencyCount = 0L
+        diagLatencyMaxMs = 0L
+        diagLatencyCurrentSeconds = 0f
+        diagLatencyAverageSeconds = 0f
+        diagLatencyMaxSeconds = 0f
+        diagAudioBacklogSeconds = 0f
+        notifyDiagnosticsListeners()
     }
 
     override fun onCreate() {
@@ -290,9 +437,20 @@ class LiveTranslationService : Service() {
                 notifyListeners()
             }
             is ServerEvent.AudioChunk -> {
+                // DIAGNOSTIC ONLY (see the section above [addStateListener]):
+                // this is exactly the existing "a new turn just started"
+                // detection this line already did before any diagnostics
+                // existed — reused as the "first output audio of this
+                // turn" moment, never added to or changed.
+                if (LIVE_DIAGNOSTICS_ENABLED && state == LiveSessionState.LISTENING) recordTurnLatency()
                 if (state == LiveSessionState.LISTENING) transitionTo(LiveSessionState.TRANSLATING)
-                playbackTrack?.write(event.pcm16, 0, event.pcm16.size)
-                updateAdaptivePlaybackSpeed(event.pcm16.size)
+                val track = playbackTrack
+                track?.write(event.pcm16, 0, event.pcm16.size)
+                // Only counted when there was actually a track to accept
+                // it — otherwise this byte was never written anywhere, and
+                // counting it would make the next backlog reading larger
+                // than what is really buffered.
+                if (LIVE_DIAGNOSTICS_ENABLED && track != null) diagBytesWrittenCurrentTrack += event.pcm16.size
             }
             is ServerEvent.TurnComplete -> {
                 if (state == LiveSessionState.TRANSLATING) transitionTo(LiveSessionState.LISTENING)
@@ -637,7 +795,6 @@ class LiveTranslationService : Service() {
                     .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
                     .build()
             )
-            .setBufferSizeInBytes(playbackBufferSizeBytes())
             .setTransferMode(AudioTrack.MODE_STREAM)
             .build()
         if (preferredDevice != null) {
@@ -647,193 +804,19 @@ class LiveTranslationService : Service() {
                 // Best-effort only.
             }
         }
-        // Always starts at plain 1.0x, never the configured speed directly
-        // — see updateAdaptivePlaybackSpeed's doc for why a freshly built
-        // track (zero backlog) must never start sped up. framesWrittenThisTrack
-        // /fastSpeedEngaged are reset here too, since this function is the
-        // single choke point every playbackTrack rebuild goes through.
-        applyPlaybackSpeed(newTrack, 1.0f)
-        framesWrittenThisTrack = 0L
-        fastSpeedEngaged = false
         playbackTrack = newTrack
+        // DIAGNOSTIC ONLY — see the section above [addStateListener]. A
+        // route/mode switch mid-session (e.g. earpiece engage/disengage)
+        // means a brand new AudioTrack with its own playbackHeadPosition
+        // starting back at 0, so the backlog byte counter must restart
+        // with it or every switch would read as a huge, fake backlog.
+        if (LIVE_DIAGNOSTICS_ENABLED) diagBytesWrittenCurrentTrack = 0L
         newTrack.play()
         try {
             oldTrack?.stop()
             oldTrack?.release()
         } catch (_: Exception) {
             // Already stopped/released.
-        }
-    }
-
-    /** `getMinBufferSize()`-based, with headroom for
-     * [PLAYBACK_BUFFER_SPEED_HEADROOM] — see that constant's own doc for
-     * why every [playbackTrack] this class builds now uses this instead of
-     * leaving `AudioTrack.Builder()` to pick its own default buffer size:
-     * `AudioTrack.setPlaybackParams()` (see [applyPlaybackSpeed]) requires
-     * it for any speed above 1.0x. Shared by both places this class builds
-     * a `playbackTrack` ([beginCapturePlayback]'s normal-path branch and
-     * [rebuildPlaybackTrack]), so both are always sized consistently.
-     *
-     * ALSO sized to hold at least [PLAYBACK_BACKLOG_CAPACITY_SECONDS] of
-     * audio (added after real on-device feedback that every speed above
-     * 1.0x caused audible stutter — see [updateAdaptivePlaybackSpeed]'s
-     * doc for the root cause). The old `minBufferSize x
-     * PLAYBACK_BUFFER_SPEED_HEADROOM` sizing alone was only ever large
-     * enough to satisfy `setPlaybackParams()`'s documented minimum, not to
-     * hold a meaningful amount of received-but-unplayed audio — so there
-     * was never enough real backlog for [updateAdaptivePlaybackSpeed] to
-     * safely speed through. Taking the larger of the two does NOT by
-     * itself add latency (see [PLAYBACK_BUFFER_SPEED_HEADROOM]'s doc: a
-     * bigger buffer CAPACITY only raises the ceiling on how much can ever
-     * queue up — the amount that actually queues up is still exactly
-     * whatever [ServerEvent.AudioChunk] events have arrived and not yet
-     * been played, unchanged by this). */
-    private fun playbackBufferSizeBytes(): Int {
-        val minBufferSize = AudioTrack.getMinBufferSize(
-            PLAYBACK_SAMPLE_RATE_HZ, AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT
-        ).coerceAtLeast(1)
-        val speedRequiredBytes = (minBufferSize * PLAYBACK_BUFFER_SPEED_HEADROOM).toInt()
-        val backlogCapacityBytes =
-            (PLAYBACK_SAMPLE_RATE_HZ * BYTES_PER_PLAYBACK_FRAME * PLAYBACK_BACKLOG_CAPACITY_SECONDS).toInt()
-        return maxOf(speedRequiredBytes, backlogCapacityBytes)
-    }
-
-    /** Applies [speed] to [track] via `AudioTrack.PlaybackParams` (API 23+,
-     * comfortably within this app's minSdk 26) — confirmed against
-     * Android's own reference docs (mirrored at learn.microsoft.com/dotnet/api/
-     * android.media.playbackparams and .audiotrack.playbackparams, same
-     * "read the real docs, don't guess" methodology used throughout this
-     * project): "Pitch equals 1.0f. Speed change will be done with pitch
-     * preserved, often called timestretching" — exactly what was asked
-     * for, faster-sounding translated speech with NO pitch shift, and
-     * explicitly NOT achieved by playing 24kHz PCM at a different
-     * declared sample rate (which would shift pitch) — this is a distinct
-     * mechanism from the format/rate the track is built and written at.
-     *
-     * Takes [speed] as a plain parameter rather than reading
-     * [AppSettingsStore.translationPlaybackSpeed] itself — after real
-     * on-device feedback that every speed above 1.0x caused audible
-     * stutter, the CALLER now decides which speed is actually safe right
-     * now: [rebuildPlaybackTrack] always passes 1.0x (a fresh track has no
-     * backlog yet), and [updateAdaptivePlaybackSpeed] passes either the
-     * configured speed or 1.0x depending on how much received-but-unplayed
-     * audio is currently buffered. See that function's doc for why a fixed
-     * "always apply the configured speed" call (the previous behavior)
-     * could not work for a live-streamed source.
-     *
-     * ONLY affects playback of audio already RECEIVED from Gemini — this
-     * sits entirely on the [playbackTrack] side. Nothing here touches: the
-     * audio sent TO Gemini ([runCaptureLoop]/[micSource] are completely
-     * unrelated), [CAPTURE_SAMPLE_RATE_HZ]/[PLAYBACK_SAMPLE_RATE_HZ]
-     * themselves (unchanged — those are the format Gemini is told about and
-     * the format this track is built/written at; PlaybackParams changes
-     * playback SPEED on top of that, not the format itself), transcription,
-     * translation content, VAD, or audio routing (EARPIECE/Bluetooth/
-     * speaker selection above is completely independent of this).
-     *
-     * A fresh `PlaybackParams()` is always constructed (rather than reading
-     * [AudioTrack.getPlaybackParams] first) — confirmed via the same docs
-     * that `PlaybackParams` has a plain no-arg constructor and that
-     * `setSpeed`/`setPitch` are chainable, so there is no need to rely on
-     * a freshly-built, not-yet-playing track's getter behavior, which
-     * isn't documented either way.
-     *
-     * `setPlaybackParams()` is documented to fail to apply the requested
-     * params if the track's buffer isn't large enough for the requested
-     * speed (see [playbackBufferSizeBytes]) — every track this class
-     * builds now has that headroom, but this call stays wrapped
-     * defensively regardless: a rejected speed change should never crash
-     * or block an active Live session over what is ultimately a cosmetic
-     * preference; playback simply continues at whatever speed was already
-     * in effect. */
-    private fun applyPlaybackSpeed(track: AudioTrack, speed: Float) {
-        try {
-            track.playbackParams = PlaybackParams()
-                .setSpeed(speed)
-                .setPitch(1.0f)
-        } catch (_: Exception) {
-            // Best-effort only — see this function's own doc.
-        }
-    }
-
-    /** Root cause of the "every speed above 1.0x stutters" report: with a
-     * FIXED speed always applied, `playbackTrack` consumes audio faster
-     * than [ServerEvent.AudioChunk] events deliver it, because
-     * `AudioTrack.write()` was called with exactly the bytes each chunk
-     * carries, at exactly the pace chunks arrive — over any sustained
-     * stretch of translated speech, Gemini cannot deliver audio faster on
-     * average than it plays in real time, so a track permanently running
-     * at e.g. 1.25x drains its buffer faster than it can be refilled and
-     * eventually runs dry. Confirmed against `AudioTrack.getUnderrunCount()`'s
-     * own reference doc (mirrored at learn.microsoft.com/dotnet/api/
-     * android.media.audiotrack.underruncount): "An underrun occurs if the
-     * application does not write audio data quickly enough, causing the
-     * buffer to underflow and a potential audio glitch or pop" — exactly
-     * the reported symptom. That same doc's suggested fix ("recreate with
-     * a larger buffer") only delays the first underrun; it cannot prevent
-     * one for a SUSTAINED rate mismatch, since a bigger buffer is still a
-     * fixed amount of audio that a too-fast track eventually exhausts.
-     *
-     * The actual fix: only ever run faster than 1.0x while there is real,
-     * already-received backlog to safely speed through — never faster
-     * than data has actually arrived. Called after every
-     * `playbackTrack.write()` (from the [ServerEvent.AudioChunk] handler,
-     * passing the just-written chunk's byte size):
-     *
-     * 1. [framesWrittenThisTrack] tracks total frames handed to the
-     *    current track. `track.playbackHeadPosition` (documented: "the
-     *    playback head position expressed in frames... should be
-     *    reinterpreted as unsigned") tracks frames actually played so far.
-     *    Their difference is exactly how much received audio is still
-     *    queued, unplayed, right now.
-     * 2. Below [PLAYBACK_BACKLOG_DISENGAGE_SECONDS] of backlog, this is
-     *    NOT a safe moment to run fast (too close to running dry) — drops
-     *    to 1.0x if it was engaged.
-     * 3. At or above [PLAYBACK_BACKLOG_ENGAGE_SECONDS] of backlog, there is
-     *    a real cushion of already-arrived audio to drain — engages the
-     *    user's configured [AppSettingsStore.translationPlaybackSpeed].
-     * 4. Between the two thresholds, whichever state was already active
-     *    stays active (hysteresis) — a single engage/disengage threshold
-     *    right at the noisy edge of "roughly empty" would otherwise flip
-     *    speed back and forth on nearly every chunk, which risks being
-     *    MORE audibly glitchy than never speeding up at all.
-     *
-     * This can never itself cause an underrun: it only ever speeds up
-     * playback of audio that has already arrived, never faster than the
-     * measured backlog justifies, and always re-checks on every chunk.
-     * [playbackBufferSizeBytes] was also enlarged so there is a
-     * meaningful backlog to work with in the first place — see that
-     * function's doc.
-     *
-     * Every speed transition (and the backlog/underrun numbers behind it)
-     * is logged under `TextGateLiveSpeed` — filter logcat with
-     * `adb logcat -s TextGateLiveSpeed` to confirm on a real device
-     * whether stutter is gone and how often fast mode actually engages;
-     * this has NOT been confirmed on real hardware yet. */
-    private fun updateAdaptivePlaybackSpeed(justWrittenBytes: Int) {
-        val track = playbackTrack ?: return
-        val configuredSpeed = settingsStore.translationPlaybackSpeed.multiplier
-        if (configuredSpeed <= 1.0f) return // nothing to gate — 1.0x is always safe.
-
-        framesWrittenThisTrack += justWrittenBytes / BYTES_PER_PLAYBACK_FRAME
-        val playedFrames = track.playbackHeadPosition.toLong() and 0xFFFFFFFFL
-        val backlogFrames = (framesWrittenThisTrack - playedFrames).coerceAtLeast(0L)
-        val backlogSeconds = backlogFrames.toFloat() / PLAYBACK_SAMPLE_RATE_HZ
-
-        val shouldRunFast = if (fastSpeedEngaged) {
-            backlogSeconds >= PLAYBACK_BACKLOG_DISENGAGE_SECONDS
-        } else {
-            backlogSeconds >= PLAYBACK_BACKLOG_ENGAGE_SECONDS
-        }
-
-        if (shouldRunFast != fastSpeedEngaged) {
-            applyPlaybackSpeed(track, if (shouldRunFast) configuredSpeed else 1.0f)
-            fastSpeedEngaged = shouldRunFast
-            android.util.Log.d(
-                "TextGateLiveSpeed",
-                "speed=${if (shouldRunFast) configuredSpeed else 1.0f} backlogMs=${(backlogSeconds * 1000).toInt()} " +
-                    "underruns=${track.underrunCount}"
-            )
         }
     }
 
@@ -1059,7 +1042,6 @@ class LiveTranslationService : Service() {
                         .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
                         .build()
                 )
-                .setBufferSizeInBytes(playbackBufferSizeBytes())
                 .setTransferMode(AudioTrack.MODE_STREAM)
                 .build()
             if (outputDevice != null) {
@@ -1070,18 +1052,24 @@ class LiveTranslationService : Service() {
                     // platform's own default routing if an OEM rejects the pin.
                 }
             }
-            // 1.0x here too — see rebuildPlaybackTrack's matching comment
-            // and updateAdaptivePlaybackSpeed's doc: a freshly built track
-            // has zero backlog, so starting it sped up would underrun
-            // immediately.
-            playbackTrack?.let { applyPlaybackSpeed(it, 1.0f) }
-            framesWrittenThisTrack = 0L
-            fastSpeedEngaged = false
+            // DIAGNOSTIC ONLY — see the section above [addStateListener];
+            // matches the reset done on this same branch's counterpart
+            // inside rebuildPlaybackTrack.
+            if (LIVE_DIAGNOSTICS_ENABLED) diagBytesWrittenCurrentTrack = 0L
             playbackTrack?.play()
         }
 
         micActive.set(true)
         transitionTo(LiveSessionState.LISTENING)
+
+        // DIAGNOSTIC ONLY — see the section above [addStateListener].
+        // Started here (session actually has audio flowing) rather than
+        // in onCreate(), so it never polls/ticks while idle between
+        // sessions; stopped and zeroed in stopCapturePlayback.
+        if (LIVE_DIAGNOSTICS_ENABLED) {
+            mainHandler.removeCallbacks(diagTickRunnable)
+            mainHandler.postDelayed(diagTickRunnable, DIAG_TICK_INTERVAL_MS)
+        }
 
         val thread = Thread({ runCaptureLoop(minBufferSize, micSource, useAec) }, "TextGateLiveCapture")
         captureThread = thread
@@ -1162,6 +1150,9 @@ class LiveTranslationService : Service() {
                 if (read > 0) {
                     val chunk = if (read == buffer.size) buffer else buffer.copyOf(read)
                     liveClient?.sendAudioChunk(chunk)
+                    // DIAGNOSTIC ONLY — see the section above [addStateListener].
+                    // Does not change what is sent, how it's chunked, or when.
+                    if (LIVE_DIAGNOSTICS_ENABLED) diagLastInputSentAtMs.set(System.currentTimeMillis())
                 }
             }
         } catch (_: Exception) {
@@ -1187,6 +1178,14 @@ class LiveTranslationService : Service() {
 
     private fun stopCapturePlayback() {
         micActive.set(false)
+        // DIAGNOSTIC ONLY — see the section above [addStateListener]. Per
+        // the request: "Po STOP wyzeruj statystyki" — every published
+        // number goes back to 0 the moment a session stops, rather than
+        // showing the previous session's numbers until a new one starts.
+        if (LIVE_DIAGNOSTICS_ENABLED) {
+            mainHandler.removeCallbacks(diagTickRunnable)
+            resetDiagnostics()
+        }
         // Unconditional, cheap no-op unless engageEarpieceCommunicationRouting
         // (STANDARD-mode headset-disconnect only) actually engaged this
         // session — guarantees AudioManager.mode and the pinned
@@ -1375,53 +1374,20 @@ class LiveTranslationService : Service() {
         private const val MIN_BUFFER_FLOOR = 3_200 // 100ms of 16kHz mono 16-bit audio
         private const val CAPTURE_THREAD_JOIN_TIMEOUT_MS = 500L
 
-        /** `AudioTrack.setPlaybackParams()` is documented (see
-         * [applyPlaybackSpeed]'s doc) to fail to apply a speed > 1.0f
-         * unless the track's buffer is larger than `speed × getMinBufferSize()`
-         * — every [playbackTrack] this class builds is sized at
-         * `getMinBufferSize() × PLAYBACK_BUFFER_SPEED_HEADROOM` regardless
-         * of which [TranslationPlaybackSpeed] is actually configured right
-         * now (so changing that Settings value later never needs a
-         * different buffer), comfortably above the fastest offered option
-         * ([TranslationPlaybackSpeed.FASTEST], 1.5x). A larger MODE_STREAM
-         * buffer CAPACITY does not by itself add playback latency — only
-         * the amount of unplayed audio actually queued in it does, and
-         * this class still writes audio in the same chunks it always has
-         * as [ServerEvent.AudioChunk] events arrive. */
-        private const val PLAYBACK_BUFFER_SPEED_HEADROOM = 2.5f
+        /** TEMPORARY — see the diagnostics section above [addStateListener].
+         * Flip to `false` (or delete that whole section plus every call
+         * site guarded by this flag) once the latency/backlog measurement
+         * this was added for is done. */
+        private const val LIVE_DIAGNOSTICS_ENABLED = true
 
-        /** 16-bit mono PCM: 2 bytes per frame. Used by
-         * [playbackBufferSizeBytes] and [updateAdaptivePlaybackSpeed] to
-         * convert between bytes/frames/seconds for [PLAYBACK_SAMPLE_RATE_HZ]
-         * audio — kept as one named constant instead of a bare `2` at each
-         * call site. */
-        private const val BYTES_PER_PLAYBACK_FRAME = 2
+        /** How often [updateDiagnosticsTick] recomputes and republishes the
+         * diagnostic numbers — within the requested 250-500ms range. */
+        private const val DIAG_TICK_INTERVAL_MS = 300L
 
-        /** How much received-but-unplayed audio [playbackBufferSizeBytes]
-         * makes room for — see that function's doc for why the previous
-         * `PLAYBACK_BUFFER_SPEED_HEADROOM`-only sizing left no real backlog
-         * for [updateAdaptivePlaybackSpeed] to safely speed through. 900ms
-         * is a deliberately modest cushion: enough to noticeably drain a
-         * translator delay when Gemini has genuinely gotten ahead, without
-         * holding so much audio that a full buffer's worth of playback lag
-         * would itself become the dominant source of perceived delay. */
-        private const val PLAYBACK_BACKLOG_CAPACITY_SECONDS = 0.9f
-
-        /** [updateAdaptivePlaybackSpeed] only engages the configured speed
-         * once at least this much already-received audio is queued up —
-         * see that function's doc. Set well below
-         * [PLAYBACK_BACKLOG_CAPACITY_SECONDS] so fast mode can engage
-         * before the buffer is nearly full (which would mean `write()`
-         * itself has likely already started blocking). */
-        private const val PLAYBACK_BACKLOG_ENGAGE_SECONDS = 0.5f
-
-        /** [updateAdaptivePlaybackSpeed] drops back to 1.0x once backlog
-         * falls under this — deliberately lower than
-         * [PLAYBACK_BACKLOG_ENGAGE_SECONDS] (hysteresis, see that
-         * function's doc point 4) and deliberately still well above zero,
-         * so playback never gets to run fast right up to the edge of
-         * actually running dry. */
-        private const val PLAYBACK_BACKLOG_DISENGAGE_SECONDS = 0.2f
+        /** 16-bit mono PCM output: 2 bytes per frame — the request's own
+         * `seconds = pendingBytes / (24000 * 2)` formula, named instead of
+         * a bare `2` at its one call site. */
+        private const val DIAG_BYTES_PER_FRAME = 2
 
         private const val MAX_RECONNECT_ATTEMPTS = 5
         private val RECONNECT_BACKOFF_MS = longArrayOf(2_000, 4_000, 8_000, 16_000, 30_000)

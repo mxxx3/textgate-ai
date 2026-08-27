@@ -198,13 +198,4 @@
     <string name="audio_capture_mode_description">Jak Rozmowa i Na żywo nagrywają i odtwarzają dźwięk. \"Redukcja echa\" zapobiega słyszeniu przez mikrofon własnego przetłumaczonego dźwięku z głośnika, ale dodaje przetwarzanie i może powodować opóźnienia lub urywanie wypowiedzi na niektórych telefonach. \"Standardowy\" jest szybszy i prostszy, ale używaj go tylko ze słuchawkami — na głośniku może wychwycić własny dźwięk i tłumaczyć go w kółko.</string>
     <string name="label_audio_capture_echo_cancelled">Redukcja echa (zalecane)</string>
     <string name="label_audio_capture_standard">Standardowy (mniejsze opóźnienie)</string>
-
-    <!-- v2.x: szybkość głosu tłumaczenia (tylko odtwarzanie w Na żywo) -->
-    <string name="section_translation_speed">Szybkość głosu tłumaczenia</string>
-    <string name="translation_speed_description">Jak szybko odtwarzany jest przetłumaczony głos Gemini w Na żywo. Przyspieszenie nie zmienia wysokości głosu — dotyczy wyłącznie dźwięku, który słyszysz, nigdy tego, co mikrofon wysyła do Gemini.</string>
-    <string name="label_translation_speed_1_0">1.0x (normalna)</string>
-    <string name="label_translation_speed_1_15">1.15x</string>
-    <string name="label_translation_speed_1_25">1.25x (domyślna)</string>
-    <string name="label_translation_speed_1_35">1.35x</string>
-    <string name="label_translation_speed_1_5">1.5x (najszybsza)</string>
 </resources>

@@ -173,12 +173,4 @@
     <string name="live_error_quota">Gemini Live सीमा पूरी हो गई — कृपया बाद में फिर से प्रयास करें।</string>
     <string name="live_error_auth">API कुंजी की समस्या — सेटिंग्स में अपनी कुंजी जांचें।</string>
     <string name="live_error_config">सत्र कॉन्फ़िगरेशन अमान्य है (जैसे असमर्थित भाषा)।</string>
-    <!-- Translation voice speed (AudioTrack.PlaybackParams, Na żywo playback only) -->
-    <string name="section_translation_speed">अनुवाद आवाज़ की गति</string>
-    <string name="translation_speed_description">Na żywo में Gemini की अनुवादित आवाज़ कितनी तेज़ी से चलती है। तेज़ करने से आवाज़ की पिच नहीं बदलती — यह केवल आपके द्वारा सुनी जाने वाली अनुवादित ऑडियो को प्रभावित करता है, कभी भी माइक्रोफ़ोन द्वारा Gemini को भेजी जाने वाली ऑडियो को नहीं।</string>
-    <string name="label_translation_speed_1_0">1.0x (सामान्य)</string>
-    <string name="label_translation_speed_1_15">1.15x</string>
-    <string name="label_translation_speed_1_25">1.25x (डिफ़ॉल्ट)</string>
-    <string name="label_translation_speed_1_35">1.35x</string>
-    <string name="label_translation_speed_1_5">1.5x (सबसे तेज़)</string>
 </resources>

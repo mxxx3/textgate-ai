@@ -174,12 +174,4 @@
     <string name="live_error_quota">הגעת למגבלת Gemini Live — נסה שוב מאוחר יותר.</string>
     <string name="live_error_auth">בעיה במפתח API — בדוק את המפתח שלך בהגדרות.</string>
     <string name="live_error_config">תצורת הפעלה לא תקינה (למשל שפה שאינה נתמכת).</string>
-    <!-- Translation voice speed (AudioTrack.PlaybackParams, Na żywo playback only) -->
-    <string name="section_translation_speed">מהירות קול התרגום</string>
-    <string name="translation_speed_description">באיזו מהירות מושמע קולו המתורגם של Gemini ב-Na żywo. האצה אינה משנה את גובה הקול — היא משפיעה רק על השמע המתורגם שאתה שומע, לעולם לא על מה שהמיקרופון שולח ל-Gemini.</string>
-    <string name="label_translation_speed_1_0">1.0x (רגילה)</string>
-    <string name="label_translation_speed_1_15">1.15x</string>
-    <string name="label_translation_speed_1_25">1.25x (ברירת מחדל)</string>
-    <string name="label_translation_speed_1_35">1.35x</string>
-    <string name="label_translation_speed_1_5">1.5x (המהירה ביותר)</string>
 </resources>

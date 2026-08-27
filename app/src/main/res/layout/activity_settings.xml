@@ -216,39 +216,6 @@
                 android:layout_marginTop="8dp" />
         </LinearLayout>
 
-        <!-- Translation voice speed (new) — see
-             com.textgate.ai.model.TranslationPlaybackSpeed's class doc: how
-             fast Na żywo plays back Gemini's translated voice, via
-             AudioTrack.PlaybackParams (pitch always stays 1.0 — speed only).
-             Only affects playback of audio already received from Gemini,
-             never the mic/audio sent to Gemini, sample rate, transcription,
-             VAD, or routing. -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:background="@drawable/bg_card"
-            android:layout_marginBottom="12dp">
-
-            <TextView
-                style="@style/TgSectionTitle"
-                android:text="@string/section_translation_speed" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="@string/translation_speed_description"
-                android:textSize="13sp"
-                android:textColor="@color/tg_text_secondary" />
-
-            <Spinner
-                android:id="@+id/spinnerTranslationPlaybackSpeed"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp" />
-        </LinearLayout>
-
         <TextView
             style="@style/TgGroupHeader"
             android:text="@string/settings_group_ai" />

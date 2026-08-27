@@ -174,12 +174,4 @@
     <string name="live_error_quota">Gemini Liveの上限に達しました — しばらくしてから再試行してください。</string>
     <string name="live_error_auth">APIキーに問題があります — 設定でキーを確認してください。</string>
     <string name="live_error_config">セッション設定が無効です(例:サポートされていない言語)。</string>
-    <!-- Translation voice speed (AudioTrack.PlaybackParams, Na żywo playback only) -->
-    <string name="section_translation_speed">翻訳音声の速度</string>
-    <string name="translation_speed_description">Na żywo で Gemini の翻訳音声を再生する速さです。速くしてもピッチ（音の高さ）は変わりません — 影響するのは聞こえる翻訳音声だけで、マイクが Gemini に送信する音声には影響しません。</string>
-    <string name="label_translation_speed_1_0">1.0x（通常）</string>
-    <string name="label_translation_speed_1_15">1.15x</string>
-    <string name="label_translation_speed_1_25">1.25x（デフォルト）</string>
-    <string name="label_translation_speed_1_35">1.35x</string>
-    <string name="label_translation_speed_1_5">1.5x（最速）</string>
 </resources>

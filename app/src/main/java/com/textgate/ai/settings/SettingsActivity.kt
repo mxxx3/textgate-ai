@@ -31,7 +31,6 @@ import com.textgate.ai.model.AudioCaptureMode
 import com.textgate.ai.model.HeadsetDisconnectBehavior
 import com.textgate.ai.model.Languages
 import com.textgate.ai.model.SupportedLanguage
-import com.textgate.ai.model.TranslationPlaybackSpeed
 import com.textgate.ai.model.TranslationPrompts
 import com.textgate.ai.model.UserGender
 import com.textgate.ai.network.GeminiClient
@@ -143,7 +142,6 @@ class SettingsActivity : Activity() {
         setupUserGenderSection()
         setupHeadsetDisconnectSection()
         setupAudioCaptureModeSection()
-        setupTranslationPlaybackSpeedSection()
         setupAccessibilitySection()
         setupApiKeySection()
         setupModelSection()
@@ -404,53 +402,6 @@ class SettingsActivity : Activity() {
                 override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                     val selected = audioCaptureModeOptions.getOrNull(position) ?: return
                     settingsStore.audioCaptureMode = selected
-                }
-
-                override fun onNothingSelected(parent: AdapterView<*>?) = Unit
-            }
-        }
-    }
-
-    // ---------------------------------------------------------------
-    // Translation voice speed ("Na żywo" playback, new)
-    // ---------------------------------------------------------------
-
-    /** Fixed display order, slowest to fastest —
-     * [TranslationPlaybackSpeed.FASTER] (1.25x) is the default, matching
-     * real on-device feedback that the previous fixed 1.0x voice was
-     * noticeably slow. Same Spinner + deferred-listener pattern as
-     * [setupAudioCaptureModeSection] above and for the same reason. */
-    private val translationPlaybackSpeedOptions = listOf(
-        TranslationPlaybackSpeed.NORMAL,
-        TranslationPlaybackSpeed.SLIGHTLY_FASTER,
-        TranslationPlaybackSpeed.FASTER,
-        TranslationPlaybackSpeed.QUITE_FAST,
-        TranslationPlaybackSpeed.FASTEST
-    )
-
-    private fun translationPlaybackSpeedLabelRes(speed: TranslationPlaybackSpeed): Int = when (speed) {
-        TranslationPlaybackSpeed.NORMAL -> R.string.label_translation_speed_1_0
-        TranslationPlaybackSpeed.SLIGHTLY_FASTER -> R.string.label_translation_speed_1_15
-        TranslationPlaybackSpeed.FASTER -> R.string.label_translation_speed_1_25
-        TranslationPlaybackSpeed.QUITE_FAST -> R.string.label_translation_speed_1_35
-        TranslationPlaybackSpeed.FASTEST -> R.string.label_translation_speed_1_5
-    }
-
-    private fun setupTranslationPlaybackSpeedSection() {
-        val labels = translationPlaybackSpeedOptions.map { getString(translationPlaybackSpeedLabelRes(it)) }
-        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, labels)
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        binding.spinnerTranslationPlaybackSpeed.adapter = adapter
-
-        val currentIndex = translationPlaybackSpeedOptions.indexOf(settingsStore.translationPlaybackSpeed)
-            .let { if (it >= 0) it else 0 }
-        binding.spinnerTranslationPlaybackSpeed.setSelection(currentIndex, false)
-
-        binding.spinnerTranslationPlaybackSpeed.post {
-            binding.spinnerTranslationPlaybackSpeed.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-                override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                    val selected = translationPlaybackSpeedOptions.getOrNull(position) ?: return
-                    settingsStore.translationPlaybackSpeed = selected
                 }
 
                 override fun onNothingSelected(parent: AdapterView<*>?) = Unit

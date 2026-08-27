@@ -174,12 +174,4 @@
     <string name="live_error_quota">Had Gemini Live telah dicapai — sila cuba lagi kemudian.</string>
     <string name="live_error_auth">Masalah kunci API — semak kunci anda dalam Tetapan.</string>
     <string name="live_error_config">Konfigurasi sesi tidak sah (cth. bahasa tidak disokong).</string>
-    <!-- Translation voice speed (AudioTrack.PlaybackParams, Na żywo playback only) -->
-    <string name="section_translation_speed">Kelajuan suara terjemahan</string>
-    <string name="translation_speed_description">Sepantas mana suara terjemahan Gemini dimainkan dalam Na żywo. Mempercepatkannya tidak mengubah nada suara — ini hanya memberi kesan kepada audio terjemahan yang anda dengar, tidak sekali-kali apa yang mikrofon hantar kepada Gemini.</string>
-    <string name="label_translation_speed_1_0">1.0x (biasa)</string>
-    <string name="label_translation_speed_1_15">1.15x</string>
-    <string name="label_translation_speed_1_25">1.25x (lalai)</string>
-    <string name="label_translation_speed_1_35">1.35x</string>
-    <string name="label_translation_speed_1_5">1.5x (terpantas)</string>
 </resources>

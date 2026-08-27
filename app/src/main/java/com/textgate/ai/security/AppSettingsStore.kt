@@ -5,7 +5,6 @@ import android.content.SharedPreferences
 import com.textgate.ai.model.AudioCaptureMode
 import com.textgate.ai.model.HeadsetDisconnectBehavior
 import com.textgate.ai.model.Languages
-import com.textgate.ai.model.TranslationPlaybackSpeed
 import com.textgate.ai.model.UserGender
 
 /**
@@ -151,22 +150,6 @@ class AppSettingsStore(context: Context) {
         set(value) = prefs.edit().putString(KEY_AUDIO_CAPTURE_MODE, value.prefValue).apply()
 
     /**
-     * How fast Na żywo plays back Gemini's translated voice — see
-     * [TranslationPlaybackSpeed]'s own class doc for the full story
-     * (real on-device feedback: the default 1.0x voice was reported as
-     * noticeably slow) and
-     * [com.textgate.ai.live.LiveTranslationService.applyPlaybackSpeed] for
-     * where it's actually applied, via `AudioTrack.PlaybackParams` — pitch
-     * always stays 1.0, only speed changes. Read only by
-     * [com.textgate.ai.live.LiveTranslationService], at the start of each
-     * capture/playback session — same "not retroactive mid-session"
-     * convention as [audioCaptureMode] above.
-     */
-    var translationPlaybackSpeed: TranslationPlaybackSpeed
-        get() = TranslationPlaybackSpeed.fromPrefValue(prefs.getString(KEY_TRANSLATION_PLAYBACK_SPEED, null))
-        set(value) = prefs.edit().putString(KEY_TRANSLATION_PLAYBACK_SPEED, value.prefValue).apply()
-
-    /**
      * The allow-list as it stands: the user's own explicit choices once
      * they have made any (even down to an empty set, e.g. after removing
      * every default), or else [DEFAULT_ALLOWED_PACKAGES] as long as the
@@ -200,7 +183,6 @@ class AppSettingsStore(context: Context) {
         private const val KEY_USER_GENDER = "user_gender"
         private const val KEY_HEADSET_DISCONNECT_BEHAVIOR = "headset_disconnect_behavior"
         private const val KEY_AUDIO_CAPTURE_MODE = "audio_capture_mode"
-        private const val KEY_TRANSLATION_PLAYBACK_SPEED = "translation_playback_speed"
 
         /**
          * Chosen from the app owner's own Google AI Studio rate-limit

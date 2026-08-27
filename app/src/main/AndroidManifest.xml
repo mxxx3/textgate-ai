@@ -44,21 +44,42 @@
         Foreground Service the moment a session starts — this was missing in
         the initial v2.0.0 drop and is the fix for that crash.
 
-    android.permission.MODIFY_AUDIO_SETTINGS — REMOVED as of the v2.x
-        routing rework. Previously required by AudioManager.
+    android.permission.MODIFY_AUDIO_SETTINGS (RE-ADDED — see history below)
+        Removed as of the v2.x routing rework, then re-added by a later,
+        narrowly-scoped follow-up. History, for transparency:
+
+        REMOVED (v2.x routing rework): previously required by AudioManager.
         setSpeakerphoneOn()/setCommunicationDevice(), which
         LiveTranslationService and ConversationTabController's
         applyCommunicationRouting() called to force loudspeaker output once
         AudioManager.mode was switched to MODE_IN_COMMUNICATION. Both
-        controllers now pin routing per-instance via AudioTrack.
+        controllers were changed to pin routing per-instance via AudioTrack.
         setPreferredDevice()/AudioRecord.setPreferredDevice() instead (API
         24+, no permission required, no global AudioManager.mode change at
-        all) — see LiveTranslationService.beginCapturePlayback's doc for
-        the full reasoning, and AudioRouteMonitor.selectPreferredOutputDevice/
-        selectBuiltInMicDevice for where the target device comes from. Left
-        this entry in place (rather than deleting it outright) so the
-        removal itself stays visible in this permission audit, per this
-        file's own transparency purpose.
+        all) — see AudioRouteMonitor.selectPreferredOutputDevice/
+        selectBuiltInMicDevice for where the target device comes from. That
+        per-instance approach is STILL what every playback path in this app
+        uses, with one exception below.
+
+        RE-ADDED (STANDARD-mode headset-disconnect earpiece fix): real
+        on-device testing showed setPreferredDevice() alone does not
+        actually move a USAGE_MEDIA AudioTrack off the phone's main
+        loudspeaker onto the earpiece — Android's own routing heuristics
+        for that usage/content-type pairing evidently ignore the hint. The
+        one narrow case this matters for — AudioCaptureMode.STANDARD,
+        headset disconnects mid-session, must fall back to the earpiece —
+        now uses real communication-audio routing instead: AudioManager.mode
+        = MODE_IN_COMMUNICATION and AudioManager.setCommunicationDevice()
+        (API 31+), which both require this permission. See
+        LiveTranslationService.engageEarpieceCommunicationRouting's doc for
+        the full mechanism, and disengageEarpieceCommunicationRouting/
+        stopCapturePlayback for how AudioManager.mode and the pinned
+        communication device are always restored so this never leaks past
+        that one session into any other app. Every OTHER playback path in
+        this app (session start, ECHO_CANCELLED mode, Rozmowa, headset
+        reconnect) still uses the permission-free setPreferredDevice()
+        approach — this permission is declared for, and used by, only this
+        one path.
 
     In particular this app still requests NONE of: contacts, SMS, call
     logs, location, camera, storage, phone state, or QUERY_ALL_PACKAGES.
@@ -74,6 +95,7 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
 
     <!--
         Declarative package-visibility filter (Android 11+ / API 30+).

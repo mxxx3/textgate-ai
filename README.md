@@ -3206,3 +3206,90 @@ still needs on-device confirmation: with STANDARD mode and headphones
 disconnected mid-session, audio should now come from the small earpiece
 near the top of the phone (quiet, held-to-ear style), not the main
 loudspeaker.
+
+**Update — `setPreferredDevice(EARPIECE)` alone still didn't work; switched
+this one path to real communication-audio routing (`MODE_IN_COMMUNICATION`
++ `setCommunicationDevice()`).** Real on-device retest of the update
+directly above: with `SWITCH_TO_SPEAKER` and `STANDARD` mode, audio still
+came out of the main loudspeaker, not the earpiece — `AudioTrack.
+setPreferredDevice()` is a routing HINT, and evidently Android's own
+routing heuristics for a `USAGE_MEDIA`-attributed track ignore it in
+favor of the speaker regardless of which specific device is requested.
+The app owner asked, specifically for this one path, to treat it as real
+communication/VoIP audio instead — the same mechanism actual phone/VoIP
+apps use to reach the earpiece — rather than attempting another
+`setPreferredDevice()`-only fix:
+
+1. `AudioManager.mode = MODE_IN_COMMUNICATION`, saving whatever mode was
+   active first (`previousAudioManagerMode`) so it can be restored
+   exactly, never hardcoded back to `MODE_NORMAL`.
+2. `TYPE_BUILTIN_EARPIECE` resolved via `AudioManager.getDevices
+   (GET_DEVICES_OUTPUTS)` (`LiveTranslationService.findEarpieceDevice`,
+   same as the previous update, unchanged).
+3. `AudioManager.setCommunicationDevice(earpiece)` on API 31+ — confirmed
+   real: added in Android 12, the documented, non-deprecated replacement
+   for `setSpeakerphoneOn()`/Bluetooth SCO control. Below API 31 (this
+   app's minSdk is 26), there is no equivalent per-device pin; `
+   isSpeakerphoneOn = false` is set instead as the platform's own
+   pre-31 way of preferring the earpiece under `MODE_IN_COMMUNICATION` —
+   the one and only place in this class that touches the deprecated
+   speakerphone API, and only below API 31.
+4. `playbackTrack` is rebuilt (new `LiveTranslationService.
+   rebuildPlaybackTrack` helper — `AudioAttributes` cannot be changed on a
+   live `AudioTrack`) with `USAGE_VOICE_COMMUNICATION` +
+   `CONTENT_TYPE_SPEECH` instead of `USAGE_MEDIA`, and pinned to the
+   earpiece via `setPreferredDevice()` too — belt-and-braces, not the
+   primary mechanism any more. The old track keeps playing until the new
+   one is built, pinned, and started, so there's no gap where an incoming
+   `AudioChunk` has nothing to write to.
+5. A new `logRoutedDevice` helper logs `AudioTrack.getRoutedDevice()`
+   (the singular accessor — confirmed real, API 24+; deliberately did
+   NOT add the plural `getRoutedDevices()` the app owner also mentioned,
+   since its exact minimum API level couldn't be confirmed against this
+   sandbox's lack of real SDK docs access, and this app's compileSdk is
+   35 — using an unconfirmed API here risked exactly the
+   "wymyślanie nieistniejącego parametru" this project has been careful
+   to avoid throughout; the singular accessor already answers the
+   question this diagnostic exists for) right after `play()`, tagged
+   `TextGateLiveRoute` — filter with `adb logcat -s TextGateLiveRoute`
+   to confirm the resolved type is `1` (`TYPE_BUILTIN_EARPIECE`) and not
+   `2` (`TYPE_BUILTIN_SPEAKER`) once translated audio is actually
+   playing back (routing may not resolve until the track has real data
+   flowing, not immediately at `play()`).
+
+This is scoped as narrowly as this mechanism allows: `LiveTranslationService`
+is the ONLY place in the app that now touches `AudioManager.mode` or
+`setCommunicationDevice()`/`clearCommunicationDevice()`, and only inside
+`engageEarpieceCommunicationRouting()`/`disengageEarpieceCommunicationRouting()`
+— every other playback path (session start, `ECHO_CANCELLED` mode,
+Rozmowa, the private-route reconnect branch) still uses the permission-free,
+per-instance `setPreferredDevice()` approach from the earlier v2.x
+routing rework, completely unchanged; `AudioRouteMonitor.kt` and
+`ConversationTabController.kt` are untouched again. `disengageEarpiece
+CommunicationRouting()` is now called unconditionally from the very top
+of `stopCapturePlayback()` (before the existing capture-thread/track
+teardown), so `AudioManager.mode` and the pinned communication device are
+always restored no matter which path ends the session — STOP, a
+route-reconnect, an error, or audio-focus loss — never left changed for
+any other app.
+
+**`android.permission.MODIFY_AUDIO_SETTINGS` is back in the manifest** —
+required by `setMode()`/`setCommunicationDevice()`, and was removed by
+the earlier v2.x routing rework specifically because nothing needed it
+any more at the time. The manifest's own PERMISSION AUDIT comment block
+now documents this full remove-then-re-add history rather than silently
+updating it, per this file's established transparency convention.
+
+Verified in this sandbox with the brace/paren balance checker (clean)
+and `xmllint --noout` on `AndroidManifest.xml` (clean) — real
+`MODE_IN_COMMUNICATION`/`setCommunicationDevice()` routing behavior
+cannot be verified without a device. Needs on-device confirmation, via
+`adb logcat -s TextGateLiveRoute`, of: (a) in STANDARD mode, disconnecting
+headphones mid-session now logs a routed-device type of `1`
+(`TYPE_BUILTIN_EARPIECE`), and audio is actually audible from the
+earpiece, not the main loudspeaker; (b) `ECHO_CANCELLED` mode and every
+other playback path are unaffected — no `AudioManager.mode` change, no
+communication-device pin, exactly as before; (c) after the session ends
+(STOP, error, or reconnecting the headset), a normal phone call placed
+afterward still rings/routes normally — i.e. this app's
+`MODE_IN_COMMUNICATION` state never lingers past its own session.

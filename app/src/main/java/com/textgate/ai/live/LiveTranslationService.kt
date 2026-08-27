@@ -90,6 +90,15 @@ class LiveTranslationService : Service() {
     private var reconnectAttempt = 0
     private var reconnectRunnable: Runnable? = null
 
+    /** True only while [engageEarpieceCommunicationRouting]'s
+     * `AudioManager.MODE_IN_COMMUNICATION` + `setCommunicationDevice()`
+     * path is active (STANDARD-mode headset-disconnect only — see that
+     * function's doc). [previousAudioManagerMode] is the `AudioManager.
+     * mode` this path saved right before changing it, restored by
+     * [disengageEarpieceCommunicationRouting]. */
+    private var earpieceCommunicationActive = false
+    private var previousAudioManagerMode = AudioManager.MODE_NORMAL
+
     var state: LiveSessionState = LiveSessionState.STOPPED
         private set
 
@@ -416,52 +425,255 @@ class LiveTranslationService : Service() {
         }
     }
 
-    /** Re-resolves the current best output device and re-pins the active
-     * [playbackTrack] to it, WITHOUT stopping/restarting capture or
-     * playback — used only by [onRouteChanged]'s STANDARD-mode disconnect/
-     * reconnect handling above, so output moves deterministically as the
-     * route changes mid-session:
-     * - Private route available (the reconnect case): same resolution as
-     *   [AudioRouteMonitor.selectPreferredOutputDevice] — pin to it.
-     * - No private route (the disconnect case): [selectEarpieceDevice],
-     *   NOT the speaker fallback [AudioRouteMonitor.
-     *   selectPreferredOutputDevice] would pick — a deliberate, narrowly-
-     *   scoped choice confirmed with the app owner for this ONE path only.
-     *   Every other "no headset" fallback in this app (session start,
-     *   ECHO_CANCELLED mode, Rozmowa) keeps using the phone's main
-     *   loudspeaker via [AudioRouteMonitor.selectPreferredOutputDevice],
-     *   completely unchanged.
-     * Best-effort, same as every other `setPreferredDevice()` call in this
-     * class. */
+    /** Dispatches [onRouteChanged]'s STANDARD-mode disconnect/reconnect
+     * handling above to either [engageEarpieceCommunicationRouting] (no
+     * private route — the disconnect case) or
+     * [disengageEarpieceCommunicationRouting]/a plain re-pin (private
+     * route present — the reconnect case), depending on whether
+     * communication-audio routing is currently engaged. See
+     * [engageEarpieceCommunicationRouting]'s doc for why a plain
+     * `AudioTrack.setPreferredDevice(EARPIECE)` on the existing
+     * USAGE_MEDIA track — the first attempt at this — was confirmed on a
+     * real device to NOT move playback off the main loudspeaker. */
     private fun switchOutputToCurrentRoute() {
-        val outputDevice = if (audioRouteMonitor.hasPrivateOutputRoute()) {
-            audioRouteMonitor.selectPreferredOutputDevice()
-        } else {
-            selectEarpieceDevice() ?: audioRouteMonitor.selectPreferredOutputDevice()
+        if (audioRouteMonitor.hasPrivateOutputRoute()) {
+            if (earpieceCommunicationActive) {
+                disengageEarpieceCommunicationRouting()
+            } else {
+                try {
+                    playbackTrack?.setPreferredDevice(audioRouteMonitor.selectPreferredOutputDevice())
+                } catch (_: Exception) {
+                    // Best-effort only.
+                }
+            }
+            return
         }
+        engageEarpieceCommunicationRouting()
+    }
+
+    /** STANDARD-mode-disconnect-only earpiece routing. The first attempt
+     * at this feature used `AudioTrack.setPreferredDevice(EARPIECE)` alone
+     * on the existing USAGE_MEDIA track — confirmed via real on-device
+     * testing (`AudioTrack.getRoutedDevice()`, see [logRoutedDevice]) to
+     * NOT actually move playback off the main `TYPE_BUILTIN_SPEAKER`:
+     * `setPreferredDevice()` is a routing HINT, and Android's own routing
+     * heuristics for a `USAGE_MEDIA`-attributed track evidently ignore it
+     * in favor of the speaker. A `USAGE_VOICE_COMMUNICATION` track under
+     * `AudioManager.MODE_IN_COMMUNICATION`, with
+     * `AudioManager.setCommunicationDevice(EARPIECE)` (API 31+, the
+     * modern, non-deprecated replacement for the old
+     * `isSpeakerphoneOn`/`setSpeakerphoneOn`/Bluetooth-SCO APIs — those are
+     * DELIBERATELY not used here, or anywhere else in this class), is
+     * what real phone/VoIP apps use to reach the earpiece, so this path
+     * now does the same, treating it explicitly as communication audio:
+     *
+     * 1. Enter [AudioManager.MODE_IN_COMMUNICATION] (saving the previous
+     *    mode in [previousAudioManagerMode] first, so
+     *    [disengageEarpieceCommunicationRouting] can restore it exactly —
+     *    this app must not leave global `AudioManager` state changed for
+     *    any other app once this one path ends).
+     * 2. Resolve `TYPE_BUILTIN_EARPIECE` via [findEarpieceDevice].
+     * 3. On API 31+, call `audioManager.setCommunicationDevice(earpiece)`
+     *    — this is the mechanism that actually moves communication audio
+     *    to a specific device; below API 31 there is no equivalent
+     *    per-device pin (the old `setSpeakerphoneOn(false)` is the
+     *    platform's own pre-31 way of preferring the earpiece — used only
+     *    as that fallback, not as this path's primary mechanism, so it is
+     *    never combined with `setCommunicationDevice()` on the same
+     *    device).
+     * 4. Rebuild [playbackTrack] with `USAGE_VOICE_COMMUNICATION` +
+     *    `CONTENT_TYPE_SPEECH` (see [rebuildPlaybackTrack]) — `AudioTrack`
+     *    attributes cannot be changed on an existing instance, so the
+     *    already-playing USAGE_MEDIA track from [beginCapturePlayback] is
+     *    swapped for a new one; the mic capture thread/loop is untouched,
+     *    it only ever writes to whatever [playbackTrack] currently is.
+     * 5. [rebuildPlaybackTrack] also calls `setPreferredDevice(earpiece)`
+     *    on the new track — belt-and-braces, not the primary mechanism.
+     * 6. [logRoutedDevice] logs `AudioTrack.getRoutedDevice()` right after
+     *    `play()`, for real on-device confirmation of where audio actually
+     *    ended up (`adb logcat -s TextGateLiveRoute`).
+     *
+     * Scoped as narrowly as points 1-6 above allow: this is the ONLY place
+     * in the app that touches `AudioManager.mode` or
+     * `setCommunicationDevice()`/`clearCommunicationDevice()` — every
+     * other playback path (session start, `ECHO_CANCELLED` mode, Rozmowa,
+     * the private-route reconnect branch above) still uses plain
+     * `USAGE_MEDIA` + `setPreferredDevice()` with no `AudioManager.mode`
+     * change, completely unchanged. [stopCapturePlayback] unconditionally
+     * calls [disengageEarpieceCommunicationRouting] first, so `mode`/
+     * `setCommunicationDevice()` can never leak past this one session
+     * regardless of how it ends (STOP, disconnect, error, reconnect-loss
+     * — see that function's own doc). */
+    private fun engageEarpieceCommunicationRouting() {
+        val earpiece = findEarpieceDevice()
+        if (earpiece == null) {
+            // No earpiece hardware on this device (e.g. a tablet) — fall
+            // back to the normal main-loudspeaker path used everywhere
+            // else in the app, nothing to engage.
+            try {
+                playbackTrack?.setPreferredDevice(audioRouteMonitor.selectPreferredOutputDevice())
+            } catch (_: Exception) {
+                // Best-effort only.
+            }
+            return
+        }
+
+        if (!earpieceCommunicationActive) {
+            previousAudioManagerMode = audioManager.mode
+        }
+        audioManager.mode = AudioManager.MODE_IN_COMMUNICATION
+        earpieceCommunicationActive = true
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            try {
+                audioManager.setCommunicationDevice(earpiece)
+            } catch (_: Exception) {
+                // Best-effort only.
+            }
+        } else {
+            // Pre-31: no per-device communication pin exists. The
+            // platform's own pre-31 mechanism for preferring the earpiece
+            // over the speaker is simply NOT requesting the speaker —
+            // isSpeakerphoneOn defaults to false in MODE_IN_COMMUNICATION,
+            // which routes to the earpiece by itself on most OEMs. Set
+            // explicitly rather than assumed, but this is the one place in
+            // this class that touches it, and only below API 31.
+            try {
+                @Suppress("DEPRECATION")
+                audioManager.isSpeakerphoneOn = false
+            } catch (_: Exception) {
+                // Best-effort only.
+            }
+        }
+
+        rebuildPlaybackTrack(AudioAttributes.USAGE_VOICE_COMMUNICATION, earpiece)
+        logRoutedDevice("engageEarpieceCommunicationRouting")
+    }
+
+    /** Reverses [engageEarpieceCommunicationRouting]: clears the
+     * per-device communication pin (API 31+), restores whatever
+     * `AudioManager.mode` was active before this path ever engaged (never
+     * a hardcoded `MODE_NORMAL` — this app is not the only thing that
+     * might have set `mode`), and rebuilds [playbackTrack] back to the
+     * normal `USAGE_MEDIA` path pinned to the now-reconnected private
+     * route. Called from two places: [switchOutputToCurrentRoute] when
+     * the headset reconnects while this routing was engaged, and
+     * unconditionally from [stopCapturePlayback] (safe no-op via the
+     * [earpieceCommunicationActive] guard when this path was never
+     * engaged) so this session can never leave `AudioManager.mode` or a
+     * pinned communication device changed for any other app once it ends,
+     * regardless of how it ends. */
+    private fun disengageEarpieceCommunicationRouting() {
+        if (!earpieceCommunicationActive) return
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            try {
+                audioManager.clearCommunicationDevice()
+            } catch (_: Exception) {
+                // Best-effort only.
+            }
+        }
+        audioManager.mode = previousAudioManagerMode
+        earpieceCommunicationActive = false
+
+        if (micActive.get()) {
+            rebuildPlaybackTrack(AudioAttributes.USAGE_MEDIA, audioRouteMonitor.selectPreferredOutputDevice())
+        }
+    }
+
+    /** Swaps [playbackTrack] for a freshly built one with the given
+     * [usage] (`AudioAttributes` cannot be changed on a live `AudioTrack`
+     * instance — this is the only way to actually switch between the
+     * normal `USAGE_MEDIA` path and [engageEarpieceCommunicationRouting]'s
+     * `USAGE_VOICE_COMMUNICATION` path mid-session), pins it to
+     * [preferredDevice] (best-effort), starts it, and only then stops/
+     * releases the old track — so there is no gap where an
+     * [ServerEvent.AudioChunk] arriving on [mainHandler] would have no
+     * live track to write to. Shared by [engageEarpieceCommunicationRouting]
+     * and [disengageEarpieceCommunicationRouting]; never used by any other
+     * playback path in this class. */
+    private fun rebuildPlaybackTrack(usage: Int, preferredDevice: AudioDeviceInfo?) {
+        val oldTrack = playbackTrack
+        val newTrack = AudioTrack.Builder()
+            .setAudioAttributes(
+                AudioAttributes.Builder()
+                    .setUsage(usage)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
+                    .build()
+            )
+            .setAudioFormat(
+                AudioFormat.Builder()
+                    .setSampleRate(PLAYBACK_SAMPLE_RATE_HZ)
+                    .setChannelMask(AudioFormat.CHANNEL_OUT_MONO)
+                    .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
+                    .build()
+            )
+            .setTransferMode(AudioTrack.MODE_STREAM)
+            .build()
+        if (preferredDevice != null) {
+            try {
+                newTrack.setPreferredDevice(preferredDevice)
+            } catch (_: Exception) {
+                // Best-effort only.
+            }
+        }
+        playbackTrack = newTrack
+        newTrack.play()
         try {
-            playbackTrack?.setPreferredDevice(outputDevice)
+            oldTrack?.stop()
+            oldTrack?.release()
         } catch (_: Exception) {
-            // Best-effort only.
+            // Already stopped/released.
         }
     }
 
     /** The phone's own earpiece — `TYPE_BUILTIN_EARPIECE`, the small
      * speaker above the screen used for a normal call held to the ear —
-     * used ONLY by [switchOutputToCurrentRoute]'s STANDARD-mode-disconnect
-     * fallback. Deliberately separate from [AudioRouteMonitor.
-     * selectPreferredOutputDevice], which resolves the phone's MAIN
-     * loudspeaker instead and is what every other "no headset" fallback in
-     * this app still uses. Null if the device genuinely reports no
-     * earpiece (e.g. a tablet with no telephony hardware) — the caller
-     * falls back to the main-loudspeaker resolution in that case. */
-    private fun selectEarpieceDevice(): AudioDeviceInfo? {
+     * used ONLY by [engageEarpieceCommunicationRouting]. Deliberately
+     * separate from [AudioRouteMonitor.selectPreferredOutputDevice], which
+     * resolves the phone's MAIN loudspeaker instead and is what every
+     * other "no headset" fallback in this app still uses. Null if the
+     * device genuinely reports no earpiece (e.g. a tablet with no
+     * telephony hardware). */
+    private fun findEarpieceDevice(): AudioDeviceInfo? {
         val devices = try {
             audioManager.getDevices(AudioManager.GET_DEVICES_OUTPUTS)
         } catch (_: Exception) {
             emptyArray()
         }
         return devices.firstOrNull { it.type == AudioDeviceInfo.TYPE_BUILTIN_EARPIECE }
+    }
+
+    /** Real-device diagnostic only, for confirming where audio actually
+     * routed after [engageEarpieceCommunicationRouting] — logs
+     * `AudioTrack.getRoutedDevice()` (the singular accessor, API 24+,
+     * comfortably within this app's minSdk 26 AND its compileSdk 35).
+     * Deliberately does NOT call the plural `getRoutedDevices()`: this
+     * project's own methodology (see `GeminiLiveClient`'s class doc and
+     * this README's changelog) is to never reference an API without
+     * confirming it against real SDK source/docs first, and its exact
+     * minimum API level could not be confirmed against this app's
+     * compileSdk (35) in this sandbox — using it here risked either a
+     * build break (if it needs a newer compileSdk) or, worse, a silently
+     * wrong assumption. The singular accessor is sufficient to answer the
+     * one question this diagnostic exists for: which physical device is
+     * `playbackTrack` actually routed to right now. Filter logcat with
+     * `-s TextGateLiveRoute` to see it; check `adb shell dumpsys media.audio_policy`
+     * or a Bluetooth/earpiece-detection app if a specific `AudioDeviceInfo.
+     * type` int needs cross-checking against a device name. */
+    private fun logRoutedDevice(context: String) {
+        val track = playbackTrack ?: return
+        try {
+            val routedType = track.routedDevice?.type
+            android.util.Log.d(
+                "TextGateLiveRoute",
+                "$context: AudioTrack.getRoutedDevice().type=$routedType " +
+                    "(TYPE_BUILTIN_EARPIECE=${AudioDeviceInfo.TYPE_BUILTIN_EARPIECE}, " +
+                    "TYPE_BUILTIN_SPEAKER=${AudioDeviceInfo.TYPE_BUILTIN_SPEAKER})"
+            )
+        } catch (_: Exception) {
+            // Diagnostic only — never fatal to the session.
+        }
     }
 
     // ---------------------------------------------------------------
@@ -647,6 +859,16 @@ class LiveTranslationService : Service() {
 
     private fun stopCapturePlayback() {
         micActive.set(false)
+        // Unconditional, cheap no-op unless engageEarpieceCommunicationRouting
+        // (STANDARD-mode headset-disconnect only) actually engaged this
+        // session — guarantees AudioManager.mode and the pinned
+        // communication device are never left changed for any other app,
+        // regardless of which path led here (STOP, disconnect, error,
+        // audio-focus loss). Called before micActive is read by
+        // disengageEarpieceCommunicationRouting so it skips rebuilding a
+        // now-pointless AudioTrack right before this function releases it
+        // below anyway.
+        disengageEarpieceCommunicationRouting()
         captureThread?.let {
             try {
                 it.join(CAPTURE_THREAD_JOIN_TIMEOUT_MS)
@@ -664,11 +886,10 @@ class LiveTranslationService : Service() {
             }
         }
         playbackTrack = null
-        // No AudioManager.mode/communication-device state to reset any
-        // more — see beginCapturePlayback's doc: routing is now pinned
-        // per-instance via setPreferredDevice() (AudioTrack/AudioRecord),
-        // never through the global AudioManager.mode, so there is nothing
-        // session-wide left over that could affect another app.
+        // Routing for every path EXCEPT engageEarpieceCommunicationRouting
+        // (disengaged above) is pinned per-instance via setPreferredDevice()
+        // (AudioTrack/AudioRecord), never through the global
+        // AudioManager.mode — see beginCapturePlayback's doc.
     }
 
     // ---------------------------------------------------------------

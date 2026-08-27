@@ -3165,3 +3165,44 @@ back to them; (c) in `ECHO_CANCELLED` mode (the default), disconnect
 behavior is unchanged from before this update — still pauses by
 default, or still switches to speaker without pausing if
 `SWITCH_TO_SPEAKER` is enabled in Settings.
+
+**Update — real on-device feedback: the update above used the wrong
+physical speaker.** Tested with `headsetDisconnectBehavior =
+SWITCH_TO_SPEAKER` and `AudioCaptureMode.STANDARD`: audio on disconnect
+came out of the phone's main (bottom) loudspeaker, confirmed with the
+app owner to be wrong — they specifically wanted the phone's own
+earpiece (the small speaker above the screen, used for a normal call
+held to the ear), not the main loudspeaker `AudioRouteMonitor.
+selectPreferredOutputDevice()` resolves to. Confirmed with the app owner
+this is intentionally narrow: ONLY the STANDARD-mode-disconnect path
+added in the update directly above should use the earpiece; every other
+"no headset" fallback in the app (session start, `ECHO_CANCELLED` mode,
+Rozmowa) is explicitly meant to keep using the main loudspeaker,
+unchanged.
+
+`LiveTranslationService.switchOutputToCurrentRoute()` (the helper added
+in the previous update, called only from `onRouteChanged()`'s
+STANDARD-mode branches) now resolves its own device instead of reusing
+`AudioRouteMonitor.selectPreferredOutputDevice()`: if a private route is
+connected (the reconnect case) it still pins to that, unchanged; if not
+(the disconnect case), a new, local `selectEarpieceDevice()` method
+looks up `AudioDeviceInfo.TYPE_BUILTIN_EARPIECE` directly via
+`AudioManager.getDevices(GET_DEVICES_OUTPUTS)` and pins to it, falling
+back to the old main-loudspeaker resolution only if the device genuinely
+reports no earpiece (e.g. a tablet). `TYPE_BUILTIN_EARPIECE` is a
+long-standing, well-documented platform constant (API 23+, same family
+as the other `AudioDeviceInfo.TYPE_*` constants already used throughout
+`AudioRouteMonitor`), so no SDK-source research was needed the way the
+Gemini Live wire-format fields required.
+
+`AudioRouteMonitor.kt` itself is untouched — `selectPreferredOutputDevice()`
+still resolves the main loudspeaker exactly as before, since every other
+caller (session start in `beginCapturePlayback()`/`SetupComplete`,
+`ECHO_CANCELLED` mode, `ConversationTabController`) still needs that
+behavior. Only `LiveTranslationService.kt` changed again.
+
+Verified the same way as above (brace/paren balance checker, clean) —
+still needs on-device confirmation: with STANDARD mode and headphones
+disconnected mid-session, audio should now come from the small earpiece
+near the top of the phone (quiet, held-to-ear style), not the main
+loudspeaker.

@@ -8,6 +8,7 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.media.AudioAttributes
+import android.media.AudioDeviceInfo
 import android.media.AudioFocusRequest
 import android.media.AudioFormat
 import android.media.AudioManager
@@ -415,20 +416,52 @@ class LiveTranslationService : Service() {
         }
     }
 
-    /** Re-resolves the best output device via [AudioRouteMonitor.
-     * selectPreferredOutputDevice] and re-pins the active [playbackTrack]
-     * to it, WITHOUT stopping/restarting capture or playback — used only
-     * by [onRouteChanged]'s STANDARD-mode disconnect/reconnect handling
-     * above, so output moves deterministically to/from the phone's own
-     * speaker as the route changes mid-session. Best-effort, same as every
-     * other `setPreferredDevice()` call in this class. */
+    /** Re-resolves the current best output device and re-pins the active
+     * [playbackTrack] to it, WITHOUT stopping/restarting capture or
+     * playback — used only by [onRouteChanged]'s STANDARD-mode disconnect/
+     * reconnect handling above, so output moves deterministically as the
+     * route changes mid-session:
+     * - Private route available (the reconnect case): same resolution as
+     *   [AudioRouteMonitor.selectPreferredOutputDevice] — pin to it.
+     * - No private route (the disconnect case): [selectEarpieceDevice],
+     *   NOT the speaker fallback [AudioRouteMonitor.
+     *   selectPreferredOutputDevice] would pick — a deliberate, narrowly-
+     *   scoped choice confirmed with the app owner for this ONE path only.
+     *   Every other "no headset" fallback in this app (session start,
+     *   ECHO_CANCELLED mode, Rozmowa) keeps using the phone's main
+     *   loudspeaker via [AudioRouteMonitor.selectPreferredOutputDevice],
+     *   completely unchanged.
+     * Best-effort, same as every other `setPreferredDevice()` call in this
+     * class. */
     private fun switchOutputToCurrentRoute() {
-        val outputDevice = audioRouteMonitor.selectPreferredOutputDevice()
+        val outputDevice = if (audioRouteMonitor.hasPrivateOutputRoute()) {
+            audioRouteMonitor.selectPreferredOutputDevice()
+        } else {
+            selectEarpieceDevice() ?: audioRouteMonitor.selectPreferredOutputDevice()
+        }
         try {
             playbackTrack?.setPreferredDevice(outputDevice)
         } catch (_: Exception) {
             // Best-effort only.
         }
+    }
+
+    /** The phone's own earpiece — `TYPE_BUILTIN_EARPIECE`, the small
+     * speaker above the screen used for a normal call held to the ear —
+     * used ONLY by [switchOutputToCurrentRoute]'s STANDARD-mode-disconnect
+     * fallback. Deliberately separate from [AudioRouteMonitor.
+     * selectPreferredOutputDevice], which resolves the phone's MAIN
+     * loudspeaker instead and is what every other "no headset" fallback in
+     * this app still uses. Null if the device genuinely reports no
+     * earpiece (e.g. a tablet with no telephony hardware) — the caller
+     * falls back to the main-loudspeaker resolution in that case. */
+    private fun selectEarpieceDevice(): AudioDeviceInfo? {
+        val devices = try {
+            audioManager.getDevices(AudioManager.GET_DEVICES_OUTPUTS)
+        } catch (_: Exception) {
+            emptyArray()
+        }
+        return devices.firstOrNull { it.type == AudioDeviceInfo.TYPE_BUILTIN_EARPIECE }
     }
 
     // ---------------------------------------------------------------

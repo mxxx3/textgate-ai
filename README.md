@@ -3100,3 +3100,68 @@ case; (d) the Na żywo screen shows "Wykryto: <język>" once Gemini reports
 a detected language; (e) a real quota/rate-limit or invalid-API-key
 condition shows the new specific message and does NOT enter a reconnect
 loop.
+
+**Update — STANDARD mode now auto-switches to the phone speaker on
+headset disconnect; `ECHO_CANCELLED` mode's disconnect behavior is
+untouched.** A narrow follow-up to the routing rework above. Until now,
+`LiveTranslationService.onRouteChanged()` made exactly one decision for
+BOTH `AudioCaptureMode` values when a headset/headphones disconnected
+mid-session: pause (`HeadsetDisconnectBehavior.PAUSE_TRANSLATION`,
+default) unless the user had separately opted into
+`SWITCH_TO_SPEAKER`. That's still exactly what happens in
+`ECHO_CANCELLED` mode (the default capture mode) — nothing in that code
+path changed.
+
+`AudioCaptureMode.STANDARD` is a deliberate override that already never
+uses AEC, even on the speaker (see point 4 of the update above) — a
+device/HAL workaround the app owner chose knowing it accepts the
+speaker echo-loop risk in exchange for the lightest capture path.
+Pausing on every headset disconnect in that mode no longer made sense:
+it meant translation stopped the instant headphones came off, even
+though STANDARD mode was already built to keep working on the speaker.
+`onRouteChanged()` now branches on `AudioCaptureMode` before it looks at
+`headsetDisconnectBehavior` at all:
+
+- **`STANDARD`**: on disconnect, the session is never paused any more —
+  it keeps capturing/translating, and output is moved to the phone's own
+  speaker via a new `switchOutputToCurrentRoute()` helper, which re-runs
+  `AudioRouteMonitor.selectPreferredOutputDevice()` (the same
+  private-route-else-speaker resolution `beginCapturePlayback()` already
+  uses) and re-pins the already-running `AudioTrack` to it with
+  `setPreferredDevice()`, rather than leaving the switch to the
+  platform's own implicit fallback once the previously pinned device
+  disappears — consistent with this whole routing rework's "as
+  deterministic as possible" approach. This is independent of the
+  `headsetDisconnectBehavior` setting; in `STANDARD` mode it always
+  behaves this way. Symmetrically, if the headset reconnects while the
+  session is still actively playing on the speaker (rather than
+  `PAUSED`, since `STANDARD` mode no longer pauses), output is moved
+  back to it the same way, instead of staying stuck on the speaker.
+- **`ECHO_CANCELLED`** (default): completely unchanged. Disconnect still
+  checks `headsetDisconnectBehavior` exactly as before — default
+  `PAUSE_TRANSLATION` stops capture/playback and enters `PAUSED`
+  (resuming automatically the moment a private route returns);
+  `SWITCH_TO_SPEAKER` still just keeps going, relying on the platform's
+  own default routing, exactly as before this change.
+
+Only `LiveTranslationService.kt` was touched — `AudioCaptureMode.kt`,
+`HeadsetDisconnectBehavior.kt`, `AudioRouteMonitor.kt`,
+`GeminiLiveClient.kt`, `ConversationTabController.kt`, and every other
+file from the update above are unmodified. Rozmowa was deliberately left
+out of this change: it has no live route-change monitoring at all (no
+`AudioRouteMonitor.start()`, only a one-time query at session start —
+see point 8 of the update above), and this request was specifically
+about the disconnect-while-a-session-is-running scenario Rozmowa doesn't
+model.
+
+Verified in this sandbox with the same custom brace/paren balance
+checker used throughout this project (no Android compiler available
+here) — passes clean. Not otherwise testable here for the same
+real-hardware-routing reason as every update above. Needs on-device
+confirmation of: (a) in STANDARD mode, disconnecting headphones mid-
+session keeps translating audibly through the speaker instead of going
+silent/`PAUSED`; (b) reconnecting the headphones afterward moves output
+back to them; (c) in `ECHO_CANCELLED` mode (the default), disconnect
+behavior is unchanged from before this update — still pauses by
+default, or still switches to speaker without pausing if
+`SWITCH_TO_SPEAKER` is enabled in Settings.

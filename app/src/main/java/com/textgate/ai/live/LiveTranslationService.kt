@@ -367,6 +367,34 @@ class LiveTranslationService : Service() {
             // returns.
             if (state == LiveSessionState.PAUSED && liveClient != null) {
                 beginCapturePlayback()
+            } else if (settingsStore.audioCaptureMode == AudioCaptureMode.STANDARD &&
+                (state == LiveSessionState.LISTENING || state == LiveSessionState.TRANSLATING)
+            ) {
+                // STANDARD mode never pauses on disconnect (see below), so
+                // the session may still be actively playing on the speaker
+                // when the headset comes back — move output back to it
+                // rather than leaving it stuck on the speaker.
+                switchOutputToCurrentRoute()
+            }
+            return
+        }
+
+        // Headset disconnected.
+        if (settingsStore.audioCaptureMode == AudioCaptureMode.STANDARD) {
+            // STANDARD mode already accepts the speaker echo-loop risk by
+            // design — see AudioCaptureMode's own class doc: it never uses
+            // AEC, even on the speaker, in exchange for guaranteed lowest
+            // latency. So on disconnect, don't pause the way ECHO_CANCELLED
+            // mode does below: keep the session running and move output to
+            // the phone's own speaker deterministically via
+            // AudioTrack.setPreferredDevice() (rather than relying on the
+            // platform's own implicit fallback once the pinned device
+            // disappears) — independent of headsetDisconnectBehavior, a
+            // deliberate STANDARD-mode-specific override.
+            // ECHO_CANCELLED mode's behavior (below, headsetDisconnectBehavior-
+            // driven PAUSE/SWITCH_TO_SPEAKER) is UNCHANGED.
+            if (state == LiveSessionState.LISTENING || state == LiveSessionState.TRANSLATING) {
+                switchOutputToCurrentRoute()
             }
             return
         }
@@ -384,6 +412,22 @@ class LiveTranslationService : Service() {
             stopCapturePlayback()
             transitionTo(LiveSessionState.PAUSED)
             updateNotification()
+        }
+    }
+
+    /** Re-resolves the best output device via [AudioRouteMonitor.
+     * selectPreferredOutputDevice] and re-pins the active [playbackTrack]
+     * to it, WITHOUT stopping/restarting capture or playback — used only
+     * by [onRouteChanged]'s STANDARD-mode disconnect/reconnect handling
+     * above, so output moves deterministically to/from the phone's own
+     * speaker as the route changes mid-session. Best-effort, same as every
+     * other `setPreferredDevice()` call in this class. */
+    private fun switchOutputToCurrentRoute() {
+        val outputDevice = audioRouteMonitor.selectPreferredOutputDevice()
+        try {
+            playbackTrack?.setPreferredDevice(outputDevice)
+        } catch (_: Exception) {
+            // Best-effort only.
         }
     }
 

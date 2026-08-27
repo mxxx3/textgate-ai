@@ -173,4 +173,12 @@
     <string name="live_error_quota">تم الوصول إلى حد Gemini Live — يرجى المحاولة مرة أخرى لاحقًا.</string>
     <string name="live_error_auth">مشكلة في مفتاح API — تحقق من المفتاح في الإعدادات.</string>
     <string name="live_error_config">تكوين الجلسة غير صالح (مثل لغة غير مدعومة).</string>
+    <!-- Translation voice speed (AudioTrack.PlaybackParams, Na żywo playback only) -->
+    <string name="section_translation_speed">سرعة صوت الترجمة</string>
+    <string name="translation_speed_description">مدى سرعة تشغيل صوت Gemini المترجم في Na żywo. تسريعه لا يغيّر حدة الصوت — يؤثر فقط على الصوت المترجم الذي تسمعه، ولا يؤثر أبدًا على ما يرسله الميكروفون إلى Gemini.</string>
+    <string name="label_translation_speed_1_0">1.0x (عادي)</string>
+    <string name="label_translation_speed_1_15">1.15x</string>
+    <string name="label_translation_speed_1_25">1.25x (افتراضي)</string>
+    <string name="label_translation_speed_1_35">1.35x</string>
+    <string name="label_translation_speed_1_5">1.5x (الأسرع)</string>
 </resources>

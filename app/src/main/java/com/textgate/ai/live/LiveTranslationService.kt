@@ -15,6 +15,7 @@ import android.media.AudioManager
 import android.media.AudioRecord
 import android.media.AudioTrack
 import android.media.MediaRecorder
+import android.media.PlaybackParams
 import android.media.audiofx.AcousticEchoCanceler
 import android.os.Binder
 import android.os.Build
@@ -619,6 +620,7 @@ class LiveTranslationService : Service() {
                     .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
                     .build()
             )
+            .setBufferSizeInBytes(playbackBufferSizeBytes())
             .setTransferMode(AudioTrack.MODE_STREAM)
             .build()
         if (preferredDevice != null) {
@@ -628,6 +630,7 @@ class LiveTranslationService : Service() {
                 // Best-effort only.
             }
         }
+        applyPlaybackSpeed(newTrack)
         playbackTrack = newTrack
         newTrack.play()
         try {
@@ -635,6 +638,77 @@ class LiveTranslationService : Service() {
             oldTrack?.release()
         } catch (_: Exception) {
             // Already stopped/released.
+        }
+    }
+
+    /** `getMinBufferSize()`-based, with headroom for
+     * [PLAYBACK_BUFFER_SPEED_HEADROOM] — see that constant's own doc for
+     * why every [playbackTrack] this class builds now uses this instead of
+     * leaving `AudioTrack.Builder()` to pick its own default buffer size:
+     * `AudioTrack.setPlaybackParams()` (see [applyPlaybackSpeed]) requires
+     * it for any speed above 1.0x. Shared by both places this class builds
+     * a `playbackTrack` ([beginCapturePlayback]'s normal-path branch and
+     * [rebuildPlaybackTrack]), so both are always sized consistently. */
+    private fun playbackBufferSizeBytes(): Int {
+        val minBufferSize = AudioTrack.getMinBufferSize(
+            PLAYBACK_SAMPLE_RATE_HZ, AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT
+        ).coerceAtLeast(1)
+        return (minBufferSize * PLAYBACK_BUFFER_SPEED_HEADROOM).toInt()
+    }
+
+    /** Applies the user's configured [AppSettingsStore.translationPlaybackSpeed]
+     * to [track] via `AudioTrack.PlaybackParams` (API 23+, comfortably
+     * within this app's minSdk 26) — confirmed against Android's own
+     * reference docs (mirrored at learn.microsoft.com/dotnet/api/
+     * android.media.playbackparams and .audiotrack.playbackparams, same
+     * "read the real docs, don't guess" methodology used throughout this
+     * project): "Pitch equals 1.0f. Speed change will be done with pitch
+     * preserved, often called timestretching" — exactly what was asked
+     * for, faster-sounding translated speech with NO pitch shift, and
+     * explicitly NOT achieved by playing 24kHz PCM at a different
+     * declared sample rate (which would shift pitch) — this is a distinct
+     * mechanism from the format/rate the track is built and written at.
+     *
+     * ONLY affects playback of audio already RECEIVED from Gemini — this
+     * sits entirely on the [playbackTrack] side, called right after
+     * BUILDING a track (both in [beginCapturePlayback] and
+     * [rebuildPlaybackTrack]), before [AudioTrack.play]. Nothing here
+     * touches: the audio sent TO Gemini ([runCaptureLoop]/[micSource] are
+     * completely unrelated), [CAPTURE_SAMPLE_RATE_HZ]/[PLAYBACK_SAMPLE_RATE_HZ]
+     * themselves (unchanged — those are the format Gemini is told about and
+     * the format this track is built/written at; PlaybackParams changes
+     * playback SPEED on top of that, not the format itself), transcription,
+     * translation content, VAD, or audio routing (EARPIECE/Bluetooth/
+     * speaker selection above is completely independent of this).
+     *
+     * A fresh `PlaybackParams()` is always constructed (rather than reading
+     * [AudioTrack.getPlaybackParams] first) — confirmed via the same docs
+     * that `PlaybackParams` has a plain no-arg constructor and that
+     * `setSpeed`/`setPitch` are chainable, so there is no need to rely on
+     * a freshly-built, not-yet-playing track's getter behavior, which
+     * isn't documented either way.
+     *
+     * 1.0x (the "normal" [TranslationPlaybackSpeed.NORMAL] option) is
+     * still passed through this exact call rather than skipped — cheap,
+     * and keeps this one code path correct for every option instead of
+     * special-casing the identity value.
+     *
+     * `setPlaybackParams()` is documented to fail to apply the requested
+     * params if the track's buffer isn't large enough for the requested
+     * speed (see [playbackBufferSizeBytes]) — every track this class
+     * builds now has that headroom, but this call stays wrapped
+     * defensively regardless: a rejected speed change should never crash
+     * or block an active Live session over what is ultimately a cosmetic
+     * preference; playback simply continues at whatever speed was already
+     * in effect (normal, the first time this is called in a session). */
+    private fun applyPlaybackSpeed(track: AudioTrack) {
+        val speed = settingsStore.translationPlaybackSpeed.multiplier
+        try {
+            track.playbackParams = PlaybackParams()
+                .setSpeed(speed)
+                .setPitch(1.0f)
+        } catch (_: Exception) {
+            // Best-effort only — see this function's own doc.
         }
     }
 
@@ -860,6 +934,7 @@ class LiveTranslationService : Service() {
                         .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
                         .build()
                 )
+                .setBufferSizeInBytes(playbackBufferSizeBytes())
                 .setTransferMode(AudioTrack.MODE_STREAM)
                 .build()
             if (outputDevice != null) {
@@ -870,6 +945,7 @@ class LiveTranslationService : Service() {
                     // platform's own default routing if an OEM rejects the pin.
                 }
             }
+            playbackTrack?.let { applyPlaybackSpeed(it) }
             playbackTrack?.play()
         }
 
@@ -1167,6 +1243,21 @@ class LiveTranslationService : Service() {
         private const val PLAYBACK_SAMPLE_RATE_HZ = 24_000
         private const val MIN_BUFFER_FLOOR = 3_200 // 100ms of 16kHz mono 16-bit audio
         private const val CAPTURE_THREAD_JOIN_TIMEOUT_MS = 500L
+
+        /** `AudioTrack.setPlaybackParams()` is documented (see
+         * [applyPlaybackSpeed]'s doc) to fail to apply a speed > 1.0f
+         * unless the track's buffer is larger than `speed × getMinBufferSize()`
+         * — every [playbackTrack] this class builds is sized at
+         * `getMinBufferSize() × PLAYBACK_BUFFER_SPEED_HEADROOM` regardless
+         * of which [TranslationPlaybackSpeed] is actually configured right
+         * now (so changing that Settings value later never needs a
+         * different buffer), comfortably above the fastest offered option
+         * ([TranslationPlaybackSpeed.FASTEST], 1.5x). A larger MODE_STREAM
+         * buffer CAPACITY does not by itself add playback latency — only
+         * the amount of unplayed audio actually queued in it does, and
+         * this class still writes audio in the same chunks it always has
+         * as [ServerEvent.AudioChunk] events arrive. */
+        private const val PLAYBACK_BUFFER_SPEED_HEADROOM = 2.5f
 
         private const val MAX_RECONNECT_ATTEMPTS = 5
         private val RECONNECT_BACKOFF_MS = longArrayOf(2_000, 4_000, 8_000, 16_000, 30_000)

@@ -174,4 +174,12 @@
     <string name="live_error_quota">Sasniegts Gemini Live limits — mēģiniet vēlreiz vēlāk.</string>
     <string name="live_error_auth">API atslēgas problēma — pārbaudiet atslēgu Iestatījumos.</string>
     <string name="live_error_config">Nederīga sesijas konfigurācija (piem., neatbalstīta valoda).</string>
+    <!-- Translation voice speed (AudioTrack.PlaybackParams, Na żywo playback only) -->
+    <string name="section_translation_speed">Tulkojuma balss ātrums</string>
+    <string name="translation_speed_description">Cik ātri Na żywo tiek atskaņota Gemini tulkotā balss. Paātrināšana nemaina balss augstumu — tas ietekmē tikai dzirdēto tulkoto audio, nekad to, ko mikrofons sūta Gemini.</string>
+    <string name="label_translation_speed_1_0">1.0x (normāls)</string>
+    <string name="label_translation_speed_1_15">1.15x</string>
+    <string name="label_translation_speed_1_25">1.25x (noklusējuma)</string>
+    <string name="label_translation_speed_1_35">1.35x</string>
+    <string name="label_translation_speed_1_5">1.5x (ātrākais)</string>
 </resources>

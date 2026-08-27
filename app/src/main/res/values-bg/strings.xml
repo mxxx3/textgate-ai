@@ -173,4 +173,12 @@
     <string name="live_error_quota">Достигнат е лимитът на Gemini Live — моля, опитайте отново по-късно.</string>
     <string name="live_error_auth">Проблем с API ключа — проверете ключа си в Настройки.</string>
     <string name="live_error_config">Невалидна конфигурация на сесията (напр. неподдържан език).</string>
+    <!-- Translation voice speed (AudioTrack.PlaybackParams, Na żywo playback only) -->
+    <string name="section_translation_speed">Скорост на гласа за превод</string>
+    <string name="translation_speed_description">Колко бързо се възпроизвежда преведеният глас на Gemini в Na żywo. Ускоряването не променя височината на тона — засяга само преведения звук, който чувате, никога това, което микрофонът изпраща до Gemini.</string>
+    <string name="label_translation_speed_1_0">1.0x (нормална)</string>
+    <string name="label_translation_speed_1_15">1.15x</string>
+    <string name="label_translation_speed_1_25">1.25x (по подразбиране)</string>
+    <string name="label_translation_speed_1_35">1.35x</string>
+    <string name="label_translation_speed_1_5">1.5x (най-бърза)</string>
 </resources>

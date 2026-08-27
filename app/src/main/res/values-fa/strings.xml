@@ -174,4 +174,12 @@
     <string name="live_error_quota">به محدودیت Gemini Live رسیده‌اید — لطفاً بعداً دوباره امتحان کنید.</string>
     <string name="live_error_auth">مشکل کلید API — کلید خود را در تنظیمات بررسی کنید.</string>
     <string name="live_error_config">پیکربندی نشست نامعتبر است (مثلاً زبان پشتیبانی‌نشده).</string>
+    <!-- Translation voice speed (AudioTrack.PlaybackParams, Na żywo playback only) -->
+    <string name="section_translation_speed">سرعت صدای ترجمه</string>
+    <string name="translation_speed_description">صدای ترجمه‌شده Gemini در Na żywo با چه سرعتی پخش می‌شود. افزایش سرعت زیر و بمی صدا را تغییر نمی‌دهد — فقط روی صدای ترجمه‌شده‌ای که می‌شنوید تأثیر می‌گذارد، هرگز روی چیزی که میکروفون به Gemini می‌فرستد.</string>
+    <string name="label_translation_speed_1_0">1.0x (عادی)</string>
+    <string name="label_translation_speed_1_15">1.15x</string>
+    <string name="label_translation_speed_1_25">1.25x (پیش‌فرض)</string>
+    <string name="label_translation_speed_1_35">1.35x</string>
+    <string name="label_translation_speed_1_5">1.5x (سریع‌ترین)</string>
 </resources>

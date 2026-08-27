@@ -174,4 +174,12 @@
     <string name="live_error_quota">Gemini Live\'i piirang on saavutatud — proovi hiljem uuesti.</string>
     <string name="live_error_auth">API-võtme probleem — kontrolli oma võtit Seadete alt.</string>
     <string name="live_error_config">Sobimatu seansi seadistus (nt toetamata keel).</string>
+    <!-- Translation voice speed (AudioTrack.PlaybackParams, Na żywo playback only) -->
+    <string name="section_translation_speed">Tõlke hääle kiirus</string>
+    <string name="translation_speed_description">Kui kiiresti mängitakse Gemini tõlgitud häält funktsioonis Na żywo. Kiirendamine ei muuda hääle kõrgust — see mõjutab ainult tõlgitud heli, mida kuuled, mitte kunagi seda, mida mikrofon Geminile saadab.</string>
+    <string name="label_translation_speed_1_0">1.0x (tavaline)</string>
+    <string name="label_translation_speed_1_15">1.15x</string>
+    <string name="label_translation_speed_1_25">1.25x (vaikimisi)</string>
+    <string name="label_translation_speed_1_35">1.35x</string>
+    <string name="label_translation_speed_1_5">1.5x (kiireim)</string>
 </resources>

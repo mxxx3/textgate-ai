@@ -174,4 +174,12 @@
     <string name="live_error_quota">Gemini Live -raja saavutettu — yritä myöhemmin uudelleen.</string>
     <string name="live_error_auth">API-avaimen ongelma — tarkista avaimesi Asetuksista.</string>
     <string name="live_error_config">Virheellinen istunnon määritys (esim. kieltä ei tueta).</string>
+    <!-- Translation voice speed (AudioTrack.PlaybackParams, Na żywo playback only) -->
+    <string name="section_translation_speed">Käännösäänen nopeus</string>
+    <string name="translation_speed_description">Kuinka nopeasti Geminin käännetty ääni toistetaan Na żywo -tilassa. Nopeuttaminen ei muuta äänenkorkeutta — se vaikuttaa vain kuulemaasi käännettyyn ääneen, ei koskaan siihen, mitä mikrofoni lähettää Geminille.</string>
+    <string name="label_translation_speed_1_0">1.0x (normaali)</string>
+    <string name="label_translation_speed_1_15">1.15x</string>
+    <string name="label_translation_speed_1_25">1.25x (oletus)</string>
+    <string name="label_translation_speed_1_35">1.35x</string>
+    <string name="label_translation_speed_1_5">1.5x (nopein)</string>
 </resources>

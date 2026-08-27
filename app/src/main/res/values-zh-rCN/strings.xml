@@ -173,4 +173,12 @@
     <string name="live_error_quota">已达到 Gemini Live 限额 — 请稍后再试。</string>
     <string name="live_error_auth">API 密钥问题 — 请在设置中检查您的密钥。</string>
     <string name="live_error_config">会话配置无效(例如不支持的语言)。</string>
+    <!-- Translation voice speed (AudioTrack.PlaybackParams, Na żywo playback only) -->
+    <string name="section_translation_speed">翻译语音速度</string>
+    <string name="translation_speed_description">Gemini 翻译语音在 Na żywo 中的播放速度。加快速度不会改变音调 — 只影响你听到的翻译音频，绝不影响麦克风发送给 Gemini 的内容。</string>
+    <string name="label_translation_speed_1_0">1.0x（正常）</string>
+    <string name="label_translation_speed_1_15">1.15x</string>
+    <string name="label_translation_speed_1_25">1.25x（默认）</string>
+    <string name="label_translation_speed_1_35">1.35x</string>
+    <string name="label_translation_speed_1_5">1.5x（最快）</string>
 </resources>

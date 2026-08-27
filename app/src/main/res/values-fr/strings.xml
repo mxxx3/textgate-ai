@@ -174,4 +174,12 @@
     <string name="live_error_quota">Limite Gemini Live atteinte — veuillez réessayer plus tard.</string>
     <string name="live_error_auth">Problème de clé API — vérifiez votre clé dans les Paramètres.</string>
     <string name="live_error_config">Configuration de session invalide (p. ex. langue non prise en charge).</string>
+    <!-- Translation voice speed (AudioTrack.PlaybackParams, Na żywo playback only) -->
+    <string name="section_translation_speed">Vitesse de la voix de traduction</string>
+    <string name="translation_speed_description">À quelle vitesse la voix traduite de Gemini est lue dans Na żywo. Accélérer ne change pas la hauteur de la voix — cela n\'affecte que l\'audio traduit que vous entendez, jamais ce que le microphone envoie à Gemini.</string>
+    <string name="label_translation_speed_1_0">1.0x (normale)</string>
+    <string name="label_translation_speed_1_15">1.15x</string>
+    <string name="label_translation_speed_1_25">1.25x (par défaut)</string>
+    <string name="label_translation_speed_1_35">1.35x</string>
+    <string name="label_translation_speed_1_5">1.5x (la plus rapide)</string>
 </resources>

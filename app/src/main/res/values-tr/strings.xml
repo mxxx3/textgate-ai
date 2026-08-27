@@ -173,4 +173,12 @@
     <string name="live_error_quota">Gemini Live sınırına ulaşıldı — lütfen daha sonra tekrar deneyin.</string>
     <string name="live_error_auth">API anahtarı sorunu — anahtarınızı Ayarlar\'da kontrol edin.</string>
     <string name="live_error_config">Geçersiz oturum yapılandırması (örn. desteklenmeyen dil).</string>
+    <!-- Translation voice speed (AudioTrack.PlaybackParams, Na żywo playback only) -->
+    <string name="section_translation_speed">Çeviri sesi hızı</string>
+    <string name="translation_speed_description">Na żywo\'da Gemini\'nin çevrilmiş sesinin ne kadar hızlı çalındığı. Hızlandırmak perdeyi değiştirmez — yalnızca duyduğunuz çevrilmiş sesi etkiler, mikrofonun Gemini\'ye gönderdiği sesi asla etkilemez.</string>
+    <string name="label_translation_speed_1_0">1.0x (normal)</string>
+    <string name="label_translation_speed_1_15">1.15x</string>
+    <string name="label_translation_speed_1_25">1.25x (varsayılan)</string>
+    <string name="label_translation_speed_1_35">1.35x</string>
+    <string name="label_translation_speed_1_5">1.5x (en hızlı)</string>
 </resources>

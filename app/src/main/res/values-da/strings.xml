@@ -174,4 +174,12 @@
     <string name="live_error_quota">Gemini Live-grænsen er nået — prøv igen senere.</string>
     <string name="live_error_auth">Problem med API-nøgle — tjek din nøgle i Indstillinger.</string>
     <string name="live_error_config">Ugyldig sessionskonfiguration (f.eks. et sprog der ikke understøttes).</string>
+    <!-- Translation voice speed (AudioTrack.PlaybackParams, Na żywo playback only) -->
+    <string name="section_translation_speed">Oversættelsesstemmens hastighed</string>
+    <string name="translation_speed_description">Hvor hurtigt Geminis oversatte stemme afspilles i Na żywo. Hurtigere afspilning ændrer ikke tonehøjden — det påvirker kun den oversatte lyd, du hører, aldrig det, mikrofonen sender til Gemini.</string>
+    <string name="label_translation_speed_1_0">1.0x (normal)</string>
+    <string name="label_translation_speed_1_15">1.15x</string>
+    <string name="label_translation_speed_1_25">1.25x (standard)</string>
+    <string name="label_translation_speed_1_35">1.35x</string>
+    <string name="label_translation_speed_1_5">1.5x (hurtigst)</string>
 </resources>

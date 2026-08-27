@@ -174,4 +174,12 @@
     <string name="live_error_quota">Το όριο του Gemini Live έχει εξαντληθεί — δοκιμάστε ξανά αργότερα.</string>
     <string name="live_error_auth">Πρόβλημα με το κλειδί API — ελέγξτε το κλειδί σας στις Ρυθμίσεις.</string>
     <string name="live_error_config">Μη έγκυρη διαμόρφωση περιόδου σύνδεσης (π.χ. μη υποστηριζόμενη γλώσσα).</string>
+    <!-- Translation voice speed (AudioTrack.PlaybackParams, Na żywo playback only) -->
+    <string name="section_translation_speed">Ταχύτητα φωνής μετάφρασης</string>
+    <string name="translation_speed_description">Πόσο γρήγορα αναπαράγεται η μεταφρασμένη φωνή του Gemini στο Na żywo. Η επιτάχυνση δεν αλλάζει τον τόνο — επηρεάζει μόνο τον μεταφρασμένο ήχο που ακούτε, ποτέ αυτό που στέλνει το μικρόφωνο στο Gemini.</string>
+    <string name="label_translation_speed_1_0">1.0x (κανονική)</string>
+    <string name="label_translation_speed_1_15">1.15x</string>
+    <string name="label_translation_speed_1_25">1.25x (προεπιλογή)</string>
+    <string name="label_translation_speed_1_35">1.35x</string>
+    <string name="label_translation_speed_1_5">1.5x (η ταχύτερη)</string>
 </resources>

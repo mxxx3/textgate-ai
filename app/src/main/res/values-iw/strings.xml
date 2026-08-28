@@ -24,6 +24,15 @@
     <string name="accessibility_status_enabled">מופעל</string>
     <string name="accessibility_status_disabled">לא מופעל — TextGate AI לא יכולה לעשות דבר עד שתפעילו אותה</string>
     <string name="btn_open_accessibility_settings">פתיחת הגדרות הנגישות</string>
+    <string name="section_background_operation">Background operation</string>
+    <string name="background_operation_status_oem">This phone may require extra background permissions</string>
+    <string name="background_operation_status_unrestricted">Battery optimization is already unrestricted for TextGate AI</string>
+    <string name="background_operation_status_standard">If translation stops after closing the app, review these settings</string>
+    <string name="background_operation_description">Some phones, especially Xiaomi/HyperOS, Redmi, and POCO, can stop the Accessibility Service after the app is closed. TextGate AI cannot change these settings automatically. To keep translation working, enable the Accessibility Service, set battery usage to &quot;No restrictions&quot; or &quot;Unrestricted,&quot; and enable Autostart if your phone shows that option.</string>
+    <string name="btn_open_battery_settings">Open battery/app settings</string>
+    <string name="btn_open_autostart_settings">Open Autostart settings</string>
+    <string name="btn_open_app_details_settings">Open app details</string>
+    <string name="background_operation_policy_note">You stay in control: each button only opens Android or manufacturer settings, where you choose what to allow. TextGate AI never enables Accessibility, Autostart, or battery exemptions by itself.</string>
 
     <string name="accessibility_disclosure_title">לפני שתפעילו את שירות הנגישות</string>
     <string name="accessibility_disclosure_body">TextGate AI אינה כלי נגישות עבור אנשים עם מוגבלויות — היא משתמשת בשירות הנגישות של Android אך ורק כדי להפעיל תרגום במקום, ורק באופן המתואר כאן.\n\nמה נקרא: שדה הטקסט שבו אתם עורכים כרגע — רק כדי לבדוק אם יש סיומת טריגר מדויקת אחת, כמו \"?en\" או \"?de\", בסוף מה שהקלדתם; והודעה או תגובה שעליה אתם לוחצים לחיצה ארוכה — רק באפליקציות שאישרתם במפורש בהגדרות.\n\nמה שאף פעם לא נקרא: שדות סיסמה, הזנת קוד PIN, או כל דבר באפליקציה שלא הפעלתם. אף פעם לא נשמרת היסטוריה של דבר שנקרא.\n\nמה קורה בהמשך: רק כאשר מזוהה טריגר, או כשאתם לוחצים לחיצה ארוכה על הודעה, הטקסט הרלוונטי נשלח פעם אחת, דרך HTTPS, אל ה-API של Gemini שהגדרתם, ומתורגם. בכל זמן אחר לא נשלח שום דבר.\n\nאתם נשארים בשליטה: כבו את כל התכונה בכל עת באמצעות המתג הראשי בהגדרות, והסירו כל אפליקציה מהרשימה המורשית מתי שתרצו.\n\nלחיצה על \"הסכמה\" פותחת את הגדרות הנגישות של Android עצמו, שם אתם מפעילים בעצמכם את TextGate AI — לחיצה על הכפתור הזה בלבד אינה מפעילה דבר.</string>

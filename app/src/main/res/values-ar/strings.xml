@@ -24,6 +24,15 @@
     <string name="accessibility_status_enabled">مفعّلة</string>
     <string name="accessibility_status_disabled">غير مفعّلة — لا يمكن لـ TextGate AI فعل أي شيء حتى تُفعّلها</string>
     <string name="btn_open_accessibility_settings">فتح إعدادات إمكانية الوصول</string>
+    <string name="section_background_operation">Background operation</string>
+    <string name="background_operation_status_oem">This phone may require extra background permissions</string>
+    <string name="background_operation_status_unrestricted">Battery optimization is already unrestricted for TextGate AI</string>
+    <string name="background_operation_status_standard">If translation stops after closing the app, review these settings</string>
+    <string name="background_operation_description">Some phones, especially Xiaomi/HyperOS, Redmi, and POCO, can stop the Accessibility Service after the app is closed. TextGate AI cannot change these settings automatically. To keep translation working, enable the Accessibility Service, set battery usage to &quot;No restrictions&quot; or &quot;Unrestricted,&quot; and enable Autostart if your phone shows that option.</string>
+    <string name="btn_open_battery_settings">Open battery/app settings</string>
+    <string name="btn_open_autostart_settings">Open Autostart settings</string>
+    <string name="btn_open_app_details_settings">Open app details</string>
+    <string name="background_operation_policy_note">You stay in control: each button only opens Android or manufacturer settings, where you choose what to allow. TextGate AI never enables Accessibility, Autostart, or battery exemptions by itself.</string>
     <string name="accessibility_disclosure_title">قبل أن تُفعّل خدمة إمكانية الوصول</string>
     <string name="accessibility_disclosure_body">TextGate AI ليس أداة إمكانية وصول لذوي الإعاقة — إنه يستخدم خدمة إمكانية الوصول في أندرويد لغرض واحد فقط: تشغيل الترجمة داخل النص نفسه، وبالطريقة الموضحة هنا حصرًا.\n\nما الذي تتم قراءته: حقل النص الذي تُحرّره حاليًا، وذلك فقط للتحقق من وجود لاحقة مشغّل واحدة محددة بدقة مثل \"?en\" أو \"?de\" في نهاية ما كتبته؛ ورسالة أو تعليق تضغط عليه ضغطًا مطوّلًا، وذلك فقط في التطبيقات التي سمحت بها صراحةً في الإعدادات.\n\nما لا تتم قراءته أبدًا: حقول كلمات المرور، وإدخال رمز PIN، أو أي شيء في تطبيق لم تُفعّله. لا يُحتفظ بأي سجل لما تمت قراءته على الإطلاق.\n\nما يحدث بعد ذلك: فقط عند اكتشاف مشغّل، أو عند ضغطك المطول على رسالة، يُرسَل النص المعني مرة واحدة، عبر HTTPS، إلى واجهة Gemini API التي أعددتها، ليُترجَم. لا يُرسَل أي شيء في أي وقت آخر.\n\nتبقى أنت المتحكم: أوقف الميزة بالكامل في أي وقت عبر المفتاح الرئيسي في الإعدادات، وأزل أي تطبيق من قائمة التطبيقات المسموح بها متى شئت.\n\nيؤدي النقر على \"أوافق\" إلى فتح إعدادات إمكانية الوصول الخاصة بأندرويد نفسها، حيث تُفعّل TextGate AI بنفسك — لا يتم تفعيل أي شيء بمجرد النقر على هذا الزر وحده.</string>
     <string name="btn_accessibility_agree">أوافق وأتابع إلى الإعدادات</string>

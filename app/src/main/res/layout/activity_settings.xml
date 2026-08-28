@@ -427,6 +427,69 @@
                 android:text="@string/btn_open_accessibility_settings" />
         </LinearLayout>
 
+        <!-- Background operation guidance for OEMs such as Xiaomi/HyperOS.
+             The app does not enable anything automatically; each button
+             only opens a system settings screen where the user makes the
+             final choice themselves. -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/bg_card"
+            android:layout_marginBottom="12dp">
+
+            <TextView
+                style="@style/TgSectionTitle"
+                android:text="@string/section_background_operation" />
+
+            <TextView
+                android:id="@+id/textBackgroundOperationStatus"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:textColor="@color/tg_text_primary"
+                tools:text="Extra setup may be needed on this phone" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="@string/background_operation_description"
+                android:textSize="13sp"
+                android:textColor="@color/tg_text_secondary" />
+
+            <Button
+                android:id="@+id/buttonOpenBatterySettings"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="@string/btn_open_battery_settings" />
+
+            <Button
+                android:id="@+id/buttonOpenAutostartSettings"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="@string/btn_open_autostart_settings" />
+
+            <Button
+                android:id="@+id/buttonOpenAppDetailsSettings"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="@string/btn_open_app_details_settings" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="@string/background_operation_policy_note"
+                android:textSize="12sp"
+                android:textColor="@color/tg_text_secondary" />
+        </LinearLayout>
+
         <!-- Allowed apps -->
         <LinearLayout
             android:layout_width="match_parent"

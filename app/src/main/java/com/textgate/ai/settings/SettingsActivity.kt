@@ -9,6 +9,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.os.PowerManager
 import android.provider.Settings
 import android.view.LayoutInflater
 import android.view.View
@@ -144,6 +145,7 @@ class SettingsActivity : Activity() {
         setupHeadsetDisconnectSection()
         setupAudioCaptureModeSection()
         setupAccessibilitySection()
+        setupBackgroundOperationSection()
         setupApiKeySection()
         setupModelSection()
         setupTestApiButton()
@@ -158,6 +160,7 @@ class SettingsActivity : Activity() {
         // system Settings), so refresh the status label every time the
         // user returns to this screen.
         refreshAccessibilityStatus()
+        refreshBackgroundOperationStatus()
     }
 
     override fun onDestroy() {
@@ -465,6 +468,87 @@ class SettingsActivity : Activity() {
         } catch (_: Exception) {
             false
         }
+    }
+
+    // ---------------------------------------------------------------
+    // Background operation guidance
+    // ---------------------------------------------------------------
+
+    private fun setupBackgroundOperationSection() {
+        refreshBackgroundOperationStatus()
+        binding.buttonOpenBatterySettings.setOnClickListener {
+            openAppDetailsSettings()
+        }
+        binding.buttonOpenAutostartSettings.setOnClickListener {
+            openXiaomiAutostartSettings()
+        }
+        binding.buttonOpenAppDetailsSettings.setOnClickListener {
+            openAppDetailsSettings()
+        }
+    }
+
+    private fun refreshBackgroundOperationStatus() {
+        if (!::binding.isInitialized) return
+        val statusRes = when {
+            isKnownAggressiveBackgroundDevice() -> R.string.background_operation_status_oem
+            isIgnoringBatteryOptimizations() -> R.string.background_operation_status_unrestricted
+            else -> R.string.background_operation_status_standard
+        }
+        binding.textBackgroundOperationStatus.text = getString(statusRes)
+    }
+
+    private fun isIgnoringBatteryOptimizations(): Boolean {
+        return try {
+            val powerManager = getSystemService(POWER_SERVICE) as? PowerManager ?: return false
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                powerManager.isIgnoringBatteryOptimizations(packageName)
+            } else {
+                false
+            }
+        } catch (_: Exception) {
+            false
+        }
+    }
+
+    private fun isKnownAggressiveBackgroundDevice(): Boolean {
+        val manufacturer = Build.MANUFACTURER.lowercase()
+        val brand = Build.BRAND.lowercase()
+        return listOf("xiaomi", "redmi", "poco").any { marker ->
+            manufacturer.contains(marker) || brand.contains(marker)
+        }
+    }
+
+    private fun openAppDetailsSettings() {
+        try {
+            startActivity(
+                Intent(
+                    Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                    Uri.parse("package:$packageName")
+                )
+            )
+        } catch (_: Exception) {
+            Toast.makeText(this, R.string.error_generic, Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun openXiaomiAutostartSettings() {
+        val intents = listOf(
+            Intent().setClassName(
+                "com.miui.securitycenter",
+                "com.miui.permcenter.autostart.AutoStartManagementActivity"
+            ),
+            Intent("miui.intent.action.OP_AUTO_START"),
+            Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:$packageName"))
+        )
+        for (intent in intents) {
+            try {
+                startActivity(intent)
+                return
+            } catch (_: Exception) {
+                // Try the next known OEM/system screen.
+            }
+        }
+        Toast.makeText(this, R.string.error_generic, Toast.LENGTH_SHORT).show()
     }
 
     // ---------------------------------------------------------------

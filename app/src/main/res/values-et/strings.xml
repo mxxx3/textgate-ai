@@ -24,6 +24,15 @@
     <string name="accessibility_status_enabled">Lubatud</string>
     <string name="accessibility_status_disabled">Ei ole lubatud — TextGate AI ei saa midagi teha, kuni te selle lubate</string>
     <string name="btn_open_accessibility_settings">Ava hõlbustusteenuse seaded</string>
+    <string name="section_background_operation">Background operation</string>
+    <string name="background_operation_status_oem">This phone may require extra background permissions</string>
+    <string name="background_operation_status_unrestricted">Battery optimization is already unrestricted for TextGate AI</string>
+    <string name="background_operation_status_standard">If translation stops after closing the app, review these settings</string>
+    <string name="background_operation_description">Some phones, especially Xiaomi/HyperOS, Redmi, and POCO, can stop the Accessibility Service after the app is closed. TextGate AI cannot change these settings automatically. To keep translation working, enable the Accessibility Service, set battery usage to &quot;No restrictions&quot; or &quot;Unrestricted,&quot; and enable Autostart if your phone shows that option.</string>
+    <string name="btn_open_battery_settings">Open battery/app settings</string>
+    <string name="btn_open_autostart_settings">Open Autostart settings</string>
+    <string name="btn_open_app_details_settings">Open app details</string>
+    <string name="background_operation_policy_note">You stay in control: each button only opens Android or manufacturer settings, where you choose what to allow. TextGate AI never enables Accessibility, Autostart, or battery exemptions by itself.</string>
 
     <string name="accessibility_disclosure_title">Enne hõlbustusteenuse lubamist</string>
     <string name="accessibility_disclosure_body">TextGate AI ei ole hõlbustusvahend puuetega inimestele — see kasutab Androidi hõlbustusteenust ainuüksi selleks, et võimaldada tõlkimist otse kohapeal, ja seda ainult nii, nagu siin kirjeldatud.\n\nMida loetakse: tekstiväli, mida te parasjagu redigeerite — ainult selleks, et kontrollida, kas kirjutatu lõpus on üks täpne päästiku-sufiks, näiteks \"?en\" või \"?de\"; ning sõnum või kommentaar, millel te pikalt vajutate, ainult rakendustes, mille olete Seadetes sõnaselgelt lubanud.\n\nMida ei loeta kunagi: paroolivälju, PIN-koode ega midagi rakenduses, mida te ei ole sisse lülitanud. Loetu kohta ei säilitata kunagi ajalugu.\n\nMis juhtub seejärel: alles siis, kui tuvastatakse päästik või kui te sõnumil pikalt vajutate, saadetakse asjakohane tekst üks kord üle HTTPS-i teie seadistatud Gemini API-sse ja tõlgitakse. Muul ajal ei saadeta midagi.\n\nKontroll jääb teile: lülitage kogu funktsioon soovi korral igal ajal välja Seadete pealülitist ja eemaldage rakendus lubatud loendist, millal iganes soovite.\n\nNupu \"Nõustun\" vajutamine avab Androidi enda hõlbustusteenuse seaded, kus te lülitate TextGate AI ise sisse — ainuüksi selle nupu vajutamine midagi sisse ei lülita.</string>

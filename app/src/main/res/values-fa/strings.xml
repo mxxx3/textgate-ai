@@ -24,6 +24,15 @@
     <string name="accessibility_status_enabled">فعال</string>
     <string name="accessibility_status_disabled">فعال نیست — TextGate AI تا زمانی که آن را فعال نکنید نمی‌تواند کاری انجام دهد</string>
     <string name="btn_open_accessibility_settings">باز کردن تنظیمات دسترس‌پذیری</string>
+    <string name="section_background_operation">Background operation</string>
+    <string name="background_operation_status_oem">This phone may require extra background permissions</string>
+    <string name="background_operation_status_unrestricted">Battery optimization is already unrestricted for TextGate AI</string>
+    <string name="background_operation_status_standard">If translation stops after closing the app, review these settings</string>
+    <string name="background_operation_description">Some phones, especially Xiaomi/HyperOS, Redmi, and POCO, can stop the Accessibility Service after the app is closed. TextGate AI cannot change these settings automatically. To keep translation working, enable the Accessibility Service, set battery usage to &quot;No restrictions&quot; or &quot;Unrestricted,&quot; and enable Autostart if your phone shows that option.</string>
+    <string name="btn_open_battery_settings">Open battery/app settings</string>
+    <string name="btn_open_autostart_settings">Open Autostart settings</string>
+    <string name="btn_open_app_details_settings">Open app details</string>
+    <string name="background_operation_policy_note">You stay in control: each button only opens Android or manufacturer settings, where you choose what to allow. TextGate AI never enables Accessibility, Autostart, or battery exemptions by itself.</string>
 
     <string name="accessibility_disclosure_title">پیش از فعال کردن سرویس دسترس‌پذیری</string>
     <string name="accessibility_disclosure_body">TextGate AI یک ابزار دسترس‌پذیری برای افراد دارای معلولیت نیست — این برنامه از سرویس دسترس‌پذیری اندروید تنها برای فعال کردن ترجمهٔ درجا استفاده می‌کند، و فقط به همان شکلی که در اینجا توضیح داده شده است.\n\nچه چیزی خوانده می‌شود: فیلد متنی که در حال حاضر ویرایش می‌کنید، فقط برای بررسی وجود یک پسوند فعال‌ساز دقیق مانند «?en» یا «?de» در انتهای متن تایپ‌شده؛ و پیام یا نظری که روی آن فشار طولانی می‌دهید، فقط در برنامه‌هایی که به‌صراحت در تنظیمات مجاز کرده‌اید.\n\nچه چیزی هرگز خوانده نمی‌شود: فیلدهای رمز عبور، ورود پین، یا هر چیزی در برنامه‌ای که روشن نکرده‌اید. هیچ تاریخچه‌ای از آنچه خوانده شده نگه‌داری نمی‌شود.\n\nبعد از آن چه اتفاقی می‌افتد: تنها زمانی که یک فعال‌ساز شناسایی شود، یا زمانی که روی پیامی فشار طولانی دهید، متن مربوطه یک‌بار از طریق HTTPS به Gemini API‌ای که پیکربندی کرده‌اید ارسال و ترجمه می‌شود. در هیچ زمان دیگری چیزی ارسال نمی‌شود.\n\nکنترل همیشه دست شماست: هر زمان که بخواهید می‌توانید کل این قابلیت را با کلید اصلی در تنظیمات خاموش کنید و هر برنامه‌ای را هر وقت خواستید از فهرست مجاز حذف کنید.\n\nبا ضربه زدن روی «موافقم»، تنظیمات دسترس‌پذیری خود اندروید باز می‌شود، جایی که خودتان TextGate AI را روشن می‌کنید — با ضربه زدن روی همین دکمه به‌تنهایی چیزی فعال نمی‌شود.</string>

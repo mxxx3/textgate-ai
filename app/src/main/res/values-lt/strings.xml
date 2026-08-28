@@ -24,6 +24,15 @@
     <string name="accessibility_status_enabled">Įjungta</string>
     <string name="accessibility_status_disabled">Neįjungta — TextGate AI negalės nieko atlikti, kol jos neįjungsite</string>
     <string name="btn_open_accessibility_settings">Atidaryti pritaikymo neįgaliesiems nustatymus</string>
+    <string name="section_background_operation">Background operation</string>
+    <string name="background_operation_status_oem">This phone may require extra background permissions</string>
+    <string name="background_operation_status_unrestricted">Battery optimization is already unrestricted for TextGate AI</string>
+    <string name="background_operation_status_standard">If translation stops after closing the app, review these settings</string>
+    <string name="background_operation_description">Some phones, especially Xiaomi/HyperOS, Redmi, and POCO, can stop the Accessibility Service after the app is closed. TextGate AI cannot change these settings automatically. To keep translation working, enable the Accessibility Service, set battery usage to &quot;No restrictions&quot; or &quot;Unrestricted,&quot; and enable Autostart if your phone shows that option.</string>
+    <string name="btn_open_battery_settings">Open battery/app settings</string>
+    <string name="btn_open_autostart_settings">Open Autostart settings</string>
+    <string name="btn_open_app_details_settings">Open app details</string>
+    <string name="background_operation_policy_note">You stay in control: each button only opens Android or manufacturer settings, where you choose what to allow. TextGate AI never enables Accessibility, Autostart, or battery exemptions by itself.</string>
 
     <string name="accessibility_disclosure_title">Prieš įjungdami pritaikymo neįgaliesiems paslaugą</string>
     <string name="accessibility_disclosure_body">TextGate AI nėra pritaikymo neįgaliesiems priemonė žmonėms su negalia — ji naudoja Android pritaikymo neįgaliesiems paslaugą tik tam, kad veiktų vertimas vietoje, ir tik taip, kaip aprašyta čia.\n\nKas skaitoma: teksto laukas, kurį šiuo metu redaguojate, tik tam, kad būtų patikrinta, ar įvesto teksto pabaigoje yra vienas tikslus suveikimo ženklas, pvz., \"?en\" arba \"?de\"; ir pranešimas ar komentaras, kurį paspaudžiate ir laikote nuspaudę, tik tose programose, kurias aiškiai leidote Nustatymuose.\n\nKas niekada neskaitoma: slaptažodžių laukai, PIN kodo įvestis ar bet kas programoje, kurios neįjungėte. Jokia perskaityto teksto istorija niekada nesaugoma.\n\nKas vyksta toliau: tik aptikus suveikimo ženklą arba jums laikant nuspaudę pranešimą, atitinkamas tekstas vieną kartą siunčiamas per HTTPS į jūsų sukonfigūruotą Gemini API ir išverčiamas. Jokiu kitu metu niekas nesiunčiama.\n\nJūs viską kontroliuojate: bet kada išjunkite visą funkciją pagrindiniu jungikliu Nustatymuose ir bet kada pašalinkite bet kurią programą iš leidžiamų sąrašo.\n\nPalietę \"Sutinku\" atidarysite Android pritaikymo neįgaliesiems nustatymus, kuriuose patys įjungsite TextGate AI — vien paspaudus šį mygtuką niekas neįjungiama.</string>

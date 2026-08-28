@@ -24,6 +24,15 @@
     <string name="accessibility_status_enabled">已启用</string>
     <string name="accessibility_status_disabled">未启用——在您启用之前,TextGate AI 无法执行任何操作</string>
     <string name="btn_open_accessibility_settings">打开无障碍设置</string>
+    <string name="section_background_operation">Background operation</string>
+    <string name="background_operation_status_oem">This phone may require extra background permissions</string>
+    <string name="background_operation_status_unrestricted">Battery optimization is already unrestricted for TextGate AI</string>
+    <string name="background_operation_status_standard">If translation stops after closing the app, review these settings</string>
+    <string name="background_operation_description">Some phones, especially Xiaomi/HyperOS, Redmi, and POCO, can stop the Accessibility Service after the app is closed. TextGate AI cannot change these settings automatically. To keep translation working, enable the Accessibility Service, set battery usage to &quot;No restrictions&quot; or &quot;Unrestricted,&quot; and enable Autostart if your phone shows that option.</string>
+    <string name="btn_open_battery_settings">Open battery/app settings</string>
+    <string name="btn_open_autostart_settings">Open Autostart settings</string>
+    <string name="btn_open_app_details_settings">Open app details</string>
+    <string name="background_operation_policy_note">You stay in control: each button only opens Android or manufacturer settings, where you choose what to allow. TextGate AI never enables Accessibility, Autostart, or battery exemptions by itself.</string>
     <string name="accessibility_disclosure_title">啟用無障礙服務之前</string>
     <string name="accessibility_disclosure_body">TextGate AI 並不是為身心障礙人士打造的輔助工具——它使用 Android 的無障礙服務,單純是為了實現原地翻譯功能,而且僅限於這裡所說明的方式。\n\n會被讀取的內容:您目前正在編輯的文字欄位,但僅用於檢查您輸入內容的結尾是否出現一個像「?en」或「?de」這樣的精確觸發後綴;以及您長按的一則訊息或留言,但僅限於您已在「設定」中明確允許的應用程式。\n\n絕不會被讀取的內容:密碼欄位、PIN 碼輸入框,或任何您尚未開啟的應用程式中的內容。系統絕不會保留任何已讀取內容的紀錄。\n\n接下來會發生的事:只有在偵測到觸發後綴,或您長按一則訊息時,相關文字才會透過 HTTPS 傳送一次,送到您所設定的 Gemini API 進行翻譯。除此之外的任何時候,系統都不會傳送任何內容。\n\n您隨時掌握主導權:您可以隨時透過「設定」中的總開關關閉整個功能,也可以隨時將任何應用程式從允許清單中移除。\n\n點一下「我同意」會開啟 Android 系統的無障礙設定頁面,由您親自在裡頭開啟 TextGate AI——單純點擊這個按鈕,並不會啟用任何功能。</string>
     <string name="btn_accessibility_agree">我同意並前往設定</string>

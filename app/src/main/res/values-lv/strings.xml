@@ -24,6 +24,15 @@
     <string name="accessibility_status_enabled">Iespējots</string>
     <string name="accessibility_status_disabled">Nav iespējots — TextGate AI nevar neko darīt, kamēr to neiespējosiet</string>
     <string name="btn_open_accessibility_settings">Atvērt pieejamības iestatījumus</string>
+    <string name="section_background_operation">Background operation</string>
+    <string name="background_operation_status_oem">This phone may require extra background permissions</string>
+    <string name="background_operation_status_unrestricted">Battery optimization is already unrestricted for TextGate AI</string>
+    <string name="background_operation_status_standard">If translation stops after closing the app, review these settings</string>
+    <string name="background_operation_description">Some phones, especially Xiaomi/HyperOS, Redmi, and POCO, can stop the Accessibility Service after the app is closed. TextGate AI cannot change these settings automatically. To keep translation working, enable the Accessibility Service, set battery usage to &quot;No restrictions&quot; or &quot;Unrestricted,&quot; and enable Autostart if your phone shows that option.</string>
+    <string name="btn_open_battery_settings">Open battery/app settings</string>
+    <string name="btn_open_autostart_settings">Open Autostart settings</string>
+    <string name="btn_open_app_details_settings">Open app details</string>
+    <string name="background_operation_policy_note">You stay in control: each button only opens Android or manufacturer settings, where you choose what to allow. TextGate AI never enables Accessibility, Autostart, or battery exemptions by itself.</string>
 
     <string name="accessibility_disclosure_title">Pirms iespējojat pieejamības pakalpojumu</string>
     <string name="accessibility_disclosure_body">TextGate AI nav pieejamības rīks cilvēkiem ar invaliditāti — tā izmanto Android pieejamības pakalpojumu tikai un vienīgi tulkošanai tieši tur, kur rakstāt, un vienīgi tā, kā aprakstīts šeit.\n\nKas tiek lasīts: teksta lauks, kuru pašlaik rediģējat, tikai lai pārbaudītu, vai ievadītā teksta beigās ir viens precīzs izraisītājsufikss, piemēram, \"?en\" vai \"?de\"; un ziņa vai komentārs, kuru turat nospiestu, tikai lietotnēs, kurām to skaidri atļāvāt Iestatījumos.\n\nKas nekad netiek lasīts: paroles lauki, PIN koda ievade vai jebkas lietotnē, kuru neesat iespējojis. Nekāda izlasītā satura vēsture nekad netiek saglabāta.\n\nKas notiek tālāk: tikai tad, kad tiek atklāts izraisītājs vai kad turat nospiestu ziņu, attiecīgais teksts vienu reizi tiek nosūtīts pa HTTPS uz jūsu konfigurēto Gemini API un iztulkots. Nekādā citā brīdī nekas netiek sūtīts.\n\nJūs saglabājat pilnu kontroli: jebkurā brīdī izslēdziet visu funkciju ar galveno slēdzi Iestatījumos un jebkurā brīdī noņemiet jebkuru lietotni no atļauto saraksta.\n\nPieskaroties \"Piekrītu\", tiks atvērti Android pieejamības iestatījumi, kur pats/pati iespējosiet TextGate AI — vienkārši nospiežot šo pogu, nekas netiek iespējots.</string>

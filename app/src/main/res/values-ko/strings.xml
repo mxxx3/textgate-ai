@@ -24,6 +24,15 @@
     <string name="accessibility_status_enabled">사용 중</string>
     <string name="accessibility_status_disabled">사용 안 함 — 활성화하기 전까지 TextGate AI는 아무 작업도 할 수 없습니다</string>
     <string name="btn_open_accessibility_settings">접근성 설정 열기</string>
+    <string name="section_background_operation">Background operation</string>
+    <string name="background_operation_status_oem">This phone may require extra background permissions</string>
+    <string name="background_operation_status_unrestricted">Battery optimization is already unrestricted for TextGate AI</string>
+    <string name="background_operation_status_standard">If translation stops after closing the app, review these settings</string>
+    <string name="background_operation_description">Some phones, especially Xiaomi/HyperOS, Redmi, and POCO, can stop the Accessibility Service after the app is closed. TextGate AI cannot change these settings automatically. To keep translation working, enable the Accessibility Service, set battery usage to &quot;No restrictions&quot; or &quot;Unrestricted,&quot; and enable Autostart if your phone shows that option.</string>
+    <string name="btn_open_battery_settings">Open battery/app settings</string>
+    <string name="btn_open_autostart_settings">Open Autostart settings</string>
+    <string name="btn_open_app_details_settings">Open app details</string>
+    <string name="background_operation_policy_note">You stay in control: each button only opens Android or manufacturer settings, where you choose what to allow. TextGate AI never enables Accessibility, Autostart, or battery exemptions by itself.</string>
 
     <string name="accessibility_disclosure_title">접근성 서비스를 활성화하기 전에</string>
     <string name="accessibility_disclosure_body">TextGate AI는 장애가 있는 분들을 위한 접근성 도구가 아닙니다. Android의 접근성 서비스는 오직 텍스트를 있는 자리에서 바로 번역하기 위한 용도로만 사용되며, 여기에서 설명하는 방식으로만 작동합니다.\n\n읽는 항목: 현재 편집 중인 텍스트 필드는 입력한 내용의 끝부분에 있는 \"?en\" 또는 \"?de\"와 같은 정확한 트리거 접미사 하나만을 확인하기 위해 읽습니다. 또한 길게 눌러 선택한 메시지나 댓글은 설정에서 명시적으로 허용한 앱에서만 읽습니다.\n\n절대 읽지 않는 항목: 비밀번호 입력란, PIN 입력란, 또는 켜지 않은 앱의 어떠한 내용도 읽지 않습니다. 읽은 내용의 기록은 어떠한 경우에도 저장되지 않습니다.\n\n그다음 일어나는 일: 트리거가 감지되거나 메시지를 길게 눌렀을 때만 해당 텍스트가 HTTPS를 통해 사용자가 설정한 Gemini API로 한 번 전송되어 번역됩니다. 그 외의 경우에는 아무것도 전송되지 않습니다.\n\n모든 제어권은 사용자에게 있습니다: 설정의 기본 스위치로 이 기능 전체를 언제든지 끌 수 있으며, 원할 때마다 허용 목록에서 앱을 제거할 수 있습니다.\n\n\"동의\"를 탭하면 Android 자체의 접근성 설정 화면이 열리며, 그곳에서 직접 TextGate AI를 켤 수 있습니다. 이 버튼을 탭하는 것만으로는 아무것도 활성화되지 않습니다.</string>

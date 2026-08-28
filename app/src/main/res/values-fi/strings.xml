@@ -24,6 +24,15 @@
     <string name="accessibility_status_enabled">Käytössä</string>
     <string name="accessibility_status_disabled">Ei käytössä — TextGate AI ei voi tehdä mitään, ennen kuin otat sen käyttöön</string>
     <string name="btn_open_accessibility_settings">Avaa esteettömyysasetukset</string>
+    <string name="section_background_operation">Background operation</string>
+    <string name="background_operation_status_oem">This phone may require extra background permissions</string>
+    <string name="background_operation_status_unrestricted">Battery optimization is already unrestricted for TextGate AI</string>
+    <string name="background_operation_status_standard">If translation stops after closing the app, review these settings</string>
+    <string name="background_operation_description">Some phones, especially Xiaomi/HyperOS, Redmi, and POCO, can stop the Accessibility Service after the app is closed. TextGate AI cannot change these settings automatically. To keep translation working, enable the Accessibility Service, set battery usage to &quot;No restrictions&quot; or &quot;Unrestricted,&quot; and enable Autostart if your phone shows that option.</string>
+    <string name="btn_open_battery_settings">Open battery/app settings</string>
+    <string name="btn_open_autostart_settings">Open Autostart settings</string>
+    <string name="btn_open_app_details_settings">Open app details</string>
+    <string name="background_operation_policy_note">You stay in control: each button only opens Android or manufacturer settings, where you choose what to allow. TextGate AI never enables Accessibility, Autostart, or battery exemptions by itself.</string>
 
     <string name="accessibility_disclosure_title">Ennen kuin otat esteettömyyspalvelun käyttöön</string>
     <string name="accessibility_disclosure_body">TextGate AI ei ole esteettömyystyökalu vammaisille henkilöille — se käyttää Androidin esteettömyyspalvelua ainoastaan mahdollistaakseen kääntämisen suoraan paikan päällä, ja vain tässä kuvatulla tavalla.\n\nMitä luetaan: tekstikenttä, jota parhaillaan muokkaat, vain sen tarkistamiseksi, päättyykö kirjoittamasi teksti johonkin yhteen tarkkaan liipaisinpäätteeseen, kuten \"?en\" tai \"?de\"; sekä viesti tai kommentti, jota painat pitkään, vain sovelluksissa, jotka olet nimenomaisesti sallinut Asetuksissa.\n\nMitä ei koskaan lueta: salasanakenttiä, PIN-koodin syöttöä tai mitään sovelluksessa, jota et ole ottanut käyttöön. Mistään luetusta ei koskaan säilytetä historiaa.\n\nMitä tapahtuu seuraavaksi: vasta kun liipaisin havaitaan tai kun painat viestiä pitkään, kyseinen teksti lähetetään kerran HTTPS:n kautta määrittämääsi Gemini-rajapintaan ja käännetään. Muulloin mitään ei lähetetä.\n\nPysyt hallinnassa: voit sammuttaa koko ominaisuuden milloin tahansa Asetusten pääkytkimestä ja poistaa minkä tahansa sovelluksen sallittujen listalta, milloin haluat.\n\nKun napautat \"Hyväksyn\", avautuvat Androidin omat esteettömyysasetukset, joissa otat TextGate AI:n käyttöön itse — pelkkä tämän painikkeen napauttaminen ei ota mitään käyttöön.</string>

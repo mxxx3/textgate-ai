@@ -24,6 +24,15 @@
     <string name="accessibility_status_enabled">Включена</string>
     <string name="accessibility_status_disabled">Не е включена — TextGate AI не може да направи нищо, докато не я включите</string>
     <string name="btn_open_accessibility_settings">Отваряне на настройките за достъпност</string>
+    <string name="section_background_operation">Background operation</string>
+    <string name="background_operation_status_oem">This phone may require extra background permissions</string>
+    <string name="background_operation_status_unrestricted">Battery optimization is already unrestricted for TextGate AI</string>
+    <string name="background_operation_status_standard">If translation stops after closing the app, review these settings</string>
+    <string name="background_operation_description">Some phones, especially Xiaomi/HyperOS, Redmi, and POCO, can stop the Accessibility Service after the app is closed. TextGate AI cannot change these settings automatically. To keep translation working, enable the Accessibility Service, set battery usage to &quot;No restrictions&quot; or &quot;Unrestricted,&quot; and enable Autostart if your phone shows that option.</string>
+    <string name="btn_open_battery_settings">Open battery/app settings</string>
+    <string name="btn_open_autostart_settings">Open Autostart settings</string>
+    <string name="btn_open_app_details_settings">Open app details</string>
+    <string name="background_operation_policy_note">You stay in control: each button only opens Android or manufacturer settings, where you choose what to allow. TextGate AI never enables Accessibility, Autostart, or battery exemptions by itself.</string>
     <string name="accessibility_disclosure_title">Преди да включите Услугата за достъпност</string>
     <string name="accessibility_disclosure_body">TextGate AI не е инструмент за достъпност за хора с увреждания — той използва Услугата за достъпност на Android единствено за превод в самия текст, и само по начина, описан тук.\n\nКакво се чете: текстовото поле, което в момента редактирате — само за да се провери за един точен суфикс на тригер, например \"?en\" или \"?de\", в края на написаното от вас; и съобщение или коментар, върху който задържите пръст — само в приложения, които изрично сте разрешили в Настройки.\n\nКакво никога не се чете: полета за пароли, въвеждане на ПИН код или каквото и да е в приложение, което не сте включили. Не се пази история на нищо прочетено.\n\nКакво се случва след това: само когато бъде открит тригер или задържите пръст върху съобщение, съответният текст се изпраща еднократно, през HTTPS, до настроения от вас Gemini API, и се превежда. В никой друг момент не се изпраща нищо.\n\nВие оставате в контрол: изключете цялата функция по всяко време с основния превключвател в Настройки, и премахнете кое да е приложение от списъка с разрешени, когато пожелаете.\n\nДокосването на \"Съгласявам се\" отваря собствените настройки за достъпност на Android, където сами включвате TextGate AI — само с натискането на този бутон нищо не се включва.</string>
     <string name="btn_accessibility_agree">Съгласявам се и продължавам към настройките</string>

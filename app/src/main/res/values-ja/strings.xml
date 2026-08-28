@@ -24,6 +24,15 @@
     <string name="accessibility_status_enabled">有効</string>
     <string name="accessibility_status_disabled">無効 — 有効にするまで TextGate AI は何も実行できません</string>
     <string name="btn_open_accessibility_settings">ユーザー補助の設定を開く</string>
+    <string name="section_background_operation">Background operation</string>
+    <string name="background_operation_status_oem">This phone may require extra background permissions</string>
+    <string name="background_operation_status_unrestricted">Battery optimization is already unrestricted for TextGate AI</string>
+    <string name="background_operation_status_standard">If translation stops after closing the app, review these settings</string>
+    <string name="background_operation_description">Some phones, especially Xiaomi/HyperOS, Redmi, and POCO, can stop the Accessibility Service after the app is closed. TextGate AI cannot change these settings automatically. To keep translation working, enable the Accessibility Service, set battery usage to &quot;No restrictions&quot; or &quot;Unrestricted,&quot; and enable Autostart if your phone shows that option.</string>
+    <string name="btn_open_battery_settings">Open battery/app settings</string>
+    <string name="btn_open_autostart_settings">Open Autostart settings</string>
+    <string name="btn_open_app_details_settings">Open app details</string>
+    <string name="background_operation_policy_note">You stay in control: each button only opens Android or manufacturer settings, where you choose what to allow. TextGate AI never enables Accessibility, Autostart, or battery exemptions by itself.</string>
 
     <string name="accessibility_disclosure_title">ユーザー補助サービスを有効にする前に</string>
     <string name="accessibility_disclosure_body">TextGate AI は、障がいのある方向けのユーザー補助ツールではありません。Android のユーザー補助サービスは、その場での翻訳を実現するためだけに使用しており、ここで説明する方法でのみ利用します。\n\n読み取る内容: 現在編集中のテキストフィールドについては、入力した内容の末尾にある「?en」や「?de」などの特定のトリガー接尾辞を確認するためだけに読み取ります。また、長押ししたメッセージやコメントについては、設定で明示的に許可したアプリでのみ読み取ります。\n\n一切読み取らない内容: パスワード入力欄、PIN入力欄、またはオンにしていないアプリ内のあらゆる内容です。読み取った内容の履歴が保存されることもありません。\n\nその後の流れ: トリガーが検出されたとき、またはメッセージを長押ししたときにのみ、該当するテキストが一度だけHTTPS経由で設定済みのGemini APIに送信され、翻訳されます。それ以外のタイミングで送信されることはありません。\n\n主導権はあなたにあります: 設定のメインスイッチでこの機能全体をいつでもオフにでき、許可リストからアプリをいつでも削除できます。\n\n「同意」をタップすると、Android 本来のユーザー補助の設定画面が開き、そこでご自身の操作で TextGate AI を有効にできます。このボタンをタップしただけでは、何も有効になりません。</string>

@@ -24,6 +24,15 @@
     <string name="accessibility_status_enabled">Aktiveret</string>
     <string name="accessibility_status_disabled">Ikke aktiveret — TextGate AI kan ikke gøre noget, før du aktiverer den</string>
     <string name="btn_open_accessibility_settings">Åbn indstillinger for tilgængelighed</string>
+    <string name="section_background_operation">Background operation</string>
+    <string name="background_operation_status_oem">This phone may require extra background permissions</string>
+    <string name="background_operation_status_unrestricted">Battery optimization is already unrestricted for TextGate AI</string>
+    <string name="background_operation_status_standard">If translation stops after closing the app, review these settings</string>
+    <string name="background_operation_description">Some phones, especially Xiaomi/HyperOS, Redmi, and POCO, can stop the Accessibility Service after the app is closed. TextGate AI cannot change these settings automatically. To keep translation working, enable the Accessibility Service, set battery usage to &quot;No restrictions&quot; or &quot;Unrestricted,&quot; and enable Autostart if your phone shows that option.</string>
+    <string name="btn_open_battery_settings">Open battery/app settings</string>
+    <string name="btn_open_autostart_settings">Open Autostart settings</string>
+    <string name="btn_open_app_details_settings">Open app details</string>
+    <string name="background_operation_policy_note">You stay in control: each button only opens Android or manufacturer settings, where you choose what to allow. TextGate AI never enables Accessibility, Autostart, or battery exemptions by itself.</string>
 
     <string name="accessibility_disclosure_title">Før du aktiverer tilgængelighedstjenesten</string>
     <string name="accessibility_disclosure_body">TextGate AI er ikke et hjælpemiddel til personer med handicap — appen bruger udelukkende Androids tilgængelighedstjeneste til at drive oversættelse direkte der, hvor du skriver, og kun på den måde, der er beskrevet her.\n\nDet, der bliver læst: det tekstfelt, du er i gang med at redigere, kun for at kigge efter én bestemt trigger-endelse som \"?en\" eller \"?de\" i slutningen af det, du har skrevet; samt en besked eller kommentar, du trykker og holder nede på, kun i apps, du udtrykkeligt har givet adgang til under Indstillinger.\n\nDet, der aldrig bliver læst: adgangskodefelter, PIN-indtastning eller noget som helst i en app, du ikke har slået til. Der gemmes aldrig nogen historik over det, der er læst.\n\nHvad der sker herefter: kun når en trigger registreres, eller du trykker og holder på en besked, sendes den relevante tekst én gang, via HTTPS, til den Gemini API, du har konfigureret, og bliver oversat. Der bliver ikke sendt noget på noget andet tidspunkt.\n\nDu har fuld kontrol: slå hele funktionen fra, når du vil, med hovedafbryderen i Indstillinger, og fjern enhver app fra listen over tilladte apps, når du ønsker det.\n\nNår du trykker på \"Jeg accepterer\", åbnes Androids egne indstillinger for tilgængelighed, hvor du selv slår TextGate AI til — der bliver ikke aktiveret noget blot ved at trykke på denne knap.</string>

@@ -24,6 +24,15 @@
     <string name="accessibility_status_enabled">Zapnuté</string>
     <string name="accessibility_status_disabled">Nezapnuté — TextGate AI nemôže nič robiť, kým ju nezapnete</string>
     <string name="btn_open_accessibility_settings">Otvoriť nastavenia zjednodušenia ovládania</string>
+    <string name="section_background_operation">Background operation</string>
+    <string name="background_operation_status_oem">This phone may require extra background permissions</string>
+    <string name="background_operation_status_unrestricted">Battery optimization is already unrestricted for TextGate AI</string>
+    <string name="background_operation_status_standard">If translation stops after closing the app, review these settings</string>
+    <string name="background_operation_description">Some phones, especially Xiaomi/HyperOS, Redmi, and POCO, can stop the Accessibility Service after the app is closed. TextGate AI cannot change these settings automatically. To keep translation working, enable the Accessibility Service, set battery usage to &quot;No restrictions&quot; or &quot;Unrestricted,&quot; and enable Autostart if your phone shows that option.</string>
+    <string name="btn_open_battery_settings">Open battery/app settings</string>
+    <string name="btn_open_autostart_settings">Open Autostart settings</string>
+    <string name="btn_open_app_details_settings">Open app details</string>
+    <string name="background_operation_policy_note">You stay in control: each button only opens Android or manufacturer settings, where you choose what to allow. TextGate AI never enables Accessibility, Autostart, or battery exemptions by itself.</string>
 
     <string name="accessibility_disclosure_title">Skôr než zapnete službu zjednodušenia ovládania</string>
     <string name="accessibility_disclosure_body">TextGate AI nie je nástroj pre ľudí so zdravotným postihnutím — službu zjednodušenia ovládania systému Android využíva výlučne na preklad textu priamo na mieste, a to len spôsobom opísaným nižšie.\n\nČo sa číta: textové pole, ktoré práve upravujete, a to iba na kontrolu jednej presnej spúšťacej prípony, napríklad „?en“ alebo „?de“, na konci toho, čo ste napísali; a správa alebo komentár, na ktorý dlho podržíte prst, a to iba v aplikáciách, ktoré ste výslovne povolili v nastaveniach.\n\nČo sa nikdy nečíta: polia s heslami, zadávanie PIN kódu ani nič v aplikácii, ktorú ste nezapli. História ničoho prečítaného sa nikdy neuchováva.\n\nČo sa stane ďalej: iba keď sa zistí spúšťač alebo dlho podržíte správu, príslušný text sa raz odošle cez HTTPS do vami nakonfigurovaného API Gemini a preloží sa. V žiadnom inom okamihu sa nič neodosiela.\n\nMáte veci pod kontrolou: celú funkciu môžete kedykoľvek vypnúť hlavným prepínačom v nastaveniach a kedykoľvek odstrániť ľubovoľnú aplikáciu zo zoznamu povolených.\n\nŤuknutím na „Súhlasím“ sa otvoria nastavenia zjednodušenia ovládania systému Android, kde si TextGate AI zapnete sami — samotné ťuknutie na toto tlačidlo nič nezapne.</string>

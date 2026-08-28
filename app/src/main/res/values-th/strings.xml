@@ -24,6 +24,15 @@
     <string name="accessibility_status_enabled">เปิดใช้งานแล้ว</string>
     <string name="accessibility_status_disabled">ยังไม่ได้เปิดใช้งาน — TextGate AI จะไม่สามารถทำงานใดๆ ได้จนกว่าคุณจะเปิดใช้งาน</string>
     <string name="btn_open_accessibility_settings">เปิดการตั้งค่าการช่วยเหลือการเข้าถึง</string>
+    <string name="section_background_operation">Background operation</string>
+    <string name="background_operation_status_oem">This phone may require extra background permissions</string>
+    <string name="background_operation_status_unrestricted">Battery optimization is already unrestricted for TextGate AI</string>
+    <string name="background_operation_status_standard">If translation stops after closing the app, review these settings</string>
+    <string name="background_operation_description">Some phones, especially Xiaomi/HyperOS, Redmi, and POCO, can stop the Accessibility Service after the app is closed. TextGate AI cannot change these settings automatically. To keep translation working, enable the Accessibility Service, set battery usage to &quot;No restrictions&quot; or &quot;Unrestricted,&quot; and enable Autostart if your phone shows that option.</string>
+    <string name="btn_open_battery_settings">Open battery/app settings</string>
+    <string name="btn_open_autostart_settings">Open Autostart settings</string>
+    <string name="btn_open_app_details_settings">Open app details</string>
+    <string name="background_operation_policy_note">You stay in control: each button only opens Android or manufacturer settings, where you choose what to allow. TextGate AI never enables Accessibility, Autostart, or battery exemptions by itself.</string>
     <string name="accessibility_disclosure_title">ก่อนที่คุณจะเปิดใช้งานบริการการช่วยเหลือการเข้าถึง</string>
     <string name="accessibility_disclosure_body">TextGate AI ไม่ใช่เครื่องมือช่วยเหลือสำหรับผู้พิการ แต่ใช้บริการการช่วยเหลือการเข้าถึงของ Android เพื่อรองรับการแปลข้อความในที่เดียวเท่านั้น และเฉพาะในรูปแบบที่อธิบายไว้ที่นี่เท่านั้น\n\nสิ่งที่ถูกอ่าน: ช่องข้อความที่คุณกำลังพิมพ์อยู่ในขณะนั้น เพื่อตรวจสอบเฉพาะคำต่อท้ายกระตุ้นที่ตรงกันแบบเป๊ะๆ หนึ่งรายการ เช่น \"?en\" หรือ \"?de\" ที่ท้ายข้อความที่คุณพิมพ์ไว้เท่านั้น และข้อความหรือความคิดเห็นที่คุณกดค้าง เฉพาะในแอปที่คุณอนุญาตไว้อย่างชัดเจนในการตั้งค่าเท่านั้น\n\nสิ่งที่ไม่ถูกอ่านเด็ดขาด: ช่องรหัสผ่าน การป้อนรหัส PIN หรือสิ่งใดๆ ในแอปที่คุณยังไม่ได้เปิดใช้งาน ไม่มีการเก็บประวัติสิ่งที่อ่านไว้เลย\n\nสิ่งที่เกิดขึ้นต่อไป: เฉพาะเมื่อตรวจพบคำกระตุ้น หรือเมื่อคุณกดค้างที่ข้อความ ข้อความที่เกี่ยวข้องจะถูกส่งเพียงครั้งเดียวผ่าน HTTPS ไปยัง Gemini API ที่คุณตั้งค่าไว้ เพื่อทำการแปล จะไม่มีการส่งข้อมูลใดๆ ในเวลาอื่นเลย\n\nคุณควบคุมได้เสมอ: ปิดฟีเจอร์ทั้งหมดได้ทุกเมื่อด้วยสวิตช์หลักในการตั้งค่า และนำแอปใดๆ ออกจากรายการที่อนุญาตได้ทุกเมื่อที่ต้องการ\n\nการแตะ \"ยอมรับและไปที่การตั้งค่า\" จะเปิดหน้าการตั้งค่าการช่วยเหลือการเข้าถึงของ Android เอง ซึ่งคุณจะเป็นผู้เปิดใช้งาน TextGate AI ด้วยตนเอง — การแตะปุ่มนี้เพียงอย่างเดียวจะไม่เปิดใช้งานสิ่งใดเลย</string>
     <string name="btn_accessibility_agree">ยอมรับและไปที่การตั้งค่า</string>

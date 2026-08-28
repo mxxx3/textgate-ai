@@ -5,12 +5,12 @@ plugins {
 
 android {
     namespace = "com.textgate.ai"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.textgate.ai"
         minSdk = 26
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 27
         versionName = "2.0.0"
 

@@ -136,7 +136,8 @@ class TranslationPromptsTest {
     @Test
     fun `base prompt preserves ambiguity rather than resolving it`() {
         val prompt = TranslationPrompts.systemPromptFor(english)
-        assertTrue(prompt.contains("preserve that same ambiguity"))
+        assertTrue(prompt.contains("If the source is ambiguous"))
+        assertTrue(prompt.contains("preserve it"))
     }
 
     @Test

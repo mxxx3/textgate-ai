@@ -130,7 +130,7 @@ class TranslationPromptsTest {
     fun `base prompt forbids inventing context and forbids flipping singular-plural`() {
         val prompt = TranslationPrompts.systemPromptFor(english)
         assertTrue(prompt.contains("Never invent information"))
-        assertTrue(prompt.contains("Never change a singular to a plural or a plural to a singular"))
+        assertTrue(prompt.contains("Never change singular to plural or plural to singular"))
     }
 
     @Test
@@ -155,7 +155,7 @@ class TranslationPromptsTest {
     fun `base prompt handles text already in the target language as a grammar-only pass`() {
         val prompt = TranslationPrompts.systemPromptFor(english)
         assertTrue(prompt.contains("already written in"))
-        assertTrue(prompt.contains("only correct grammar"))
+        assertTrue(prompt.contains("Only correct grammar"))
     }
 
     @Test

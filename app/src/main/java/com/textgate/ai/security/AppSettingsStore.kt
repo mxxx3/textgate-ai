@@ -17,7 +17,7 @@ import com.textgate.ai.model.UserGender
  * is not readable by other apps.
  *
  * Defaults:
- *   - AI transformation starts DISABLED — the user must turn it on.
+ *   - AI transformation starts enabled for the typed-trigger translator.
  *   - The allow-list starts pre-populated with [DEFAULT_ALLOWED_PACKAGES],
  *     a curated, best-effort set of common social-media and messaging
  *     apps, so day-to-day use needs no manual per-app setup. This is a
@@ -45,7 +45,7 @@ class AppSettingsStore(context: Context) {
         (context.applicationContext ?: context).getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
     var isAiEnabled: Boolean
-        get() = prefs.getBoolean(KEY_AI_ENABLED, false)
+        get() = prefs.getBoolean(KEY_AI_ENABLED, true)
         set(value) = prefs.edit().putBoolean(KEY_AI_ENABLED, value).apply()
 
     var selectedModel: String

@@ -120,8 +120,8 @@ class TranslationPromptsTest {
     @Test
     fun `base prompt instructs preserving singular-plural, person, and tense`() {
         val prompt = TranslationPrompts.systemPromptFor(english)
-        assertTrue(prompt.contains("grammatical number"))
-        assertTrue(prompt.contains("singular vs. plural") || prompt.contains("singular"))
+        assertTrue(prompt.contains("Grammar & Numbers"))
+        assertTrue(prompt.contains("singular/plural forms"))
         assertTrue(prompt.contains("grammatical person"))
         assertTrue(prompt.contains("tense"))
     }
@@ -129,8 +129,8 @@ class TranslationPromptsTest {
     @Test
     fun `base prompt forbids inventing context and forbids flipping singular-plural`() {
         val prompt = TranslationPrompts.systemPromptFor(english)
-        assertTrue(prompt.contains("Never invent information"))
-        assertTrue(prompt.contains("Never change singular to plural or plural to singular"))
+        assertTrue(prompt.contains("infer information that is not present in the source"))
+        assertTrue(prompt.contains("singular/plural forms"))
     }
 
     @Test
@@ -147,22 +147,31 @@ class TranslationPromptsTest {
         assertTrue(prompt.contains("@mentions"))
         assertTrue(prompt.contains("URLs"))
         assertTrue(prompt.contains("numbers"))
-        assertTrue(prompt.contains("emoji"))
-        assertTrue(prompt.contains("formatting"))
+        assertTrue(prompt.contains("emojis"))
+        assertTrue(prompt.contains("line breaks"))
     }
 
     @Test
     fun `base prompt handles text already in the target language as a grammar-only pass`() {
         val prompt = TranslationPrompts.systemPromptFor(english)
-        assertTrue(prompt.contains("already written in"))
-        assertTrue(prompt.contains("Only correct grammar"))
+        assertTrue(prompt.contains("already in"))
+        assertTrue(prompt.contains("Correct only clear grammar"))
     }
 
     @Test
     fun `base prompt forbids commentary, labels, quotes, and alternative versions in the response`() {
         val prompt = TranslationPrompts.systemPromptFor(english)
-        assertTrue(prompt.contains("Do not include quotation marks"))
-        assertTrue(prompt.contains("alternative versions"))
+        assertTrue(prompt.contains("Output ONLY the translated text"))
+        assertTrue(prompt.contains("Do not include quotes"))
+        assertTrue(prompt.contains("explanations, options, or notes"))
+    }
+
+    @Test
+    fun `base prompt preserves question and exclamation marks without adding new ones`() {
+        val prompt = TranslationPrompts.systemPromptFor(english)
+        assertTrue(prompt.contains("Preserve all question marks (?) and exclamation marks (!)"))
+        assertTrue(prompt.contains("NEVER add question marks or exclamation marks"))
+        assertTrue(prompt.contains("Do not add trailing periods if the source lacks them"))
     }
 
     @Test

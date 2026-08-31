@@ -12,10 +12,9 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
 /**
- * Covers the "safe by default" half of spec scenario #8: the master switch
- * is off until the user explicitly turns it on, so "app not on the
- * allow-list -> zero requests" holds regardless of what the allow-list
- * contains. The allow-list itself defaults to a curated set of common
+ * Covers the local settings defaults. The master switch now starts enabled
+ * for the typed-trigger translator, while the allow-list itself defaults
+ * to a curated set of common
  * social-media/messaging apps (see AppSettingsStore.DEFAULT_ALLOWED_PACKAGES)
  * rather than starting empty — a deliberate, requested trade-off so
  * day-to-day use needs no manual per-app setup — but any app outside that
@@ -29,8 +28,8 @@ class AppSettingsStoreTest {
     private val context: Context = ApplicationProvider.getApplicationContext()
 
     @Test
-    fun `AI transformation defaults to disabled`() {
-        assertFalse(AppSettingsStore(context).isAiEnabled)
+    fun `AI transformation defaults to enabled`() {
+        assertTrue(AppSettingsStore(context).isAiEnabled)
     }
 
     @Test

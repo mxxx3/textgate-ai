@@ -9,6 +9,7 @@ import android.os.Bundle
 import android.speech.RecognitionListener
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
+import android.text.method.ScrollingMovementMethod
 import android.speech.tts.TextToSpeech
 import android.view.View
 import android.widget.AdapterView
@@ -67,11 +68,16 @@ class TranslateTabController(
 
     init {
         setupLanguageSpinners()
+        setupResultScrolling()
         setupTextWatcher()
         setupButtons()
         textToSpeech = TextToSpeech(activity.applicationContext) { status ->
             ttsReady = status == TextToSpeech.SUCCESS
         }
+    }
+
+    private fun setupResultScrolling() {
+        binding.textTranslationResult.movementMethod = ScrollingMovementMethod()
     }
 
     fun onDestroy() {

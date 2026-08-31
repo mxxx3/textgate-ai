@@ -91,48 +91,32 @@ object TranslationPrompts {
     ): String {
         val name = (Languages.byCode(target.code) ?: Languages.DEFAULT).englishName
 
-        val base = "Translate the provided text into $name.\n\n" +
-            "Your highest priority is to preserve the source text's exact meaning and " +
-            "communicative intent. The translation must not add, remove, strengthen, " +
-            "weaken, reinterpret, summarize, or otherwise alter what the author is " +
-            "saying.\n\n" +
-            "Within that constraint, make the translation natural, idiomatic, and " +
-            "conversational — as a native $name speaker would actually express the same " +
-            "meaning. Do not translate mechanically word for word, but never sacrifice " +
-            "meaning or intent for more natural or polished phrasing.\n\n" +
-            "The source text may be in any language; detect it automatically. If it is " +
-            "already written in $name, do not translate it. Only correct grammar, " +
-            "spelling, punctuation, and phrasing where this can be done without changing " +
-            "the meaning, intent, tone, or degree of certainty.\n\n" +
-            "Preserve exactly:\n\n" +
-            "- intended meaning and communicative intent,\n" +
-            "- grammatical number (singular vs. plural),\n" +
-            "- grammatical person,\n" +
-            "- tense,\n" +
-            "- any gender explicitly expressed or clearly implied by the source,\n" +
-            "- tone and level of formality,\n" +
-            "- degree of certainty, emphasis, criticism, politeness, and emotional " +
-            "strength.\n\n" +
-            "Never invent information, context, motivation, conclusions, or implications " +
-            "that are not present in the source.\n\n" +
-            "Never make a statement stronger or weaker than the original. Do not turn a " +
-            "possibility into a certainty, a suggestion into a command, criticism into a " +
-            "stronger accusation, or a neutral statement into an emotional one.\n\n" +
-            "If the source is ambiguous and the target language allows the same " +
-            "ambiguity, preserve it. Do not guess what the author probably meant and do " +
-            "not resolve ambiguity merely to make the translation sound more polished.\n\n" +
-            "You may correct or add basic punctuation such as commas and periods when " +
-            "needed for readability. However, do not use punctuation to change or infer " +
-            "communicative intent. In particular, do not turn an ambiguous statement into " +
-            "a question, exclamation, command, or other sentence type unless that intent " +
-            "is unambiguous from the source.\n\n" +
-            "Never change singular to plural or plural to singular.\n\n" +
-            "Keep unchanged, exactly as written, unless the translation itself requires a " +
-            "change: proper nouns and names, usernames and @mentions, URLs and links, " +
-            "numbers, emoji, and existing formatting or line breaks.\n\n" +
-            "Return only the finished translated text. Do not include quotation marks, " +
-            "labels, explanations, notes, alternative versions, or any other commentary " +
-            "— nothing but the translation itself."
+        val base = "Translate the source text into $name.\n\n" +
+            "Core Objective:\n" +
+            "Deliver a natural, fluent, and idiomatic translation as a native speaker " +
+            "would say it, while strictly preserving the original meaning, tone, " +
+            "formality, and intent.\n\n" +
+            "Rules:\n\n" +
+            "1. Meaning & Tone: Keep the exact meaning and level of politeness, " +
+            "certainty, emphasis, and emotion. Do not add, omit, exaggerate, soften, " +
+            "reinterpret, or infer information that is not present in the source.\n\n" +
+            "2. Punctuation Strictness: Preserve all question marks (?) and exclamation " +
+            "marks (!) from the source. NEVER add question marks or exclamation marks " +
+            "unless they exist in the source text. Do not add trailing periods if the " +
+            "source lacks them. Keep comma usage natural for readability.\n\n" +
+            "3. Grammar & Numbers: Preserve the original grammatical person, tense, " +
+            "singular/plural forms, and any gender explicitly expressed or clearly " +
+            "implied by the source.\n\n" +
+            "4. Ambiguity: If the source is ambiguous and the target language allows " +
+            "that ambiguity to remain, preserve it rather than guessing or choosing an " +
+            "interpretation.\n\n" +
+            "5. Preserved Elements: Keep proper nouns, names, @mentions, URLs, numbers, " +
+            "emojis, and line breaks exactly as written.\n\n" +
+            "6. Direct Output: Output ONLY the translated text. Do not include quotes, " +
+            "explanations, options, or notes.\n\n" +
+            "If the source is already in $name, do not translate it. Correct only clear " +
+            "grammar, spelling, and punctuation errors without changing its meaning, " +
+            "tone, or intent."
 
         // AUTO ("Automatyczna/nieokreślona") means the user deliberately
         // declared no preference — say nothing about gender at all, rather

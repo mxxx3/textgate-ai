@@ -2,6 +2,33 @@
 <resources>
     <string name="app_name">Tłumacz TextGate AI</string>
 
+    <string name="setup_title">Prepare TextGate AI</string>
+    <string name="setup_intro">Complete these steps once. We check the key and Accessibility Service whenever you open the app.</string>
+    <string name="setup_key_title">1. Connect Gemini</string>
+    <string name="setup_key_help">Open Google AI Studio, create an API key, return here, paste it and save. Your key stays encrypted on this device.</string>
+    <string name="setup_key_missing">Action needed: no API key saved.</string>
+    <string name="setup_key_saved">Key saved. Use Test API connection to verify Gemini.</string>
+    <string name="setup_api_test_failed">The test failed. Check the key, model, connection or API quota in Settings.</string>
+    <string name="setup_open_settings">Open app settings</string>
+    <string name="setup_accessibility_title">2. Enable translation in other apps</string>
+    <string name="setup_accessibility_help">Read the disclosure, agree if you choose, then enable TextGate AI in Android Accessibility settings. Return here to check the result.</string>
+    <string name="setup_accessibility_missing">Action needed: Accessibility Service is off.</string>
+    <string name="setup_open_accessibility">Read disclosure and open settings</string>
+    <string name="setup_trigger_missing">Action needed: typed-trigger translation is off.</string>
+    <string name="setup_enable_trigger">Enable typed-trigger translation</string>
+    <string name="setup_background_title">3. Keep it running on this phone</string>
+    <string name="setup_background_help">Xiaomi, Redmi and POCO may stop translation when the app closes. Open each setting and confirm what you selected. Android does not let us verify these manufacturer settings automatically.</string>
+    <string name="setup_battery_help">In app details, open Battery and choose No restrictions.</string>
+    <string name="setup_battery_confirm">I checked and selected No restrictions</string>
+    <string name="setup_autostart_help">Enable Autostart for TextGate AI if your phone shows it. If the shortcut opens app details, look for Autostart there.</string>
+    <string name="setup_autostart_confirm">I checked and enabled Autostart (or it is unavailable)</string>
+    <string name="setup_standard_background">On other phones, if translation stops after closing the app, review battery restrictions in Android app settings.</string>
+    <string name="setup_done">Ready</string>
+    <string name="setup_incomplete">Finish the steps above, then check again.</string>
+    <string name="setup_ready">Setup complete. You can open the app.</string>
+    <string name="setup_verify">Check again</string>
+    <string name="setup_continue">Open app</string>
+
     <string name="accessibility_service_description">TextGate AI reads text in two ways, both strictly limited. First: the text field you are currently editing, and only to look for one exact trigger suffix (like \"?en\" or \"?de\" — one per language, see the full list in Settings) at the end of what you\'ve typed. Second: a message or comment you long-press and hold, to show a floating translation into the default language you choose in Settings. Both pathways never read password fields, never run in apps you have not explicitly allowed, and never keep a history of anything read. When a trigger is detected, or when you long-press a message, in an allowed app, the relevant text is sent over HTTPS to the Gemini API you have configured and translated. The typed-trigger result replaces the field\'s contents; the long-press result is only ever shown in a temporary floating bubble and never touches the original app. Nothing is sent anywhere unless you type one of these exact triggers or long-press a message in an app that is switched on in TextGate AI\'s settings.</string>
 
     <!-- Settings screen -->

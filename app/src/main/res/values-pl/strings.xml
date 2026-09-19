@@ -9,6 +9,33 @@
 <resources>
     <string name="app_name">Tłumacz TextGate AI</string>
 
+    <string name="setup_title">Przygotuj TextGate AI</string>
+    <string name="setup_intro">Wykonaj te kroki raz. Przy każdym uruchomieniu sprawdzamy klucz i usługę ułatwień dostępu.</string>
+    <string name="setup_key_title">1. Połącz z Gemini</string>
+    <string name="setup_key_help">Otwórz Google AI Studio, utwórz klucz API, wróć tutaj, wklej go i zapisz. Klucz jest szyfrowany na tym telefonie.</string>
+    <string name="setup_key_missing">Wymagane działanie: brak zapisanego klucza API.</string>
+    <string name="setup_key_saved">Klucz zapisany. Sprawdź połączenie z Gemini przyciskiem testu.</string>
+    <string name="setup_api_test_failed">Test nie powiódł się. Sprawdź klucz, model, połączenie lub limit API w Ustawieniach.</string>
+    <string name="setup_open_settings">Otwórz ustawienia aplikacji</string>
+    <string name="setup_accessibility_title">2. Włącz tłumaczenie w innych aplikacjach</string>
+    <string name="setup_accessibility_help">Przeczytaj informację o dostępie, wyraź zgodę, jeśli chcesz, i włącz TextGate AI w ustawieniach ułatwień dostępu Androida. Wróć tutaj, aby sprawdzić wynik.</string>
+    <string name="setup_accessibility_missing">Wymagane działanie: usługa ułatwień dostępu jest wyłączona.</string>
+    <string name="setup_open_accessibility">Przeczytaj informację i otwórz ustawienia</string>
+    <string name="setup_trigger_missing">Wymagane działanie: tłumaczenie wyzwalaczem jest wyłączone.</string>
+    <string name="setup_enable_trigger">Włącz tłumaczenie wyzwalaczem</string>
+    <string name="setup_background_title">3. Pozwól działać w tle na tym telefonie</string>
+    <string name="setup_background_help">Xiaomi, Redmi i POCO mogą zatrzymać tłumaczenie po zamknięciu aplikacji. Otwórz każde ustawienie i potwierdź swój wybór. Android nie pozwala nam automatycznie sprawdzić ustawień producenta.</string>
+    <string name="setup_battery_help">W informacjach o aplikacji otwórz Bateria i wybierz Bez ograniczeń.</string>
+    <string name="setup_battery_confirm">Sprawdziłem/am i wybrałem/am Bez ograniczeń</string>
+    <string name="setup_autostart_help">Włącz Autostart dla TextGate AI, jeśli telefon pokazuje tę opcję. Jeśli skrót otworzy informacje o aplikacji, poszukaj tam Autostartu.</string>
+    <string name="setup_autostart_confirm">Sprawdziłem/am i włączyłem/am Autostart (lub nie ma tej opcji)</string>
+    <string name="setup_standard_background">Na innych telefonach, jeśli tłumaczenie przestanie działać po zamknięciu aplikacji, sprawdź ograniczenia baterii w ustawieniach Androida.</string>
+    <string name="setup_done">Gotowe</string>
+    <string name="setup_incomplete">Dokończ kroki powyżej i sprawdź ponownie.</string>
+    <string name="setup_ready">Konfiguracja ukończona. Możesz otworzyć aplikację.</string>
+    <string name="setup_verify">Sprawdź ponownie</string>
+    <string name="setup_continue">Otwórz aplikację</string>
+
     <string name="accessibility_service_description">TextGate AI odczytuje tekst na dwa sposoby, oba ściśle ograniczone. Pierwszy: pole tekstowe, które właśnie edytujesz — wyłącznie po to, by sprawdzić, czy na końcu wpisanego tekstu znajduje się jeden konkretny przyrostek-wyzwalacz (np. „?en” lub „?de” — jeden na język, pełna lista w Ustawieniach). Drugi: wiadomość lub komentarz, który przytrzymasz palcem, aby zobaczyć pływające tłumaczenie na domyślny język wybrany w Ustawieniach. Żadna z tych ścieżek nigdy nie odczytuje pól haseł, nigdy nie działa w aplikacjach, na które nie wyraziłeś/aś wyraźnej zgody, i nigdy nie zapisuje historii odczytanych treści. Gdy w dozwolonej aplikacji wykryty zostanie wyzwalacz, albo gdy przytrzymasz wiadomość, odpowiedni tekst jest wysyłany przez HTTPS do skonfigurowanego przez Ciebie API Gemini i tłumaczony. Wynik dla wpisanego wyzwalacza zastępuje zawartość pola; wynik dla przytrzymania jest pokazywany wyłącznie w tymczasowej pływającej chmurce i nigdy nie dotyka oryginalnej aplikacji. Nic nie jest nigdzie wysyłane, dopóki nie wpiszesz jednego z tych dokładnych wyzwalaczy lub nie przytrzymasz wiadomości w aplikacji włączonej w ustawieniach TextGate AI.</string>
 
     <!-- Settings screen -->

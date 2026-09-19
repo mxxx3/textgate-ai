@@ -16,6 +16,8 @@ import com.textgate.ai.conversation.ConversationTabController
 import com.textgate.ai.databinding.ActivityMainBinding
 import com.textgate.ai.live.LiveTabController
 import com.textgate.ai.settings.SettingsActivity
+import com.textgate.ai.setup.SetupActivity
+import com.textgate.ai.setup.SetupReadiness
 import com.textgate.ai.translate.TranslateTabController
 
 /**
@@ -61,6 +63,7 @@ class MainActivity : Activity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (redirectToSetupIfNeeded()) return
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -81,15 +84,20 @@ class MainActivity : Activity() {
     }
 
     override fun onDestroy() {
-        translateTab.onDestroy()
-        conversationTab.onDestroy()
-        liveTab.onDestroy()
+        if (::translateTab.isInitialized) translateTab.onDestroy()
+        if (::conversationTab.isInitialized) conversationTab.onDestroy()
+        if (::liveTab.isInitialized) liveTab.onDestroy()
         super.onDestroy()
     }
 
     override fun onStart() {
         super.onStart()
-        liveTab.onStart()
+        if (::liveTab.isInitialized) liveTab.onStart()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (::binding.isInitialized) redirectToSetupIfNeeded()
     }
 
     override fun onStop() {
@@ -99,9 +107,16 @@ class MainActivity : Activity() {
         // backgrounding via its own Foreground Service, so liveTab.onStop()
         // only detaches this Activity's UI listener, never stops the
         // session itself — see LiveTabController.
-        conversationTab.onStop()
-        liveTab.onStop()
+        if (::conversationTab.isInitialized) conversationTab.onStop()
+        if (::liveTab.isInitialized) liveTab.onStop()
         super.onStop()
+    }
+
+    private fun redirectToSetupIfNeeded(): Boolean {
+        if (SetupReadiness.status(this).ready) return false
+        startActivity(Intent(this, SetupActivity::class.java))
+        finish()
+        return true
     }
 
     override fun onRequestPermissionsResult(
@@ -110,9 +125,9 @@ class MainActivity : Activity() {
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        translateTab.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        conversationTab.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        liveTab.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (::translateTab.isInitialized) translateTab.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (::conversationTab.isInitialized) conversationTab.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (::liveTab.isInitialized) liveTab.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
 
     @android.annotation.TargetApi(Build.VERSION_CODES.R)

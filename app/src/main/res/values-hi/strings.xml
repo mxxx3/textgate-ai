@@ -1,5 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+<string name="setup_title">Prepare TextGate AI</string>
+    <string name="setup_intro">Complete these steps once. We check the key and Accessibility Service whenever you open the app.</string>
+    <string name="setup_key_title">1. Connect Gemini</string>
+    <string name="setup_key_help">Open Google AI Studio, create an API key, return here, paste it and save. Your key stays encrypted on this device.</string>
+    <string name="setup_key_missing">Action needed: no API key saved.</string>
+    <string name="setup_key_saved">Key saved. Use Test API connection to verify Gemini.</string>
+    <string name="setup_api_test_failed">The test failed. Check the key, model, connection or API quota in Settings.</string>
+    <string name="setup_open_settings">Open app settings</string>
+    <string name="setup_accessibility_title">2. Enable translation in other apps</string>
+    <string name="setup_accessibility_help">Read the disclosure, agree if you choose, then enable TextGate AI in Android Accessibility settings. Return here to check the result.</string>
+    <string name="setup_accessibility_missing">Action needed: Accessibility Service is off.</string>
+    <string name="setup_open_accessibility">Read disclosure and open settings</string>
+    <string name="setup_trigger_missing">Action needed: typed-trigger translation is off.</string>
+    <string name="setup_enable_trigger">Enable typed-trigger translation</string>
+    <string name="setup_background_title">3. Keep it running on this phone</string>
+    <string name="setup_background_help">Xiaomi, Redmi and POCO may stop translation when the app closes. Open each setting and confirm what you selected. Android does not let us verify these manufacturer settings automatically.</string>
+    <string name="setup_battery_help">In app details, open Battery and choose No restrictions.</string>
+    <string name="setup_battery_confirm">I checked and selected No restrictions</string>
+    <string name="setup_autostart_help">Enable Autostart for TextGate AI if your phone shows it. If the shortcut opens app details, look for Autostart there.</string>
+    <string name="setup_autostart_confirm">I checked and enabled Autostart (or it is unavailable)</string>
+    <string name="setup_standard_background">On other phones, if translation stops after closing the app, review battery restrictions in Android app settings.</string>
+    <string name="setup_done">Ready</string>
+    <string name="setup_incomplete">Finish the steps above, then check again.</string>
+    <string name="setup_ready">Setup complete. You can open the app.</string>
+    <string name="setup_verify">Check again</string>
+    <string name="setup_continue">Open app</string>
     <string name="app_name">Tłumacz TextGate AI</string>
 
     <string name="accessibility_service_description">TextGate AI टेक्स्ट को दो तरीकों से पढ़ता है, और दोनों ही सख्ती से सीमित हैं। पहला: जिस टेक्स्ट फ़ील्ड में आप फ़िलहाल टाइप कर रहे हैं, और वह भी केवल यह देखने के लिए कि आपने जो टाइप किया है उसके अंत में कोई एक निश्चित ट्रिगर प्रत्यय (जैसे \"?en\" या \"?de\" — हर भाषा के लिए एक, पूरी सूची Settings में देखें) है या नहीं। दूसरा: कोई संदेश या टिप्पणी जिसे आप देर तक दबाकर (long-press) रखते हैं, ताकि Settings में आपकी चुनी हुई डिफ़ॉल्ट भाषा में एक फ़्लोटिंग अनुवाद दिखाया जा सके। दोनों ही तरीके कभी भी पासवर्ड फ़ील्ड नहीं पढ़ते, कभी भी उन ऐप्स में काम नहीं करते जिन्हें आपने स्पष्ट रूप से अनुमति नहीं दी है, और पढ़ी गई किसी भी चीज़ का कोई इतिहास कभी नहीं रखते। जब कोई ट्रिगर पहचाना जाता है, या जब आप किसी अनुमति प्राप्त ऐप में किसी संदेश को देर तक दबाते हैं, तो संबंधित टेक्स्ट को HTTPS के ज़रिए आपके द्वारा कॉन्फ़िगर किए गए Gemini API को भेजा जाता है और अनुवादित किया जाता है। टाइप किए गए ट्रिगर का परिणाम फ़ील्ड की सामग्री की जगह ले लेता है; देर तक दबाने का परिणाम केवल एक अस्थायी फ़्लोटिंग बबल में दिखाया जाता है और मूल ऐप को कभी नहीं छूता। जब तक आप इनमें से कोई एक सटीक ट्रिगर टाइप नहीं करते या TextGate AI की सेटिंग्स में चालू किए गए किसी ऐप में किसी संदेश को देर तक नहीं दबाते, तब तक कहीं कुछ भी नहीं भेजा जाता।</string>

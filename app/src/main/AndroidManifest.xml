@@ -146,6 +146,12 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".setup.SetupActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize"
+            android:label="@string/setup_title" />
+
         <!--
             As of v2, reached only from MainActivity's "Ustawienia" tab —
             no longer the launcher. exported="false" is correct and safe:

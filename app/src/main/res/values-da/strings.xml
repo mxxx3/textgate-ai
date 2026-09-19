@@ -1,5 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+<string name="setup_title">Prepare TextGate AI</string>
+    <string name="setup_intro">Complete these steps once. We check the key and Accessibility Service whenever you open the app.</string>
+    <string name="setup_key_title">1. Connect Gemini</string>
+    <string name="setup_key_help">Open Google AI Studio, create an API key, return here, paste it and save. Your key stays encrypted on this device.</string>
+    <string name="setup_key_missing">Action needed: no API key saved.</string>
+    <string name="setup_key_saved">Key saved. Use Test API connection to verify Gemini.</string>
+    <string name="setup_api_test_failed">The test failed. Check the key, model, connection or API quota in Settings.</string>
+    <string name="setup_open_settings">Open app settings</string>
+    <string name="setup_accessibility_title">2. Enable translation in other apps</string>
+    <string name="setup_accessibility_help">Read the disclosure, agree if you choose, then enable TextGate AI in Android Accessibility settings. Return here to check the result.</string>
+    <string name="setup_accessibility_missing">Action needed: Accessibility Service is off.</string>
+    <string name="setup_open_accessibility">Read disclosure and open settings</string>
+    <string name="setup_trigger_missing">Action needed: typed-trigger translation is off.</string>
+    <string name="setup_enable_trigger">Enable typed-trigger translation</string>
+    <string name="setup_background_title">3. Keep it running on this phone</string>
+    <string name="setup_background_help">Xiaomi, Redmi and POCO may stop translation when the app closes. Open each setting and confirm what you selected. Android does not let us verify these manufacturer settings automatically.</string>
+    <string name="setup_battery_help">In app details, open Battery and choose No restrictions.</string>
+    <string name="setup_battery_confirm">I checked and selected No restrictions</string>
+    <string name="setup_autostart_help">Enable Autostart for TextGate AI if your phone shows it. If the shortcut opens app details, look for Autostart there.</string>
+    <string name="setup_autostart_confirm">I checked and enabled Autostart (or it is unavailable)</string>
+    <string name="setup_standard_background">On other phones, if translation stops after closing the app, review battery restrictions in Android app settings.</string>
+    <string name="setup_done">Ready</string>
+    <string name="setup_incomplete">Finish the steps above, then check again.</string>
+    <string name="setup_ready">Setup complete. You can open the app.</string>
+    <string name="setup_verify">Check again</string>
+    <string name="setup_continue">Open app</string>
     <string name="app_name">Tłumacz TextGate AI</string>
 
     <string name="accessibility_service_description">TextGate AI læser tekst på to måder, som begge er strengt begrænsede. For det første: det tekstfelt, du er i gang med at redigere, og kun for at kigge efter én bestemt trigger-endelse (som \"?en\" eller \"?de\" — én pr. sprog, se den fulde liste under Indstillinger) i slutningen af det, du har skrevet. For det andet: en besked eller kommentar, du trykker og holder nede på, for at vise en flydende oversættelse til det standardsprog, du vælger under Indstillinger. Ingen af de to metoder læser nogensinde adgangskodefelter, kører aldrig i apps, du ikke udtrykkeligt har givet tilladelse til, og gemmer aldrig en historik over noget, der er læst. Når en trigger registreres, eller når du trykker og holder på en besked, i en tilladt app, sendes den relevante tekst via HTTPS til den Gemini API, du har konfigureret, og bliver oversat. Resultatet af den skrevne trigger erstatter feltets indhold; resultatet af tryk-og-hold vises kun i en midlertidig flydende boble og rører aldrig ved den oprindelige app. Der bliver ikke sendt noget nogen steder, medmindre du skriver en af disse præcise triggers eller trykker og holder på en besked i en app, der er slået til i TextGate AI\'s indstillinger.</string>

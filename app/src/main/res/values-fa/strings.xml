@@ -28,6 +28,15 @@
     <string name="setup_ready">Setup complete. Open the app and test translation after closing it.</string>
     <string name="setup_verify">Check again</string>
     <string name="setup_continue">Open app</string>
+    <string name="setup_guide_permission_title">Show a guide over Settings?</string>
+    <string name="setup_guide_permission_body">TextGate AI can show a small, closable step-by-step panel while you find the right switches in your phone settings. This needs the optional Display over other apps access. It cannot change settings or tap buttons for you. Android may hide the panel on protected screens.</string>
+    <string name="setup_guide_permission_path">In the next screen, find Tłumacz TextGate AI and allow Display over other apps, then return. On some phones, you may first see a list of apps.</string>
+    <string name="setup_guide_enable">Enable floating guide</string>
+    <string name="setup_guide_skip">Continue without floating guide</string>
+    <string name="setup_guide_close">Close guide</string>
+    <string name="setup_guide_accessibility_steps">1. Open Downloaded apps.\n2. Find Tłumacz TextGate AI.\n3. Turn on its service and confirm.</string>
+    <string name="setup_guide_battery_steps">1. Open Battery or Battery usage.\n2. Select Unrestricted / No restrictions.\n3. Return to TextGate AI.</string>
+    <string name="setup_guide_autostart_steps">1. Find Autostart (Xiaomi: Apps &gt; Permissions).\n2. Enable Tłumacz TextGate AI.\n3. Return and confirm your choice.</string>
     <string name="app_name">Tłumacz TextGate AI</string>
 
     <string name="accessibility_service_description">TextGate AI متن را به دو روش می‌خواند که هر دو به‌شدت محدود هستند. اول: فیلد متنی که در حال حاضر در حال ویرایش آن هستید، و فقط برای جستجوی یک پسوند فعال‌ساز دقیق (مانند «?en» یا «?de» — یکی برای هر زبان، فهرست کامل را در تنظیمات ببینید) در انتهای چیزی که تایپ کرده‌اید. دوم: پیام یا نظری که روی آن فشار طولانی می‌دهید و نگه می‌دارید، تا ترجمه‌ای شناور به زبان پیش‌فرضی که در تنظیمات انتخاب می‌کنید نمایش داده شود. هیچ‌یک از این دو مسیر هرگز فیلدهای رمز عبور را نمی‌خوانند، هرگز در برنامه‌هایی که شما به‌صراحت اجازه نداده‌اید اجرا نمی‌شوند، و هرگز هیچ سابقه‌ای از آنچه خوانده شده نگه نمی‌دارند. هنگامی که در برنامه‌ای مجاز یک فعال‌ساز شناسایی شود، یا هنگامی که روی پیامی فشار طولانی دهید، متن مربوطه از طریق HTTPS به Gemini API‌ای که پیکربندی کرده‌اید ارسال و ترجمه می‌شود. نتیجهٔ فعال‌ساز تایپ‌شده جایگزین محتوای فیلد می‌شود؛ نتیجهٔ فشار طولانی فقط در یک حباب شناور موقت نمایش داده می‌شود و هرگز به برنامهٔ اصلی دست نمی‌زند. تا زمانی که یکی از این فعال‌سازهای دقیق را تایپ نکنید یا روی پیامی در برنامه‌ای که در تنظیمات TextGate AI روشن است فشار طولانی ندهید، هیچ چیز به هیچ‌جا ارسال نمی‌شود.</string>

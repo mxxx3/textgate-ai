@@ -28,6 +28,15 @@
     <string name="setup_ready">Setup complete. Open the app and test translation after closing it.</string>
     <string name="setup_verify">Check again</string>
     <string name="setup_continue">Open app</string>
+    <string name="setup_guide_permission_title">Show a guide over Settings?</string>
+    <string name="setup_guide_permission_body">TextGate AI can show a small, closable step-by-step panel while you find the right switches in your phone settings. This needs the optional Display over other apps access. It cannot change settings or tap buttons for you. Android may hide the panel on protected screens.</string>
+    <string name="setup_guide_permission_path">In the next screen, find Tłumacz TextGate AI and allow Display over other apps, then return. On some phones, you may first see a list of apps.</string>
+    <string name="setup_guide_enable">Enable floating guide</string>
+    <string name="setup_guide_skip">Continue without floating guide</string>
+    <string name="setup_guide_close">Close guide</string>
+    <string name="setup_guide_accessibility_steps">1. Open Downloaded apps.\n2. Find Tłumacz TextGate AI.\n3. Turn on its service and confirm.</string>
+    <string name="setup_guide_battery_steps">1. Open Battery or Battery usage.\n2. Select Unrestricted / No restrictions.\n3. Return to TextGate AI.</string>
+    <string name="setup_guide_autostart_steps">1. Find Autostart (Xiaomi: Apps &gt; Permissions).\n2. Enable Tłumacz TextGate AI.\n3. Return and confirm your choice.</string>
     <string name="app_name">Tłumacz TextGate AI</string>
 
     <string name="accessibility_service_description">TextGate AI bere besedilo na dva strogo omejena načina. Prvič: besedilno polje, ki ga trenutno urejate, in to samo za iskanje ene natančne sprožilne pripone (na primer „?en“ ali „?de“ — ena za vsak jezik, celoten seznam si oglejte v nastavitvah) na koncu vnesenega besedila. Drugič: sporočilo ali komentar, na katerega dolgo pritisnete in ga držite, da se prikaže plavajoč prevod v privzeti jezik, ki ga izberete v nastavitvah. Nobena od teh poti nikoli ne bere polj z gesli, nikoli ne deluje v aplikacijah, ki jih niste izrecno dovolili, in nikoli ne shranjuje zgodovine česarkoli prebranega. Ko je zaznan sprožilec ali ko dolgo pritisnete sporočilo v dovoljeni aplikaciji, se ustrezno besedilo prek HTTPS pošlje v API Gemini, ki ste ga konfigurirali, in prevede. Rezultat vnesenega sprožilca nadomesti vsebino polja; rezultat dolgega pritiska se prikaže samo v začasnem plavajočem oblačku in nikoli ne vpliva na izvirno aplikacijo. Nič se nikamor ne pošlje, razen če vnesete enega od teh natančnih sprožilcev ali dolgo pritisnete sporočilo v aplikaciji, ki je vklopljena v nastavitvah TextGate AI.</string>

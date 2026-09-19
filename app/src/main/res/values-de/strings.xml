@@ -28,6 +28,15 @@
     <string name="setup_ready">Setup complete. Open the app and test translation after closing it.</string>
     <string name="setup_verify">Check again</string>
     <string name="setup_continue">Open app</string>
+    <string name="setup_guide_permission_title">Show a guide over Settings?</string>
+    <string name="setup_guide_permission_body">TextGate AI can show a small, closable step-by-step panel while you find the right switches in your phone settings. This needs the optional Display over other apps access. It cannot change settings or tap buttons for you. Android may hide the panel on protected screens.</string>
+    <string name="setup_guide_permission_path">In the next screen, find Tłumacz TextGate AI and allow Display over other apps, then return. On some phones, you may first see a list of apps.</string>
+    <string name="setup_guide_enable">Enable floating guide</string>
+    <string name="setup_guide_skip">Continue without floating guide</string>
+    <string name="setup_guide_close">Close guide</string>
+    <string name="setup_guide_accessibility_steps">1. Open Downloaded apps.\n2. Find Tłumacz TextGate AI.\n3. Turn on its service and confirm.</string>
+    <string name="setup_guide_battery_steps">1. Open Battery or Battery usage.\n2. Select Unrestricted / No restrictions.\n3. Return to TextGate AI.</string>
+    <string name="setup_guide_autostart_steps">1. Find Autostart (Xiaomi: Apps &gt; Permissions).\n2. Enable Tłumacz TextGate AI.\n3. Return and confirm your choice.</string>
     <string name="app_name">Tłumacz TextGate AI</string>
 
     <string name="accessibility_service_description">TextGate AI liest Text auf zwei Arten, die beide streng eingeschränkt sind. Erstens: das Textfeld, das Sie gerade bearbeiten, und zwar nur, um nach einem exakten Auslöse-Suffix (wie „?en“ oder „?de“ — eines pro Sprache, die vollständige Liste finden Sie in den Einstellungen) am Ende des Eingegebenen zu suchen. Zweitens: eine Nachricht oder ein Kommentar, den Sie gedrückt halten, um eine schwebende Übersetzung in die Standardsprache anzuzeigen, die Sie in den Einstellungen wählen. Keiner der beiden Wege liest jemals Passwortfelder, läuft niemals in Apps, die Sie nicht ausdrücklich erlaubt haben, und speichert niemals einen Verlauf des Gelesenen. Wenn ein Auslöser erkannt wird, oder wenn Sie eine Nachricht gedrückt halten, in einer erlaubten App, wird der betreffende Text über HTTPS an die von Ihnen konfigurierte Gemini API gesendet und übersetzt. Das Ergebnis des eingegebenen Auslösers ersetzt den Inhalt des Feldes; das Ergebnis des langen Drückens wird ausschließlich in einer temporären schwebenden Blase angezeigt und berührt niemals die ursprüngliche App. Es wird nirgendwohin etwas gesendet, es sei denn, Sie geben einen dieser exakten Auslöser ein oder halten eine Nachricht in einer App gedrückt, die in den Einstellungen von TextGate AI aktiviert ist.</string>

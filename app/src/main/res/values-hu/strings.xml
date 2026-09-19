@@ -28,6 +28,15 @@
     <string name="setup_ready">Setup complete. Open the app and test translation after closing it.</string>
     <string name="setup_verify">Check again</string>
     <string name="setup_continue">Open app</string>
+    <string name="setup_guide_permission_title">Show a guide over Settings?</string>
+    <string name="setup_guide_permission_body">TextGate AI can show a small, closable step-by-step panel while you find the right switches in your phone settings. This needs the optional Display over other apps access. It cannot change settings or tap buttons for you. Android may hide the panel on protected screens.</string>
+    <string name="setup_guide_permission_path">In the next screen, find Tłumacz TextGate AI and allow Display over other apps, then return. On some phones, you may first see a list of apps.</string>
+    <string name="setup_guide_enable">Enable floating guide</string>
+    <string name="setup_guide_skip">Continue without floating guide</string>
+    <string name="setup_guide_close">Close guide</string>
+    <string name="setup_guide_accessibility_steps">1. Open Downloaded apps.\n2. Find Tłumacz TextGate AI.\n3. Turn on its service and confirm.</string>
+    <string name="setup_guide_battery_steps">1. Open Battery or Battery usage.\n2. Select Unrestricted / No restrictions.\n3. Return to TextGate AI.</string>
+    <string name="setup_guide_autostart_steps">1. Find Autostart (Xiaomi: Apps &gt; Permissions).\n2. Enable Tłumacz TextGate AI.\n3. Return and confirm your choice.</string>
     <string name="app_name">Tłumacz TextGate AI</string>
 
     <string name="accessibility_service_description">A TextGate AI kétféleképpen olvassa a szöveget, mindkettő szigorúan korlátozott. Először: azt a szövegmezőt, amelyet éppen szerkeszt, és csakis azért, hogy megkeresse a beírt szöveg végén az egyetlen pontos aktiváló utótagot (például \"?en\" vagy \"?de\" — nyelvenként egyet, a teljes listát a Beállításokban találja). Másodszor: egy üzenetet vagy hozzászólást, amelyet hosszan megnyom, hogy megjelenjen egy lebegő fordítás a Beállításokban kiválasztott alapértelmezett nyelvre. Egyik módszer sem olvassa el soha a jelszómezőket, sosem működik olyan alkalmazásokban, amelyeket kifejezetten nem engedélyezett, és sosem tárol előzményt semmiről, amit olvasott. Amikor felismer egy aktiválót, vagy amikor hosszan megnyom egy üzenetet egy engedélyezett alkalmazásban, az érintett szöveg HTTPS-en keresztül elküldésre kerül az Ön által beállított Gemini API-hoz, és lefordításra kerül. A begépelt aktiváló eredménye felülírja a mező tartalmát; a hosszú megnyomás eredménye csak egy ideiglenes lebegő buborékban jelenik meg, és sosem érinti az eredeti alkalmazást. Semmi sem kerül elküldésre sehova, hacsak nem gépeli be az egyik pontos aktiválót, vagy nem nyom hosszan meg egy üzenetet egy olyan alkalmazásban, amely be van kapcsolva a TextGate AI beállításaiban.</string>

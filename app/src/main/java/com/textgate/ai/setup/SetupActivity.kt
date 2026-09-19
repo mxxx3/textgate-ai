@@ -8,7 +8,6 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.provider.Settings
 import android.view.View
 import android.view.WindowInsets
 import android.widget.AdapterView
@@ -124,15 +123,10 @@ class SetupActivity : Activity() {
             refresh()
         }
         binding.buttonBattery.setOnClickListener {
-            if (!open(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:$packageName")))) showOpenError()
+            if (!open(SetupGuideActivity.intent(this, SetupGuideOverlay.Destination.BATTERY))) showOpenError()
         }
         binding.buttonAutostart.setOnClickListener {
-            val intents = listOf(
-                Intent().setClassName("com.miui.securitycenter", "com.miui.permcenter.autostart.AutoStartManagementActivity"),
-                Intent("miui.intent.action.OP_AUTO_START"),
-                Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:$packageName"))
-            )
-            if (intents.none(::open)) showOpenError()
+            if (!open(SetupGuideActivity.intent(this, SetupGuideOverlay.Destination.AUTOSTART))) showOpenError()
         }
         binding.groupBattery.setOnCheckedChangeListener { _, id ->
             val choice = when (id) {
@@ -166,6 +160,7 @@ class SetupActivity : Activity() {
 
     override fun onResume() {
         super.onResume()
+        SetupGuideOverlay.dismiss()
         if (::binding.isInitialized) refresh()
     }
 

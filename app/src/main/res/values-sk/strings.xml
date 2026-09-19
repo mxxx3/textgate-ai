@@ -28,6 +28,15 @@
     <string name="setup_ready">Setup complete. Open the app and test translation after closing it.</string>
     <string name="setup_verify">Check again</string>
     <string name="setup_continue">Open app</string>
+    <string name="setup_guide_permission_title">Show a guide over Settings?</string>
+    <string name="setup_guide_permission_body">TextGate AI can show a small, closable step-by-step panel while you find the right switches in your phone settings. This needs the optional Display over other apps access. It cannot change settings or tap buttons for you. Android may hide the panel on protected screens.</string>
+    <string name="setup_guide_permission_path">In the next screen, find Tłumacz TextGate AI and allow Display over other apps, then return. On some phones, you may first see a list of apps.</string>
+    <string name="setup_guide_enable">Enable floating guide</string>
+    <string name="setup_guide_skip">Continue without floating guide</string>
+    <string name="setup_guide_close">Close guide</string>
+    <string name="setup_guide_accessibility_steps">1. Open Downloaded apps.\n2. Find Tłumacz TextGate AI.\n3. Turn on its service and confirm.</string>
+    <string name="setup_guide_battery_steps">1. Open Battery or Battery usage.\n2. Select Unrestricted / No restrictions.\n3. Return to TextGate AI.</string>
+    <string name="setup_guide_autostart_steps">1. Find Autostart (Xiaomi: Apps &gt; Permissions).\n2. Enable Tłumacz TextGate AI.\n3. Return and confirm your choice.</string>
     <string name="app_name">Tłumacz TextGate AI</string>
 
     <string name="accessibility_service_description">TextGate AI číta text len dvoma prísne obmedzenými spôsobmi. Po prvé: textové pole, ktoré práve upravujete, a to iba na vyhľadanie jednej presnej spúšťacej prípony (napríklad „?en“ alebo „?de“ — jedna pre každý jazyk, celý zoznam nájdete v nastaveniach) na konci toho, čo ste napísali. Po druhé: správu alebo komentár, na ktorý dlho podržíte prst, aby sa zobrazil plávajúci preklad do predvoleného jazyka, ktorý si zvolíte v nastaveniach. Ani jeden z týchto spôsobov nikdy nečíta polia s heslami, nikdy nefunguje v aplikáciách, ktoré ste výslovne nepovolili, a nikdy si neuchováva históriu ničoho prečítaného. Keď sa zistí spúšťač alebo keď dlho podržíte správu v povolenej aplikácii, príslušný text sa odošle cez HTTPS do vami nakonfigurovaného API Gemini a preloží sa. Výsledok zadaného spúšťača nahradí obsah poľa; výsledok dlhého podržania sa zobrazí iba v dočasnej plávajúcej bubline a nikdy sa nedotkne pôvodnej aplikácie. Nič sa nikam neodošle, pokiaľ nezadáte jeden z týchto presných spúšťačov alebo dlho nepodržíte správu v aplikácii, ktorá je zapnutá v nastaveniach TextGate AI.</string>

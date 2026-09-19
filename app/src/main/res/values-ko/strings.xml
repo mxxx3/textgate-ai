@@ -28,6 +28,15 @@
     <string name="setup_ready">Setup complete. Open the app and test translation after closing it.</string>
     <string name="setup_verify">Check again</string>
     <string name="setup_continue">Open app</string>
+    <string name="setup_guide_permission_title">Show a guide over Settings?</string>
+    <string name="setup_guide_permission_body">TextGate AI can show a small, closable step-by-step panel while you find the right switches in your phone settings. This needs the optional Display over other apps access. It cannot change settings or tap buttons for you. Android may hide the panel on protected screens.</string>
+    <string name="setup_guide_permission_path">In the next screen, find Tłumacz TextGate AI and allow Display over other apps, then return. On some phones, you may first see a list of apps.</string>
+    <string name="setup_guide_enable">Enable floating guide</string>
+    <string name="setup_guide_skip">Continue without floating guide</string>
+    <string name="setup_guide_close">Close guide</string>
+    <string name="setup_guide_accessibility_steps">1. Open Downloaded apps.\n2. Find Tłumacz TextGate AI.\n3. Turn on its service and confirm.</string>
+    <string name="setup_guide_battery_steps">1. Open Battery or Battery usage.\n2. Select Unrestricted / No restrictions.\n3. Return to TextGate AI.</string>
+    <string name="setup_guide_autostart_steps">1. Find Autostart (Xiaomi: Apps &gt; Permissions).\n2. Enable Tłumacz TextGate AI.\n3. Return and confirm your choice.</string>
     <string name="app_name">Tłumacz TextGate AI</string>
 
     <string name="accessibility_service_description">TextGate AI는 두 가지 방식으로만 텍스트를 읽으며, 두 방식 모두 엄격하게 제한되어 있습니다. 첫째, 현재 편집 중인 텍스트 필드에서 입력한 내용의 끝부분에 있는 정확히 일치하는 트리거 접미사(예: \"?en\" 또는 \"?de\" — 언어마다 하나씩이며 전체 목록은 설정에서 확인할 수 있습니다) 하나만을 찾기 위해 읽습니다. 둘째, 길게 눌러 선택한 메시지나 댓글을 읽어 설정에서 선택한 기본 언어로 떠 있는 형태의 번역을 표시합니다. 두 방식 모두 비밀번호 입력란은 절대 읽지 않으며, 명시적으로 허용하지 않은 앱에서는 실행되지 않고, 읽은 내용의 기록을 저장하지 않습니다. 허용된 앱에서 트리거가 감지되거나 메시지를 길게 누르면 해당 텍스트가 HTTPS를 통해 사용자가 설정한 Gemini API로 전송되어 번역됩니다. 입력 트리거의 결과는 필드의 내용을 대체합니다. 길게 누르기의 결과는 일시적으로 떠 있는 말풍선에만 표시되며 원래 앱에는 전혀 영향을 주지 않습니다. 이러한 정확한 트리거 중 하나를 입력하거나 TextGate AI 설정에서 켜져 있는 앱에서 메시지를 길게 누르지 않는 한 어디로도 아무것도 전송되지 않습니다.</string>

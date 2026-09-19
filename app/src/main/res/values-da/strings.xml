@@ -28,6 +28,15 @@
     <string name="setup_ready">Setup complete. Open the app and test translation after closing it.</string>
     <string name="setup_verify">Check again</string>
     <string name="setup_continue">Open app</string>
+    <string name="setup_guide_permission_title">Show a guide over Settings?</string>
+    <string name="setup_guide_permission_body">TextGate AI can show a small, closable step-by-step panel while you find the right switches in your phone settings. This needs the optional Display over other apps access. It cannot change settings or tap buttons for you. Android may hide the panel on protected screens.</string>
+    <string name="setup_guide_permission_path">In the next screen, find Tłumacz TextGate AI and allow Display over other apps, then return. On some phones, you may first see a list of apps.</string>
+    <string name="setup_guide_enable">Enable floating guide</string>
+    <string name="setup_guide_skip">Continue without floating guide</string>
+    <string name="setup_guide_close">Close guide</string>
+    <string name="setup_guide_accessibility_steps">1. Open Downloaded apps.\n2. Find Tłumacz TextGate AI.\n3. Turn on its service and confirm.</string>
+    <string name="setup_guide_battery_steps">1. Open Battery or Battery usage.\n2. Select Unrestricted / No restrictions.\n3. Return to TextGate AI.</string>
+    <string name="setup_guide_autostart_steps">1. Find Autostart (Xiaomi: Apps &gt; Permissions).\n2. Enable Tłumacz TextGate AI.\n3. Return and confirm your choice.</string>
     <string name="app_name">Tłumacz TextGate AI</string>
 
     <string name="accessibility_service_description">TextGate AI læser tekst på to måder, som begge er strengt begrænsede. For det første: det tekstfelt, du er i gang med at redigere, og kun for at kigge efter én bestemt trigger-endelse (som \"?en\" eller \"?de\" — én pr. sprog, se den fulde liste under Indstillinger) i slutningen af det, du har skrevet. For det andet: en besked eller kommentar, du trykker og holder nede på, for at vise en flydende oversættelse til det standardsprog, du vælger under Indstillinger. Ingen af de to metoder læser nogensinde adgangskodefelter, kører aldrig i apps, du ikke udtrykkeligt har givet tilladelse til, og gemmer aldrig en historik over noget, der er læst. Når en trigger registreres, eller når du trykker og holder på en besked, i en tilladt app, sendes den relevante tekst via HTTPS til den Gemini API, du har konfigureret, og bliver oversat. Resultatet af den skrevne trigger erstatter feltets indhold; resultatet af tryk-og-hold vises kun i en midlertidig flydende boble og rører aldrig ved den oprindelige app. Der bliver ikke sendt noget nogen steder, medmindre du skriver en af disse præcise triggers eller trykker og holder på en besked i en app, der er slået til i TextGate AI\'s indstillinger.</string>

@@ -303,11 +303,11 @@ excluded from every backup mechanism Android has.
 
 ## 3. Permissions — every single one, justified
 
-```xml
-<uses-permission android:name="android.permission.INTERNET" />
-```
-
-That is the **only** `<uses-permission>` in the manifest.
+The current manifest declares `INTERNET`, `RECORD_AUDIO`,
+`FOREGROUND_SERVICE`, `FOREGROUND_SERVICE_MICROPHONE`,
+`POST_NOTIFICATIONS`, `WAKE_LOCK`, `MODIFY_AUDIO_SETTINGS`, and
+`SYSTEM_ALERT_WINDOW`. See `app/src/main/AndroidManifest.xml` for the
+purpose and scope of each one.
 
 * **Why it's needed:** `GeminiClient` makes one HTTPS POST per translation
   request, to the host in `NetworkAllowlist.GEMINI_HOST`. Android has no
@@ -315,10 +315,9 @@ That is the **only** `<uses-permission>` in the manifest.
   necessarily process-wide — so it cannot be scoped tighter at the
   manifest level. It is scoped in *code* instead (see §5).
 
-Permissions this app does **not** request, and does not need: contacts,
-SMS, call logs, location, microphone, camera, storage, phone state,
-`QUERY_ALL_PACKAGES`, `SYSTEM_ALERT_WINDOW`, `POST_NOTIFICATIONS`,
-`FOREGROUND_SERVICE`, or anything else. The list of installed apps shown
+Permissions this app does **not** request: contacts, SMS, call logs,
+location, camera, storage, phone state, or `QUERY_ALL_PACKAGES`.
+The list of installed apps shown
 in Settings uses a declarative `<queries>` filter (launcher apps only),
 which is not a runtime/dangerous permission at all.
 
@@ -332,8 +331,9 @@ permission.** It is a `WindowManager` overlay of type
 `TYPE_ACCESSIBILITY_OVERLAY`, which — unlike `TYPE_APPLICATION_OVERLAY` —
 is available to any bound `AccessibilityService` without the user having
 to separately grant "display over other apps" (`SYSTEM_ALERT_WINDOW`).
-`SYSTEM_ALERT_WINDOW` remains absent from the manifest and unused anywhere
-in this app.
+The optional setup guide uses `TYPE_APPLICATION_OVERLAY` and requires
+`SYSTEM_ALERT_WINDOW` only when the user chooses to show instructions over
+system Settings. Declining that access does not block setup or translation.
 
 ---
 

@@ -32,8 +32,8 @@ import com.textgate.ai.R
  * additional permission: unlike TYPE_APPLICATION_OVERLAY, it does not need
  * the user to separately grant "display over other apps"
  * (SYSTEM_ALERT_WINDOW) — the accessibility binding itself is sufficient.
- * See AndroidManifest.xml / README.md "Permissions" for confirmation no
- * such permission is declared or requested anywhere in this app.
+ * The separate setup guide may request that permission, but this translation
+ * bubble still works without it.
  *
  * The window is non-modal (FLAG_NOT_TOUCH_MODAL): every touch outside the
  * bubble's own bounds passes straight through to the app underneath, so

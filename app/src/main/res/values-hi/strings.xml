@@ -28,6 +28,15 @@
     <string name="setup_ready">Setup complete. Open the app and test translation after closing it.</string>
     <string name="setup_verify">Check again</string>
     <string name="setup_continue">Open app</string>
+    <string name="setup_guide_permission_title">Show a guide over Settings?</string>
+    <string name="setup_guide_permission_body">TextGate AI can show a small, closable step-by-step panel while you find the right switches in your phone settings. This needs the optional Display over other apps access. It cannot change settings or tap buttons for you. Android may hide the panel on protected screens.</string>
+    <string name="setup_guide_permission_path">In the next screen, find Tłumacz TextGate AI and allow Display over other apps, then return. On some phones, you may first see a list of apps.</string>
+    <string name="setup_guide_enable">Enable floating guide</string>
+    <string name="setup_guide_skip">Continue without floating guide</string>
+    <string name="setup_guide_close">Close guide</string>
+    <string name="setup_guide_accessibility_steps">1. Open Downloaded apps.\n2. Find Tłumacz TextGate AI.\n3. Turn on its service and confirm.</string>
+    <string name="setup_guide_battery_steps">1. Open Battery or Battery usage.\n2. Select Unrestricted / No restrictions.\n3. Return to TextGate AI.</string>
+    <string name="setup_guide_autostart_steps">1. Find Autostart (Xiaomi: Apps &gt; Permissions).\n2. Enable Tłumacz TextGate AI.\n3. Return and confirm your choice.</string>
     <string name="app_name">Tłumacz TextGate AI</string>
 
     <string name="accessibility_service_description">TextGate AI टेक्स्ट को दो तरीकों से पढ़ता है, और दोनों ही सख्ती से सीमित हैं। पहला: जिस टेक्स्ट फ़ील्ड में आप फ़िलहाल टाइप कर रहे हैं, और वह भी केवल यह देखने के लिए कि आपने जो टाइप किया है उसके अंत में कोई एक निश्चित ट्रिगर प्रत्यय (जैसे \"?en\" या \"?de\" — हर भाषा के लिए एक, पूरी सूची Settings में देखें) है या नहीं। दूसरा: कोई संदेश या टिप्पणी जिसे आप देर तक दबाकर (long-press) रखते हैं, ताकि Settings में आपकी चुनी हुई डिफ़ॉल्ट भाषा में एक फ़्लोटिंग अनुवाद दिखाया जा सके। दोनों ही तरीके कभी भी पासवर्ड फ़ील्ड नहीं पढ़ते, कभी भी उन ऐप्स में काम नहीं करते जिन्हें आपने स्पष्ट रूप से अनुमति नहीं दी है, और पढ़ी गई किसी भी चीज़ का कोई इतिहास कभी नहीं रखते। जब कोई ट्रिगर पहचाना जाता है, या जब आप किसी अनुमति प्राप्त ऐप में किसी संदेश को देर तक दबाते हैं, तो संबंधित टेक्स्ट को HTTPS के ज़रिए आपके द्वारा कॉन्फ़िगर किए गए Gemini API को भेजा जाता है और अनुवादित किया जाता है। टाइप किए गए ट्रिगर का परिणाम फ़ील्ड की सामग्री की जगह ले लेता है; देर तक दबाने का परिणाम केवल एक अस्थायी फ़्लोटिंग बबल में दिखाया जाता है और मूल ऐप को कभी नहीं छूता। जब तक आप इनमें से कोई एक सटीक ट्रिगर टाइप नहीं करते या TextGate AI की सेटिंग्स में चालू किए गए किसी ऐप में किसी संदेश को देर तक नहीं दबाते, तब तक कहीं कुछ भी नहीं भेजा जाता।</string>

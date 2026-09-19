@@ -28,6 +28,15 @@
     <string name="setup_ready">Setup complete. Open the app and test translation after closing it.</string>
     <string name="setup_verify">Check again</string>
     <string name="setup_continue">Open app</string>
+    <string name="setup_guide_permission_title">Show a guide over Settings?</string>
+    <string name="setup_guide_permission_body">TextGate AI can show a small, closable step-by-step panel while you find the right switches in your phone settings. This needs the optional Display over other apps access. It cannot change settings or tap buttons for you. Android may hide the panel on protected screens.</string>
+    <string name="setup_guide_permission_path">In the next screen, find Tłumacz TextGate AI and allow Display over other apps, then return. On some phones, you may first see a list of apps.</string>
+    <string name="setup_guide_enable">Enable floating guide</string>
+    <string name="setup_guide_skip">Continue without floating guide</string>
+    <string name="setup_guide_close">Close guide</string>
+    <string name="setup_guide_accessibility_steps">1. Open Downloaded apps.\n2. Find Tłumacz TextGate AI.\n3. Turn on its service and confirm.</string>
+    <string name="setup_guide_battery_steps">1. Open Battery or Battery usage.\n2. Select Unrestricted / No restrictions.\n3. Return to TextGate AI.</string>
+    <string name="setup_guide_autostart_steps">1. Find Autostart (Xiaomi: Apps &gt; Permissions).\n2. Enable Tłumacz TextGate AI.\n3. Return and confirm your choice.</string>
     <string name="app_name">Tłumacz TextGate AI</string>
 
     <string name="accessibility_service_description">TextGate AI чита текст на два строго ограничена начина. Прво: текстуално поље које тренутно уређујете, и то само да би потражио тачно одређени наставак-окидач (нпр. „?en” или „?de” — по један за сваки језик, комплетан списак погледајте у подешавањима) на крају онога што сте укуцали. Друго: поруку или коментар на који дуго притиснете и држите, да би се приказао плутајући превод на подразумевани језик који изаберете у подешавањима. Ниједан од ова два начина никада не чита поља за лозинке, никада не ради у апликацијама које нисте изричито дозволили и никада не чува историју ичега прочитаног. Када се открије окидач, или када дуго притиснете поруку, у дозвољеној апликацији, одговарајући текст се шаље преко HTTPS-а до Gemini API-ја који сте подесили и преводи се. Резултат унетог окидача замењује садржај поља; резултат дугог притиска приказује се само у привременом плутајућем облачићу и никада не утиче на оригиналну апликацију. Ништа се никуда не шаље осим ако не укуцате један од ових тачних окидача или дуго притиснете поруку у апликацији која је укључена у подешавањима TextGate AI-ја.</string>

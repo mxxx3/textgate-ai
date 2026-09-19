@@ -28,6 +28,15 @@
     <string name="setup_ready">Setup complete. Open the app and test translation after closing it.</string>
     <string name="setup_verify">Check again</string>
     <string name="setup_continue">Open app</string>
+    <string name="setup_guide_permission_title">Show a guide over Settings?</string>
+    <string name="setup_guide_permission_body">TextGate AI can show a small, closable step-by-step panel while you find the right switches in your phone settings. This needs the optional Display over other apps access. It cannot change settings or tap buttons for you. Android may hide the panel on protected screens.</string>
+    <string name="setup_guide_permission_path">In the next screen, find Tłumacz TextGate AI and allow Display over other apps, then return. On some phones, you may first see a list of apps.</string>
+    <string name="setup_guide_enable">Enable floating guide</string>
+    <string name="setup_guide_skip">Continue without floating guide</string>
+    <string name="setup_guide_close">Close guide</string>
+    <string name="setup_guide_accessibility_steps">1. Open Downloaded apps.\n2. Find Tłumacz TextGate AI.\n3. Turn on its service and confirm.</string>
+    <string name="setup_guide_battery_steps">1. Open Battery or Battery usage.\n2. Select Unrestricted / No restrictions.\n3. Return to TextGate AI.</string>
+    <string name="setup_guide_autostart_steps">1. Find Autostart (Xiaomi: Apps &gt; Permissions).\n2. Enable Tłumacz TextGate AI.\n3. Return and confirm your choice.</string>
     <string name="app_name">Tłumacz TextGate AI</string>
 
     <string name="accessibility_service_description">TextGate AI зчитує текст лише двома суворо обмеженими способами. Перший: текстове поле, яке ви зараз редагуєте, — і лише для пошуку одного точного тригерного суфікса (наприклад, \"?en\" або \"?de\" — по одному на кожну мову, повний список див. у Налаштуваннях) у кінці введеного вами тексту. Другий: повідомлення чи коментар, на якому ви утримуєте палець (довге натискання), — щоб показати спливаючий переклад на мову за замовчуванням, обрану вами в Налаштуваннях. Жоден із цих способів ніколи не зчитує поля паролів, ніколи не працює в застосунках, які ви явно не дозволили, і ніколи не зберігає історію прочитаного. Коли виявлено тригер або коли ви робите довге натискання на повідомлення в дозволеному застосунку, відповідний текст надсилається через HTTPS до налаштованого вами Gemini API та перекладається. Результат текстового тригера замінює вміст поля; результат довгого натискання показується лише в тимчасовій спливаючій бульбашці й ніколи не торкається початкового застосунку. Нічого й нікуди не надсилається, доки ви не введете один із цих точних тригерів або не зробите довге натискання на повідомлення в застосунку, увімкненому в налаштуваннях TextGate AI.</string>

@@ -41,6 +41,8 @@ import com.textgate.ai.network.TranslationOrchestrator
 import com.textgate.ai.security.AppSettingsStore
 import com.textgate.ai.security.SecureApiKeyStore
 import com.textgate.ai.security.TriggerDetector
+import com.textgate.ai.setup.SetupGuideActivity
+import com.textgate.ai.setup.SetupGuideOverlay
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
@@ -156,6 +158,7 @@ class SettingsActivity : Activity() {
 
     override fun onResume() {
         super.onResume()
+        SetupGuideOverlay.dismiss()
         // Accessibility enablement can only change outside this app (in
         // system Settings), so refresh the status label every time the
         // user returns to this screen.
@@ -441,7 +444,7 @@ class SettingsActivity : Activity() {
 
     private fun openSystemAccessibilitySettings() {
         try {
-            startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
+            startActivity(SetupGuideActivity.intent(this, SetupGuideOverlay.Destination.ACCESSIBILITY))
         } catch (_: Exception) {
             Toast.makeText(this, R.string.error_generic, Toast.LENGTH_SHORT).show()
         }
@@ -477,10 +480,10 @@ class SettingsActivity : Activity() {
     private fun setupBackgroundOperationSection() {
         refreshBackgroundOperationStatus()
         binding.buttonOpenBatterySettings.setOnClickListener {
-            openAppDetailsSettings()
+            startActivity(SetupGuideActivity.intent(this, SetupGuideOverlay.Destination.BATTERY))
         }
         binding.buttonOpenAutostartSettings.setOnClickListener {
-            openXiaomiAutostartSettings()
+            startActivity(SetupGuideActivity.intent(this, SetupGuideOverlay.Destination.AUTOSTART))
         }
         binding.buttonOpenAppDetailsSettings.setOnClickListener {
             openAppDetailsSettings()
@@ -529,26 +532,6 @@ class SettingsActivity : Activity() {
         } catch (_: Exception) {
             Toast.makeText(this, R.string.error_generic, Toast.LENGTH_SHORT).show()
         }
-    }
-
-    private fun openXiaomiAutostartSettings() {
-        val intents = listOf(
-            Intent().setClassName(
-                "com.miui.securitycenter",
-                "com.miui.permcenter.autostart.AutoStartManagementActivity"
-            ),
-            Intent("miui.intent.action.OP_AUTO_START"),
-            Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:$packageName"))
-        )
-        for (intent in intents) {
-            try {
-                startActivity(intent)
-                return
-            } catch (_: Exception) {
-                // Try the next known OEM/system screen.
-            }
-        }
-        Toast.makeText(this, R.string.error_generic, Toast.LENGTH_SHORT).show()
     }
 
     // ---------------------------------------------------------------

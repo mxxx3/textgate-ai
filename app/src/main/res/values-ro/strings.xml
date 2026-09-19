@@ -28,6 +28,15 @@
     <string name="setup_ready">Setup complete. Open the app and test translation after closing it.</string>
     <string name="setup_verify">Check again</string>
     <string name="setup_continue">Open app</string>
+    <string name="setup_guide_permission_title">Show a guide over Settings?</string>
+    <string name="setup_guide_permission_body">TextGate AI can show a small, closable step-by-step panel while you find the right switches in your phone settings. This needs the optional Display over other apps access. It cannot change settings or tap buttons for you. Android may hide the panel on protected screens.</string>
+    <string name="setup_guide_permission_path">In the next screen, find Tłumacz TextGate AI and allow Display over other apps, then return. On some phones, you may first see a list of apps.</string>
+    <string name="setup_guide_enable">Enable floating guide</string>
+    <string name="setup_guide_skip">Continue without floating guide</string>
+    <string name="setup_guide_close">Close guide</string>
+    <string name="setup_guide_accessibility_steps">1. Open Downloaded apps.\n2. Find Tłumacz TextGate AI.\n3. Turn on its service and confirm.</string>
+    <string name="setup_guide_battery_steps">1. Open Battery or Battery usage.\n2. Select Unrestricted / No restrictions.\n3. Return to TextGate AI.</string>
+    <string name="setup_guide_autostart_steps">1. Find Autostart (Xiaomi: Apps &gt; Permissions).\n2. Enable Tłumacz TextGate AI.\n3. Return and confirm your choice.</string>
     <string name="app_name">Tłumacz TextGate AI</string>
 
     <string name="accessibility_service_description">TextGate AI citește textul în două moduri, ambele strict limitate. Primul: câmpul de text pe care îl editați în prezent, doar pentru a căuta un sufix declanșator exact (precum \"?en\" sau \"?de\" — câte unul pentru fiecare limbă, consultați lista completă din Setări) la sfârșitul a ceea ce ați scris. Al doilea: un mesaj sau un comentariu pe care apăsați lung, pentru a afișa o traducere plutitoare în limba implicită pe care o alegeți din Setări. Niciuna dintre aceste două metode nu citește vreodată câmpurile de parolă, nu funcționează niciodată în aplicații pe care nu le-ați permis explicit și nu păstrează niciodată un istoric al a ceea ce a fost citit. Când este detectat un declanșator, sau când apăsați lung pe un mesaj, într-o aplicație permisă, textul relevant este trimis prin HTTPS către API-ul Gemini pe care l-ați configurat și tradus. Rezultatul declanșatorului scris înlocuiește conținutul câmpului; rezultatul apăsării lungi este afișat doar într-o bulă plutitoare temporară și nu afectează niciodată aplicația originală. Nimic nu este trimis nicăieri, decât dacă scrieți unul dintre acești declanșatori exacți sau apăsați lung pe un mesaj într-o aplicație care este activată în setările TextGate AI.</string>

@@ -28,6 +28,15 @@
     <string name="setup_ready">Setup complete. Open the app and test translation after closing it.</string>
     <string name="setup_verify">Check again</string>
     <string name="setup_continue">Open app</string>
+    <string name="setup_guide_permission_title">Show a guide over Settings?</string>
+    <string name="setup_guide_permission_body">TextGate AI can show a small, closable step-by-step panel while you find the right switches in your phone settings. This needs the optional Display over other apps access. It cannot change settings or tap buttons for you. Android may hide the panel on protected screens.</string>
+    <string name="setup_guide_permission_path">In the next screen, find Tłumacz TextGate AI and allow Display over other apps, then return. On some phones, you may first see a list of apps.</string>
+    <string name="setup_guide_enable">Enable floating guide</string>
+    <string name="setup_guide_skip">Continue without floating guide</string>
+    <string name="setup_guide_close">Close guide</string>
+    <string name="setup_guide_accessibility_steps">1. Open Downloaded apps.\n2. Find Tłumacz TextGate AI.\n3. Turn on its service and confirm.</string>
+    <string name="setup_guide_battery_steps">1. Open Battery or Battery usage.\n2. Select Unrestricted / No restrictions.\n3. Return to TextGate AI.</string>
+    <string name="setup_guide_autostart_steps">1. Find Autostart (Xiaomi: Apps &gt; Permissions).\n2. Enable Tłumacz TextGate AI.\n3. Return and confirm your choice.</string>
     <string name="app_name">Tłumacz TextGate AI</string>
 
     <string name="accessibility_service_description">TextGate AI 通过两种方式读取文本,且都受到严格限制。第一种:读取您当前正在编辑的文本框,且仅用于查找您输入内容末尾是否存在一个精确的触发后缀(例如“?en”或“?de”——每种语言对应一个,完整列表请见“设置”页面)。第二种:您长按住的一条消息或评论,用于以悬浮窗形式显示翻译为您在“设置”中选择的默认语言的结果。这两种方式都绝不会读取密码字段,绝不会在您未明确允许的应用中运行,也绝不会保留任何已读取内容的记录。当在已允许的应用中检测到触发后缀,或您长按某条消息时,相关文本会通过 HTTPS 发送到您配置的 Gemini API 进行翻译。输入触发的翻译结果会替换文本框中的内容;长按翻译的结果则只会显示在一个临时悬浮气泡中,绝不会触及原应用。只有当您输入这些精确触发后缀之一,或在 TextGate AI 设置中已开启的应用内长按某条消息时,系统才会发送任何内容。</string>

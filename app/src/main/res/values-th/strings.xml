@@ -28,6 +28,15 @@
     <string name="setup_ready">Setup complete. Open the app and test translation after closing it.</string>
     <string name="setup_verify">Check again</string>
     <string name="setup_continue">Open app</string>
+    <string name="setup_guide_permission_title">Show a guide over Settings?</string>
+    <string name="setup_guide_permission_body">TextGate AI can show a small, closable step-by-step panel while you find the right switches in your phone settings. This needs the optional Display over other apps access. It cannot change settings or tap buttons for you. Android may hide the panel on protected screens.</string>
+    <string name="setup_guide_permission_path">In the next screen, find Tłumacz TextGate AI and allow Display over other apps, then return. On some phones, you may first see a list of apps.</string>
+    <string name="setup_guide_enable">Enable floating guide</string>
+    <string name="setup_guide_skip">Continue without floating guide</string>
+    <string name="setup_guide_close">Close guide</string>
+    <string name="setup_guide_accessibility_steps">1. Open Downloaded apps.\n2. Find Tłumacz TextGate AI.\n3. Turn on its service and confirm.</string>
+    <string name="setup_guide_battery_steps">1. Open Battery or Battery usage.\n2. Select Unrestricted / No restrictions.\n3. Return to TextGate AI.</string>
+    <string name="setup_guide_autostart_steps">1. Find Autostart (Xiaomi: Apps &gt; Permissions).\n2. Enable Tłumacz TextGate AI.\n3. Return and confirm your choice.</string>
     <string name="app_name">Tłumacz TextGate AI</string>
 
     <string name="accessibility_service_description">TextGate AI อ่านข้อความใน 2 รูปแบบเท่านั้น และทั้งสองแบบถูกจำกัดขอบเขตอย่างเคร่งครัด แบบแรก: ช่องข้อความที่คุณกำลังพิมพ์อยู่ โดยจะตรวจดูเฉพาะคำต่อท้ายกระตุ้น (trigger) ที่ตรงกันแบบเป๊ะๆ (เช่น \"?en\" หรือ \"?de\" — หนึ่งรหัสต่อหนึ่งภาษา ดูรายการทั้งหมดได้ในหน้าตั้งค่า) ที่อยู่ท้ายข้อความที่คุณพิมพ์เท่านั้น แบบที่สอง: ข้อความหรือความคิดเห็นที่คุณกดค้าง เพื่อแสดงคำแปลแบบลอยเป็นภาษาเริ่มต้นที่คุณเลือกไว้ในหน้าตั้งค่า ทั้งสองช่องทางนี้จะไม่อ่านช่องรหัสผ่านเด็ดขาด ไม่ทำงานในแอปที่คุณไม่ได้อนุญาตไว้อย่างชัดเจน และไม่เก็บประวัติสิ่งที่อ่านไปเลย เมื่อตรวจพบคำกระตุ้น หรือเมื่อคุณกดค้างที่ข้อความในแอปที่ได้รับอนุญาต ข้อความที่เกี่ยวข้องจะถูกส่งผ่าน HTTPS ไปยัง Gemini API ที่คุณตั้งค่าไว้เพื่อแปลภาษา ผลลัพธ์จากการพิมพ์คำกระตุ้นจะแทนที่เนื้อหาในช่องข้อความ ส่วนผลลัพธ์จากการกดค้างจะแสดงในบับเบิลลอยชั่วคราวเท่านั้น และจะไม่ไปแตะต้องแอปต้นทางเลย จะไม่มีการส่งข้อมูลใดๆ ไปที่ใดเลย เว้นแต่คุณจะพิมพ์คำกระตุ้นเหล่านี้อย่างใดอย่างหนึ่ง หรือกดค้างข้อความในแอปที่เปิดใช้งานไว้ในการตั้งค่าของ TextGate AI</string>

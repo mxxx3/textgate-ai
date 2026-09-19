@@ -8,7 +8,7 @@
     an explicit affirmative action ("I agree", not "OK"/"Understood") before
     continuing. SettingsActivity launches this screen instead of jumping
     straight to Settings.ACTION_ACCESSIBILITY_SETTINGS; only tapping
-    buttonAgree here does that.
+    buttonAgree here proceeds through the optional guide choice to that screen.
 -->
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"

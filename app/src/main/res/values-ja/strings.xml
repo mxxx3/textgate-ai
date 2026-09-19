@@ -28,6 +28,15 @@
     <string name="setup_ready">Setup complete. Open the app and test translation after closing it.</string>
     <string name="setup_verify">Check again</string>
     <string name="setup_continue">Open app</string>
+    <string name="setup_guide_permission_title">Show a guide over Settings?</string>
+    <string name="setup_guide_permission_body">TextGate AI can show a small, closable step-by-step panel while you find the right switches in your phone settings. This needs the optional Display over other apps access. It cannot change settings or tap buttons for you. Android may hide the panel on protected screens.</string>
+    <string name="setup_guide_permission_path">In the next screen, find Tłumacz TextGate AI and allow Display over other apps, then return. On some phones, you may first see a list of apps.</string>
+    <string name="setup_guide_enable">Enable floating guide</string>
+    <string name="setup_guide_skip">Continue without floating guide</string>
+    <string name="setup_guide_close">Close guide</string>
+    <string name="setup_guide_accessibility_steps">1. Open Downloaded apps.\n2. Find Tłumacz TextGate AI.\n3. Turn on its service and confirm.</string>
+    <string name="setup_guide_battery_steps">1. Open Battery or Battery usage.\n2. Select Unrestricted / No restrictions.\n3. Return to TextGate AI.</string>
+    <string name="setup_guide_autostart_steps">1. Find Autostart (Xiaomi: Apps &gt; Permissions).\n2. Enable Tłumacz TextGate AI.\n3. Return and confirm your choice.</string>
     <string name="app_name">Tłumacz TextGate AI</string>
 
     <string name="accessibility_service_description">TextGate AI は、厳密に制限された2つの方法でのみテキストを読み取ります。1つ目は、現在編集中のテキストフィールドで、入力した内容の末尾にある特定のトリガー接尾辞(「?en」や「?de」など。言語ごとに1つずつ用意されており、完全なリストは設定画面で確認できます)を探すためだけに読み取ります。2つ目は、長押ししたメッセージやコメントを読み取り、設定で選択したデフォルトの言語へのフローティング翻訳を表示するためのものです。どちらの方法も、パスワード入力欄を読み取ることは一切なく、明示的に許可していないアプリでは動作せず、読み取った内容の履歴を保持することもありません。許可されたアプリ内でトリガーが検出された場合、またはメッセージを長押しした場合、該当するテキストはHTTPS経由で設定済みのGemini APIに送信され、翻訳されます。入力トリガーの結果はフィールドの内容を置き換えます。長押しの結果は一時的なフローティングバブルにのみ表示され、元のアプリには一切影響しません。これらの正確なトリガーのいずれかを入力するか、TextGate AIの設定でオンになっているアプリでメッセージを長押しした場合を除き、どこにも何も送信されません。</string>

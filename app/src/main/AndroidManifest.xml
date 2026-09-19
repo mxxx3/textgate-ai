@@ -81,6 +81,14 @@
         approach — this permission is declared for, and used by, only this
         one path.
 
+    android.permission.SYSTEM_ALERT_WINDOW (optional setup guide)
+        Lets the user display a small, closable instruction panel over
+        system Settings before the Accessibility Service is enabled.
+        The user must explicitly grant this special access in Android
+        Settings; declining does not block setup. The panel never taps
+        system controls and is removed when the user returns to the app
+        or after three minutes.
+
     In particular this app still requests NONE of: contacts, SMS, call
     logs, location, camera, storage, phone state, or QUERY_ALL_PACKAGES.
     The accessibility capability itself is not a manifest permission the
@@ -96,6 +104,7 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
 
     <!--
         Declarative package-visibility filter (Android 11+ / API 30+).
@@ -152,6 +161,11 @@
             android:windowSoftInputMode="adjustResize"
             android:label="@string/setup_title" />
 
+        <activity
+            android:name=".setup.SetupGuideActivity"
+            android:exported="false"
+            android:label="@string/setup_guide_permission_title" />
+
         <!--
             As of v2, reached only from MainActivity's "Ustawienia" tab —
             no longer the launcher. exported="false" is correct and safe:
@@ -169,9 +183,8 @@
             Google Play's mandatory "prominent disclosure" screen for the
             Accessibility Service below (see section 0 of
             docs/publikacja_google_play.md, and this Activity's own doc
-            comment). Not a launcher entry point — it is only ever started
-            from SettingsActivity (reached via MainActivity's Ustawienia
-            tab), so it declares no intent-filter.
+            comment). Not a launcher entry point — it is started from
+            SetupActivity or SettingsActivity, so it declares no intent-filter.
             exported="false" is correct and safe here: nothing outside this
             app has any legitimate reason to start it directly.
         -->

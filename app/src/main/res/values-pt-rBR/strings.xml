@@ -28,6 +28,15 @@
     <string name="setup_ready">Setup complete. Open the app and test translation after closing it.</string>
     <string name="setup_verify">Check again</string>
     <string name="setup_continue">Open app</string>
+    <string name="setup_guide_permission_title">Show a guide over Settings?</string>
+    <string name="setup_guide_permission_body">TextGate AI can show a small, closable step-by-step panel while you find the right switches in your phone settings. This needs the optional Display over other apps access. It cannot change settings or tap buttons for you. Android may hide the panel on protected screens.</string>
+    <string name="setup_guide_permission_path">In the next screen, find Tłumacz TextGate AI and allow Display over other apps, then return. On some phones, you may first see a list of apps.</string>
+    <string name="setup_guide_enable">Enable floating guide</string>
+    <string name="setup_guide_skip">Continue without floating guide</string>
+    <string name="setup_guide_close">Close guide</string>
+    <string name="setup_guide_accessibility_steps">1. Open Downloaded apps.\n2. Find Tłumacz TextGate AI.\n3. Turn on its service and confirm.</string>
+    <string name="setup_guide_battery_steps">1. Open Battery or Battery usage.\n2. Select Unrestricted / No restrictions.\n3. Return to TextGate AI.</string>
+    <string name="setup_guide_autostart_steps">1. Find Autostart (Xiaomi: Apps &gt; Permissions).\n2. Enable Tłumacz TextGate AI.\n3. Return and confirm your choice.</string>
     <string name="app_name">Tłumacz TextGate AI</string>
 
     <string name="accessibility_service_description">O TextGate AI lê texto de duas formas, ambas estritamente limitadas. Primeiro: o campo de texto que você está editando no momento, e apenas para procurar um sufixo de gatilho exato (como \"?en\" ou \"?de\" — um por idioma, veja a lista completa em Configurações) no final do que você digitou. Segundo: uma mensagem ou comentário em que você toca e segura, para mostrar uma tradução flutuante no idioma padrão que você escolher em Configurações. Nenhum dos dois caminhos lê campos de senha, nunca funciona em aplicativos que você não tenha autorizado explicitamente, e nunca mantém um histórico do que foi lido. Quando um gatilho é detectado, ou quando você toca e segura em uma mensagem, em um aplicativo permitido, o texto relevante é enviado por HTTPS para a API Gemini que você configurou e traduzido. O resultado do gatilho digitado substitui o conteúdo do campo; o resultado de tocar e segurar é mostrado apenas em um balão flutuante temporário e nunca afeta o aplicativo original. Nada é enviado para lugar nenhum, a menos que você digite um desses gatilhos exatos ou toque e segure uma mensagem em um aplicativo que esteja ativado nas configurações do TextGate AI.</string>

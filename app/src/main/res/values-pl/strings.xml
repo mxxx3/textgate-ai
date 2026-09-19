@@ -37,6 +37,15 @@
     <string name="setup_ready">Konfiguracja ukończona. Otwórz aplikację i sprawdź tłumaczenie po jej zamknięciu.</string>
     <string name="setup_verify">Sprawdź ponownie</string>
     <string name="setup_continue">Otwórz aplikację</string>
+    <string name="setup_guide_permission_title">Pokazać instrukcję nad ustawieniami?</string>
+    <string name="setup_guide_permission_body">TextGate AI może wyświetlać mały panel z krokami, gdy szukasz przełączników w ustawieniach telefonu. Wymaga to opcjonalnego dostępu „Wyświetlanie nad innymi aplikacjami”. Panel nie zmienia ustawień ani nie klika za Ciebie. Android może ukryć go na chronionych ekranach.</string>
+    <string name="setup_guide_permission_path">Na następnym ekranie znajdź Tłumacz TextGate AI i zezwól na wyświetlanie nad innymi aplikacjami, a potem wróć. Na niektórych telefonach najpierw zobaczysz listę aplikacji.</string>
+    <string name="setup_guide_enable">Włącz pływającą instrukcję</string>
+    <string name="setup_guide_skip">Przejdź bez pływającej instrukcji</string>
+    <string name="setup_guide_close">Zamknij instrukcję</string>
+    <string name="setup_guide_accessibility_steps">1. Otwórz Pobrane aplikacje.\n2. Znajdź Tłumacz TextGate AI.\n3. Włącz usługę i potwierdź.</string>
+    <string name="setup_guide_battery_steps">1. Otwórz Bateria lub Zużycie baterii.\n2. Wybierz Bez ograniczeń.\n3. Wróć do TextGate AI.</string>
+    <string name="setup_guide_autostart_steps">1. Znajdź Autostart (Xiaomi: Aplikacje &gt; Uprawnienia).\n2. Włącz Tłumacz TextGate AI.\n3. Wróć i potwierdź wybór.</string>
 
     <string name="accessibility_service_description">TextGate AI odczytuje tekst na dwa sposoby, oba ściśle ograniczone. Pierwszy: pole tekstowe, które właśnie edytujesz — wyłącznie po to, by sprawdzić, czy na końcu wpisanego tekstu znajduje się jeden konkretny przyrostek-wyzwalacz (np. „?en” lub „?de” — jeden na język, pełna lista w Ustawieniach). Drugi: wiadomość lub komentarz, który przytrzymasz palcem, aby zobaczyć pływające tłumaczenie na domyślny język wybrany w Ustawieniach. Żadna z tych ścieżek nigdy nie odczytuje pól haseł, nigdy nie działa w aplikacjach, na które nie wyraziłeś/aś wyraźnej zgody, i nigdy nie zapisuje historii odczytanych treści. Gdy w dozwolonej aplikacji wykryty zostanie wyzwalacz, albo gdy przytrzymasz wiadomość, odpowiedni tekst jest wysyłany przez HTTPS do skonfigurowanego przez Ciebie API Gemini i tłumaczony. Wynik dla wpisanego wyzwalacza zastępuje zawartość pola; wynik dla przytrzymania jest pokazywany wyłącznie w tymczasowej pływającej chmurce i nigdy nie dotyka oryginalnej aplikacji. Nic nie jest nigdzie wysyłane, dopóki nie wpiszesz jednego z tych dokładnych wyzwalaczy lub nie przytrzymasz wiadomości w aplikacji włączonej w ustawieniach TextGate AI.</string>
 

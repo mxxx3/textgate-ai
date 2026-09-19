@@ -2,13 +2,13 @@ package com.textgate.ai.accessibility
 
 import android.app.Activity
 import android.content.Context
-import android.content.Intent
 import android.os.Bundle
-import android.provider.Settings
 import android.widget.Toast
 import com.textgate.ai.LocaleHelper
 import com.textgate.ai.R
 import com.textgate.ai.databinding.ActivityAccessibilityDisclosureBinding
+import com.textgate.ai.setup.SetupGuideActivity
+import com.textgate.ai.setup.SetupGuideOverlay
 
 /**
  * Google Play's "prominent disclosure and consent" screen for apps that use
@@ -25,9 +25,8 @@ import com.textgate.ai.databinding.ActivityAccessibilityDisclosureBinding
  *      proceed.
  *
  * [com.textgate.ai.settings.SettingsActivity] launches this Activity
- * instead of jumping straight to [Settings.ACTION_ACCESSIBILITY_SETTINGS];
- * only [buttonAgree] does that, and only after the user has read
- * [R.string.accessibility_disclosure_body] on this screen. Tapping "Cancel"
+ * before any system Settings screen; only [buttonAgree] proceeds to the
+ * optional floating-guide choice and then Accessibility settings. Tapping "Cancel"
  * (or the system back gesture) simply returns to Settings with nothing
  * changed — the service is not enabled until the user separately switches
  * it on in the system screen this leads to.
@@ -50,16 +49,11 @@ class AccessibilityDisclosureActivity : Activity() {
 
         binding.buttonAgree.setOnClickListener {
             try {
-                startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
+                startActivity(SetupGuideActivity.intent(this, SetupGuideOverlay.Destination.ACCESSIBILITY))
+                finish()
             } catch (_: Exception) {
                 Toast.makeText(this, R.string.error_generic, Toast.LENGTH_SHORT).show()
             }
-            // Whether or not the system screen could be opened, this
-            // disclosure screen's job is done — the user has already made
-            // their affirmative choice. Returning to SettingsActivity lets
-            // its onResume() refresh the enabled/disabled status label as
-            // usual once the user comes back from system Settings.
-            finish()
         }
 
         binding.buttonCancel.setOnClickListener {

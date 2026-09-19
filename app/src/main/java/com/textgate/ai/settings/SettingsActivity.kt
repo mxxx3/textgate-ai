@@ -158,7 +158,6 @@ class SettingsActivity : Activity() {
 
     override fun onResume() {
         super.onResume()
-        SetupGuideOverlay.dismiss()
         // Accessibility enablement can only change outside this app (in
         // system Settings), so refresh the status label every time the
         // user returns to this screen.

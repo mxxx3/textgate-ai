@@ -43,6 +43,9 @@
     <string name="setup_guide_enable">Włącz pływającą instrukcję</string>
     <string name="setup_guide_skip">Przejdź bez pływającej instrukcji</string>
     <string name="setup_guide_close">Zamknij instrukcję</string>
+    <string name="setup_guide_permission_missing">Zgoda na wyświetlanie nad innymi aplikacjami nadal jest wyłączona. Włącz ją w ustawieniach albo przejdź bez panelu. Kroki powyżej pozostają dostępne tutaj.</string>
+    <string name="setup_guide_overlay_failed">Android nie pozwolił wyświetlić panelu. Spróbuj ponownie albo przejdź bez niego. Kroki powyżej pozostają dostępne tutaj.</string>
+    <string name="setup_guide_settings_failed">Nie udało się otworzyć ustawień systemu. Spróbuj ponownie.</string>
     <string name="setup_guide_accessibility_steps">1. Otwórz Pobrane aplikacje.\n2. Znajdź Tłumacz TextGate AI.\n3. Włącz usługę i potwierdź.</string>
     <string name="setup_guide_battery_steps">1. Otwórz Bateria lub Zużycie baterii.\n2. Wybierz Bez ograniczeń.\n3. Wróć do TextGate AI.</string>
     <string name="setup_guide_autostart_steps">1. Znajdź Autostart (Xiaomi: Aplikacje &gt; Uprawnienia).\n2. Włącz Tłumacz TextGate AI.\n3. Wróć i potwierdź wybór.</string>

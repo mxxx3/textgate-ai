@@ -36,6 +36,9 @@
     <string name="setup_guide_enable">Enable floating guide</string>
     <string name="setup_guide_skip">Continue without floating guide</string>
     <string name="setup_guide_close">Close guide</string>
+    <string name="setup_guide_permission_missing">Display over other apps is still off. Enable it in Settings or continue without the floating guide. The steps above remain available here.</string>
+    <string name="setup_guide_overlay_failed">Android could not display the floating guide. Try again or continue without it. The steps above remain available here.</string>
+    <string name="setup_guide_settings_failed">Could not open system Settings. Please try again.</string>
     <string name="setup_guide_accessibility_steps">1. Open Downloaded apps.\n2. Find Tłumacz TextGate AI.\n3. Turn on its service and confirm.</string>
     <string name="setup_guide_battery_steps">1. Open Battery or Battery usage.\n2. Select Unrestricted / No restrictions.\n3. Return to TextGate AI.</string>
     <string name="setup_guide_autostart_steps">1. Find Autostart (Xiaomi: Apps &gt; Permissions).\n2. Enable Tłumacz TextGate AI.\n3. Return and confirm your choice.</string>

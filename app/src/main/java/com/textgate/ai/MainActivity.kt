@@ -17,7 +17,6 @@ import com.textgate.ai.databinding.ActivityMainBinding
 import com.textgate.ai.live.LiveTabController
 import com.textgate.ai.settings.SettingsActivity
 import com.textgate.ai.setup.SetupActivity
-import com.textgate.ai.setup.SetupGuideOverlay
 import com.textgate.ai.setup.SetupReadiness
 import com.textgate.ai.translate.TranslateTabController
 
@@ -98,7 +97,6 @@ class MainActivity : Activity() {
 
     override fun onResume() {
         super.onResume()
-        SetupGuideOverlay.dismiss()
         if (::binding.isInitialized) redirectToSetupIfNeeded()
     }
 

@@ -160,7 +160,6 @@ class SetupActivity : Activity() {
 
     override fun onResume() {
         super.onResume()
-        SetupGuideOverlay.dismiss()
         if (::binding.isInitialized) refresh()
     }
 

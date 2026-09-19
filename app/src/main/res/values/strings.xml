@@ -42,6 +42,28 @@
     <string name="setup_guide_accessibility_steps">1. Open Downloaded apps.\n2. Find Tłumacz TextGate AI.\n3. Turn on its service and confirm.</string>
     <string name="setup_guide_battery_steps">1. Open Battery or Battery usage.\n2. Select Unrestricted / No restrictions.\n3. Return to TextGate AI.</string>
     <string name="setup_guide_autostart_steps">1. Find Autostart (Xiaomi: Apps &gt; Permissions).\n2. Enable Tłumacz TextGate AI.\n3. Return and confirm your choice.</string>
+    <string name="setup_guide_accessibility_title" tools:ignore="MissingTranslation">Accessibility</string>
+    <string name="setup_guide_battery_title" tools:ignore="MissingTranslation">Battery use</string>
+    <string name="setup_guide_autostart_title" tools:ignore="MissingTranslation">Autostart</string>
+    <string name="setup_guide_progress" tools:ignore="MissingTranslation">Step %1$d of %2$d</string>
+    <string name="setup_guide_find_on_screen" tools:ignore="MissingTranslation">LOOK FOR THIS ON SCREEN</string>
+    <string name="setup_guide_previous" tools:ignore="MissingTranslation">Back</string>
+    <string name="setup_guide_next" tools:ignore="MissingTranslation">Next</string>
+    <string-array name="setup_guide_accessibility_targets" tools:ignore="MissingTranslation">
+        <item>Accessibility &gt; Downloaded apps</item>
+        <item>Tłumacz TextGate AI</item>
+        <item>Service switch and Android confirmation</item>
+    </string-array>
+    <string-array name="setup_guide_battery_targets" tools:ignore="MissingTranslation">
+        <item>App info &gt; Battery / Battery usage</item>
+        <item>Unrestricted / No restrictions</item>
+        <item>TextGate AI setup screen</item>
+    </string-array>
+    <string-array name="setup_guide_autostart_targets" tools:ignore="MissingTranslation">
+        <item>Xiaomi: Apps &gt; Permissions &gt; Autostart</item>
+        <item>Tłumacz TextGate AI switch</item>
+        <item>TextGate AI setup screen</item>
+    </string-array>
 
     <string name="accessibility_service_description">TextGate AI reads text in two ways, both strictly limited. First: the text field you are currently editing, and only to look for one exact trigger suffix (like \"?en\" or \"?de\" — one per language, see the full list in Settings) at the end of what you\'ve typed. Second: a message or comment you long-press and hold, to show a floating translation into the default language you choose in Settings. Both pathways never read password fields, never run in apps you have not explicitly allowed, and never keep a history of anything read. When a trigger is detected, or when you long-press a message, in an allowed app, the relevant text is sent over HTTPS to the Gemini API you have configured and translated. The typed-trigger result replaces the field\'s contents; the long-press result is only ever shown in a temporary floating bubble and never touches the original app. Nothing is sent anywhere unless you type one of these exact triggers or long-press a message in an app that is switched on in TextGate AI\'s settings.</string>
 

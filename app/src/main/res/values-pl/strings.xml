@@ -11,6 +11,7 @@
 
     <string name="setup_title">Przygotuj TextGate AI</string>
     <string name="setup_intro">Wykonaj te kroki raz. Przy każdym uruchomieniu sprawdzamy klucz i usługę ułatwień dostępu.</string>
+    <string name="setup_gender_hint">Dotyczy tylko wiadomości, które piszesz. Opcja automatyczna nie narzuca płci.</string>
     <string name="setup_key_title">1. Połącz z Gemini</string>
     <string name="setup_key_help">Otwórz Google AI Studio, utwórz klucz API, wróć tutaj, wklej go i zapisz. Klucz jest szyfrowany na tym telefonie.</string>
     <string name="setup_key_missing">Wymagane działanie: brak zapisanego klucza API.</string>
@@ -18,21 +19,22 @@
     <string name="setup_api_test_failed">Test nie powiódł się. Sprawdź klucz, model, połączenie lub limit API w Ustawieniach.</string>
     <string name="setup_open_settings">Otwórz ustawienia aplikacji</string>
     <string name="setup_accessibility_title">2. Włącz tłumaczenie w innych aplikacjach</string>
-    <string name="setup_accessibility_help">Przeczytaj informację o dostępie, wyraź zgodę, jeśli chcesz, i włącz TextGate AI w ustawieniach ułatwień dostępu Androida. Wróć tutaj, aby sprawdzić wynik.</string>
+    <string name="setup_accessibility_help">Po przeczytaniu informacji i wyrażeniu zgody otwórz Pobrane aplikacje w ustawieniach ułatwień dostępu. Znajdź Tłumacz TextGate AI, włącz usługę i potwierdź komunikat Androida. Wróć tutaj, aby sprawdzić wynik.</string>
     <string name="setup_accessibility_missing">Wymagane działanie: usługa ułatwień dostępu jest wyłączona.</string>
     <string name="setup_open_accessibility">Przeczytaj informację i otwórz ustawienia</string>
     <string name="setup_trigger_missing">Wymagane działanie: tłumaczenie wyzwalaczem jest wyłączone.</string>
     <string name="setup_enable_trigger">Włącz tłumaczenie wyzwalaczem</string>
     <string name="setup_background_title">3. Pozwól działać w tle na tym telefonie</string>
-    <string name="setup_background_help">Xiaomi, Redmi i POCO mogą zatrzymać tłumaczenie po zamknięciu aplikacji. Otwórz każde ustawienie i potwierdź swój wybór. Android nie pozwala nam automatycznie sprawdzić ustawień producenta.</string>
-    <string name="setup_battery_help">W informacjach o aplikacji otwórz Bateria i wybierz Bez ograniczeń.</string>
-    <string name="setup_battery_confirm">Sprawdziłem/am i wybrałem/am Bez ograniczeń</string>
-    <string name="setup_autostart_help">Włącz Autostart dla TextGate AI, jeśli telefon pokazuje tę opcję. Jeśli skrót otworzy informacje o aplikacji, poszukaj tam Autostartu.</string>
-    <string name="setup_autostart_confirm">Sprawdziłem/am i włączyłem/am Autostart (lub nie ma tej opcji)</string>
+    <string name="setup_background_help">Sprawdź oba ustawienia, a potem zaznacz to, co widzisz. Nazwy i położenie opcji zależą od telefonu. To Twoje potwierdzenie; aplikacja nie może automatycznie sprawdzić ustawień producenta.</string>
+    <string name="setup_battery_help">Dotknij Otwórz ustawienia baterii. W informacjach o aplikacji znajdź Bateria lub Zużycie baterii i wybierz Bez ograniczeń, jeśli jest dostępne. Potem wróć tutaj.</string>
+    <string name="setup_battery_confirm">Wybrałem/am Bez ograniczeń</string>
+    <string name="setup_autostart_help">Dotknij Otwórz ustawienia Autostartu. Na Xiaomi, Redmi i POCO szukaj Autostartu w Ustawienia > Aplikacje > Uprawnienia, a potem włącz Tłumacz TextGate AI. Na innych telefonach sprawdź informacje o aplikacji i szukaj Autostart / Automatyczne uruchamianie. Potem wróć tutaj.</string>
+    <string name="setup_autostart_confirm">Włączyłem/am Autostart / Automatyczne uruchamianie</string>
+    <string name="setup_option_unavailable">Sprawdziłem/am; na tym telefonie nie ma tej opcji</string>
     <string name="setup_standard_background">Na innych telefonach, jeśli tłumaczenie przestanie działać po zamknięciu aplikacji, sprawdź ograniczenia baterii w ustawieniach Androida.</string>
     <string name="setup_done">Gotowe</string>
     <string name="setup_incomplete">Dokończ kroki powyżej i sprawdź ponownie.</string>
-    <string name="setup_ready">Konfiguracja ukończona. Możesz otworzyć aplikację.</string>
+    <string name="setup_ready">Konfiguracja ukończona. Otwórz aplikację i sprawdź tłumaczenie po jej zamknięciu.</string>
     <string name="setup_verify">Sprawdź ponownie</string>
     <string name="setup_continue">Otwórz aplikację</string>
 

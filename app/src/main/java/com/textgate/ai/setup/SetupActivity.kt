@@ -11,6 +11,8 @@ import android.os.Looper
 import android.provider.Settings
 import android.view.View
 import android.view.WindowInsets
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import android.widget.Toast
 import com.textgate.ai.LocaleHelper
 import com.textgate.ai.MainActivity
@@ -18,11 +20,15 @@ import com.textgate.ai.R
 import com.textgate.ai.accessibility.AccessibilityDisclosureActivity
 import com.textgate.ai.databinding.ActivitySetupBinding
 import com.textgate.ai.model.TranslationPrompts
+import com.textgate.ai.model.Languages
+import com.textgate.ai.model.UserGender
+import com.textgate.ai.model.pickerLabel
 import com.textgate.ai.network.GeminiClient
 import com.textgate.ai.network.ModelAvailabilityStore
 import com.textgate.ai.network.TranslationOrchestrator
 import com.textgate.ai.security.AppSettingsStore
 import com.textgate.ai.security.SecureApiKeyStore
+import com.textgate.ai.security.TriggerDetector
 import com.textgate.ai.settings.SettingsActivity
 import java.util.concurrent.Executors
 
@@ -39,6 +45,7 @@ class SetupActivity : Activity() {
         super.onCreate(savedInstanceState)
         binding = ActivitySetupBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        title = getString(R.string.setup_title)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             window.setDecorFitsSystemWindows(false)
             val root = binding.root
@@ -53,6 +60,8 @@ class SetupActivity : Activity() {
             }
             root.requestApplyInsets()
         }
+
+        setupPreferencePickers()
 
         binding.buttonGetApiKey.setOnClickListener {
             if (!open(Intent(Intent.ACTION_VIEW, Uri.parse("https://aistudio.google.com/apikey")))) showOpenError()
@@ -125,12 +134,22 @@ class SetupActivity : Activity() {
             )
             if (intents.none(::open)) showOpenError()
         }
-        binding.checkBattery.setOnCheckedChangeListener { _, checked ->
-            SetupReadiness.confirmBattery(this, checked)
+        binding.groupBattery.setOnCheckedChangeListener { _, id ->
+            val choice = when (id) {
+                R.id.optionBatteryEnabled -> SetupReadiness.ManualChoice.ENABLED
+                R.id.optionBatteryUnavailable -> SetupReadiness.ManualChoice.UNAVAILABLE
+                else -> SetupReadiness.ManualChoice.PENDING
+            }
+            SetupReadiness.chooseBattery(this, choice)
             refresh()
         }
-        binding.checkAutostart.setOnCheckedChangeListener { _, checked ->
-            SetupReadiness.confirmAutostart(this, checked)
+        binding.groupAutostart.setOnCheckedChangeListener { _, id ->
+            val choice = when (id) {
+                R.id.optionAutostartEnabled -> SetupReadiness.ManualChoice.ENABLED
+                R.id.optionAutostartUnavailable -> SetupReadiness.ManualChoice.UNAVAILABLE
+                else -> SetupReadiness.ManualChoice.PENDING
+            }
+            SetupReadiness.chooseAutostart(this, choice)
             refresh()
         }
         binding.buttonVerify.setOnClickListener { refresh() }
@@ -156,6 +175,58 @@ class SetupActivity : Activity() {
         super.onDestroy()
     }
 
+    private fun setupPreferencePickers() {
+        val settings = AppSettingsStore(this)
+        val languages = Languages.ALL
+        binding.spinnerSetupLanguage.adapter = ArrayAdapter(
+            this, android.R.layout.simple_spinner_item, languages.map { it.pickerLabel() }
+        ).apply { setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item) }
+        val initialLanguageIndex = languages.indexOfFirst {
+            it.code == (settings.appInterfaceLanguage ?: settings.bubbleTargetLanguage.code)
+        }.coerceAtLeast(0)
+        binding.spinnerSetupLanguage.setSelection(initialLanguageIndex, false)
+        var awaitingInitialSelection = true
+        binding.spinnerSetupLanguage.post {
+            binding.spinnerSetupLanguage.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                    if (awaitingInitialSelection) {
+                        awaitingInitialSelection = false
+                        if (position == initialLanguageIndex) return
+                    }
+                    val selected = languages.getOrNull(position) ?: return
+                    if (selected.code == settings.bubbleTargetLanguage.code &&
+                        selected.code == (settings.appInterfaceLanguage ?: Languages.DEFAULT.code)) return
+                    settings.bubbleTargetLanguage = TriggerDetector.Target(selected.code)
+                    settings.appInterfaceLanguage = selected.code
+                    recreate()
+                }
+
+                override fun onNothingSelected(parent: AdapterView<*>?) = Unit
+            }
+        }
+
+        val genders = UserGender.entries
+        binding.spinnerSetupGender.adapter = ArrayAdapter(
+            this, android.R.layout.simple_spinner_item, genders.map { gender ->
+                getString(when (gender) {
+                    UserGender.AUTO -> R.string.label_gender_auto
+                    UserGender.MALE -> R.string.label_gender_male
+                    UserGender.FEMALE -> R.string.label_gender_female
+                })
+            }
+        ).apply { setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item) }
+        binding.spinnerSetupGender.setSelection(genders.indexOf(settings.userGender).coerceAtLeast(0), false)
+        binding.spinnerSetupGender.post {
+            binding.spinnerSetupGender.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                    genders.getOrNull(position)?.let { settings.userGender = it }
+                }
+
+                override fun onNothingSelected(parent: AdapterView<*>?) = Unit
+            }
+        }
+    }
+
     private fun refresh() {
         val status = SetupReadiness.status(this)
         binding.textKeyStatus.setText(when {
@@ -176,10 +247,18 @@ class SetupActivity : Activity() {
         binding.textTriggerStatus.setText(if (status.triggerEnabled) R.string.setup_done else R.string.setup_trigger_missing)
         binding.textTriggerStatus.setTextColor(getColor(if (status.triggerEnabled) R.color.tg_primary else R.color.tg_warning))
         binding.buttonEnableTrigger.visibility = if (status.triggerEnabled) View.GONE else View.VISIBLE
-        binding.layoutOemSteps.visibility = if (status.needsOemSteps) View.VISIBLE else View.GONE
-        binding.textStandardBackground.visibility = if (status.needsOemSteps) View.GONE else View.VISIBLE
-        if (binding.checkBattery.isChecked != status.batteryConfirmed) binding.checkBattery.isChecked = status.batteryConfirmed
-        if (binding.checkAutostart.isChecked != status.autostartConfirmed) binding.checkAutostart.isChecked = status.autostartConfirmed
+        val batteryId = when (status.batteryChoice) {
+            SetupReadiness.ManualChoice.ENABLED -> R.id.optionBatteryEnabled
+            SetupReadiness.ManualChoice.UNAVAILABLE -> R.id.optionBatteryUnavailable
+            SetupReadiness.ManualChoice.PENDING -> -1
+        }
+        if (binding.groupBattery.checkedRadioButtonId != batteryId) binding.groupBattery.check(batteryId)
+        val autostartId = when (status.autostartChoice) {
+            SetupReadiness.ManualChoice.ENABLED -> R.id.optionAutostartEnabled
+            SetupReadiness.ManualChoice.UNAVAILABLE -> R.id.optionAutostartUnavailable
+            SetupReadiness.ManualChoice.PENDING -> -1
+        }
+        if (binding.groupAutostart.checkedRadioButtonId != autostartId) binding.groupAutostart.check(autostartId)
         binding.textSummary.setText(if (status.ready) R.string.setup_ready else R.string.setup_incomplete)
         binding.textSummary.setTextColor(getColor(if (status.ready) R.color.tg_primary else R.color.tg_text_secondary))
         binding.buttonContinue.isEnabled = status.ready

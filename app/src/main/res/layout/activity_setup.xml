@@ -36,7 +36,44 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
+                android:layout_marginTop="16dp"
+                android:background="@drawable/bg_card"
+                android:orientation="vertical">
+
+                <TextView
+                    style="@style/TgSectionTitle"
+                    android:text="@string/bubble_language_label" />
+
+                <Spinner
+                    android:id="@+id/spinnerSetupLanguage"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:contentDescription="@string/bubble_language_label" />
+
+                <TextView
+                    style="@style/TgSectionTitle"
+                    android:layout_marginTop="12dp"
+                    android:text="@string/label_user_gender" />
+
+                <Spinner
+                    android:id="@+id/spinnerSetupGender"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:contentDescription="@string/label_user_gender" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="@string/setup_gender_hint"
+                    android:textColor="@color/tg_text_secondary"
+                    android:textSize="13sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
                 android:background="@drawable/bg_card"
                 android:orientation="vertical">
 
@@ -153,7 +190,7 @@
             </LinearLayout>
 
             <LinearLayout
-                android:id="@+id/layoutOemSteps"
+                android:id="@+id/layoutBackgroundSteps"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
@@ -183,11 +220,23 @@
                     android:layout_height="wrap_content"
                     android:text="@string/btn_open_battery_settings" />
 
-                <CheckBox
-                    android:id="@+id/checkBattery"
+                <RadioGroup
+                    android:id="@+id/groupBattery"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/setup_battery_confirm" />
+                    android:layout_height="wrap_content">
+
+                    <RadioButton
+                        android:id="@+id/optionBatteryEnabled"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/setup_battery_confirm" />
+
+                    <RadioButton
+                        android:id="@+id/optionBatteryUnavailable"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/setup_option_unavailable" />
+                </RadioGroup>
 
                 <TextView
                     android:layout_width="match_parent"
@@ -201,20 +250,25 @@
                     android:layout_height="wrap_content"
                     android:text="@string/btn_open_autostart_settings" />
 
-                <CheckBox
-                    android:id="@+id/checkAutostart"
+                <RadioGroup
+                    android:id="@+id/groupAutostart"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/setup_autostart_confirm" />
+                    android:layout_height="wrap_content">
+
+                    <RadioButton
+                        android:id="@+id/optionAutostartEnabled"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/setup_autostart_confirm" />
+
+                    <RadioButton
+                        android:id="@+id/optionAutostartUnavailable"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/setup_option_unavailable" />
+                </RadioGroup>
             </LinearLayout>
 
-            <TextView
-                android:id="@+id/textStandardBackground"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:text="@string/setup_standard_background"
-                android:textColor="@color/tg_text_secondary" />
         </LinearLayout>
     </ScrollView>
 

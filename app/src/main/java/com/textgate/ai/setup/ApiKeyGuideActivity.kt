@@ -123,18 +123,28 @@ class ApiKeyGuideActivity : Activity() {
             target.scaleX = 1f
             target.scaleY = 1f
 
-            val targetCenterX = target.left + target.width / 2f
-            val targetCenterY = target.top + target.height / 2f
-            val handCenterX = hand.left + hand.width / 2f
-            val handCenterY = hand.top + hand.height / 2f
-
-            val destinationX = targetCenterX - handCenterX
-            val destinationY = targetCenterY - handCenterY + dp(9)
-
             hand.animate().cancel()
             hand.alpha = 0f
             hand.scaleX = 1f
             hand.scaleY = 1f
+            hand.translationX = 0f
+            hand.translationY = 0f
+
+            // Use screen coordinates because the three tap targets live at
+            // different nesting depths inside the demo card.
+            val targetLocation = IntArray(2)
+            val handLocation = IntArray(2)
+            target.getLocationOnScreen(targetLocation)
+            hand.getLocationOnScreen(handLocation)
+
+            val targetCenterX = targetLocation[0] + target.width / 2f
+            val targetCenterY = targetLocation[1] + target.height / 2f
+            val handCenterX = handLocation[0] + hand.width / 2f
+            val handCenterY = handLocation[1] + hand.height / 2f
+
+            val destinationX = targetCenterX - handCenterX
+            val destinationY = targetCenterY - handCenterY + dp(9)
+
             hand.translationX = destinationX + dp(26)
             hand.translationY = destinationY + dp(8)
 

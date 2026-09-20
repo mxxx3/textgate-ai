@@ -563,6 +563,9 @@ class SettingsActivity : Activity() {
             }
             renderApiKeyList()
             refreshApiKeyStatus()
+            if (added) {
+                runApiTest()
+            }
         }
 
         // "Remove all" — same button id/label as the old single-key

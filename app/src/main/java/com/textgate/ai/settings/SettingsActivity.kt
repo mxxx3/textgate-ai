@@ -9,7 +9,6 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.os.PowerManager
 import android.provider.Settings
 import android.view.LayoutInflater
 import android.view.View
@@ -41,8 +40,7 @@ import com.textgate.ai.network.TranslationOrchestrator
 import com.textgate.ai.security.AppSettingsStore
 import com.textgate.ai.security.SecureApiKeyStore
 import com.textgate.ai.security.TriggerDetector
-import com.textgate.ai.setup.SetupGuideActivity
-import com.textgate.ai.setup.SetupGuideOverlay
+import com.textgate.ai.setup.SetupSettingsLauncher
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
@@ -443,7 +441,7 @@ class SettingsActivity : Activity() {
 
     private fun openSystemAccessibilitySettings() {
         try {
-            startActivity(SetupGuideActivity.intent(this, SetupGuideOverlay.Destination.ACCESSIBILITY))
+            startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
         } catch (_: Exception) {
             Toast.makeText(this, R.string.error_generic, Toast.LENGTH_SHORT).show()
         }
@@ -479,10 +477,14 @@ class SettingsActivity : Activity() {
     private fun setupBackgroundOperationSection() {
         refreshBackgroundOperationStatus()
         binding.buttonOpenBatterySettings.setOnClickListener {
-            startActivity(SetupGuideActivity.intent(this, SetupGuideOverlay.Destination.BATTERY))
+            if (!SetupSettingsLauncher.openBatteryExemption(this)) {
+                Toast.makeText(this, R.string.error_generic, Toast.LENGTH_SHORT).show()
+            }
         }
         binding.buttonOpenAutostartSettings.setOnClickListener {
-            startActivity(SetupGuideActivity.intent(this, SetupGuideOverlay.Destination.AUTOSTART))
+            if (!SetupSettingsLauncher.openAutostartWithGuide(this)) {
+                Toast.makeText(this, R.string.error_generic, Toast.LENGTH_SHORT).show()
+            }
         }
         binding.buttonOpenAppDetailsSettings.setOnClickListener {
             openAppDetailsSettings()
@@ -491,25 +493,18 @@ class SettingsActivity : Activity() {
 
     private fun refreshBackgroundOperationStatus() {
         if (!::binding.isInitialized) return
+        val autostartAvailable = SetupSettingsLauncher.isAutostartAvailable(this)
+        binding.buttonOpenAutostartSettings.visibility =
+            if (autostartAvailable) View.VISIBLE else View.GONE
+
         val statusRes = when {
-            isKnownAggressiveBackgroundDevice() -> R.string.background_operation_status_oem
-            isIgnoringBatteryOptimizations() -> R.string.background_operation_status_unrestricted
+            SetupSettingsLauncher.isIgnoringBatteryOptimizations(this) ->
+                R.string.background_operation_status_unrestricted
+            autostartAvailable || isKnownAggressiveBackgroundDevice() ->
+                R.string.background_operation_status_oem
             else -> R.string.background_operation_status_standard
         }
         binding.textBackgroundOperationStatus.text = getString(statusRes)
-    }
-
-    private fun isIgnoringBatteryOptimizations(): Boolean {
-        return try {
-            val powerManager = getSystemService(POWER_SERVICE) as? PowerManager ?: return false
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                powerManager.isIgnoringBatteryOptimizations(packageName)
-            } else {
-                false
-            }
-        } catch (_: Exception) {
-            false
-        }
     }
 
     private fun isKnownAggressiveBackgroundDevice(): Boolean {

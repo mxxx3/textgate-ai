@@ -197,6 +197,7 @@ class TutorialActivity : Activity() {
 
         val listener = View.OnTouchListener { _, event ->
             detector.onTouchEvent(event)
+            false
         }
         binding.tutorialFlipper.setOnTouchListener(listener)
         slideViews.forEach { it.setOnTouchListener(listener) }

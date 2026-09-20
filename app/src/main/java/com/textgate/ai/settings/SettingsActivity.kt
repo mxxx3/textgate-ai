@@ -40,6 +40,7 @@ import com.textgate.ai.network.TranslationOrchestrator
 import com.textgate.ai.security.AppSettingsStore
 import com.textgate.ai.security.SecureApiKeyStore
 import com.textgate.ai.security.TriggerDetector
+import com.textgate.ai.setup.ApiKeyGuideLauncher
 import com.textgate.ai.setup.SetupSettingsLauncher
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -76,12 +77,6 @@ class SettingsActivity : Activity() {
         "gemini-3.7-flash"
     )
 
-    companion object {
-        /** Google AI Studio's "API keys" page — the exact place a
-         * first-time user needs to land to create a free key, confirmed
-         * against ai.google.dev/gemini-api/docs/api-key. */
-        private const val GEMINI_API_KEY_URL = "https://aistudio.google.com/apikey"
-    }
 
     /**
      * Applies the user's chosen "App interface language" (see
@@ -537,16 +532,12 @@ class SettingsActivity : Activity() {
         refreshApiKeyStatus()
 
         // Opens Google AI Studio's "Create API key" page directly in the
-        // browser — the exact page a first-time user needs, so they are
-        // never left guessing which of Google's many developer sites is
-        // the right one. Wrapped in try/catch like every other
-        // startActivity() call in this screen: if no browser can handle
-        // the intent (unlikely, but not impossible on a stripped-down
-        // device), fail with a toast rather than crash.
+        // Open Google AI Studio, then immediately show the short translucent
+        // help over the browser. The help uses this app's selected locale and
+        // demonstrates create -> confirm -> copy without interacting with the
+        // website itself.
         binding.buttonGetApiKey.setOnClickListener {
-            try {
-                startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(GEMINI_API_KEY_URL)))
-            } catch (_: Exception) {
+            if (!ApiKeyGuideLauncher.open(this)) {
                 Toast.makeText(this, R.string.error_generic, Toast.LENGTH_SHORT).show()
             }
         }

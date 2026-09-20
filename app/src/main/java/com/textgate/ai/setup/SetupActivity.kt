@@ -237,6 +237,7 @@ class SetupActivity : Activity() {
         binding.groupBattery.visibility = View.GONE
 
         val autostartAvailable = SetupSettingsLauncher.isAutostartAvailable(this)
+        binding.textAutostartHelp.visibility = if (autostartAvailable) View.VISIBLE else View.GONE
         binding.buttonAutostart.visibility = if (autostartAvailable) View.VISIBLE else View.GONE
         binding.groupAutostart.visibility = if (autostartAvailable) View.VISIBLE else View.GONE
 

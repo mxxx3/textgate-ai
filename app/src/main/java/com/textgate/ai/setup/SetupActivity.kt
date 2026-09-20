@@ -123,19 +123,10 @@ class SetupActivity : Activity() {
             refresh()
         }
         binding.buttonBattery.setOnClickListener {
-            if (!open(SetupGuideActivity.intent(this, SetupGuideOverlay.Destination.BATTERY))) showOpenError()
+            if (!SetupSettingsLauncher.openBatteryExemption(this)) showOpenError()
         }
         binding.buttonAutostart.setOnClickListener {
-            if (!open(SetupGuideActivity.intent(this, SetupGuideOverlay.Destination.AUTOSTART))) showOpenError()
-        }
-        binding.groupBattery.setOnCheckedChangeListener { _, id ->
-            val choice = when (id) {
-                R.id.optionBatteryEnabled -> SetupReadiness.ManualChoice.ENABLED
-                R.id.optionBatteryUnavailable -> SetupReadiness.ManualChoice.UNAVAILABLE
-                else -> SetupReadiness.ManualChoice.PENDING
-            }
-            SetupReadiness.chooseBattery(this, choice)
-            refresh()
+            if (!SetupSettingsLauncher.openAutostartWithGuide(this)) showOpenError()
         }
         binding.groupAutostart.setOnCheckedChangeListener { _, id ->
             val choice = when (id) {
@@ -241,12 +232,14 @@ class SetupActivity : Activity() {
         binding.textTriggerStatus.setText(if (status.triggerEnabled) R.string.setup_done else R.string.setup_trigger_missing)
         binding.textTriggerStatus.setTextColor(getColor(if (status.triggerEnabled) R.color.tg_primary else R.color.tg_warning))
         binding.buttonEnableTrigger.visibility = if (status.triggerEnabled) View.GONE else View.VISIBLE
-        val batteryId = when (status.batteryChoice) {
-            SetupReadiness.ManualChoice.ENABLED -> R.id.optionBatteryEnabled
-            SetupReadiness.ManualChoice.UNAVAILABLE -> R.id.optionBatteryUnavailable
-            SetupReadiness.ManualChoice.PENDING -> -1
-        }
-        if (binding.groupBattery.checkedRadioButtonId != batteryId) binding.groupBattery.check(batteryId)
+        binding.buttonBattery.visibility =
+            if (status.batteryChoice == SetupReadiness.ManualChoice.ENABLED) View.GONE else View.VISIBLE
+        binding.groupBattery.visibility = View.GONE
+
+        val autostartAvailable = SetupSettingsLauncher.isAutostartAvailable(this)
+        binding.buttonAutostart.visibility = if (autostartAvailable) View.VISIBLE else View.GONE
+        binding.groupAutostart.visibility = if (autostartAvailable) View.VISIBLE else View.GONE
+
         val autostartId = when (status.autostartChoice) {
             SetupReadiness.ManualChoice.ENABLED -> R.id.optionAutostartEnabled
             SetupReadiness.ManualChoice.UNAVAILABLE -> R.id.optionAutostartUnavailable

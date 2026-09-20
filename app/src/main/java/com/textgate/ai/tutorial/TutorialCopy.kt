@@ -20,8 +20,14 @@ object TutorialCopyProvider {
     fun forContext(context: Context): TutorialCopy {
         val settings = AppSettingsStore(context)
         val code = settings.appInterfaceLanguage ?: Languages.DEFAULT.code
-        return COPIES[code] ?: COPIES.getValue("en")
+        return forCode(code)
     }
+
+    internal fun forCode(code: String): TutorialCopy =
+        COPIES[code] ?: COPIES.getValue("en")
+
+    internal fun hasExplicitCopy(code: String): Boolean =
+        COPIES.containsKey(code)
 
     private fun s(title: String, body: String) = TutorialSlideCopy(title, body)
 

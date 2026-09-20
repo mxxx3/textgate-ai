@@ -19,6 +19,7 @@ import com.textgate.ai.settings.SettingsActivity
 import com.textgate.ai.setup.SetupActivity
 import com.textgate.ai.setup.SetupReadiness
 import com.textgate.ai.translate.TranslateTabController
+import com.textgate.ai.tutorial.TutorialActivity
 
 /**
  * The app's launcher Activity as of v2 — hosts the bottom navigation
@@ -113,10 +114,17 @@ class MainActivity : Activity() {
     }
 
     private fun redirectToSetupIfNeeded(): Boolean {
-        if (SetupReadiness.status(this).ready) return false
-        startActivity(Intent(this, SetupActivity::class.java))
-        finish()
-        return true
+        if (!SetupReadiness.status(this).ready) {
+            startActivity(Intent(this, SetupActivity::class.java))
+            finish()
+            return true
+        }
+        if (TutorialActivity.needsToBeShown(this)) {
+            startActivity(TutorialActivity.intent(this))
+            finish()
+            return true
+        }
+        return false
     }
 
     override fun onRequestPermissionsResult(

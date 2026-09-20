@@ -52,10 +52,17 @@
                 android:tint="@android:color/white" />
         </LinearLayout>
 
+        <Button
+            android:id="@+id/buttonOpenAiStudio"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/btn_get_api_key" />
+
         <ScrollView
             android:layout_width="match_parent"
             android:layout_height="155dp"
-            android:layout_marginTop="6dp"
+            android:layout_marginTop="8dp"
             android:fillViewport="true"
             android:fadeScrollbars="false">
 

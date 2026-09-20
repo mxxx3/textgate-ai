@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/transparent">
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/transparent" />
+
+    <LinearLayout
+        android:id="@+id/apiKeyGuidePanel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_margin="8dp"
+        android:background="@drawable/bg_setup_guide"
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:contentDescription="@null"
+                android:src="@mipmap/ic_launcher" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:layout_weight="1"
+                android:text="@string/btn_get_api_key"
+                android:textColor="@android:color/white"
+                android:textSize="17sp"
+                android:textStyle="bold" />
+
+            <ImageButton
+                android:id="@+id/buttonCloseApiKeyGuide"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/setup_guide_close"
+                android:src="@android:drawable/ic_menu_close_clear_cancel"
+                android:tint="@android:color/white" />
+        </LinearLayout>
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="155dp"
+            android:layout_marginTop="6dp"
+            android:fillViewport="true"
+            android:fadeScrollbars="false">
+
+            <TextView
+                android:id="@+id/textApiKeyGuideInstructions"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:lineSpacingExtra="3dp"
+                android:text="@string/api_key_instructions_body"
+                android:textColor="@android:color/white"
+                android:textSize="14sp" />
+        </ScrollView>
+
+        <FrameLayout
+            android:id="@+id/apiKeyGuideDemo"
+            android:layout_width="match_parent"
+            android:layout_height="132dp"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/bg_setup_guide_demo_row"
+            android:padding="12dp">
+
+            <LinearLayout
+                android:id="@+id/apiGuideStageCreate"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:paddingEnd="14dp">
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="8dp"
+                        android:background="@drawable/bg_api_key_guide_line" />
+
+                    <View
+                        android:layout_width="72dp"
+                        android:layout_height="8dp"
+                        android:layout_marginTop="10dp"
+                        android:background="@drawable/bg_api_key_guide_line" />
+                </LinearLayout>
+
+                <FrameLayout
+                    android:id="@+id/apiGuideActionCreate"
+                    android:layout_width="58dp"
+                    android:layout_height="48dp"
+                    android:background="@drawable/bg_api_key_guide_action">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_gravity="center"
+                        android:contentDescription="@null"
+                        android:src="@drawable/ic_api_key_guide_add" />
+                </FrameLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/apiGuideStageConfirm"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="8dp"
+                    android:background="@drawable/bg_api_key_guide_line" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="34dp"
+                    android:layout_marginTop="10dp"
+                    android:background="@drawable/bg_api_key_guide_action" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:gravity="end"
+                    android:orientation="horizontal">
+
+                    <FrameLayout
+                        android:id="@+id/apiGuideActionConfirm"
+                        android:layout_width="58dp"
+                        android:layout_height="40dp"
+                        android:background="@drawable/bg_api_key_guide_action">
+
+                        <ImageView
+                            android:layout_width="22dp"
+                            android:layout_height="22dp"
+                            android:layout_gravity="center"
+                            android:contentDescription="@null"
+                            android:src="@drawable/ic_api_key_guide_check" />
+                    </FrameLayout>
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/apiGuideStageCopy"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:visibility="gone">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:paddingEnd="14dp">
+
+                    <View
+                        android:layout_width="78dp"
+                        android:layout_height="8dp"
+                        android:background="@drawable/bg_api_key_guide_line" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="8dp"
+                        android:layout_marginTop="10dp"
+                        android:background="@drawable/bg_api_key_guide_line" />
+
+                    <View
+                        android:layout_width="110dp"
+                        android:layout_height="8dp"
+                        android:layout_marginTop="10dp"
+                        android:background="@drawable/bg_api_key_guide_line" />
+                </LinearLayout>
+
+                <FrameLayout
+                    android:id="@+id/apiGuideActionCopy"
+                    android:layout_width="54dp"
+                    android:layout_height="48dp"
+                    android:background="@drawable/bg_api_key_guide_action">
+
+                    <ImageView
+                        android:id="@+id/apiGuideCopyIcon"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_gravity="center"
+                        android:contentDescription="@null"
+                        android:src="@drawable/ic_api_key_guide_copy" />
+                </FrameLayout>
+            </LinearLayout>
+
+            <ImageView
+                android:id="@+id/apiGuideTouchHand"
+                android:layout_width="46dp"
+                android:layout_height="46dp"
+                android:layout_gravity="end|center_vertical"
+                android:alpha="0"
+                android:contentDescription="@null"
+                android:importantForAccessibility="no"
+                android:rotation="-8"
+                android:src="@drawable/ic_setup_guide_touch" />
+        </FrameLayout>
+    </LinearLayout>
+</RelativeLayout>

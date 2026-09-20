@@ -75,41 +75,18 @@ class SetupActivity : Activity() {
             }
             binding.editApiKey.text.clear()
             binding.textApiTestResult.text = ""
-            if (saved) SetupReadiness.recordApiTest(this, false)
-            Toast.makeText(this, if (saved) R.string.api_key_saved else R.string.error_no_api_key, Toast.LENGTH_SHORT).show()
-            refresh()
+            if (saved) {
+                SetupReadiness.recordApiTest(this, false)
+                Toast.makeText(this, R.string.api_key_saved, Toast.LENGTH_SHORT).show()
+                refresh()
+                runApiConnectionTest()
+            } else {
+                Toast.makeText(this, R.string.error_no_api_key, Toast.LENGTH_SHORT).show()
+                refresh()
+            }
         }
         binding.buttonTestApi.setOnClickListener {
-            if (!SetupReadiness.status(this).apiKeyReady) {
-                binding.textApiTestResult.setText(R.string.error_no_api_key)
-                return@setOnClickListener
-            }
-            binding.buttonTestApi.isEnabled = false
-            binding.textApiTestResult.setText(R.string.test_api_running)
-            val model = AppSettingsStore(this).selectedModel
-            testExecutor.execute {
-                val result = try {
-                    TranslationOrchestrator.translateText(
-                        apiKeyStore = SecureApiKeyStore(this),
-                        availabilityStore = ModelAvailabilityStore(this),
-                        requestedModel = model,
-                        systemPrompt = TranslationPrompts.EN_TRANSLATION_SYSTEM_PROMPT,
-                        userText = "To jest testowa wiadomość."
-                    )
-                } catch (_: Exception) {
-                    GeminiClient.Result.Failure.InvalidResponse
-                }
-                mainHandler.post {
-                    if (isFinishing || isDestroyed) return@post
-                    SetupReadiness.recordApiTest(this, result is GeminiClient.Result.Success)
-                    binding.buttonTestApi.isEnabled = true
-                    binding.textApiTestResult.setText(
-                        if (result is GeminiClient.Result.Success) R.string.test_api_success
-                        else R.string.setup_api_test_failed
-                    )
-                    refresh()
-                }
-            }
+            runApiConnectionTest()
         }
         binding.buttonOpenSettings.setOnClickListener {
             if (!open(Intent(this, SettingsActivity::class.java))) showOpenError()
@@ -157,6 +134,46 @@ class SetupActivity : Activity() {
         testExecutor.shutdownNow()
         mainHandler.removeCallbacksAndMessages(null)
         super.onDestroy()
+    }
+
+    private fun runApiConnectionTest() {
+        if (!SetupReadiness.status(this).apiKeyReady) {
+            binding.textApiTestResult.setText(R.string.error_no_api_key)
+            return
+        }
+
+        binding.buttonTestApi.isEnabled = false
+        binding.buttonSaveApiKey.isEnabled = false
+        binding.textApiTestResult.setText(R.string.test_api_running)
+
+        val model = AppSettingsStore(this).selectedModel
+        testExecutor.execute {
+            val result = try {
+                TranslationOrchestrator.translateText(
+                    apiKeyStore = SecureApiKeyStore(this),
+                    availabilityStore = ModelAvailabilityStore(this),
+                    requestedModel = model,
+                    systemPrompt = TranslationPrompts.EN_TRANSLATION_SYSTEM_PROMPT,
+                    // Fixed, non-sensitive test text. It is not user content
+                    // and never comes from Accessibility.
+                    userText = "API connection test"
+                )
+            } catch (_: Exception) {
+                GeminiClient.Result.Failure.InvalidResponse
+            }
+
+            mainHandler.post {
+                if (isFinishing || isDestroyed) return@post
+                SetupReadiness.recordApiTest(this, result is GeminiClient.Result.Success)
+                binding.buttonTestApi.isEnabled = true
+                binding.buttonSaveApiKey.isEnabled = true
+                binding.textApiTestResult.setText(
+                    if (result is GeminiClient.Result.Success) R.string.test_api_success
+                    else R.string.setup_api_test_failed
+                )
+                refresh()
+            }
+        }
     }
 
     private fun setupPreferencePickers() {

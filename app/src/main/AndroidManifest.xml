@@ -80,14 +80,10 @@
         reconnect) still uses the permission-free setPreferredDevice()
         approach — this permission is declared for, and used by, only this
         one path.
+    android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
+        Allows the user to explicitly grant TextGate AI a per-app Doze exemption
+        from Android's own system screen. The app never grants this itself.
 
-    android.permission.SYSTEM_ALERT_WINDOW (optional setup guide)
-        Lets the user display a small, closable instruction panel over
-        system Settings before the Accessibility Service is enabled.
-        The user must explicitly grant this special access in Android
-        Settings; declining does not block setup. The panel never taps
-        system controls and is removed when the user returns to the app
-        or after three minutes.
 
     In particular this app still requests NONE of: contacts, SMS, call
     logs, location, camera, storage, phone state, or QUERY_ALL_PACKAGES.
@@ -104,7 +100,7 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
-    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
 
     <!--
         Declarative package-visibility filter (Android 11+ / API 30+).
@@ -120,6 +116,16 @@
             <action android:name="android.intent.action.MAIN" />
             <category android:name="android.intent.category.LAUNCHER" />
         </intent>
+        <package android:name="com.miui.securitycenter" />
+        <package android:name="com.huawei.systemmanager" />
+        <package android:name="com.hihonor.systemmanager" />
+        <package android:name="com.coloros.safecenter" />
+        <package android:name="com.oppo.safe" />
+        <package android:name="com.vivo.permissionmanager" />
+        <package android:name="com.iqoo.secure" />
+        <package android:name="com.oneplus.security" />
+        <package android:name="com.letv.android.letvsafe" />
+        <package android:name="com.transsion.phonemaster" />
     </queries>
 
     <application
@@ -164,7 +170,9 @@
         <activity
             android:name=".setup.SetupGuideActivity"
             android:exported="false"
-            android:label="@string/setup_guide_permission_title" />
+            android:excludeFromRecents="true"
+            android:launchMode="singleTask"
+            android:theme="@style/Theme.TextGate.SetupGuide" />
 
         <!--
             As of v2, reached only from MainActivity's "Ustawienia" tab —

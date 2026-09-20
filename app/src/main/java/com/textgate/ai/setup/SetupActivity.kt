@@ -3,7 +3,6 @@ package com.textgate.ai.setup
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -63,7 +62,7 @@ class SetupActivity : Activity() {
         setupPreferencePickers()
 
         binding.buttonGetApiKey.setOnClickListener {
-            if (!open(Intent(Intent.ACTION_VIEW, Uri.parse("https://aistudio.google.com/apikey")))) showOpenError()
+            if (!ApiKeyGuideLauncher.open(this)) showOpenError()
         }
         binding.buttonSaveApiKey.setOnClickListener {
             val chars = CharArray(binding.editApiKey.text.length)

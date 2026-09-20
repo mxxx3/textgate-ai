@@ -306,8 +306,8 @@ excluded from every backup mechanism Android has.
 The current manifest declares `INTERNET`, `RECORD_AUDIO`,
 `FOREGROUND_SERVICE`, `FOREGROUND_SERVICE_MICROPHONE`,
 `POST_NOTIFICATIONS`, `WAKE_LOCK`, `MODIFY_AUDIO_SETTINGS`, and
-`SYSTEM_ALERT_WINDOW`. See `app/src/main/AndroidManifest.xml` for the
-purpose and scope of each one.
+`REQUEST_IGNORE_BATTERY_OPTIMIZATIONS`. See
+`app/src/main/AndroidManifest.xml` for the purpose and scope of each one.
 
 * **Why it's needed:** `GeminiClient` makes one HTTPS POST per translation
   request, to the host in `NetworkAllowlist.GEMINI_HOST`. Android has no
@@ -328,12 +328,21 @@ event types as of 1.2.10, no window enumeration; see §2 and §8).
 
 **The long-press translation bubble (§2.1b) still requests no new
 permission.** It is a `WindowManager` overlay of type
-`TYPE_ACCESSIBILITY_OVERLAY`, which — unlike `TYPE_APPLICATION_OVERLAY` —
-is available to any bound `AccessibilityService` without the user having
-to separately grant "display over other apps" (`SYSTEM_ALERT_WINDOW`).
-The optional setup guide uses `TYPE_APPLICATION_OVERLAY` and requires
-`SYSTEM_ALERT_WINDOW` only when the user chooses to show instructions over
-system Settings. Declining that access does not block setup or translation.
+`TYPE_ACCESSIBILITY_OVERLAY`, available to the bound
+`AccessibilityService` without "display over other apps".
+
+The setup guide no longer uses `TYPE_APPLICATION_OVERLAY` or
+`SYSTEM_ALERT_WINDOW`. For Accessibility and supported manufacturer
+Autostart screens, TextGate AI opens Settings first and immediately places
+a short-lived translucent Activity on top. The bottom instruction panel
+appears after 500 ms and the translucent Activity closes after 8 seconds,
+leaving the system Settings screen visible.
+
+Battery setup uses Android's real per-app Doze exemption flow. The app checks
+`PowerManager.isIgnoringBatteryOptimizations(packageName)` and, only while
+the exemption is absent, opens
+`ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS`. The user makes the decision
+in Android's own system UI; TextGate AI cannot grant the exemption itself.
 
 ---
 

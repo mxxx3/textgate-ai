@@ -195,15 +195,11 @@ class SetupGuideActivity : Activity() {
             }
 
             demoAnimator = AnimatorSet().apply {
-                playTogether(handFadeIn, handApproachX, handApproachY)
-                playTogether(pressX, pressY)
-                    .after(handApproachX)
-                playTogether(thumbSlide, handSlide)
-                    .after(pressX)
-                playTogether(releaseX, releaseY)
-                    .after(thumbSlide)
-                play(handFadeOut)
-                    .after(releaseX)
+                play(handFadeIn).with(handApproachX).with(handApproachY)
+                play(pressX).with(pressY).after(handApproachX)
+                play(thumbSlide).with(handSlide).after(pressX)
+                play(releaseX).with(releaseY).after(thumbSlide)
+                play(handFadeOut).after(releaseX)
 
                 addListener(object : AnimatorListenerAdapter() {
                     override fun onAnimationEnd(animation: Animator) {

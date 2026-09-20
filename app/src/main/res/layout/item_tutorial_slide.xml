@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    android:overScrollMode="never">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:orientation="vertical"
+        android:paddingTop="20dp"
+        android:paddingBottom="20dp">
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="260dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:background="@drawable/bg_tutorial_illustration"
+            android:padding="28dp">
+
+            <ImageView
+                android:id="@+id/imageTutorialPrimary"
+                android:layout_width="138dp"
+                android:layout_height="138dp"
+                android:layout_gravity="center"
+                android:contentDescription="@null"
+                android:scaleType="centerInside" />
+
+            <FrameLayout
+                android:id="@+id/tutorialAccentBubble"
+                android:layout_width="72dp"
+                android:layout_height="72dp"
+                android:layout_gravity="end|bottom"
+                android:layout_marginEnd="22dp"
+                android:layout_marginBottom="26dp"
+                android:background="@drawable/bg_tutorial_accent"
+                android:elevation="6dp"
+                android:padding="16dp">
+
+                <ImageView
+                    android:id="@+id/imageTutorialAccent"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:contentDescription="@null"
+                    android:scaleType="centerInside" />
+            </FrameLayout>
+        </FrameLayout>
+
+        <TextView
+            android:id="@+id/textTutorialTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="28dp"
+            android:gravity="center"
+            android:textColor="@color/tg_text_primary"
+            android:textSize="26sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/textTutorialBody"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:gravity="center"
+            android:lineSpacingExtra="4dp"
+            android:textColor="@color/tg_text_secondary"
+            android:textSize="16sp" />
+
+    </LinearLayout>
+</ScrollView>

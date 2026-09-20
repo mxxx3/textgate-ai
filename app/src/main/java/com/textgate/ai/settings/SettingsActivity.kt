@@ -42,6 +42,8 @@ import com.textgate.ai.security.SecureApiKeyStore
 import com.textgate.ai.security.TriggerDetector
 import com.textgate.ai.setup.ApiKeyGuideLauncher
 import com.textgate.ai.setup.SetupSettingsLauncher
+import com.textgate.ai.tutorial.TutorialActivity
+import com.textgate.ai.tutorial.TutorialCopyProvider
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
@@ -861,6 +863,10 @@ class SettingsActivity : Activity() {
 
     private fun setupAboutSection() {
         binding.textVersion.text = getString(R.string.about_version_label) + ": " + BuildConfig.VERSION_NAME
+        binding.buttonShowTutorial.text = TutorialCopyProvider.forContext(this).replay
+        binding.buttonShowTutorial.setOnClickListener {
+            startActivity(TutorialActivity.intent(this, replay = true))
+        }
     }
 }
 

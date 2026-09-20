@@ -195,9 +195,11 @@ class TutorialActivity : Activity() {
             }
         })
 
-        binding.tutorialFlipper.setOnTouchListener { _, event ->
+        val listener = View.OnTouchListener { _, event ->
             detector.onTouchEvent(event)
         }
+        binding.tutorialFlipper.setOnTouchListener(listener)
+        slideViews.forEach { it.setOnTouchListener(listener) }
     }
 
     private fun nextSlide() {

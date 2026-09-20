@@ -1,68 +1,125 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true"
-    android:background="@color/tg_background">
+    android:background="@android:color/transparent">
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/transparent" />
 
     <LinearLayout
+        android:id="@+id/lineSetupGuide"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_margin="8dp"
+        android:background="@drawable/bg_setup_guide"
         android:orientation="vertical"
-        android:padding="20dp">
+        android:padding="16dp"
+        android:visibility="gone">
 
-        <TextView
-            style="@style/TgSectionTitle"
-            android:text="@string/setup_guide_permission_title"
-            android:textSize="22sp" />
-
-        <TextView
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="@string/setup_guide_permission_body"
-            android:textColor="@color/tg_text_primary"
-            android:textSize="16sp" />
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:contentDescription="@null"
+                android:src="@mipmap/ic_launcher" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:layout_weight="1"
+                android:text="@string/app_name"
+                android:textColor="@android:color/white"
+                android:textSize="17sp"
+                android:textStyle="bold" />
+
+            <ImageButton
+                android:id="@+id/buttonCloseGuide"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/setup_guide_close"
+                android:src="@android:drawable/ic_menu_close_clear_cancel"
+                android:tint="@android:color/white" />
+        </LinearLayout>
 
         <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:text="@string/setup_guide_permission_path"
-            android:textColor="@color/tg_text_secondary"
-            android:textSize="15sp" />
-
-        <TextView
-            android:id="@+id/textTargetSteps"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:lineSpacingExtra="4dp"
-            android:textColor="@color/tg_text_primary"
-            android:textSize="16sp" />
-
-        <TextView
-            android:id="@+id/textGuideStatus"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:textColor="@color/tg_warning"
-            android:textSize="15sp"
-            android:visibility="gone" />
-
-        <Button
-            android:id="@+id/buttonEnableGuide"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:text="@string/setup_guide_enable" />
-
-        <Button
-            android:id="@+id/buttonSkipGuide"
-            style="?android:attr/borderlessButtonStyle"
+            android:id="@+id/textGuideSteps"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="@string/setup_guide_skip" />
+            android:lineSpacingExtra="4dp"
+            android:textColor="@android:color/white"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <FrameLayout
+            android:id="@+id/guideDemoFrame"
+            android:layout_width="match_parent"
+            android:layout_height="88dp"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/bg_setup_guide_demo_row"
+            android:padding="12dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
+                    android:contentDescription="@null"
+                    android:src="@mipmap/ic_launcher" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:layout_weight="1"
+                    android:maxLines="2"
+                    android:text="@string/app_name"
+                    android:textColor="@android:color/white"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <FrameLayout
+                    android:id="@+id/guideFakeSwitch"
+                    android:layout_width="58dp"
+                    android:layout_height="34dp"
+                    android:layout_marginEnd="8dp"
+                    android:background="@drawable/bg_setup_guide_switch_off"
+                    android:padding="4dp">
+
+                    <View
+                        android:id="@+id/guideFakeSwitchThumb"
+                        android:layout_width="26dp"
+                        android:layout_height="26dp"
+                        android:layout_gravity="start|center_vertical"
+                        android:background="@drawable/bg_setup_guide_switch_thumb" />
+                </FrameLayout>
+            </LinearLayout>
+
+            <ImageView
+                android:id="@+id/guideTouchHand"
+                android:layout_width="46dp"
+                android:layout_height="46dp"
+                android:layout_gravity="end|center_vertical"
+                android:alpha="0"
+                android:contentDescription="@null"
+                android:importantForAccessibility="no"
+                android:rotation="-8"
+                android:src="@drawable/ic_setup_guide_touch" />
+        </FrameLayout>
     </LinearLayout>
-</ScrollView>
+</RelativeLayout>

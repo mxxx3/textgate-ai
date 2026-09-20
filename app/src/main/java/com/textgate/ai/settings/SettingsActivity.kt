@@ -9,7 +9,6 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.os.PowerManager
 import android.provider.Settings
 import android.view.LayoutInflater
 import android.view.View
@@ -41,8 +40,10 @@ import com.textgate.ai.network.TranslationOrchestrator
 import com.textgate.ai.security.AppSettingsStore
 import com.textgate.ai.security.SecureApiKeyStore
 import com.textgate.ai.security.TriggerDetector
-import com.textgate.ai.setup.SetupGuideActivity
-import com.textgate.ai.setup.SetupGuideOverlay
+import com.textgate.ai.setup.ApiKeyGuideLauncher
+import com.textgate.ai.setup.SetupSettingsLauncher
+import com.textgate.ai.tutorial.TutorialActivity
+import com.textgate.ai.tutorial.TutorialCopyProvider
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
@@ -78,12 +79,6 @@ class SettingsActivity : Activity() {
         "gemini-3.7-flash"
     )
 
-    companion object {
-        /** Google AI Studio's "API keys" page — the exact place a
-         * first-time user needs to land to create a free key, confirmed
-         * against ai.google.dev/gemini-api/docs/api-key. */
-        private const val GEMINI_API_KEY_URL = "https://aistudio.google.com/apikey"
-    }
 
     /**
      * Applies the user's chosen "App interface language" (see
@@ -443,7 +438,7 @@ class SettingsActivity : Activity() {
 
     private fun openSystemAccessibilitySettings() {
         try {
-            startActivity(SetupGuideActivity.intent(this, SetupGuideOverlay.Destination.ACCESSIBILITY))
+            startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
         } catch (_: Exception) {
             Toast.makeText(this, R.string.error_generic, Toast.LENGTH_SHORT).show()
         }
@@ -479,10 +474,14 @@ class SettingsActivity : Activity() {
     private fun setupBackgroundOperationSection() {
         refreshBackgroundOperationStatus()
         binding.buttonOpenBatterySettings.setOnClickListener {
-            startActivity(SetupGuideActivity.intent(this, SetupGuideOverlay.Destination.BATTERY))
+            if (!SetupSettingsLauncher.openBatteryExemption(this)) {
+                Toast.makeText(this, R.string.error_generic, Toast.LENGTH_SHORT).show()
+            }
         }
         binding.buttonOpenAutostartSettings.setOnClickListener {
-            startActivity(SetupGuideActivity.intent(this, SetupGuideOverlay.Destination.AUTOSTART))
+            if (!SetupSettingsLauncher.openAutostartWithGuide(this)) {
+                Toast.makeText(this, R.string.error_generic, Toast.LENGTH_SHORT).show()
+            }
         }
         binding.buttonOpenAppDetailsSettings.setOnClickListener {
             openAppDetailsSettings()
@@ -491,25 +490,18 @@ class SettingsActivity : Activity() {
 
     private fun refreshBackgroundOperationStatus() {
         if (!::binding.isInitialized) return
+        val autostartAvailable = SetupSettingsLauncher.isAutostartAvailable(this)
+        binding.buttonOpenAutostartSettings.visibility =
+            if (autostartAvailable) View.VISIBLE else View.GONE
+
         val statusRes = when {
-            isKnownAggressiveBackgroundDevice() -> R.string.background_operation_status_oem
-            isIgnoringBatteryOptimizations() -> R.string.background_operation_status_unrestricted
+            SetupSettingsLauncher.isIgnoringBatteryOptimizations(this) ->
+                R.string.background_operation_status_unrestricted
+            autostartAvailable || isKnownAggressiveBackgroundDevice() ->
+                R.string.background_operation_status_oem
             else -> R.string.background_operation_status_standard
         }
         binding.textBackgroundOperationStatus.text = getString(statusRes)
-    }
-
-    private fun isIgnoringBatteryOptimizations(): Boolean {
-        return try {
-            val powerManager = getSystemService(POWER_SERVICE) as? PowerManager ?: return false
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                powerManager.isIgnoringBatteryOptimizations(packageName)
-            } else {
-                false
-            }
-        } catch (_: Exception) {
-            false
-        }
     }
 
     private fun isKnownAggressiveBackgroundDevice(): Boolean {
@@ -542,16 +534,12 @@ class SettingsActivity : Activity() {
         refreshApiKeyStatus()
 
         // Opens Google AI Studio's "Create API key" page directly in the
-        // browser — the exact page a first-time user needs, so they are
-        // never left guessing which of Google's many developer sites is
-        // the right one. Wrapped in try/catch like every other
-        // startActivity() call in this screen: if no browser can handle
-        // the intent (unlikely, but not impossible on a stripped-down
-        // device), fail with a toast rather than crash.
+        // Open Google AI Studio, then immediately show the short translucent
+        // help over the browser. The help uses this app's selected locale and
+        // demonstrates create -> confirm -> copy without interacting with the
+        // website itself.
         binding.buttonGetApiKey.setOnClickListener {
-            try {
-                startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(GEMINI_API_KEY_URL)))
-            } catch (_: Exception) {
+            if (!ApiKeyGuideLauncher.open(this)) {
                 Toast.makeText(this, R.string.error_generic, Toast.LENGTH_SHORT).show()
             }
         }
@@ -577,6 +565,9 @@ class SettingsActivity : Activity() {
             }
             renderApiKeyList()
             refreshApiKeyStatus()
+            if (added) {
+                runApiTest()
+            }
         }
 
         // "Remove all" — same button id/label as the old single-key
@@ -872,6 +863,10 @@ class SettingsActivity : Activity() {
 
     private fun setupAboutSection() {
         binding.textVersion.text = getString(R.string.about_version_label) + ": " + BuildConfig.VERSION_NAME
+        binding.buttonShowTutorial.text = TutorialCopyProvider.forContext(this).replay
+        binding.buttonShowTutorial.setOnClickListener {
+            startActivity(TutorialActivity.intent(this, replay = true))
+        }
     }
 }
 

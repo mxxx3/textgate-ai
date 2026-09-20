@@ -23,7 +23,6 @@ import com.textgate.ai.security.ResultPolicy
 import com.textgate.ai.security.SecureApiKeyStore
 import com.textgate.ai.security.SensitiveInputGuard
 import com.textgate.ai.security.TriggerDetector
-import com.textgate.ai.setup.SetupGuideOverlay
 import com.textgate.ai.util.Debouncer
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -141,7 +140,6 @@ class TextGateAccessibilityService : AccessibilityService() {
 
     override fun onServiceConnected() {
         super.onServiceConnected()
-        SetupGuideOverlay.dismiss("Accessibility enabled")
         settingsStore = AppSettingsStore(applicationContext)
         apiKeyStore = SecureApiKeyStore(applicationContext)
         availabilityStore = ModelAvailabilityStore(applicationContext)

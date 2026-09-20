@@ -3,7 +3,6 @@ package com.textgate.ai.setup
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -29,6 +28,7 @@ import com.textgate.ai.security.AppSettingsStore
 import com.textgate.ai.security.SecureApiKeyStore
 import com.textgate.ai.security.TriggerDetector
 import com.textgate.ai.settings.SettingsActivity
+import com.textgate.ai.tutorial.TutorialActivity
 import java.util.concurrent.Executors
 
 class SetupActivity : Activity() {
@@ -63,7 +63,7 @@ class SetupActivity : Activity() {
         setupPreferencePickers()
 
         binding.buttonGetApiKey.setOnClickListener {
-            if (!open(Intent(Intent.ACTION_VIEW, Uri.parse("https://aistudio.google.com/apikey")))) showOpenError()
+            if (!ApiKeyGuideLauncher.open(this)) showOpenError()
         }
         binding.buttonSaveApiKey.setOnClickListener {
             val chars = CharArray(binding.editApiKey.text.length)
@@ -76,41 +76,18 @@ class SetupActivity : Activity() {
             }
             binding.editApiKey.text.clear()
             binding.textApiTestResult.text = ""
-            if (saved) SetupReadiness.recordApiTest(this, false)
-            Toast.makeText(this, if (saved) R.string.api_key_saved else R.string.error_no_api_key, Toast.LENGTH_SHORT).show()
-            refresh()
+            if (saved) {
+                SetupReadiness.recordApiTest(this, false)
+                Toast.makeText(this, R.string.api_key_saved, Toast.LENGTH_SHORT).show()
+                refresh()
+                runApiConnectionTest()
+            } else {
+                Toast.makeText(this, R.string.error_no_api_key, Toast.LENGTH_SHORT).show()
+                refresh()
+            }
         }
         binding.buttonTestApi.setOnClickListener {
-            if (!SetupReadiness.status(this).apiKeyReady) {
-                binding.textApiTestResult.setText(R.string.error_no_api_key)
-                return@setOnClickListener
-            }
-            binding.buttonTestApi.isEnabled = false
-            binding.textApiTestResult.setText(R.string.test_api_running)
-            val model = AppSettingsStore(this).selectedModel
-            testExecutor.execute {
-                val result = try {
-                    TranslationOrchestrator.translateText(
-                        apiKeyStore = SecureApiKeyStore(this),
-                        availabilityStore = ModelAvailabilityStore(this),
-                        requestedModel = model,
-                        systemPrompt = TranslationPrompts.EN_TRANSLATION_SYSTEM_PROMPT,
-                        userText = "To jest testowa wiadomość."
-                    )
-                } catch (_: Exception) {
-                    GeminiClient.Result.Failure.InvalidResponse
-                }
-                mainHandler.post {
-                    if (isFinishing || isDestroyed) return@post
-                    SetupReadiness.recordApiTest(this, result is GeminiClient.Result.Success)
-                    binding.buttonTestApi.isEnabled = true
-                    binding.textApiTestResult.setText(
-                        if (result is GeminiClient.Result.Success) R.string.test_api_success
-                        else R.string.setup_api_test_failed
-                    )
-                    refresh()
-                }
-            }
+            runApiConnectionTest()
         }
         binding.buttonOpenSettings.setOnClickListener {
             if (!open(Intent(this, SettingsActivity::class.java))) showOpenError()
@@ -123,19 +100,10 @@ class SetupActivity : Activity() {
             refresh()
         }
         binding.buttonBattery.setOnClickListener {
-            if (!open(SetupGuideActivity.intent(this, SetupGuideOverlay.Destination.BATTERY))) showOpenError()
+            if (!SetupSettingsLauncher.openBatteryExemption(this)) showOpenError()
         }
         binding.buttonAutostart.setOnClickListener {
-            if (!open(SetupGuideActivity.intent(this, SetupGuideOverlay.Destination.AUTOSTART))) showOpenError()
-        }
-        binding.groupBattery.setOnCheckedChangeListener { _, id ->
-            val choice = when (id) {
-                R.id.optionBatteryEnabled -> SetupReadiness.ManualChoice.ENABLED
-                R.id.optionBatteryUnavailable -> SetupReadiness.ManualChoice.UNAVAILABLE
-                else -> SetupReadiness.ManualChoice.PENDING
-            }
-            SetupReadiness.chooseBattery(this, choice)
-            refresh()
+            if (!SetupSettingsLauncher.openAutostartWithGuide(this)) showOpenError()
         }
         binding.groupAutostart.setOnCheckedChangeListener { _, id ->
             val choice = when (id) {
@@ -149,7 +117,12 @@ class SetupActivity : Activity() {
         binding.buttonVerify.setOnClickListener { refresh() }
         binding.buttonContinue.setOnClickListener {
             if (SetupReadiness.status(this).ready) {
-                startActivity(Intent(this, MainActivity::class.java))
+                val nextIntent = if (TutorialActivity.needsToBeShown(this)) {
+                    TutorialActivity.intent(this)
+                } else {
+                    Intent(this, MainActivity::class.java)
+                }
+                startActivity(nextIntent)
                 finish()
             } else {
                 refresh()
@@ -167,6 +140,46 @@ class SetupActivity : Activity() {
         testExecutor.shutdownNow()
         mainHandler.removeCallbacksAndMessages(null)
         super.onDestroy()
+    }
+
+    private fun runApiConnectionTest() {
+        if (!SetupReadiness.status(this).apiKeyReady) {
+            binding.textApiTestResult.setText(R.string.error_no_api_key)
+            return
+        }
+
+        binding.buttonTestApi.isEnabled = false
+        binding.buttonSaveApiKey.isEnabled = false
+        binding.textApiTestResult.setText(R.string.test_api_running)
+
+        val model = AppSettingsStore(this).selectedModel
+        testExecutor.execute {
+            val result = try {
+                TranslationOrchestrator.translateText(
+                    apiKeyStore = SecureApiKeyStore(this),
+                    availabilityStore = ModelAvailabilityStore(this),
+                    requestedModel = model,
+                    systemPrompt = TranslationPrompts.EN_TRANSLATION_SYSTEM_PROMPT,
+                    // Fixed, non-sensitive test text. It is not user content
+                    // and never comes from Accessibility.
+                    userText = "API connection test"
+                )
+            } catch (_: Exception) {
+                GeminiClient.Result.Failure.InvalidResponse
+            }
+
+            mainHandler.post {
+                if (isFinishing || isDestroyed) return@post
+                SetupReadiness.recordApiTest(this, result is GeminiClient.Result.Success)
+                binding.buttonTestApi.isEnabled = true
+                binding.buttonSaveApiKey.isEnabled = true
+                binding.textApiTestResult.setText(
+                    if (result is GeminiClient.Result.Success) R.string.test_api_success
+                    else R.string.setup_api_test_failed
+                )
+                refresh()
+            }
+        }
     }
 
     private fun setupPreferencePickers() {
@@ -241,12 +254,15 @@ class SetupActivity : Activity() {
         binding.textTriggerStatus.setText(if (status.triggerEnabled) R.string.setup_done else R.string.setup_trigger_missing)
         binding.textTriggerStatus.setTextColor(getColor(if (status.triggerEnabled) R.color.tg_primary else R.color.tg_warning))
         binding.buttonEnableTrigger.visibility = if (status.triggerEnabled) View.GONE else View.VISIBLE
-        val batteryId = when (status.batteryChoice) {
-            SetupReadiness.ManualChoice.ENABLED -> R.id.optionBatteryEnabled
-            SetupReadiness.ManualChoice.UNAVAILABLE -> R.id.optionBatteryUnavailable
-            SetupReadiness.ManualChoice.PENDING -> -1
-        }
-        if (binding.groupBattery.checkedRadioButtonId != batteryId) binding.groupBattery.check(batteryId)
+        binding.buttonBattery.visibility =
+            if (status.batteryChoice == SetupReadiness.ManualChoice.ENABLED) View.GONE else View.VISIBLE
+        binding.groupBattery.visibility = View.GONE
+
+        val autostartAvailable = SetupSettingsLauncher.isAutostartAvailable(this)
+        binding.textAutostartHelp.visibility = if (autostartAvailable) View.VISIBLE else View.GONE
+        binding.buttonAutostart.visibility = if (autostartAvailable) View.VISIBLE else View.GONE
+        binding.groupAutostart.visibility = if (autostartAvailable) View.VISIBLE else View.GONE
+
         val autostartId = when (status.autostartChoice) {
             SetupReadiness.ManualChoice.ENABLED -> R.id.optionAutostartEnabled
             SetupReadiness.ManualChoice.UNAVAILABLE -> R.id.optionAutostartUnavailable

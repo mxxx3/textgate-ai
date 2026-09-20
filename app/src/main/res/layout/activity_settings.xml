@@ -608,6 +608,13 @@
                 android:textColor="@color/tg_text_secondary"
                 tools:text="Version 1.0.0" />
 
+            <Button
+                android:id="@+id/buttonShowTutorial"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                tools:text="Show tutorial again" />
+
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

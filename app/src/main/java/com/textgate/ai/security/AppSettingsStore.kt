@@ -152,6 +152,16 @@ class AppSettingsStore(context: Context) {
         set(value) = prefs.edit().putString(KEY_AUDIO_CAPTURE_MODE, value.prefValue).apply()
 
     /**
+     * Version of the first-run product tutorial the user has explicitly
+     * completed or skipped. A version number (instead of a Boolean) lets a
+     * future substantially changed tutorial be shown once again without
+     * losing the user's current settings.
+     */
+    var tutorialVersionSeen: Int
+        get() = prefs.getInt(KEY_TUTORIAL_VERSION_SEEN, 0)
+        set(value) = prefs.edit().putInt(KEY_TUTORIAL_VERSION_SEEN, value.coerceAtLeast(0)).apply()
+
+    /**
      * The allow-list as it stands: the user's own explicit choices once
      * they have made any (even down to an empty set, e.g. after removing
      * every default), or else [DEFAULT_ALLOWED_PACKAGES] as long as the
@@ -185,6 +195,7 @@ class AppSettingsStore(context: Context) {
         private const val KEY_USER_GENDER = "user_gender"
         private const val KEY_HEADSET_DISCONNECT_BEHAVIOR = "headset_disconnect_behavior"
         private const val KEY_AUDIO_CAPTURE_MODE = "audio_capture_mode"
+        private const val KEY_TUTORIAL_VERSION_SEEN = "tutorial_version_seen"
 
         /**
          * Chosen from the app owner's own Google AI Studio rate-limit

@@ -7,8 +7,7 @@ import android.widget.Toast
 import com.textgate.ai.LocaleHelper
 import com.textgate.ai.R
 import com.textgate.ai.databinding.ActivityAccessibilityDisclosureBinding
-import com.textgate.ai.setup.SetupGuideActivity
-import com.textgate.ai.setup.SetupGuideOverlay
+import com.textgate.ai.setup.SetupSettingsLauncher
 
 /**
  * Google Play's "prominent disclosure and consent" screen for apps that use
@@ -49,8 +48,8 @@ class AccessibilityDisclosureActivity : Activity() {
 
         binding.buttonAgree.setOnClickListener {
             try {
-                startActivity(SetupGuideActivity.intent(this, SetupGuideOverlay.Destination.ACCESSIBILITY))
-                finish()
+                if (SetupSettingsLauncher.openAccessibilityWithGuide(this)) finish()
+                else Toast.makeText(this, R.string.error_generic, Toast.LENGTH_SHORT).show()
             } catch (_: Exception) {
                 Toast.makeText(this, R.string.error_generic, Toast.LENGTH_SHORT).show()
             }

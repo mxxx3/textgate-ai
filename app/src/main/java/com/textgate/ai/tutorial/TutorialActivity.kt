@@ -111,6 +111,7 @@ class TutorialActivity : Activity() {
         super.onDestroy()
     }
 
+    @android.annotation.TargetApi(Build.VERSION_CODES.R)
     private fun applyInsetsAsPadding(root: View) {
         val originalLeft = root.paddingLeft
         val originalTop = root.paddingTop

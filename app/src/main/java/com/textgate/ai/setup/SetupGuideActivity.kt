@@ -43,7 +43,7 @@ class SetupGuideActivity : Activity() {
 
     private val handler = Handler(Looper.getMainLooper())
     private val showGuide = Runnable {
-        findViewById<View?>(R.id.lineSetupGuide)?.visibility = View.VISIBLE
+        findViewById<View>(R.id.lineSetupGuide).visibility = View.VISIBLE
     }
     private val autoClose = Runnable { finish() }
 

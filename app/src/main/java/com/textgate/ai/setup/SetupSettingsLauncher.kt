@@ -38,7 +38,7 @@ internal object SetupSettingsLauncher {
      * system battery-optimization list and finally to this app's details page.
      */
     fun openBatteryExemption(activity: Activity): Boolean {
-        val packageUri = Uri.parse("package:\${activity.packageName}")
+        val packageUri = Uri.parse("package:${activity.packageName}")
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
             !isIgnoringBatteryOptimizations(activity)

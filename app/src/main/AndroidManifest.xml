@@ -181,6 +181,11 @@
             android:launchMode="singleTask"
             android:theme="@style/Theme.TextGate.SetupGuide" />
 
+        <activity
+            android:name=".tutorial.TutorialActivity"
+            android:exported="false"
+            android:excludeFromRecents="true" />
+
         <!--
             As of v2, reached only from MainActivity's "Ustawienia" tab —
             no longer the launcher. exported="false" is correct and safe:

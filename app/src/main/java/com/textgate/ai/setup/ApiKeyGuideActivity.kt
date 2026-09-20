@@ -3,6 +3,7 @@ package com.textgate.ai.setup
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -10,14 +11,15 @@ import android.os.Looper
 import android.view.View
 import android.view.WindowInsets
 import android.widget.ImageView
+import android.widget.Toast
 import com.textgate.ai.LocaleHelper
 import com.textgate.ai.R
 
 /**
- * Translucent, short-lived help shown immediately after Google AI Studio is
- * opened in the browser. All user-facing text comes from the app's existing
- * localized resources, so the guide follows the language selected in TextGate
- * AI instead of hard-coding English or Polish.
+ * Translucent help shown inside TextGate AI before Google AI Studio is opened.
+ * All user-facing text comes from the app's existing localized resources, so
+ * the guide follows the language selected in TextGate AI instead of hard-coding
+ * English or Polish. The user explicitly opens the browser from this guide.
  *
  * The three animated mini-screens are decorative only: they demonstrate
  * "create key -> confirm -> copy" inside this Activity and never interact with
@@ -27,7 +29,6 @@ class ApiKeyGuideActivity : Activity() {
 
     companion object {
         private const val SHOW_DELAY_MS = 500L
-        private const val AUTO_CLOSE_MS = 15_000L
         private const val STEP_DURATION_MS = 2_250L
         private const val TAP_START_DELAY_MS = 180L
 
@@ -43,8 +44,6 @@ class ApiKeyGuideActivity : Activity() {
         currentStep = 0
         showCurrentStep()
     }
-
-    private val autoClose = Runnable { finish() }
 
     private val animateCurrentStep = Runnable {
         val target = when (currentStep) {
@@ -70,6 +69,7 @@ class ApiKeyGuideActivity : Activity() {
         overridePendingTransition(0, 0)
 
         findViewById<View>(R.id.buttonCloseApiKeyGuide).setOnClickListener { finish() }
+        findViewById<View>(R.id.buttonOpenAiStudio).setOnClickListener { openAiStudio() }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             window.insetsController?.apply {
@@ -84,7 +84,19 @@ class ApiKeyGuideActivity : Activity() {
         }
 
         handler.postDelayed(showGuide, SHOW_DELAY_MS)
-        handler.postDelayed(autoClose, AUTO_CLOSE_MS)
+    }
+
+    private fun openAiStudio() {
+        val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://aistudio.google.com/apikey"))
+        try {
+            startActivity(intent)
+            // Close only after the browser has accepted the request. Returning
+            // from the browser then reveals the original setup/settings screen
+            // where the user can paste the copied key.
+            finish()
+        } catch (_: Exception) {
+            Toast.makeText(this, R.string.error_generic, Toast.LENGTH_SHORT).show()
+        }
     }
 
     private fun showCurrentStep() {
@@ -201,7 +213,6 @@ class ApiKeyGuideActivity : Activity() {
 
     override fun onDestroy() {
         handler.removeCallbacks(showGuide)
-        handler.removeCallbacks(autoClose)
         handler.removeCallbacks(animateCurrentStep)
         handler.removeCallbacks(advanceStep)
         findViewById<View>(R.id.apiGuideTouchHand).animate().cancel()

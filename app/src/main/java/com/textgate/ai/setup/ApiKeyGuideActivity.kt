@@ -194,7 +194,7 @@ class ApiKeyGuideActivity : Activity() {
         handler.removeCallbacks(autoClose)
         handler.removeCallbacks(animateCurrentStep)
         handler.removeCallbacks(advanceStep)
-        findViewById<View?>(R.id.apiGuideTouchHand)?.animate()?.cancel()
+        findViewById<View>(R.id.apiGuideTouchHand).animate().cancel()
         super.onDestroy()
     }
 

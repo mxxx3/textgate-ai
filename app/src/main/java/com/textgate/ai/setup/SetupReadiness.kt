@@ -9,7 +9,6 @@ import com.textgate.ai.security.SecureApiKeyStore
 
 internal object SetupReadiness {
     private const val PREFS_NAME = "setup_checklist"
-    private const val BATTERY_CHOICE = "battery_choice"
     private const val AUTOSTART_CHOICE = "autostart_choice"
     private const val TESTED_KEY_AND_MODEL = "tested_key_and_model"
 
@@ -33,19 +32,25 @@ internal object SetupReadiness {
         val keyStore = SecureApiKeyStore(context)
         val settingsStore = AppSettingsStore(context)
         val currentTest = testSignature(keyStore.activeKeyId(), settingsStore.selectedModel)
+        val autostartAvailable = SetupSettingsLauncher.isAutostartAvailable(context)
+
         return Status(
             apiKeyReady = keyStore.getActiveKeyPlaintext() != null,
             apiTestPassed = currentTest != null && prefs.getString(TESTED_KEY_AND_MODEL, null) == currentTest,
             accessibilityEnabled = isAccessibilityEnabled(context),
             triggerEnabled = settingsStore.isAiEnabled,
-            batteryChoice = readChoice(prefs.getString(BATTERY_CHOICE, null)),
-            autostartChoice = readChoice(prefs.getString(AUTOSTART_CHOICE, null))
+            batteryChoice = if (SetupSettingsLauncher.isIgnoringBatteryOptimizations(context)) {
+                ManualChoice.ENABLED
+            } else {
+                ManualChoice.PENDING
+            },
+            autostartChoice = if (autostartAvailable) {
+                readChoice(prefs.getString(AUTOSTART_CHOICE, null))
+            } else {
+                ManualChoice.UNAVAILABLE
+            }
         )
     }
-
-    fun chooseBattery(context: Context, choice: ManualChoice) =
-        context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-            .edit().putString(BATTERY_CHOICE, choice.name).apply()
 
     fun chooseAutostart(context: Context, choice: ManualChoice) =
         context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)

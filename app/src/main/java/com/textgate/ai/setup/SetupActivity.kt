@@ -28,6 +28,7 @@ import com.textgate.ai.security.AppSettingsStore
 import com.textgate.ai.security.SecureApiKeyStore
 import com.textgate.ai.security.TriggerDetector
 import com.textgate.ai.settings.SettingsActivity
+import com.textgate.ai.tutorial.TutorialActivity
 import java.util.concurrent.Executors
 
 class SetupActivity : Activity() {
@@ -116,7 +117,12 @@ class SetupActivity : Activity() {
         binding.buttonVerify.setOnClickListener { refresh() }
         binding.buttonContinue.setOnClickListener {
             if (SetupReadiness.status(this).ready) {
-                startActivity(Intent(this, MainActivity::class.java))
+                val nextIntent = if (TutorialActivity.needsToBeShown(this)) {
+                    TutorialActivity.intent(this)
+                } else {
+                    Intent(this, MainActivity::class.java)
+                }
+                startActivity(nextIntent)
                 finish()
             } else {
                 refresh()

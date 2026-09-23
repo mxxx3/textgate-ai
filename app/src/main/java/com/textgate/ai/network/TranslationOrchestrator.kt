@@ -96,7 +96,11 @@ object TranslationOrchestrator {
 
             val remainingMs = TOTAL_BUDGET_MS - elapsedMillis().coerceAtLeast(0L)
             if (remainingMs < MIN_REMAINING_MS) break
-            val timeoutMs = minOf(PER_MODEL_TIMEOUT_MS.toLong(), remainingMs).toInt()
+            // Gemini 2.5 Flash works on the owner's account but may need
+            // a little longer than Flash-Lite for a complete response.
+            val perModelTimeout = if (model.equals("gemini-2.5-flash", ignoreCase = true))
+                4_500 else PER_MODEL_TIMEOUT_MS
+            val timeoutMs = minOf(perModelTimeout.toLong(), remainingMs).toInt()
             attempts++
 
             when (val result = attempt(model, timeoutMs)) {

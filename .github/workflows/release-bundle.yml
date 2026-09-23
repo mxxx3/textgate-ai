@@ -29,13 +29,6 @@ name: Build signed release bundle (AAB)
 # secret, which GitHub encrypts and never displays again after saving.
 on:
   workflow_dispatch:
-  # One-time build of merged TextGate AI 2.0.13 (versionCode 41).
-  # Restrict to changes in this workflow; remove this temporary trigger
-  # after the signed artifact has been produced.
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/release-bundle.yml'
 
 jobs:
   bundle-release:

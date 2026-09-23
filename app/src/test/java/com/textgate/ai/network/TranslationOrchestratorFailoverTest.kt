@@ -39,7 +39,7 @@ class TranslationOrchestratorFailoverTest {
         val result = TranslationOrchestrator.translateWithFallback(
             store, AppSettingsStore.DEFAULT_MODEL, now
         ) { model, timeout ->
-            assertEquals(3_000, timeout)
+            assertEquals(if (model == "gemini-2.5-flash") 4_500 else 3_000, timeout)
             tried += model
             if (model == "gemini-2.5-flash") success else highDemand
         }

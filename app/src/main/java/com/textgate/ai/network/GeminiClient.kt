@@ -140,7 +140,8 @@ object GeminiClient {
         apiKey: String,
         model: String,
         systemPrompt: String,
-        userText: String
+        userText: String,
+        timeoutMs: Int = READ_TIMEOUT_MS
     ): Result {
         if (apiKey.isBlank()) return Result.Failure.MissingApiKey
         val trimmedModel = model.trim()
@@ -168,8 +169,12 @@ object GeminiClient {
         return try {
             connection = (url.openConnection() as HttpsURLConnection).apply {
                 requestMethod = "POST"
-                connectTimeout = CONNECT_TIMEOUT_MS
-                readTimeout = READ_TIMEOUT_MS
+                // Short bounded timeouts for chat failover; the existing
+                // standalone caller can retain the original default. The
+                // network connect and read phases have separate timeouts,
+                // so the orchestrator also checks its overall time budget.
+                connectTimeout = minOf(CONNECT_TIMEOUT_MS, (timeoutMs / 2).coerceAtLeast(500))
+                readTimeout = minOf(READ_TIMEOUT_MS, timeoutMs.coerceAtLeast(500))
                 doOutput = true
                 doInput = true
                 useCaches = false

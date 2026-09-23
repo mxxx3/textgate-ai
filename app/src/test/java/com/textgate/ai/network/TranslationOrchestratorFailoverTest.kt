@@ -214,7 +214,11 @@ class TranslationOrchestratorFailoverTest {
             availabilityStore = store,
             requestedModel = AppSettingsStore.DEFAULT_MODEL,
             now = now,
-            elapsedMillis = { if (timeouts.isEmpty()) 8_000L else 10_500L },
+            elapsedMillis = { when (timeouts.size) {
+                0 -> 8_000L
+                1 -> 10_500L
+                else -> 12_000L
+            } },
             attempt = { _, timeout ->
                 timeouts += timeout
                 highDemand

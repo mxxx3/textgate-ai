@@ -145,7 +145,7 @@ object TranslationOrchestrator {
 
                 GeminiClient.Result.Failure.Timeout -> {
                     availabilityStore.markShortCooldown(model, now, 30L)
-                    lastTransientFailure = result
+                    lastTransientFailure = GeminiClient.Result.Failure.Timeout
                 }
 
                 // Bad keys, local network failures, bad request shapes and

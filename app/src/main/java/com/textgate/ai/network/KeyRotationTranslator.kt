@@ -1,6 +1,7 @@
 package com.textgate.ai.network
 
 import com.textgate.ai.security.SecureApiKeyStore
+import java.util.concurrent.TimeUnit
 
 /**
  * Thin orchestration layer on top of [GeminiClient.translateBlocking]:
@@ -45,17 +46,27 @@ object KeyRotationTranslator {
         apiKeyStore: SecureApiKeyStore,
         model: String,
         systemPrompt: String,
-        userText: String
+        userText: String,
+        timeoutMs: Int = 20_000
     ): GeminiClient.Result {
         val totalKeys = apiKeyStore.keyCount()
         if (totalKeys == 0) return GeminiClient.Result.Failure.MissingApiKey
 
         var lastQuotaDetail: GeminiClient.Result.Failure.QuotaExceeded? = null
+        val startedNanos = System.nanoTime()
 
         // At most one attempt per stored key, so a persistently-bad key
         // (revoked, malformed, or a Keystore decryption failure affecting
         // every key at once) can never spin longer than the list is long.
         repeat(totalKeys) {
+            // Multiple keys may be from the same project and share a limit;
+            // never spend an unbounded amount of a chat request rotating.
+            val spentMs = TimeUnit.NANOSECONDS.toMillis(
+                (System.nanoTime() - startedNanos).coerceAtLeast(0L)
+            )
+            val remainingMs = timeoutMs.toLong() - spentMs
+            if (remainingMs < 500L) return GeminiClient.Result.Failure.Timeout
+
             val apiKey = apiKeyStore.getActiveKeyPlaintext()
                 ?: return GeminiClient.Result.Failure.MissingApiKey
 
@@ -63,7 +74,8 @@ object KeyRotationTranslator {
                 apiKey = apiKey,
                 model = model,
                 systemPrompt = systemPrompt,
-                userText = userText
+                userText = userText,
+                timeoutMs = remainingMs.coerceAtMost(Int.MAX_VALUE.toLong()).toInt()
             )
 
             if (result !is GeminiClient.Result.Failure.QuotaExceeded) {

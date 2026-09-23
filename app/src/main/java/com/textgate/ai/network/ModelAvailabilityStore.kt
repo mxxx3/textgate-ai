@@ -8,13 +8,12 @@ import java.time.ZoneId
 import java.time.ZonedDateTime
 
 /**
- * Persisted per-model availability state for TEXT translation's automatic
- * fallback between the primary model ([com.textgate.ai.security.
- * AppSettingsStore.DEFAULT_MODEL], gemini-3.5-flash-lite) and
- * [TranslationOrchestrator.FALLBACK_MODEL] (gemini-3.1-flash-lite) — see
- * [TranslationOrchestrator], the only reader/writer of this store.
+ * Persisted per-model availability state for text translations. The
+ * TranslationOrchestrator stores both quota exhaustion and temporary 503/
+ * timeout cooldowns for whichever built-in model is currently unavailable.
+ * Live voice translation does not use this store.
  *
- * Two independent kinds of "this model is temporarily unavailable" state
+ * Three causes of "this model is temporarily unavailable" state
  * are tracked, because a 429 from Gemini does not always mean the same
  * thing (see [GeminiClient.Result.Failure.QuotaScope]):
  *   - DAILY (RPD): the model's daily request quota is exhausted. Persisted
@@ -27,7 +26,9 @@ import java.time.ZonedDateTime
  *   - SHORT_TERM or UNKNOWN (RPM/TPM, or an unidentifiable 429): a short
  *     cooldown, using the server's own retry hint when available, or a
  *     conservative fixed default otherwise (see [markShortCooldown]).
- * Both survive an app restart — plain SharedPreferences, like every other
+ *   - TRANSIENT SERVER (503/5xx/timeout): short cooldown to skip a server
+ *     that is currently too busy; new translations try another model.
+ * All survive an app restart — plain SharedPreferences, like every other
  * non-secret setting in this app (see [com.textgate.ai.security.
  * AppSettingsStore]); nothing stored here is a credential.
  */

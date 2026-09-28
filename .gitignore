@@ -25,3 +25,4 @@ app/release/
 *.apk
 *.aab
 screeny/
+logs_*/

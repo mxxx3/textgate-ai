@@ -29,6 +29,8 @@ name: Build signed release bundle (AAB)
 # secret, which GitHub encrypts and never displays again after saving.
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
 
 jobs:
   bundle-release:

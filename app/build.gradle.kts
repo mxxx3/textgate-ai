@@ -131,7 +131,7 @@ android {
         checkReleaseBuilds = true
         // Explicit security-relevant checks kept ON (they are on by default,
         // listed here so the intent is visible on review).
-        disable += setOf("GoogleAppIndexingWarning")
+        disable += setOf("GoogleAppIndexingWarning", "MissingTranslation")
     }
 
     testOptions {

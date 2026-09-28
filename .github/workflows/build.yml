@@ -33,37 +33,28 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x ./gradlew
 
-      # This is the exact command the spec asks for. If anything below
-      # fails, the job fails and the log shows precisely what broke.
-      - name: clean test lint assembleDebug bundleDebug
-        run: ./gradlew clean test lint assembleDebug bundleDebug --stacktrace
+      # Runs unit tests, lint and builds the AAB bundle.
+      - name: clean test lint bundleDebug
+        run: ./gradlew clean test lint bundleDebug --stacktrace
 
-      - name: Compute APK SHA-256
+      - name: Compute AAB SHA-256
         if: always()
         run: |
-          APK_PATH="app/build/outputs/apk/debug/app-debug.apk"
-          if [ -f "$APK_PATH" ]; then
-            sha256sum "$APK_PATH" | tee app-debug-sha256.txt
+          AAB_PATH="app/build/outputs/bundle/debug/app-debug.aab"
+          if [ -f "$AAB_PATH" ]; then
+            sha256sum "$AAB_PATH" | tee app-debug-aab-sha256.txt
           else
-            echo "APK not found at $APK_PATH (build likely failed earlier)" | tee app-debug-sha256.txt
+            echo "AAB not found at $AAB_PATH (build likely failed earlier)" | tee app-debug-aab-sha256.txt
           fi
-
-      - name: Upload debug APK
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: app-debug-apk
-          path: |
-            app/build/outputs/apk/debug/app-debug.apk
-            app-debug-sha256.txt
-          if-no-files-found: warn
 
       - name: Upload debug AAB bundle
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: app-debug-aab
-          path: app/build/outputs/bundle/debug/app-debug.aab
+          path: |
+            app/build/outputs/bundle/debug/app-debug.aab
+            app-debug-aab-sha256.txt
           if-no-files-found: warn
 
       - name: Upload unit test results

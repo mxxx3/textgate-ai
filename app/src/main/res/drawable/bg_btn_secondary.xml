@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ripple xmlns:android="http://schemas.android.com/apk/res/android"
+    android:color="@color/tg_divider">
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@color/tg_card_bg" />
+            <stroke android:width="1dp" android:color="@color/tg_divider" />
+            <corners android:radius="24dp" />
+            <padding
+                android:left="16dp"
+                android:top="10dp"
+                android:right="16dp"
+                android:bottom="10dp" />
+        </shape>
+    </item>
+</ripple>

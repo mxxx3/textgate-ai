@@ -108,4 +108,15 @@ class AppSettingsStoreTest {
         assertTrue(reloaded.isAiEnabled)
         assertTrue(reloaded.isPackageAllowed("com.example.notesapp"))
     }
+
+    @Test
+    fun `default live model is the documented default`() {
+        assertEquals(AppSettingsStore.DEFAULT_LIVE_MODEL, AppSettingsStore(context).liveModel)
+    }
+
+    @Test
+    fun `live model choice persists across separate store instances`() {
+        AppSettingsStore(context).liveModel = AppSettingsStore.FAST_LIVE_MODEL
+        assertEquals(AppSettingsStore.FAST_LIVE_MODEL, AppSettingsStore(context).liveModel)
+    }
 }

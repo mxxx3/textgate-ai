@@ -98,7 +98,6 @@ class MainActivity : Activity() {
 
     override fun onResume() {
         super.onResume()
-        if (::binding.isInitialized) redirectToSetupIfNeeded()
     }
 
     override fun onStop() {
@@ -114,10 +113,13 @@ class MainActivity : Activity() {
     }
 
     private fun redirectToSetupIfNeeded(): Boolean {
-        if (!SetupReadiness.status(this).ready) {
+        if (!SetupReadiness.isSetupCompleted(this) && !SetupReadiness.status(this).ready) {
             startActivity(Intent(this, SetupActivity::class.java))
             finish()
             return true
+        }
+        if (SetupReadiness.status(this).ready && !SetupReadiness.isSetupCompleted(this)) {
+            SetupReadiness.markSetupCompleted(this)
         }
         if (TutorialActivity.needsToBeShown(this)) {
             startActivity(TutorialActivity.intent(this))
@@ -175,18 +177,20 @@ class MainActivity : Activity() {
         binding.contentConversation.root.visibility = if (tab == Tab.CONVERSATION) View.VISIBLE else View.GONE
         binding.contentLive.root.visibility = if (tab == Tab.LIVE) View.VISIBLE else View.GONE
 
-        setNavItemSelected(binding.navTranslate, binding.navTranslateIcon, binding.navTranslateLabel, tab == Tab.TRANSLATE)
-        setNavItemSelected(binding.navConversation, binding.navConversationIcon, binding.navConversationLabel, tab == Tab.CONVERSATION)
-        setNavItemSelected(binding.navLive, binding.navLiveIcon, binding.navLiveLabel, tab == Tab.LIVE)
+        setNavItemSelected(binding.navTranslatePill, binding.navTranslateIcon, binding.navTranslateLabel, tab == Tab.TRANSLATE)
+        setNavItemSelected(binding.navConversationPill, binding.navConversationIcon, binding.navConversationLabel, tab == Tab.CONVERSATION)
+        setNavItemSelected(binding.navLivePill, binding.navLiveIcon, binding.navLiveLabel, tab == Tab.LIVE)
         // Settings is a startActivity() shortcut, never the "current" tab —
         // its icon/label are left in the unselected state at all times.
-        setNavItemSelected(binding.navSettings, binding.navSettingsIcon, binding.navSettingsLabel, false)
+        setNavItemSelected(binding.navSettingsPill, binding.navSettingsIcon, binding.navSettingsLabel, false)
     }
 
-    private fun setNavItemSelected(container: LinearLayout, icon: ImageView, label: TextView, selected: Boolean) {
-        val color = getColor(if (selected) R.color.tg_primary else R.color.tg_text_secondary)
+    private fun setNavItemSelected(pill: View, icon: ImageView, label: TextView, selected: Boolean) {
+        val color = getColor(if (selected) R.color.tg_primary else R.color.tg_nav_inactive)
+        pill.setBackgroundResource(if (selected) R.drawable.bg_nav_pill else 0)
         icon.imageTintList = android.content.res.ColorStateList.valueOf(color)
         label.setTextColor(color)
+        label.typeface = if (selected) android.graphics.Typeface.DEFAULT_BOLD else android.graphics.Typeface.DEFAULT
     }
 
     companion object {

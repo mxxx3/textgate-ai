@@ -11,10 +11,16 @@ android {
         applicationId = "com.textgate.ai"
         minSdk = 26
         targetSdk = 36
-        versionCode = 41
-        versionName = "2.0.13"
+        versionCode = 43
+        versionName = "2.0.15"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    bundle {
+        language {
+            enableSplit = false
+        }
     }
 
     signingConfigs {
@@ -171,6 +177,9 @@ dependencies {
     // standard library, both of which are unavoidable and are pulled in
     // automatically by the Android Gradle Plugin — they are not listed here
     // because there is nothing to choose or version-pin.
+    // Upgraded explicitly to 1.9.1 to satisfy Google Play Console SDK requirement
+    // (transitive dependency from androidx.databinding:viewbinding:8.7.3 pulls outdated 1.0.0).
+    implementation("androidx.annotation:annotation:1.9.1")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
 
     // --- Test-only dependencies. Gradle's testImplementation scope is

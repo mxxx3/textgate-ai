@@ -11,6 +11,22 @@ internal object SetupReadiness {
     private const val PREFS_NAME = "setup_checklist"
     private const val AUTOSTART_CHOICE = "autostart_choice"
     private const val TESTED_KEY_AND_MODEL = "tested_key_and_model"
+    private const val SETUP_COMPLETED = "setup_completed"
+
+    fun isSetupCompleted(context: Context): Boolean {
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        if (prefs.getBoolean(SETUP_COMPLETED, false)) return true
+        if (status(context).ready) {
+            markSetupCompleted(context)
+            return true
+        }
+        return false
+    }
+
+    fun markSetupCompleted(context: Context) {
+        context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            .edit().putBoolean(SETUP_COMPLETED, true).apply()
+    }
 
     enum class ManualChoice { PENDING, ENABLED, UNAVAILABLE }
 

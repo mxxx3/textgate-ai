@@ -108,6 +108,17 @@ class TranslateTabController(
         }.let { if (it >= 0) it else 0 }
         binding.spinnerTargetLanguage.setSelection(defaultTargetIndex, false)
 
+        val spinnerListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                if (binding.editSourceText.text?.isNotBlank() == true) {
+                    scheduleTranslate()
+                }
+            }
+            override fun onNothingSelected(parent: AdapterView<*>?) = Unit
+        }
+        binding.spinnerSourceLanguage.onItemSelectedListener = spinnerListener
+        binding.spinnerTargetLanguage.onItemSelectedListener = spinnerListener
+
         binding.buttonSwapLanguages.setOnClickListener { swapLanguages() }
     }
 
@@ -181,6 +192,8 @@ class TranslateTabController(
         val sourceText = binding.editSourceText.text?.toString().orEmpty()
         if (sourceText.isBlank()) return
 
+        val sourceIndex = binding.spinnerSourceLanguage.selectedItemPosition
+        val sourceLanguage = sourceLanguageValues.getOrNull(sourceIndex)
         val targetIndex = binding.spinnerTargetLanguage.selectedItemPosition
         val targetLanguage = targetLanguageValues.getOrNull(targetIndex) ?: Languages.DEFAULT
 
@@ -195,7 +208,8 @@ class TranslateTabController(
         val systemPrompt = TranslationPrompts.systemPromptFor(
             target = target,
             speakerGender = settingsStore.userGender,
-            userPreferredLanguage = userPreferredLanguage
+            userPreferredLanguage = userPreferredLanguage,
+            sourceLanguage = sourceLanguage
         )
 
         val exec = executor ?: return

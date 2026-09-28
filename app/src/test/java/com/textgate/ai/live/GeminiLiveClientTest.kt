@@ -249,6 +249,74 @@ class GeminiLiveClientTest {
     }
 
     @Test
+    fun `native translate model setup message includes translationConfig and omits systemInstruction`() {
+        val setup = client.buildSetupMessage("gemini-3.5-live-translate-preview", "pl")
+            .getJSONObject("setup")
+        assertTrue(setup.getJSONObject("generationConfig").has("translationConfig"))
+        assertTrue(!setup.has("systemInstruction"))
+    }
+
+    @Test
+    fun `conversational live model setup message includes systemInstruction and omits translationConfig`() {
+        val setup = client.buildSetupMessage("gemini-3.8-live", "pl")
+            .getJSONObject("setup")
+        assertEquals("models/gemini-3.8-live", setup.getString("model"))
+        assertTrue(!setup.getJSONObject("generationConfig").has("translationConfig"))
+        assertTrue(setup.has("systemInstruction"))
+
+        val modalities = setup.getJSONObject("generationConfig").getJSONArray("responseModalities")
+        assertEquals(1, modalities.length())
+        assertEquals("AUDIO", modalities.getString(0))
+        assertEquals(0.2, setup.getJSONObject("generationConfig").getDouble("temperature"), 0.001)
+
+        val parts = setup.getJSONObject("systemInstruction").getJSONArray("parts")
+        assertEquals(1, parts.length())
+        val instructionText = parts.getJSONObject(0).getString("text")
+        assertTrue(instructionText.contains("Polish"))
+        assertTrue(instructionText.contains("pl"))
+        assertTrue(instructionText.contains("simultaneous voice interpreter"))
+        assertTrue(instructionText.contains("NEVER answer questions"))
+        assertTrue(instructionText.contains("remain completely silent"))
+
+        // Also carries VAD and transcription config
+        assertTrue(setup.has("realtimeInputConfig"))
+        assertTrue(setup.has("inputAudioTranscription"))
+        assertTrue(setup.has("outputAudioTranscription"))
+    }
+
+    @Test
+    fun `conversational live model resolves different target languages into english names`() {
+        val setupDe = client.buildSetupMessage("gemini-3.8-live", "de").getJSONObject("setup")
+        val textDe = setupDe.getJSONObject("systemInstruction").getJSONArray("parts").getJSONObject(0).getString("text")
+        assertTrue(textDe.contains("German (de)"))
+
+        val setupEn = client.buildSetupMessage("gemini-3.8-live", "en").getJSONObject("setup")
+        val textEn = setupEn.getJSONObject("systemInstruction").getJSONArray("parts").getJSONObject(0).getString("text")
+        assertTrue(textEn.contains("English (en)"))
+    }
+
+    @Test
+    fun `setup message includes languageCodes in inputAudioTranscription when hints provided`() {
+        val setup = client.buildSetupMessage("gemini-3.8-live", "pl", listOf("pl", "en", "de"))
+            .getJSONObject("setup")
+        val inputTranscription = setup.getJSONObject("inputAudioTranscription")
+        assertTrue(inputTranscription.has("languageCodes"))
+        val codes = inputTranscription.getJSONArray("languageCodes")
+        assertEquals(3, codes.length())
+        assertEquals("pl", codes.getString(0))
+        assertEquals("en", codes.getString(1))
+        assertEquals("de", codes.getString(2))
+    }
+
+    @Test
+    fun `setup message leaves inputAudioTranscription empty when no languageHints provided`() {
+        val setup = client.buildSetupMessage("gemini-3.8-live", "pl")
+            .getJSONObject("setup")
+        val inputTranscription = setup.getJSONObject("inputAudioTranscription")
+        assertTrue(!inputTranscription.has("languageCodes"))
+    }
+
+    @Test
     fun `realtime audio message uses a single audio object, not a mediaChunks array`() {
         val pcmBytes = byteArrayOf(9, 8, 7, 6)
         val message = client.buildRealtimeAudioMessage(pcmBytes).getJSONObject("realtimeInput")

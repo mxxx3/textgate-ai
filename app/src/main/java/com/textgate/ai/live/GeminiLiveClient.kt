@@ -1,6 +1,7 @@
 package com.textgate.ai.live
 
 import android.util.Base64
+import com.textgate.ai.model.Languages
 import com.textgate.ai.network.NetworkAllowlist
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -10,6 +11,7 @@ import okhttp3.WebSocketListener
 import okio.ByteString
 import org.json.JSONArray
 import org.json.JSONObject
+import java.util.Locale
 import java.util.concurrent.TimeUnit
 
 /**
@@ -274,6 +276,7 @@ class GeminiLiveClient {
         apiKey: String,
         model: String,
         targetLanguageCode: String,
+        languageHints: List<String> = emptyList(),
         onEvent: (ServerEvent) -> Unit
     ) {
         val httpClient = OkHttpClient.Builder()
@@ -322,7 +325,7 @@ class GeminiLiveClient {
             request,
             object : WebSocketListener() {
                 override fun onOpen(webSocket: WebSocket, response: Response) {
-                    webSocket.send(buildSetupMessage(model, targetLanguageCode).toString())
+                    webSocket.send(buildSetupMessage(model, targetLanguageCode, languageHints).toString())
                 }
 
                 override fun onMessage(webSocket: WebSocket, text: String) {
@@ -398,44 +401,54 @@ class GeminiLiveClient {
      * [parseServerMessage], applied to construction instead of parsing,
      * specifically because this class has already shipped one real,
      * user-hit bug in this exact shape (see the IMPLEMENTATION NOTE). */
-    internal fun buildSetupMessage(model: String, targetLanguageCode: String): JSONObject {
+    internal fun buildSetupMessage(
+        model: String,
+        targetLanguageCode: String,
+        languageHints: List<String> = emptyList()
+    ): JSONObject {
         // responseModalities tells the server this session wants audio back
         // (not text) — see this class's IMPLEMENTATION NOTE: omitting it
         // entirely was the confirmed cause of a setup that is sent but never
         // answered with setupComplete.
-        //
-        // translationConfig is nested INSIDE generationConfig (a sibling of
-        // responseModalities), NOT at the top level of setup — confirmed
-        // straight from Google's own official `google-genai` Python SDK
-        // source (_live_converters.py's _LiveConnectConfig_to_mldev:
-        // `setv(parent_object, ['setup', 'generationConfig',
-        // 'translationConfig'], ...)`), which is the ground truth for what
-        // the real API actually accepts, more reliable than any doc page or
-        // forum post. This class had it at the top level of setup before —
-        // a second real bug in the same setup message as the
-        // responseModalities one, and the more likely actual cause of a
-        // session that never leaves "connecting": the server has nothing to
-        // configure a *translation* session with if translationConfig isn't
-        // where it's expected.
-        // echoTargetLanguage: confirmed real (TranslationConfig.
-        // echo_target_language in google-genai's types.py, wire path
-        // generationConfig.translationConfig.echoTargetLanguage) —
-        // "Optional. If true, the model will generate audio when the
-        // target language is spoken, essentially it will parrot the
-        // input. If false, we will not produce audio for the target
-        // language." The server default is undocumented (None) and
-        // evidently parrots back speech that's already in the target
-        // language on at least some sessions — a real reported symptom
-        // ("Gemini powtarza zdanie, które już jest w języku docelowym").
-        // Explicit false here rather than relying on that default — this
-        // one function serves both Na żywo and Rozmowa (see class doc), so
-        // one change covers both.
-        val translationConfig = JSONObject()
-            .put("targetLanguageCode", targetLanguageCode)
-            .put("echoTargetLanguage", false)
         val generationConfig = JSONObject()
             .put("responseModalities", JSONArray().put("AUDIO"))
-            .put("translationConfig", translationConfig)
+
+        val isNativeTranslate = model.contains("translate", ignoreCase = true)
+        val setup = JSONObject()
+            .put("model", "models/$model")
+
+        if (isNativeTranslate) {
+            // translationConfig is nested INSIDE generationConfig (a sibling of
+            // responseModalities), NOT at the top level of setup — confirmed
+            // straight from Google's own official `google-genai` Python SDK
+            // source (_live_converters.py's _LiveConnectConfig_to_mldev).
+            // Dedicated translation models (e.g. gemini-3.5-live-translate-preview)
+            // natively support translationConfig.
+            // echoTargetLanguage: confirmed real (TranslationConfig.echo_target_language
+            // in google-genai's types.py, wire path generationConfig.translationConfig.echoTargetLanguage).
+            // Stops Gemini parroting speech already in the target language.
+            val translationConfig = JSONObject()
+                .put("targetLanguageCode", targetLanguageCode)
+                .put("echoTargetLanguage", false)
+            generationConfig.put("translationConfig", translationConfig)
+        } else {
+            // Conversational Live models (e.g. gemini-3.8-live, gemini-2.5-flash-native-audio-dialog)
+            // do NOT support translationConfig — sending it causes server errors (INVALID_ARGUMENT)
+            // or is ignored, causing the model to default to a general conversational voice assistant.
+            // Instead, conversational Live models require:
+            // 1. temperature = 0.2 to ensure faithful, deterministic translation without creative additions.
+            // 2. systemInstruction directly inside setup with strict simultaneous interpreter directives.
+            generationConfig.put("temperature", 0.2)
+
+            val targetLanguageName = Languages.byCode(targetLanguageCode)?.englishName
+                ?: Locale.forLanguageTag(targetLanguageCode).getDisplayLanguage(Locale.ENGLISH).ifEmpty { targetLanguageCode }
+
+            val prompt = buildConversationalInterpreterInstruction(targetLanguageName, targetLanguageCode)
+            val systemInstruction = JSONObject()
+                .put("parts", JSONArray().put(JSONObject().put("text", prompt)))
+            setup.put("systemInstruction", systemInstruction)
+        }
+
         // realtimeInputConfig.automaticActivityDetection.silenceDurationMs:
         // confirmed real (AutomaticActivityDetection.silence_duration_ms in
         // google-genai's types.py — "The required duration of detected
@@ -458,13 +471,38 @@ class GeminiLiveClient {
                 "automaticActivityDetection",
                 JSONObject().put("silenceDurationMs", VAD_SILENCE_DURATION_MS)
             )
-        val setup = JSONObject()
-            .put("model", "models/$model")
-            .put("generationConfig", generationConfig)
+
+        // languageCodes provides BCP-47 language hints to Gemini's speech recognition engine,
+        // preventing acoustic hallucinations on background noise or silence (e.g. random Vietnamese / Asian tokens).
+        val inputAudioTranscription = JSONObject()
+        if (languageHints.isNotEmpty()) {
+            val hintsArray = JSONArray()
+            languageHints.distinct().forEach { hintsArray.put(it) }
+            inputAudioTranscription.put("languageCodes", hintsArray)
+        }
+
+        setup.put("generationConfig", generationConfig)
             .put("realtimeInputConfig", realtimeInputConfig)
-            .put("inputAudioTranscription", JSONObject())
+            .put("inputAudioTranscription", inputAudioTranscription)
             .put("outputAudioTranscription", JSONObject())
         return JSONObject().put("setup", setup)
+    }
+
+    /** Builds the system instruction turning a general conversational Live model
+     * (such as gemini-3.8-live) into a dedicated real-time simultaneous voice interpreter. */
+    internal fun buildConversationalInterpreterInstruction(targetLanguageName: String, targetLanguageCode: String): String {
+        return """
+            You are a real-time, low-latency simultaneous voice interpreter and audio translator.
+            Your ONLY task is to listen to incoming speech and immediately speak its natural, fluent, and accurate translation into $targetLanguageName ($targetLanguageCode).
+
+            CRITICAL RULES:
+            1. Speak ONLY the translation into $targetLanguageName.
+            2. Accurately recognize words spoken by the user and translate them directly into $targetLanguageName. Never hallucinate unrelated languages.
+            3. NEVER answer questions, converse, comment, or assist the speaker. You are an interpreter, NOT an assistant. If the speaker asks a question, translate the question itself into $targetLanguageName.
+            4. NEVER add explanations, meta-commentary, or pleasantries (e.g. NEVER say "Here is the translation", "Understood", "Sure").
+            5. If the incoming speech is already in $targetLanguageName, remain completely silent and produce no audio output.
+            6. Translate immediately and speak with natural pronunciation and pacing.
+        """.trimIndent()
     }
 
     /** `internal` for the same reason as [buildSetupMessage]. */

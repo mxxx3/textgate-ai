@@ -48,21 +48,26 @@ class AudioRouteMonitor(context: Context) {
      * global — see [LiveTranslationService.beginCapturePlayback] and
      * [com.textgate.ai.conversation.ConversationTabController.
      * beginCapturePlayback] for the callers) — the first available private
-     * route (wired/Bluetooth/USB), or, when none is connected, the phone's
-     * OWN built-in speaker, explicit rather than left to the platform's
-     * default so routing stays as deterministic as possible across
-     * different OEMs (this app's minSdk is 26, well above the API-24
-     * requirement, so no version check is needed). Null only if the device
-     * genuinely reports no output devices at all — not expected in
-     * practice, but `getDevices()` documents no non-empty guarantee. */
+     * route (wired/Bluetooth/USB) ordered by priority, or, when none is connected,
+     * the phone's OWN built-in speaker. Null only if the device genuinely reports
+     * no output devices at all.
+     *
+     * Note: TYPE_BLUETOOTH_SCO is deliberately EXCLUDED here because playback
+     * uses AudioAttributes.USAGE_MEDIA (media audio). According to official Android
+     * docs, media streams cannot route over Bluetooth SCO (which is reserved for
+     * telephony/voice communication). Bluetooth headphones must use TYPE_BLUETOOTH_A2DP
+     * or BLE Audio (TYPE_BLE_HEADSET). */
     fun selectPreferredOutputDevice(): AudioDeviceInfo? {
         val devices = try {
             audioManager.getDevices(AudioManager.GET_DEVICES_OUTPUTS)
         } catch (_: Exception) {
             emptyArray()
         }
-        return devices.firstOrNull { it.type in PRIVATE_OUTPUT_TYPES }
-            ?: devices.firstOrNull { it.type == AudioDeviceInfo.TYPE_BUILTIN_SPEAKER }
+        for (type in PRIVATE_OUTPUT_TYPE_PRIORITY) {
+            val match = devices.firstOrNull { it.type == type }
+            if (match != null) return match
+        }
+        return devices.firstOrNull { it.type == AudioDeviceInfo.TYPE_BUILTIN_SPEAKER }
     }
 
     /** The phone's own built-in microphone, for `AudioRecord.
@@ -95,12 +100,17 @@ class AudioRouteMonitor(context: Context) {
             emptyArray()
         }
         return when {
-            devices.any { it.type == AudioDeviceInfo.TYPE_BLUETOOTH_A2DP || it.type == AudioDeviceInfo.TYPE_BLUETOOTH_SCO } ->
-                OutputRoute.BLUETOOTH
             devices.any { it.type == AudioDeviceInfo.TYPE_WIRED_HEADSET || it.type == AudioDeviceInfo.TYPE_WIRED_HEADPHONES } ->
                 OutputRoute.WIRED
             devices.any { it.type == AudioDeviceInfo.TYPE_USB_HEADSET || it.type == AudioDeviceInfo.TYPE_USB_DEVICE } ->
                 OutputRoute.USB
+            devices.any {
+                it.type == AudioDeviceInfo.TYPE_BLUETOOTH_A2DP ||
+                it.type == AudioDeviceInfo.TYPE_BLUETOOTH_SCO ||
+                it.type == AudioDeviceInfo.TYPE_BLE_HEADSET ||
+                it.type == AudioDeviceInfo.TYPE_BLE_SPEAKER ||
+                it.type == AudioDeviceInfo.TYPE_HEARING_AID
+            } -> OutputRoute.BLUETOOTH
             else -> OutputRoute.SPEAKER
         }
     }
@@ -136,20 +146,33 @@ class AudioRouteMonitor(context: Context) {
     enum class OutputRoute { SPEAKER, WIRED, BLUETOOTH, USB }
 
     companion object {
-        /** `internal`, not `private` — [LiveTranslationService] and
+        /** Order of priority when selecting an output device:
+         * 1. Wired audio (lowest latency, direct analog/digital)
+         * 2. USB audio headsets
+         * 3. Bluetooth media audio (A2DP, LE Audio, Hearing aids)
+         *
+         * Deliberately omits TYPE_BLUETOOTH_SCO: SCO is strictly a telephony
+         * profile and cannot receive USAGE_MEDIA audio without entering
+         * communication mode and establishing an SCO link.
+         *
+         * `internal`, not `private` — [LiveTranslationService] and
          * [com.textgate.ai.conversation.ConversationTabController] both
          * need this exact same device-type set to decide whether the
          * output device [selectPreferredOutputDevice] resolved is a
          * private route (skip the heavier AEC pipeline) or the phone's own
          * speaker (use it) — reusing this one definition rather than each
          * keeping its own copy. */
-        internal val PRIVATE_OUTPUT_TYPES = setOf(
+        private val PRIVATE_OUTPUT_TYPE_PRIORITY = listOf(
             AudioDeviceInfo.TYPE_WIRED_HEADSET,
             AudioDeviceInfo.TYPE_WIRED_HEADPHONES,
-            AudioDeviceInfo.TYPE_BLUETOOTH_SCO,
-            AudioDeviceInfo.TYPE_BLUETOOTH_A2DP,
             AudioDeviceInfo.TYPE_USB_HEADSET,
-            AudioDeviceInfo.TYPE_USB_DEVICE
+            AudioDeviceInfo.TYPE_USB_DEVICE,
+            AudioDeviceInfo.TYPE_BLUETOOTH_A2DP,
+            AudioDeviceInfo.TYPE_BLE_HEADSET,
+            AudioDeviceInfo.TYPE_BLE_SPEAKER,
+            AudioDeviceInfo.TYPE_HEARING_AID
         )
+
+        internal val PRIVATE_OUTPUT_TYPES = PRIVATE_OUTPUT_TYPE_PRIORITY.toSet()
     }
 }

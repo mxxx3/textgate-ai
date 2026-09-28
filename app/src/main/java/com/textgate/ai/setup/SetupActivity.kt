@@ -117,6 +117,7 @@ class SetupActivity : Activity() {
         binding.buttonVerify.setOnClickListener { refresh() }
         binding.buttonContinue.setOnClickListener {
             if (SetupReadiness.status(this).ready) {
+                SetupReadiness.markSetupCompleted(this)
                 val nextIntent = if (TutorialActivity.needsToBeShown(this)) {
                     TutorialActivity.intent(this)
                 } else {

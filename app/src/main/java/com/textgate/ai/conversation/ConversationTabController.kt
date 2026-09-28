@@ -24,6 +24,8 @@ import com.textgate.ai.model.Languages
 import com.textgate.ai.model.SupportedLanguage
 import com.textgate.ai.security.AppSettingsStore
 import com.textgate.ai.security.SecureApiKeyStore
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
@@ -85,7 +87,9 @@ class ConversationTabController(
 
     private var liveClient: GeminiLiveClient? = null
     private var captureThread: Thread? = null
+    @Volatile
     private var playbackTrack: AudioTrack? = null
+    private var playbackExecutor: ExecutorService? = null
     private val micActive = AtomicBoolean(false)
     private var connecting = false
 
@@ -229,6 +233,7 @@ class ConversationTabController(
         connecting = true
         binding.textConversationStatus.text = activity.getString(R.string.live_state_connecting)
         binding.buttonConversationStartStop.setText(R.string.conversation_button_stop)
+        binding.buttonConversationStartStop.setBackgroundResource(R.drawable.bg_btn_stop)
 
         // playbackTrack (built in beginCapturePlayback, below) always uses
         // AudioAttributes.USAGE_MEDIA now (see that method's doc — output
@@ -246,11 +251,35 @@ class ConversationTabController(
 
         val client = GeminiLiveClient()
         liveClient = client
+        val hints = listOf(languageA.localeLanguageTag, languageB.localeLanguageTag).distinct()
         client.connect(
             apiKey = apiKey,
-            model = LiveTranslationService.LIVE_MODEL,
-            targetLanguageCode = currentTargetLanguage().localeLanguageTag
+            model = settingsStore.liveModel,
+            targetLanguageCode = currentTargetLanguage().localeLanguageTag,
+            languageHints = hints
         ) { event ->
+            if (event is ServerEvent.AudioChunk) {
+                if (liveClient !== client) return@connect
+                mainHandler.post {
+                    if (liveClient === client) {
+                        val translatingText = activity.getString(R.string.live_state_translating)
+                        if (binding.textConversationStatus.text != translatingText) {
+                            binding.textConversationStatus.text = translatingText
+                        }
+                    }
+                }
+                playbackExecutor?.execute {
+                    val track = playbackTrack
+                    if (track != null && track.playState == AudioTrack.PLAYSTATE_PLAYING) {
+                        try {
+                            track.write(event.pcm16, 0, event.pcm16.size)
+                        } catch (_: Exception) {
+                            // Ignored
+                        }
+                    }
+                }
+                return@connect
+            }
             mainHandler.post {
                 // See LiveTranslationService.startSession's identical guard
                 // for the full reasoning: GeminiLiveClient.close() tears the
@@ -278,8 +307,20 @@ class ConversationTabController(
             is ServerEvent.OutputTranscript ->
                 binding.textConversationOutputTranscript.text = event.text
             is ServerEvent.AudioChunk -> {
-                binding.textConversationStatus.text = activity.getString(R.string.live_state_translating)
-                playbackTrack?.write(event.pcm16, 0, event.pcm16.size)
+                val translatingText = activity.getString(R.string.live_state_translating)
+                if (binding.textConversationStatus.text != translatingText) {
+                    binding.textConversationStatus.text = translatingText
+                }
+                playbackExecutor?.execute {
+                    val track = playbackTrack
+                    if (track != null && track.playState == AudioTrack.PLAYSTATE_PLAYING) {
+                        try {
+                            track.write(event.pcm16, 0, event.pcm16.size)
+                        } catch (_: Exception) {
+                            // Ignored
+                        }
+                    }
+                }
             }
             is ServerEvent.TurnComplete ->
                 binding.textConversationStatus.text = activity.getString(R.string.live_state_listening)
@@ -316,7 +357,10 @@ class ConversationTabController(
 
     private fun stopSession() {
         connecting = false
+        audioRouteMonitor.stop()
         micActive.set(false)
+        playbackExecutor?.shutdownNow()
+        playbackExecutor = null
         captureThread?.let { try { it.join(300) } catch (_: InterruptedException) { } }
         captureThread = null
         playbackTrack?.let { try { it.stop(); it.release() } catch (_: Exception) { } }
@@ -330,6 +374,7 @@ class ConversationTabController(
         // AudioManager.mode.
         binding.textConversationStatus.text = activity.getString(R.string.live_state_stopped)
         binding.buttonConversationStartStop.setText(R.string.conversation_button_start)
+        binding.buttonConversationStartStop.setBackgroundResource(R.drawable.bg_btn_primary)
     }
 
     private fun beginCapturePlayback() {
@@ -381,7 +426,24 @@ class ConversationTabController(
         }
         playbackTrack?.play()
 
+        audioRouteMonitor.start {
+            mainHandler.post {
+                if (micActive.get()) {
+                    val currentDevice = audioRouteMonitor.selectPreferredOutputDevice()
+                    try {
+                        playbackTrack?.setPreferredDevice(currentDevice)
+                    } catch (_: Exception) {
+                        // Best-effort only.
+                    }
+                }
+            }
+        }
+
         micActive.set(true)
+        playbackExecutor?.shutdownNow()
+        playbackExecutor = Executors.newSingleThreadExecutor { runnable ->
+            Thread(runnable, "TextGateConversationPlayback")
+        }
         val thread = Thread({ runCaptureLoop(minBufferSize, useAec) }, "TextGateConversationCapture")
         captureThread = thread
         thread.start()
@@ -443,6 +505,15 @@ class ConversationTabController(
                 if (read > 0) {
                     val chunk = if (read == buffer.size) buffer else buffer.copyOf(read)
                     liveClient?.sendAudioChunk(chunk)
+                } else if (read < 0) {
+                    android.util.Log.e("TextGateConversationCapture", "AudioRecord read error: $read")
+                    break
+                } else {
+                    try {
+                        Thread.sleep(10)
+                    } catch (_: InterruptedException) {
+                        break
+                    }
                 }
             }
         } catch (_: Exception) {

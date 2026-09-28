@@ -1,9 +1,16 @@
 package com.textgate.ai.setup
 
+import android.content.Context
+import androidx.test.core.app.ApplicationProvider
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk = [34])
 class SetupReadinessTest {
     @Test
     fun everyPhoneRequiresKeyAccessibilityTriggerAndBackgroundReview() {
@@ -35,5 +42,13 @@ class SetupReadinessTest {
             batteryChoice = SetupReadiness.ManualChoice.ENABLED,
             autostartChoice = SetupReadiness.ManualChoice.UNAVAILABLE
         ).ready)
+    }
+
+    @Test
+    fun `isSetupCompleted returns true once marked completed`() {
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        assertFalse(SetupReadiness.isSetupCompleted(context))
+        SetupReadiness.markSetupCompleted(context)
+        assertTrue(SetupReadiness.isSetupCompleted(context))
     }
 }

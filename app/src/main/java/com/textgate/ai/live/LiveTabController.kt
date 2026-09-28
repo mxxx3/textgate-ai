@@ -230,12 +230,16 @@ class LiveTabController(
 
     private fun render(state: LiveSessionState) {
         binding.textLiveState.text = activity.getString(state.labelRes)
+        val isStoppedOrError = state == LiveSessionState.STOPPED || state == LiveSessionState.ERROR
         binding.buttonLiveStartStop.setText(
-            if (state == LiveSessionState.STOPPED || state == LiveSessionState.ERROR) {
+            if (isStoppedOrError) {
                 R.string.live_button_start
             } else {
                 R.string.live_button_stop
             }
+        )
+        binding.buttonLiveStartStop.setBackgroundResource(
+            if (isStoppedOrError) R.drawable.bg_btn_primary else R.drawable.bg_btn_stop
         )
         binding.buttonLiveRetry.visibility =
             if (state == LiveSessionState.ERROR) android.view.View.VISIBLE else android.view.View.GONE

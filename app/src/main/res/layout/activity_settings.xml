@@ -1,18 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- v2: reorganized into labeled sections (Tłumaczenie / Audio i Live / AI
-     / Integracje / Prywatność / Zaawansowane) per the v2 rebuild spec's
-     Settings-tab requirement. This is a LABELING AND GROUPING change only
-     — every existing card below, and every id inside it, is byte-for-byte
-     unchanged from the pre-v2 layout; only new TgGroupHeader labels were
-     added above each existing card (or group of cards), plus one new card
-     (the headset-disconnect-behavior setting) under "Audio i Live". No
-     existing view was removed, renamed, or had its logic touched. -->
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
-    android:background="@color/tg_surface">
+    android:background="@color/tg_background">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -20,37 +12,78 @@
         android:orientation="vertical"
         android:padding="16dp">
 
+        <!-- Top Navigation Bar -->
+        <LinearLayout
+            android:id="@+id/settingsTopBar"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="12dp">
+
+            <ImageButton
+                android:id="@+id/buttonSettingsBack"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="@drawable/bg_circle_btn"
+                android:src="@drawable/ic_arrow_back"
+                android:tint="@color/tg_text_primary"
+                android:contentDescription="@string/setup_guide_previous" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:text="@string/nav_tab_settings"
+                android:textColor="@color/tg_text_primary"
+                android:textSize="22sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <!-- ============================================================ -->
+        <!-- CARD 1: Tłumaczenie i Języki (Główna konfiguracja)           -->
+        <!-- ============================================================ -->
         <TextView
             style="@style/TgGroupHeader"
-            android:layout_marginTop="0dp"
+            android:layout_marginTop="4dp"
             android:text="@string/settings_group_translation" />
 
-        <!-- Master switch -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:background="@drawable/bg_card"
-            android:layout_marginBottom="12dp">
+            android:layout_marginBottom="14dp">
 
-            <TextView
-                style="@style/TgSectionTitle"
-                android:text="@string/section_master_switch" />
-
+            <!-- Master Switch Row -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:layout_marginTop="8dp">
+                android:gravity="center_vertical">
 
-                <TextView
+                <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="@string/master_switch_label"
-                    android:textSize="16sp"
-                    android:textColor="@color/tg_text_primary" />
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/section_master_switch"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/tg_text_primary" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:text="@string/master_switch_label"
+                        android:textSize="13sp"
+                        android:textColor="@color/tg_text_secondary" />
+                </LinearLayout>
 
                 <Switch
                     android:id="@+id/switchAiEnabled"
@@ -58,27 +91,13 @@
                     android:layout_height="wrap_content" />
             </LinearLayout>
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
-                android:text="@string/master_switch_description"
-                android:textSize="13sp"
-                android:textColor="@color/tg_text_secondary" />
-
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:layout_marginTop="14dp"
-                android:layout_marginBottom="12dp"
+                android:layout_marginVertical="14dp"
                 android:background="@color/tg_divider" />
 
-            <!-- Single language picker (v1.4.0+): choosing a language here
-                 changes BOTH the long-press "translate a received message"
-                 bubble's default target language AND the app's own
-                 interface language together. Deliberately placed here,
-                 under AI transformation, rather than as its own separate
-                 card. -->
+            <!-- Język docelowy -->
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -90,30 +109,25 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
+                android:layout_marginTop="2dp"
                 android:text="@string/bubble_language_description"
-                android:textSize="13sp"
+                android:textSize="12sp"
                 android:textColor="@color/tg_text_secondary" />
 
             <Spinner
                 android:id="@+id/spinnerAppLanguage"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp" />
+                android:layout_height="48dp"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/bg_input" />
 
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:layout_marginTop="14dp"
-                android:layout_marginBottom="12dp"
+                android:layout_marginVertical="14dp"
                 android:background="@color/tg_divider" />
 
-            <!-- Gender preference (v1.7.0+): read ONLY by the typed-trigger
-                 translation path (see TextGateAccessibilityService.confirmAndProcess
-                 and AppSettingsStore.userGender's doc comments) — never by
-                 the long-press "translate a received message" bubble,
-                 which is why the description below spells that scope out
-                 explicitly rather than leaving it implied. -->
+            <!-- Płeć użytkownika -->
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -125,139 +139,89 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
+                android:layout_marginTop="2dp"
                 android:text="@string/user_gender_description"
-                android:textSize="13sp"
+                android:textSize="12sp"
                 android:textColor="@color/tg_text_secondary" />
 
             <Spinner
                 android:id="@+id/spinnerUserGender"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp" />
-        </LinearLayout>
-
-        <TextView
-            style="@style/TgGroupHeader"
-            android:text="@string/settings_group_audio_live" />
-
-        <!-- Headset-disconnect behavior (v2, new) — see
-             com.textgate.ai.model.HeadsetDisconnectBehavior's class doc for
-             the full behavior and the privacy reasoning behind its
-             PAUSE_TRANSLATION default. Everything else about an active Na
-             żywo session (ambient language, target language, START/STOP,
-             live status) lives on the Na żywo tab itself, not here — see
-             live_settings_hint below — so this setting is not duplicated
-             in two places. -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:background="@drawable/bg_card"
-            android:layout_marginBottom="12dp">
-
-            <TextView
-                style="@style/TgSectionTitle"
-                android:text="@string/section_headset_disconnect" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="48dp"
                 android:layout_marginTop="8dp"
-                android:text="@string/headset_disconnect_description"
-                android:textSize="13sp"
-                android:textColor="@color/tg_text_secondary" />
-
-            <Spinner
-                android:id="@+id/spinnerHeadsetDisconnectBehavior"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:text="@string/live_settings_hint"
-                android:textSize="12sp"
-                android:textColor="@color/tg_text_secondary" />
+                android:background="@drawable/bg_input" />
         </LinearLayout>
 
-        <!-- Audio capture mode (v2.0.1, new) — see
-             com.textgate.ai.model.AudioCaptureMode's class doc for the full
-             reasoning: a user-facing choice between echo-cancelled
-             (call-style, avoids the speaker echo loop, may add latency) and
-             standard (faster/simpler, headphones-only) capture, since which
-             one works better is real per-device behavior this project has
-             no way to detect automatically. -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:background="@drawable/bg_card"
-            android:layout_marginBottom="12dp">
-
-            <TextView
-                style="@style/TgSectionTitle"
-                android:text="@string/section_audio_capture_mode" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="@string/audio_capture_mode_description"
-                android:textSize="13sp"
-                android:textColor="@color/tg_text_secondary" />
-
-            <Spinner
-                android:id="@+id/spinnerAudioCaptureMode"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp" />
-        </LinearLayout>
-
+        <!-- ============================================================ -->
+        <!-- CARD 2: Klucz API Gemini (AI Connection)                     -->
+        <!-- ============================================================ -->
         <TextView
             style="@style/TgGroupHeader"
             android:text="@string/settings_group_ai" />
 
-        <!-- Gemini API key -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:background="@drawable/bg_card"
-            android:layout_marginBottom="12dp">
+            android:layout_marginBottom="14dp">
 
             <TextView
                 style="@style/TgSectionTitle"
                 android:text="@string/section_gemini_api" />
 
-            <Button
-                android:id="@+id/buttonGetApiKey"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="@string/btn_get_api_key" />
-
             <TextView
-                android:id="@+id/textToggleApiKeyInstructions"
-                android:layout_width="wrap_content"
+                android:id="@+id/textApiKeyStatus"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
-                android:text="@string/btn_show_api_key_instructions"
+                android:layout_marginTop="4dp"
                 android:textSize="13sp"
                 android:textStyle="bold"
                 android:textColor="@color/tg_primary"
-                android:clickable="true"
-                android:focusable="true" />
+                tools:text="3 klucze zapisane. Aktywny: •••• aB12" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="10dp">
+
+                <Button
+                    android:id="@+id/buttonGetApiKey"
+                    android:layout_width="0dp"
+                    android:layout_height="42dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_btn_secondary"
+                    android:textColor="@color/tg_primary"
+                    android:textSize="13sp"
+                    android:textStyle="bold"
+                    android:text="@string/btn_get_api_key" />
+
+                <TextView
+                    android:id="@+id/textToggleApiKeyInstructions"
+                    android:layout_width="wrap_content"
+                    android:layout_height="42dp"
+                    android:layout_marginStart="8dp"
+                    android:paddingHorizontal="12dp"
+                    android:gravity="center"
+                    android:background="@drawable/bg_btn_secondary"
+                    android:textColor="@color/tg_primary"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:text="@string/btn_show_api_key_instructions"
+                    android:clickable="true"
+                    android:focusable="true" />
+            </LinearLayout>
 
             <TextView
                 android:id="@+id/textApiKeyInstructionsBody"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
+                android:layout_marginTop="8dp"
+                android:padding="12dp"
+                android:background="@drawable/bg_input"
                 android:text="@string/api_key_instructions_body"
-                android:textSize="13sp"
+                android:textSize="12sp"
                 android:textColor="@color/tg_text_secondary"
                 android:visibility="gone" />
 
@@ -267,22 +231,10 @@
                 android:layout_marginTop="12dp"
                 android:text="@string/label_saved_api_keys"
                 android:textSize="13sp"
-                android:textColor="@color/tg_text_secondary" />
+                android:textStyle="bold"
+                android:textColor="@color/tg_text_primary" />
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:text="@string/api_keys_multi_description"
-                android:textSize="12sp"
-                android:textColor="@color/tg_text_secondary" />
-
-            <!--
-                Populated at runtime by SettingsActivity.renderApiKeyList()
-                with one item_api_key_row.xml per stored key, plus an empty
-                label (api_keys_empty) when the list is empty — same pattern
-                as layoutAppList below in this file.
-            -->
+            <!-- Lista zapisanych kluczy -->
             <LinearLayout
                 android:id="@+id/layoutApiKeyList"
                 android:layout_width="match_parent"
@@ -290,6 +242,7 @@
                 android:orientation="vertical"
                 android:layout_marginTop="4dp" />
 
+            <!-- Dodawanie nowego klucza -->
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -301,10 +254,13 @@
             <EditText
                 android:id="@+id/editApiKey"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="46dp"
+                android:layout_marginTop="4dp"
+                android:background="@drawable/bg_input"
                 android:hint="@string/hint_api_key"
                 android:inputType="textPassword"
                 android:importantForAutofill="no"
+                android:textSize="14sp"
                 android:maxLines="1" />
 
             <LinearLayout
@@ -316,312 +272,471 @@
                 <Button
                     android:id="@+id/buttonAddApiKey"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_height="40dp"
+                    android:background="@drawable/bg_btn_primary"
+                    android:textColor="@color/tg_on_primary"
+                    android:textSize="13sp"
+                    android:textStyle="bold"
+                    android:paddingHorizontal="18dp"
                     android:text="@string/btn_add_api_key" />
 
                 <Button
                     android:id="@+id/buttonClearApiKey"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_height="40dp"
                     android:layout_marginStart="8dp"
+                    android:background="@drawable/bg_btn_secondary"
+                    android:textColor="@color/tg_warning"
+                    android:textSize="13sp"
+                    android:textStyle="bold"
+                    android:paddingHorizontal="14dp"
                     android:text="@string/btn_clear_api_key" />
             </LinearLayout>
+        </LinearLayout>
+
+        <!-- ============================================================ -->
+        <!-- CARD 3: Mowa i Tłumaczenie Na Żywo (Audio & Live)             -->
+        <!-- ============================================================ -->
+        <TextView
+            style="@style/TgGroupHeader"
+            android:text="@string/settings_group_audio_live" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/bg_card"
+            android:layout_marginBottom="14dp">
 
             <TextView
-                android:id="@+id/textApiKeyStatus"
+                style="@style/TgSectionTitle"
+                android:text="@string/section_live_model" />
+
+            <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
-                android:textSize="13sp"
-                android:textColor="@color/tg_text_secondary"
-                tools:text="3 keys saved. Active: •••• aB12" />
+                android:layout_marginTop="2dp"
+                android:text="@string/live_model_description"
+                android:textSize="12sp"
+                android:textColor="@color/tg_text_secondary" />
+
+            <Spinner
+                android:id="@+id/spinnerLiveModel"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/bg_input" />
 
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:layout_marginVertical="12dp"
+                android:layout_marginVertical="14dp"
                 android:background="@color/tg_divider" />
 
+            <!-- Odłączenie słuchawek -->
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/label_model"
-                android:textSize="13sp"
-                android:textColor="@color/tg_text_secondary" />
-
-            <EditText
-                android:id="@+id/editModel"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="@string/hint_model"
-                android:inputType="text"
-                android:maxLines="1" />
+                android:text="@string/section_headset_disconnect"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:textColor="@color/tg_text_primary" />
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="@string/model_suggestions_label"
+                android:layout_marginTop="2dp"
+                android:text="@string/headset_disconnect_description"
                 android:textSize="12sp"
                 android:textColor="@color/tg_text_secondary" />
 
-            <HorizontalScrollView
+            <Spinner
+                android:id="@+id/spinnerHeadsetDisconnectBehavior"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:scrollbars="none">
+                android:layout_height="48dp"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/bg_input" />
 
-                <LinearLayout
-                    android:id="@+id/layoutModelSuggestions"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal" />
-            </HorizontalScrollView>
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginVertical="14dp"
+                android:background="@color/tg_divider" />
 
-            <Button
-                android:id="@+id/buttonTestApi"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:text="@string/btn_test_api" />
-
+            <!-- Tryb rejestrowania dźwięku -->
             <TextView
-                android:id="@+id/textTestApiResult"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
-                android:textSize="13sp"
-                android:textColor="@color/tg_text_secondary" />
+                android:text="@string/section_audio_capture_mode"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:textColor="@color/tg_text_primary" />
+
+            <Spinner
+                android:id="@+id/spinnerAudioCaptureMode"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/bg_input" />
         </LinearLayout>
 
+        <!-- ============================================================ -->
+        <!-- CARD 4: Uprawnienia i Praca w Tle (System)                   -->
+        <!-- ============================================================ -->
         <TextView
             style="@style/TgGroupHeader"
             android:text="@string/settings_group_integrations" />
 
-        <!-- Accessibility status -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:background="@drawable/bg_card"
-            android:layout_marginBottom="12dp">
+            android:layout_marginBottom="14dp">
 
+            <!-- Ułatwienia dostępu -->
             <TextView
                 style="@style/TgSectionTitle"
                 android:text="@string/section_accessibility_status" />
 
-            <TextView
-                android:id="@+id/textAccessibilityStatus"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:textSize="15sp"
-                android:textColor="@color/tg_text_primary"
-                tools:text="Not enabled" />
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginTop="6dp">
 
-            <Button
-                android:id="@+id/buttonOpenAccessibilitySettings"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="@string/btn_open_accessibility_settings" />
-        </LinearLayout>
+                <TextView
+                    android:id="@+id/textAccessibilityStatus"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textSize="14sp"
+                    android:textColor="@color/tg_text_primary"
+                    tools:text="Włączona" />
 
-        <!-- Background operation guidance for OEMs such as Xiaomi/HyperOS.
-             The app does not enable anything automatically; each button
-             only opens a system settings screen where the user makes the
-             final choice themselves. -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:background="@drawable/bg_card"
-            android:layout_marginBottom="12dp">
+                <Button
+                    android:id="@+id/buttonOpenAccessibilitySettings"
+                    android:layout_width="wrap_content"
+                    android:layout_height="38dp"
+                    android:background="@drawable/bg_btn_primary"
+                    android:textColor="@color/tg_on_primary"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:paddingHorizontal="14dp"
+                    android:text="@string/btn_open_accessibility_settings" />
+            </LinearLayout>
 
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginVertical="14dp"
+                android:background="@color/tg_divider" />
+
+            <!-- Praca w tle -->
             <TextView
-                style="@style/TgSectionTitle"
-                android:text="@string/section_background_operation" />
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/section_background_operation"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:textColor="@color/tg_text_primary" />
 
             <TextView
                 android:id="@+id/textBackgroundOperationStatus"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:textSize="15sp"
-                android:textStyle="bold"
-                android:textColor="@color/tg_text_primary"
-                tools:text="Extra setup may be needed on this phone" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="@string/background_operation_description"
-                android:textSize="13sp"
-                android:textColor="@color/tg_text_secondary" />
-
-            <Button
-                android:id="@+id/buttonOpenBatterySettings"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="@string/btn_open_battery_settings" />
-
-            <Button
-                android:id="@+id/buttonOpenAutostartSettings"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="@string/btn_open_autostart_settings" />
-
-            <Button
-                android:id="@+id/buttonOpenAppDetailsSettings"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="@string/btn_open_app_details_settings" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:text="@string/background_operation_policy_note"
-                android:textSize="12sp"
-                android:textColor="@color/tg_text_secondary" />
-        </LinearLayout>
-
-        <!-- Allowed apps -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:background="@drawable/bg_card"
-            android:layout_marginBottom="12dp">
-
-            <TextView
-                style="@style/TgSectionTitle"
-                android:text="@string/section_allowed_apps" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="@string/allowed_apps_description"
-                android:textSize="13sp"
-                android:textColor="@color/tg_text_secondary" />
-
-            <TextView
-                android:id="@+id/textToggleAdvancedApps"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:text="@string/btn_show_advanced_apps"
-                android:textSize="13sp"
-                android:textStyle="bold"
-                android:textColor="@color/tg_primary"
-                android:padding="4dp"
-                android:clickable="true"
-                android:focusable="true" />
-
-            <TextView
-                android:id="@+id/textAdvancedAppsHint"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:text="@string/allowed_apps_advanced_hint"
+                android:layout_marginTop="2dp"
                 android:textSize="12sp"
                 android:textColor="@color/tg_text_secondary"
-                android:visibility="gone" />
+                tools:text="Może być wymagane na telefonach Xiaomi/Samsung" />
 
             <LinearLayout
-                android:id="@+id/layoutAppList"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_marginTop="8dp"
-                android:visibility="gone" />
+                android:orientation="horizontal"
+                android:layout_marginTop="8dp">
+
+                <Button
+                    android:id="@+id/buttonOpenBatterySettings"
+                    android:layout_width="0dp"
+                    android:layout_height="38dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_btn_secondary"
+                    android:textColor="@color/tg_primary"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:text="@string/btn_open_battery_settings" />
+
+                <Button
+                    android:id="@+id/buttonOpenAutostartSettings"
+                    android:layout_width="0dp"
+                    android:layout_height="38dp"
+                    android:layout_weight="1"
+                    android:layout_marginStart="6dp"
+                    android:background="@drawable/bg_btn_secondary"
+                    android:textColor="@color/tg_primary"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:text="@string/btn_open_autostart_settings" />
+
+                <Button
+                    android:id="@+id/buttonOpenAppDetailsSettings"
+                    android:layout_width="0dp"
+                    android:layout_height="38dp"
+                    android:layout_weight="1"
+                    android:layout_marginStart="6dp"
+                    android:background="@drawable/bg_btn_secondary"
+                    android:textColor="@color/tg_primary"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:text="@string/btn_open_app_details_settings" />
+            </LinearLayout>
         </LinearLayout>
 
-        <TextView
-            style="@style/TgGroupHeader"
-            android:text="@string/settings_group_privacy" />
-
-        <!-- Privacy -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:background="@drawable/bg_card"
-            android:layout_marginBottom="12dp">
-
-            <TextView
-                style="@style/TgSectionTitle"
-                android:text="@string/section_privacy" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="@string/privacy_notice_headline"
-                android:textSize="15sp"
-                android:textStyle="bold"
-                android:textColor="@color/tg_primary" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="@string/privacy_notice_body"
-                android:textSize="13sp"
-                android:textColor="@color/tg_text_secondary" />
-
-            <Button
-                android:id="@+id/buttonFullPrivacyPolicy"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="@string/btn_full_privacy_policy" />
-        </LinearLayout>
-
+        <!-- ============================================================ -->
+        <!-- CARD 5: Opcje Zaawansowane (Zwijany akordeon / Expandable)     -->
+        <!-- ============================================================ -->
         <TextView
             style="@style/TgGroupHeader"
             android:text="@string/settings_group_advanced" />
 
-        <!-- About -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:background="@drawable/bg_card"
-            android:layout_marginBottom="12dp">
+            android:layout_marginBottom="24dp">
 
-            <TextView
-                style="@style/TgSectionTitle"
-                android:text="@string/section_about" />
-
-            <TextView
-                android:id="@+id/textVersion"
+            <!-- Clickable Accordion Header -->
+            <LinearLayout
+                android:id="@+id/cardToggleAdvanced"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:textSize="13sp"
-                android:textColor="@color/tg_text_secondary"
-                tools:text="Version 1.0.0" />
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:clickable="true"
+                android:focusable="true">
 
-            <Button
-                android:id="@+id/buttonShowTutorial"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                tools:text="Show tutorial again" />
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
 
-            <TextView
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/settings_advanced_toggle_title"
+                        android:textSize="15sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/tg_text_primary" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:text="@string/settings_advanced_toggle_subtitle"
+                        android:textSize="12sp"
+                        android:textColor="@color/tg_text_secondary" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/textAdvancedChevron"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="8dp"
+                    android:text="▼"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/tg_primary" />
+            </LinearLayout>
+
+            <!-- Expandable Content Container (collapsed by default) -->
+            <LinearLayout
+                android:id="@+id/layoutAdvancedSection"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="@string/advanced_model_hint"
-                android:textSize="12sp"
-                android:textColor="@color/tg_text_secondary" />
+                android:orientation="vertical"
+                android:visibility="gone"
+                android:layout_marginTop="10dp">
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginBottom="12dp"
+                    android:background="@color/tg_divider" />
+
+                <!-- Model tekstowy Gemini -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/label_model"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/tg_text_primary" />
+
+                <EditText
+                    android:id="@+id/editModel"
+                    android:layout_width="match_parent"
+                    android:layout_height="46dp"
+                    android:layout_marginTop="4dp"
+                    android:background="@drawable/bg_input"
+                    android:hint="@string/hint_model"
+                    android:inputType="text"
+                    android:textSize="14sp"
+                    android:maxLines="1" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/model_suggestions_label"
+                    android:textSize="12sp"
+                    android:textColor="@color/tg_text_secondary" />
+
+                <HorizontalScrollView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:scrollbars="none">
+
+                    <LinearLayout
+                        android:id="@+id/layoutModelSuggestions"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal" />
+                </HorizontalScrollView>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginTop="10dp">
+
+                    <Button
+                        android:id="@+id/buttonTestApi"
+                        android:layout_width="wrap_content"
+                        android:layout_height="38dp"
+                        android:background="@drawable/bg_btn_primary"
+                        android:textColor="@color/tg_on_primary"
+                        android:textSize="12sp"
+                        android:textStyle="bold"
+                        android:paddingHorizontal="14dp"
+                        android:text="@string/btn_test_api" />
+
+                    <TextView
+                        android:id="@+id/textTestApiResult"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="10dp"
+                        android:textSize="12sp"
+                        android:textColor="@color/tg_text_secondary" />
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginVertical="14dp"
+                    android:background="@color/tg_divider" />
+
+                <!-- Dozwolone aplikacje -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/section_allowed_apps"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/tg_text_primary" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="@string/allowed_apps_description"
+                    android:textSize="12sp"
+                    android:textColor="@color/tg_text_secondary" />
+
+                <TextView
+                    android:id="@+id/textToggleAdvancedApps"
+                    android:layout_width="wrap_content"
+                    android:layout_height="36dp"
+                    android:layout_marginTop="8dp"
+                    android:paddingHorizontal="12dp"
+                    android:gravity="center"
+                    android:background="@drawable/bg_btn_secondary"
+                    android:text="@string/btn_show_advanced_apps"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/tg_primary"
+                    android:clickable="true"
+                    android:focusable="true" />
+
+                <TextView
+                    android:id="@+id/textAdvancedAppsHint"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="@string/allowed_apps_advanced_hint"
+                    android:textSize="12sp"
+                    android:textColor="@color/tg_text_secondary"
+                    android:visibility="gone" />
+
+                <LinearLayout
+                    android:id="@+id/layoutAppList"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginTop="8dp"
+                    android:visibility="gone" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginVertical="14dp"
+                    android:background="@color/tg_divider" />
+
+                <!-- Informacje i Polityka prywatności -->
+                <TextView
+                    android:id="@+id/textVersion"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="13sp"
+                    android:textColor="@color/tg_text_secondary"
+                    tools:text="Version 2.0.14" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="8dp">
+
+                    <Button
+                        android:id="@+id/buttonShowTutorial"
+                        android:layout_width="wrap_content"
+                        android:layout_height="36dp"
+                        android:layout_marginEnd="8dp"
+                        android:background="@drawable/bg_btn_secondary"
+                        android:textColor="@color/tg_primary"
+                        android:textSize="12sp"
+                        android:textStyle="bold"
+                        android:paddingHorizontal="14dp"
+                        tools:text="Pokaż samouczek" />
+
+                    <Button
+                        android:id="@+id/buttonFullPrivacyPolicy"
+                        android:layout_width="wrap_content"
+                        android:layout_height="36dp"
+                        android:background="@drawable/bg_btn_secondary"
+                        android:textColor="@color/tg_primary"
+                        android:textSize="12sp"
+                        android:textStyle="bold"
+                        android:paddingHorizontal="14dp"
+                        android:text="@string/btn_full_privacy_policy" />
+                </LinearLayout>
+            </LinearLayout>
         </LinearLayout>
 
     </LinearLayout>

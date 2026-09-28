@@ -185,4 +185,22 @@ class TranslationPromptsTest {
         val prompt = TranslationPrompts.systemPromptFor(TriggerDetector.Target("ja"))
         assertTrue(prompt.contains("Japanese"))
     }
+
+    @Test
+    fun `source language is embedded in prompt when explicitly provided`() {
+        val prompt = TranslationPrompts.systemPromptFor(
+            target = english,
+            sourceLanguage = Languages.byCode("es")
+        )
+        assertTrue(prompt.startsWith("Translate the source text from Spanish into English."))
+    }
+
+    @Test
+    fun `source language is omitted when null (automatic detection)`() {
+        val prompt = TranslationPrompts.systemPromptFor(
+            target = english,
+            sourceLanguage = null
+        )
+        assertTrue(prompt.startsWith("Translate the source text into English."))
+    }
 }

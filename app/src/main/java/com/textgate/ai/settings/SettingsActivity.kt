@@ -130,6 +130,7 @@ class SettingsActivity : Activity() {
             window.setDecorFitsSystemWindows(false)
             applyInsetsAsPadding(binding.root)
         }
+        binding.buttonSettingsBack.setOnClickListener { finish() }
 
         settingsStore = AppSettingsStore(applicationContext)
         apiKeyStore = SecureApiKeyStore(applicationContext)
@@ -141,6 +142,7 @@ class SettingsActivity : Activity() {
         setupUserGenderSection()
         setupHeadsetDisconnectSection()
         setupAudioCaptureModeSection()
+        setupLiveModelSection()
         setupAccessibilitySection()
         setupBackgroundOperationSection()
         setupApiKeySection()
@@ -149,6 +151,7 @@ class SettingsActivity : Activity() {
         setupAllowedAppsSection()
         setupPrivacySection()
         setupAboutSection()
+        setupAdvancedAccordion()
     }
 
     override fun onResume() {
@@ -403,6 +406,42 @@ class SettingsActivity : Activity() {
                 override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                     val selected = audioCaptureModeOptions.getOrNull(position) ?: return
                     settingsStore.audioCaptureMode = selected
+                }
+
+                override fun onNothingSelected(parent: AdapterView<*>?) = Unit
+            }
+        }
+    }
+
+    // ---------------------------------------------------------------
+    // Live translation model (Audio & Live section)
+    // ---------------------------------------------------------------
+
+    private val liveModelOptions = listOf(
+        AppSettingsStore.DEFAULT_LIVE_MODEL,
+        AppSettingsStore.FAST_LIVE_MODEL
+    )
+
+    private fun liveModelLabelRes(model: String): Int = when (model) {
+        AppSettingsStore.FAST_LIVE_MODEL -> R.string.label_live_model_38
+        else -> R.string.label_live_model_35
+    }
+
+    private fun setupLiveModelSection() {
+        val labels = liveModelOptions.map { getString(liveModelLabelRes(it)) }
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, labels)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        binding.spinnerLiveModel.adapter = adapter
+
+        val currentIndex = liveModelOptions.indexOf(settingsStore.liveModel)
+            .let { if (it >= 0) it else 0 }
+        binding.spinnerLiveModel.setSelection(currentIndex, false)
+
+        binding.spinnerLiveModel.post {
+            binding.spinnerLiveModel.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                    val selected = liveModelOptions.getOrNull(position) ?: return
+                    settingsStore.liveModel = selected
                 }
 
                 override fun onNothingSelected(parent: AdapterView<*>?) = Unit
@@ -866,6 +905,14 @@ class SettingsActivity : Activity() {
         binding.buttonShowTutorial.text = TutorialCopyProvider.forContext(this).replay
         binding.buttonShowTutorial.setOnClickListener {
             startActivity(TutorialActivity.intent(this, replay = true))
+        }
+    }
+
+    private fun setupAdvancedAccordion() {
+        binding.cardToggleAdvanced.setOnClickListener {
+            val isVisible = binding.layoutAdvancedSection.visibility == View.VISIBLE
+            binding.layoutAdvancedSection.visibility = if (isVisible) View.GONE else View.VISIBLE
+            binding.textAdvancedChevron.text = if (isVisible) "▼" else "▲"
         }
     }
 }

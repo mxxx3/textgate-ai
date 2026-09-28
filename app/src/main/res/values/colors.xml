@@ -1,16 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="tg_background">#FFFFFFFF</color>
-    <color name="tg_surface">#FFF3F4F6</color>
-    <color name="tg_primary">#FF1B5E20</color>
+    <!-- Modern Material 3 Color Palette for TextGate AI -->
+    <color name="tg_primary">#FF059669</color>
+    <color name="tg_primary_dark">#FF047857</color>
+    <color name="tg_primary_light">#FFE6F4EA</color>
     <color name="tg_on_primary">#FFFFFFFF</color>
-    <color name="tg_text_primary">#FF1A1A1A</color>
-    <color name="tg_text_secondary">#FF5F6368</color>
-    <color name="tg_warning">#FFB3261E</color>
-    <color name="tg_divider">#FFE0E0E0</color>
+    <color name="tg_background">#FFF8FAFC</color>
+    <color name="tg_surface">#FFF1F5F9</color>
+    <color name="tg_card_bg">#FFFFFFFF</color>
+    <color name="tg_text_primary">#FF0F172A</color>
+    <color name="tg_text_secondary">#FF64748B</color>
+    <color name="tg_divider">#FFE2E8F0</color>
+    <color name="tg_warning">#FFEF4444</color>
+    <color name="tg_warning_bg">#FFFEE2E2</color>
+
     <!-- Text/icon color for the floating long-press translation bubble.
          The bubble background is tg_primary (see bg_bubble.xml), so this
          is fixed white regardless of theme rather than following
          tg_text_primary, which assumes a light background. -->
     <color name="tg_bubble_text">#FFFFFFFF</color>
+
+    <!-- Navigation and conversational bubble colors -->
+    <color name="tg_nav_active">#FF059669</color>
+    <color name="tg_nav_inactive">#FF64748B</color>
+    <color name="tg_bubble_incoming">#FFF1F5F9</color>
+    <color name="tg_bubble_outgoing">#FF059669</color>
 </resources>

@@ -102,6 +102,20 @@ class TranslationBubble(private val service: AccessibilityService) {
             return
         }
 
+        val metrics = service.resources.displayMetrics
+        val margin = (8 * metrics.density).toInt()
+        val maxAllowedWidth = (metrics.widthPixels - 2 * margin).coerceAtLeast(0)
+        try {
+            view.measure(
+                View.MeasureSpec.makeMeasureSpec(maxAllowedWidth, View.MeasureSpec.AT_MOST),
+                View.MeasureSpec.makeMeasureSpec(metrics.heightPixels, View.MeasureSpec.AT_MOST)
+            )
+        } catch (_: Exception) {
+            // Defensive fallback
+        }
+        val bubbleWidth = view.measuredWidth.takeIf { it > 0 } ?: (300 * metrics.density).toInt()
+        val bubbleHeight = view.measuredHeight.takeIf { it > 0 } ?: (140 * metrics.density).toInt()
+
         val params = WindowManager.LayoutParams(
             WindowManager.LayoutParams.WRAP_CONTENT,
             WindowManager.LayoutParams.WRAP_CONTENT,
@@ -112,7 +126,7 @@ class TranslationBubble(private val service: AccessibilityService) {
             PixelFormat.TRANSLUCENT
         )
         params.gravity = Gravity.TOP or Gravity.START
-        positionNear(params, anchor)
+        positionNear(params, anchor, bubbleWidth, bubbleHeight)
 
         try {
             windowManager.addView(view, params)
@@ -124,27 +138,30 @@ class TranslationBubble(private val service: AccessibilityService) {
     }
 
     /**
-     * Chooses where on screen the (wrap_content-sized) bubble appears,
-     * preferring just ABOVE the long-pressed content as asked
-     * ("chmurka nad tym tekstem"), falling back to just below it when
-     * there isn't credible room above. The bubble's own height is not yet
-     * known at this point (it has not been measured/laid out) so "room
-     * above" is judged against a fixed estimate rather than an exact
-     * value — for a short-to-medium translation this places the bubble
-     * correctly; for an unusually tall one it may sit a little lower than
-     * ideal, but the clamps below keep it fully on screen either way.
+     * Chooses where on screen the bubble appears, preferring just ABOVE the
+     * long-pressed content, falling back to just below it when there isn't room
+     * above. Adjusts horizontal position so right-aligned chat bubbles (e.g.
+     * outgoing messages in messaging apps) never clip past the right edge of
+     * the screen.
      */
-    private fun positionNear(params: WindowManager.LayoutParams, anchor: Rect) {
+    private fun positionNear(
+        params: WindowManager.LayoutParams,
+        anchor: Rect,
+        bubbleWidth: Int,
+        bubbleHeight: Int
+    ) {
         val metrics = service.resources.displayMetrics
         val margin = (8 * metrics.density).toInt()
-        val estimatedBubbleHeight = (140 * metrics.density).toInt()
 
-        val roomAbove = anchor.top - estimatedBubbleHeight - margin
-        params.x = anchor.left.coerceIn(margin, (metrics.widthPixels - margin).coerceAtLeast(margin))
+        val maxX = metrics.widthPixels - margin - bubbleWidth
+        params.x = anchor.left.coerceIn(margin, maxX.coerceAtLeast(margin))
+
+        val roomAbove = anchor.top - bubbleHeight - margin
+        val maxY = metrics.heightPixels - margin - bubbleHeight
         params.y = if (roomAbove >= margin) {
             roomAbove
         } else {
-            (anchor.bottom + margin).coerceAtMost((metrics.heightPixels - margin).coerceAtLeast(margin))
+            (anchor.bottom + margin).coerceIn(margin, maxY.coerceAtLeast(margin))
         }
     }
 

@@ -32,6 +32,8 @@ import com.textgate.ai.model.Languages
 import com.textgate.ai.model.SupportedLanguage
 import com.textgate.ai.security.AppSettingsStore
 import com.textgate.ai.security.SecureApiKeyStore
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
@@ -83,7 +85,9 @@ class LiveTranslationService : Service() {
 
     private var liveClient: GeminiLiveClient? = null
     private var captureThread: Thread? = null
+    @Volatile
     private var playbackTrack: AudioTrack? = null
+    private var playbackExecutor: ExecutorService? = null
     private var wakeLock: PowerManager.WakeLock? = null
     private var focusRequest: AudioFocusRequest? = null
     private val micActive = AtomicBoolean(false)
@@ -191,6 +195,8 @@ class LiveTranslationService : Service() {
 
     override fun onDestroy() {
         stopSession(userInitiated = false)
+        playbackExecutor?.shutdownNow()
+        playbackExecutor = null
         super.onDestroy()
     }
 
@@ -212,19 +218,45 @@ class LiveTranslationService : Service() {
         if (apiKey == null) {
             releaseWakeLock()
             transitionTo(LiveSessionState.ERROR)
-            updateNotification()
             return
         }
 
         audioRouteMonitor.start { hasPrivateRoute -> mainHandler.post { onRouteChanged(hasPrivateRoute) } }
 
+        val userLang = LocaleHelper.resolvePreferredLanguage(this).localeLanguageTag
+        val targetLang = targetLanguage.localeLanguageTag
+        val commonHints = listOf("en", "de", "es", "fr", "it", "uk")
+        val hints = (listOf(targetLang, userLang) + commonHints).distinct()
+
         val client = GeminiLiveClient()
         liveClient = client
         client.connect(
             apiKey = apiKey,
-            model = LIVE_MODEL,
-            targetLanguageCode = targetLanguage.localeLanguageTag
+            model = settingsStore.liveModel,
+            targetLanguageCode = targetLang,
+            languageHints = hints
         ) { event ->
+            if (event is ServerEvent.AudioChunk) {
+                if (liveClient !== client) return@connect
+                if (state == LiveSessionState.LISTENING) {
+                    mainHandler.post {
+                        if (liveClient === client && state == LiveSessionState.LISTENING) {
+                            transitionTo(LiveSessionState.TRANSLATING)
+                        }
+                    }
+                }
+                playbackExecutor?.execute {
+                    val track = playbackTrack
+                    if (track != null && track.playState == AudioTrack.PLAYSTATE_PLAYING) {
+                        try {
+                            track.write(event.pcm16, 0, event.pcm16.size)
+                        } catch (_: Exception) {
+                            // Ignored
+                        }
+                    }
+                }
+                return@connect
+            }
             mainHandler.post {
                 // GeminiLiveClient.close() (called from stopSession/
                 // handleDisconnect) tears the socket down asynchronously —
@@ -265,7 +297,11 @@ class LiveTranslationService : Service() {
             }
             is ServerEvent.InputTranscript -> {
                 latestInputTranscript = event.text
+                val prevLang = detectedSourceLanguage
                 event.languageCode?.let { code -> Languages.byCode(code)?.let { detectedSourceLanguage = it } }
+                if (detectedSourceLanguage != prevLang) {
+                    updateNotification()
+                }
                 notifyListeners()
             }
             is ServerEvent.OutputTranscript -> {
@@ -274,7 +310,16 @@ class LiveTranslationService : Service() {
             }
             is ServerEvent.AudioChunk -> {
                 if (state == LiveSessionState.LISTENING) transitionTo(LiveSessionState.TRANSLATING)
-                playbackTrack?.write(event.pcm16, 0, event.pcm16.size)
+                playbackExecutor?.execute {
+                    val track = playbackTrack
+                    if (track != null && track.playState == AudioTrack.PLAYSTATE_PLAYING) {
+                        try {
+                            track.write(event.pcm16, 0, event.pcm16.size)
+                        } catch (_: Exception) {
+                            // Ignored
+                        }
+                    }
+                }
             }
             is ServerEvent.TurnComplete -> {
                 if (state == LiveSessionState.TRANSLATING) transitionTo(LiveSessionState.LISTENING)
@@ -282,7 +327,6 @@ class LiveTranslationService : Service() {
             is ServerEvent.Error -> handleLiveError(event.category)
             is ServerEvent.Closed -> if (event.code != 1000) handleLiveError(event.category)
         }
-        updateNotification()
     }
 
     /** Routes a Live error/close event to either a bounded, backed-off
@@ -377,13 +421,10 @@ class LiveTranslationService : Service() {
             // returns.
             if (state == LiveSessionState.PAUSED && liveClient != null) {
                 beginCapturePlayback()
-            } else if (settingsStore.audioCaptureMode == AudioCaptureMode.STANDARD &&
-                (state == LiveSessionState.LISTENING || state == LiveSessionState.TRANSLATING)
-            ) {
-                // STANDARD mode never pauses on disconnect (see below), so
-                // the session may still be actively playing on the speaker
-                // when the headset comes back — move output back to it
-                // rather than leaving it stuck on the speaker.
+            } else if (state == LiveSessionState.LISTENING || state == LiveSessionState.TRANSLATING) {
+                // If headphones are plugged in during an active session (in either
+                // STANDARD or ECHO_CANCELLED mode), move playback to the newly
+                // connected private route so audio is heard in the headphones.
                 switchOutputToCurrentRoute()
             }
             return
@@ -412,6 +453,9 @@ class LiveTranslationService : Service() {
         if (settingsStore.headsetDisconnectBehavior == HeadsetDisconnectBehavior.SWITCH_TO_SPEAKER) {
             // Deliberate user opt-in: keep going, audio now plays on the
             // speaker via the platform's own default routing.
+            if (state == LiveSessionState.LISTENING || state == LiveSessionState.TRANSLATING) {
+                switchOutputToCurrentRoute()
+            }
             return
         }
 
@@ -421,34 +465,42 @@ class LiveTranslationService : Service() {
         if (state == LiveSessionState.LISTENING || state == LiveSessionState.TRANSLATING) {
             stopCapturePlayback()
             transitionTo(LiveSessionState.PAUSED)
-            updateNotification()
         }
     }
 
-    /** Dispatches [onRouteChanged]'s STANDARD-mode disconnect/reconnect
-     * handling above to either [engageEarpieceCommunicationRouting] (no
-     * private route — the disconnect case) or
-     * [disengageEarpieceCommunicationRouting]/a plain re-pin (private
-     * route present — the reconnect case), depending on whether
-     * communication-audio routing is currently engaged. See
-     * [engageEarpieceCommunicationRouting]'s doc for why a plain
-     * `AudioTrack.setPreferredDevice(EARPIECE)` on the existing
-     * USAGE_MEDIA track — the first attempt at this — was confirmed on a
-     * real device to NOT move playback off the main loudspeaker. */
+    /** Dispatches [onRouteChanged]'s disconnect/reconnect handling above to either
+     * [engageEarpieceCommunicationRouting] (no private route, STANDARD mode) or
+     * updates playbackTrack's preferred device (or rebuilds the track) to the
+     * resolved route. */
     private fun switchOutputToCurrentRoute() {
         if (audioRouteMonitor.hasPrivateOutputRoute()) {
             if (earpieceCommunicationActive) {
                 disengageEarpieceCommunicationRouting()
             } else {
+                val targetDevice = audioRouteMonitor.selectPreferredOutputDevice()
                 try {
-                    playbackTrack?.setPreferredDevice(audioRouteMonitor.selectPreferredOutputDevice())
+                    val pinned = playbackTrack?.setPreferredDevice(targetDevice) == true
+                    if (!pinned && micActive.get()) {
+                        rebuildPlaybackTrack(AudioAttributes.USAGE_MEDIA, targetDevice)
+                    }
                 } catch (_: Exception) {
-                    // Best-effort only.
+                    if (micActive.get()) {
+                        rebuildPlaybackTrack(AudioAttributes.USAGE_MEDIA, targetDevice)
+                    }
                 }
             }
             return
         }
-        engageEarpieceCommunicationRouting()
+        if (settingsStore.audioCaptureMode == AudioCaptureMode.STANDARD) {
+            engageEarpieceCommunicationRouting()
+        } else {
+            val speakerDevice = audioRouteMonitor.selectPreferredOutputDevice()
+            try {
+                playbackTrack?.setPreferredDevice(speakerDevice)
+            } catch (_: Exception) {
+                // Best-effort only.
+            }
+        }
     }
 
     /** STANDARD-mode-disconnect-only earpiece routing. The first attempt
@@ -876,6 +928,11 @@ class LiveTranslationService : Service() {
         micActive.set(true)
         transitionTo(LiveSessionState.LISTENING)
 
+        playbackExecutor?.shutdownNow()
+        playbackExecutor = Executors.newSingleThreadExecutor { runnable ->
+            Thread(runnable, "TextGateLiveAudioPlayback")
+        }
+
         val thread = Thread({ runCaptureLoop(minBufferSize, micSource, useAec) }, "TextGateLiveCapture")
         captureThread = thread
         thread.start()
@@ -955,6 +1012,15 @@ class LiveTranslationService : Service() {
                 if (read > 0) {
                     val chunk = if (read == buffer.size) buffer else buffer.copyOf(read)
                     liveClient?.sendAudioChunk(chunk)
+                } else if (read < 0) {
+                    android.util.Log.e("TextGateLiveCapture", "AudioRecord read error: $read")
+                    break
+                } else {
+                    try {
+                        Thread.sleep(10)
+                    } catch (_: InterruptedException) {
+                        break
+                    }
                 }
             }
         } catch (_: Exception) {
@@ -990,6 +1056,8 @@ class LiveTranslationService : Service() {
         // now-pointless AudioTrack right before this function releases it
         // below anyway.
         disengageEarpieceCommunicationRouting()
+        playbackExecutor?.shutdownNow()
+        playbackExecutor = null
         captureThread?.let {
             try {
                 it.join(CAPTURE_THREAD_JOIN_TIMEOUT_MS)
@@ -1044,7 +1112,6 @@ class LiveTranslationService : Service() {
                 if (state == LiveSessionState.LISTENING || state == LiveSessionState.TRANSLATING) {
                     stopCapturePlayback()
                     transitionTo(LiveSessionState.PAUSED)
-                    updateNotification()
                 }
             }
             AudioManager.AUDIOFOCUS_GAIN -> {
@@ -1088,6 +1155,9 @@ class LiveTranslationService : Service() {
     private fun transitionTo(newState: LiveSessionState) {
         state = newState
         notifyListeners()
+        if (newState != LiveSessionState.STOPPED) {
+            updateNotification()
+        }
     }
 
     private fun notifyListeners() {

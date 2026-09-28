@@ -151,6 +151,10 @@ class AppSettingsStore(context: Context) {
         get() = AudioCaptureMode.fromPrefValue(prefs.getString(KEY_AUDIO_CAPTURE_MODE, null))
         set(value) = prefs.edit().putString(KEY_AUDIO_CAPTURE_MODE, value.prefValue).apply()
 
+    var liveModel: String
+        get() = prefs.getString(KEY_LIVE_MODEL, DEFAULT_LIVE_MODEL) ?: DEFAULT_LIVE_MODEL
+        set(value) = prefs.edit().putString(KEY_LIVE_MODEL, value.trim()).apply()
+
     /**
      * Version of the first-run product tutorial the user has explicitly
      * completed or skipped. A version number (instead of a Boolean) lets a
@@ -196,6 +200,10 @@ class AppSettingsStore(context: Context) {
         private const val KEY_HEADSET_DISCONNECT_BEHAVIOR = "headset_disconnect_behavior"
         private const val KEY_AUDIO_CAPTURE_MODE = "audio_capture_mode"
         private const val KEY_TUTORIAL_VERSION_SEEN = "tutorial_version_seen"
+        private const val KEY_LIVE_MODEL = "live_model"
+
+        const val DEFAULT_LIVE_MODEL = "gemini-3.5-live-translate-preview"
+        const val FAST_LIVE_MODEL = "gemini-3.8-live"
 
         /**
          * Chosen from the app owner's own Google AI Studio rate-limit

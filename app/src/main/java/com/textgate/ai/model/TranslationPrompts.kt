@@ -87,11 +87,18 @@ object TranslationPrompts {
     fun systemPromptFor(
         target: TriggerDetector.Target,
         speakerGender: UserGender = UserGender.AUTO,
-        userPreferredLanguage: SupportedLanguage? = null
+        userPreferredLanguage: SupportedLanguage? = null,
+        sourceLanguage: SupportedLanguage? = null
     ): String {
         val name = (Languages.byCode(target.code) ?: Languages.DEFAULT).englishName
 
-        val base = "Translate the source text into $name.\n\n" +
+        val targetPhrase = if (sourceLanguage != null) {
+            "Translate the source text from ${sourceLanguage.englishName} into $name.\n\n"
+        } else {
+            "Translate the source text into $name.\n\n"
+        }
+
+        val base = targetPhrase +
             "Core Objective:\n" +
             "Deliver a natural, fluent, and idiomatic translation as a native speaker " +
             "would say it, while strictly preserving the original meaning, tone, " +

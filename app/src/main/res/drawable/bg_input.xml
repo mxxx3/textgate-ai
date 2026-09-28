@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape="rectangle">
-    <solid android:color="@color/tg_card_bg" />
+    <solid android:color="@color/tg_surface" />
     <stroke android:width="1dp" android:color="@color/tg_divider" />
-    <corners android:radius="16dp" />
+    <corners android:radius="12dp" />
     <padding
-        android:left="16dp"
-        android:top="16dp"
-        android:right="16dp"
-        android:bottom="16dp" />
+        android:left="14dp"
+        android:top="10dp"
+        android:right="14dp"
+        android:bottom="10dp" />
 </shape>

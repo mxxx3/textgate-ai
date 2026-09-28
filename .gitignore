@@ -1,5 +1,6 @@
 *.iml
 .gradle/
+.kotlin/
 .gradle-user-home/
 .android-user-home/
 /local.properties
@@ -20,3 +21,7 @@ app/release/
 # owner directly) — must never be committed, even accidentally: contains
 # the raw keystore, its base64 encoding, and a plaintext-password README.
 /release-signing/
+
+*.apk
+*.aab
+screeny/

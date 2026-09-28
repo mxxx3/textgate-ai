@@ -1,141 +1,167 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- "Na żywo" tab (v2) — ambient Live translation, backed by
-     LiveTranslationService (Foreground Service). See LiveTabController. -->
-<ScrollView
+<!-- "Na żywo" tab — Modern Material 3 Live Audio Monitor UI.
+     Ambient Live translation backed by LiveTranslationService (Foreground Service).
+     All view IDs are preserved byte-for-byte for 100% controller compatibility. -->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/liveRoot"
-    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    android:background="@color/tg_background">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingTop="12dp"
+        android:paddingBottom="16dp">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/live_label_ambient_language"
-            android:textColor="@color/tg_text_secondary"
-            android:textSize="12sp" />
-
-        <!-- Static, not a picker — there is no request field that lets
-             this app force a source language on Gemini, so the UI must
-             not imply one (see LiveTabController's class doc). Reads
-             "Automatyczne wykrywanie" until Gemini itself reports a
-             detected language, then "Wykryto: <language>". -->
-        <TextView
-            android:id="@+id/textLiveAmbientLanguage"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:textColor="@color/tg_text_primary"
-            android:textSize="14sp" />
-
-        <TextView
-            android:id="@+id/textLiveTargetLanguage"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:textColor="@color/tg_text_primary"
-            android:textSize="14sp" />
-
+        <!-- Top Device Status Card -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
             android:orientation="vertical"
-            android:background="@drawable/bg_card">
+            android:background="@drawable/bg_card"
+            android:elevation="1dp">
 
-            <TextView
-                android:id="@+id/textLiveDeviceStatus"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textColor="@color/tg_text_primary"
-                android:textSize="14sp" />
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:id="@+id/textLiveDeviceStatus"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textColor="@color/tg_text_primary"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/textLiveState"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_badge_success"
+                    android:textColor="@color/tg_primary_dark"
+                    android:textStyle="bold"
+                    android:textSize="11sp"
+                    android:letterSpacing="0.04" />
+            </LinearLayout>
 
             <TextView
                 android:id="@+id/textLiveHeadsetHint"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
+                android:layout_marginTop="6dp"
                 android:textColor="@color/tg_text_secondary"
-                android:textSize="12sp" />
+                android:textSize="12sp"
+                android:lineSpacingMultiplier="1.15" />
         </LinearLayout>
 
-        <TextView
-            android:id="@+id/textLiveState"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:gravity="center"
-            android:textColor="@color/tg_primary"
-            android:textStyle="bold"
-            android:textSize="16sp" />
-
-        <Button
-            android:id="@+id/buttonLiveStartStop"
-            android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:layout_marginTop="12dp"
-            android:text="@string/live_button_start"
-            android:textSize="16sp" />
-
-        <Button
-            android:id="@+id/buttonLiveRetry"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="@string/live_button_retry"
-            android:visibility="gone" />
-
+        <!-- Dark Audio Monitor Visualizer Card -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="12dp"
             android:orientation="vertical"
-            android:background="@drawable/bg_card">
+            android:gravity="center"
+            android:background="@drawable/bg_visualizer"
+            android:elevation="2dp">
 
+            <!-- Ambient & Target Language Display -->
             <TextView
+                android:id="@+id/textLiveAmbientLanguage"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/live_label_original_transcript"
-                android:textColor="@color/tg_text_secondary"
-                android:textSize="12sp" />
+                android:textColor="#B3FFFFFF"
+                android:textSize="13sp"
+                android:fontFamily="sans-serif-medium" />
+
+            <TextView
+                android:id="@+id/textLiveTargetLanguage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:textColor="@color/tg_primary_light"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <!-- Live Transcripts Card -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:layout_marginTop="12dp"
+            android:orientation="vertical"
+            android:background="@drawable/bg_card"
+            android:elevation="1dp">
+
+            <TextView
+                style="@style/TgCardLabel"
+                android:text="@string/live_label_original_transcript" />
 
             <TextView
                 android:id="@+id/textLiveInputTranscript"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:minHeight="48dp"
+                android:minHeight="36dp"
                 android:textColor="@color/tg_text_primary"
-                android:textSize="15sp" />
+                android:textSize="14sp"
+                android:lineSpacingMultiplier="1.2" />
 
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:layout_marginTop="12dp"
-                android:layout_marginBottom="12dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp"
                 android:background="@color/tg_divider" />
 
             <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/live_label_translation_transcript"
-                android:textColor="@color/tg_text_secondary"
-                android:textSize="12sp" />
+                style="@style/TgCardLabelPrimary"
+                android:text="@string/live_label_translation_transcript" />
 
             <TextView
                 android:id="@+id/textLiveOutputTranscript"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:minHeight="48dp"
+                android:minHeight="40dp"
                 android:textColor="@color/tg_text_primary"
-                android:textSize="15sp" />
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:lineSpacingMultiplier="1.2" />
         </LinearLayout>
+
+        <!-- Action Buttons -->
+        <Button
+            android:id="@+id/buttonLiveStartStop"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/bg_btn_primary"
+            android:textColor="@color/tg_on_primary"
+            android:text="@string/live_button_start"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            android:elevation="2dp" />
+
+        <Button
+            android:id="@+id/buttonLiveRetry"
+            android:layout_width="match_parent"
+            android:layout_height="44dp"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/bg_btn_stop"
+            android:textColor="@color/tg_on_primary"
+            android:text="@string/live_button_retry"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:visibility="gone" />
 
     </LinearLayout>
 </ScrollView>

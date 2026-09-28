@@ -191,6 +191,8 @@
     <string name="label_language_auto">Automatic</string>
 
     <!-- v2: Tłumacz tab -->
+    <string name="translate_label_source">Original</string>
+    <string name="translate_label_target">Translation</string>
     <string name="translate_hint_source">Enter text to translate</string>
     <string name="translate_hint_result">Translation</string>
     <string name="translate_swap_content_description">Swap languages</string>
@@ -269,4 +271,12 @@
     <string name="audio_capture_mode_description">How Rozmowa and Na żywo capture and play audio. \"Multimedia speaker\" stops the microphone from hearing the phone\'s own translated speech on speaker, but adds processing and can cause lag or cut-off turns on some phones. \"Call speaker\" is faster and simpler, but only use it with headphones — on speaker it can pick up and re-translate its own output in a loop.</string>
     <string name="label_audio_capture_echo_cancelled">Multimedia speaker</string>
     <string name="label_audio_capture_standard">Call speaker</string>
+
+    <!-- v2.x: live translation model choice -->
+    <string name="section_live_model">Live translation model</string>
+    <string name="live_model_description">Choose which model powers real-time speech translation in Na żywo and Rozmowa.</string>
+    <string name="label_live_model_35">Gemini 3.5 Live Translate (Recommended translator)</string>
+    <string name="label_live_model_38">Gemini 3.8 Live (Faster ~1.18s, 65K TPM — BETA)</string>
+    <string name="settings_advanced_toggle_title">Advanced Options</string>
+    <string name="settings_advanced_toggle_subtitle">Text AI model, connection test, app list, privacy</string>
 </resources>

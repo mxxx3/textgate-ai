@@ -296,4 +296,7 @@
     <string name="image_translate_network_error" tools:ignore="MissingTranslation">Network error. Please check your connection.</string>
     <string name="image_translate_timeout" tools:ignore="MissingTranslation">Translation timed out. Please try again.</string>
     <string name="image_translate_generic_error" tools:ignore="MissingTranslation">Image translation failed.</string>
+    <string name="image_translate_prompt" tools:ignore="MissingTranslation">Translate text from photo</string>
+    <string name="image_translate_prompt_sub" tools:ignore="MissingTranslation">Take a new photo or select an existing picture from your gallery</string>
+    <string name="image_translate_camera_permission_needed" tools:ignore="MissingTranslation">Camera permission is required to take a photo.</string>
 </resources>

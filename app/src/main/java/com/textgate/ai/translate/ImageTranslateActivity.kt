@@ -1,10 +1,12 @@
 package com.textgate.ai.translate
 
+import android.Manifest
 import android.app.Activity
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
@@ -15,7 +17,9 @@ import android.os.Bundle
 import android.provider.MediaStore
 import android.speech.tts.TextToSpeech
 import android.util.Base64
+import android.util.Log
 import android.view.View
+import android.view.WindowInsets
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Toast
@@ -28,7 +32,7 @@ import com.textgate.ai.network.GeminiClient
 import com.textgate.ai.security.AppSettingsStore
 import com.textgate.ai.security.SecureApiKeyStore
 import java.io.ByteArrayOutputStream
-import java.io.InputStream
+import java.io.File
 import java.util.Locale
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -48,7 +52,7 @@ class ImageTranslateActivity : Activity() {
 
     private var currentBitmap: Bitmap? = null
     private var currentImageUri: Uri? = null
-    private var cameraImageUri: Uri? = null
+    private var currentCameraFile: File? = null
 
     private var textToSpeech: TextToSpeech? = null
     private var ttsReady = false
@@ -66,6 +70,7 @@ class ImageTranslateActivity : Activity() {
 
         private const val REQUEST_CODE_CAMERA = 1001
         private const val REQUEST_CODE_GALLERY = 1002
+        private const val REQUEST_CODE_CAMERA_PERMISSION = 2001
         private const val MAX_IMAGE_DIMENSION = 1600
 
         fun intent(
@@ -91,21 +96,34 @@ class ImageTranslateActivity : Activity() {
         binding = ActivityImageTranslateBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        // Handle edge-to-edge window insets so bottom action bar is not covered
+        // by the system navigation bar (3-button or gesture bar).
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            window.setDecorFitsSystemWindows(false)
+            applyInsetsAsPadding(binding.rootImageTranslate)
+        }
+
         initLanguagesFromIntent()
         setupLanguageSpinners()
         setupButtons()
         setupOverlayInteractions()
+        updateEmptyState()
 
         textToSpeech = TextToSpeech(applicationContext) { status ->
             ttsReady = status == TextToSpeech.SUCCESS
         }
 
-        val initialUri = intent.getParcelableExtra<Uri>(EXTRA_IMAGE_URI)
+        val initialUri = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            intent.getParcelableExtra(EXTRA_IMAGE_URI, Uri::class.java)
+        } else {
+            @Suppress("DEPRECATION")
+            intent.getParcelableExtra<Uri>(EXTRA_IMAGE_URI)
+        }
+
         if (initialUri != null) {
             loadImageAndTranslate(initialUri)
         } else {
-            // Prompt user to pick an image or take a photo if launched directly
-            launchCameraCapture()
+            checkCameraPermissionAndLaunch()
         }
     }
 
@@ -116,6 +134,28 @@ class ImageTranslateActivity : Activity() {
         textToSpeech?.shutdown()
         textToSpeech = null
         super.onDestroy()
+    }
+
+    @android.annotation.TargetApi(Build.VERSION_CODES.R)
+    private fun applyInsetsAsPadding(root: View) {
+        val basePaddingLeft = root.paddingLeft
+        val basePaddingTop = root.paddingTop
+        val basePaddingRight = root.paddingRight
+        val basePaddingBottom = root.paddingBottom
+
+        root.setOnApplyWindowInsetsListener { view, insets ->
+            val bars = insets.getInsets(
+                WindowInsets.Type.systemBars() or WindowInsets.Type.displayCutout()
+            )
+            view.setPadding(
+                basePaddingLeft + bars.left,
+                basePaddingTop + bars.top,
+                basePaddingRight + bars.right,
+                basePaddingBottom + bars.bottom
+            )
+            insets
+        }
+        root.requestApplyInsets()
     }
 
     private fun initLanguagesFromIntent() {
@@ -208,10 +248,18 @@ class ImageTranslateActivity : Activity() {
         }
 
         binding.buttonCamera.setOnClickListener {
-            launchCameraCapture()
+            checkCameraPermissionAndLaunch()
         }
 
         binding.buttonGallery.setOnClickListener {
+            launchGalleryPicker()
+        }
+
+        binding.buttonPromptCamera.setOnClickListener {
+            checkCameraPermissionAndLaunch()
+        }
+
+        binding.buttonPromptGallery.setOnClickListener {
             launchGalleryPicker()
         }
 
@@ -251,6 +299,12 @@ class ImageTranslateActivity : Activity() {
         }
     }
 
+    private fun updateEmptyState() {
+        val hasImage = currentBitmap != null
+        binding.layoutEmptyPrompt.visibility = if (hasImage) View.GONE else View.VISIBLE
+        binding.imageOverlayView.visibility = if (hasImage) View.VISIBLE else View.GONE
+    }
+
     private fun loadImageAndTranslate(uri: Uri) {
         currentImageUri = uri
         binding.layoutNoText.visibility = View.GONE
@@ -261,13 +315,17 @@ class ImageTranslateActivity : Activity() {
             val bitmap = loadOptimizedBitmap(uri)
             if (bitmap == null) {
                 Toast.makeText(this, R.string.image_translate_load_failed, Toast.LENGTH_SHORT).show()
+                updateEmptyState()
                 return
             }
             currentBitmap = bitmap
             binding.imageOverlayView.bitmap = bitmap
+            updateEmptyState()
             translateBitmap(bitmap)
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            Log.e("TextGate", "Failed to load image", e)
             Toast.makeText(this, R.string.image_translate_load_failed, Toast.LENGTH_SHORT).show()
+            updateEmptyState()
         }
     }
 
@@ -293,7 +351,6 @@ class ImageTranslateActivity : Activity() {
         val requestedModel = settingsStore.selectedModel.ifBlank { "gemini-2.5-flash" }
 
         executor?.execute {
-            // Attempt with configured model, or fallback to gemini-2.5-flash if needed
             var result = GeminiClient.translateImageBlocking(
                 apiKey = apiKey,
                 model = requestedModel,
@@ -304,7 +361,6 @@ class ImageTranslateActivity : Activity() {
             if (result is GeminiClient.ImageTranslationResult.Failure.InvalidModel ||
                 (result is GeminiClient.ImageTranslationResult.Failure.HttpError && result.code == 404)
             ) {
-                // Try proven multimodal fallback
                 result = GeminiClient.translateImageBlocking(
                     apiKey = apiKey,
                     model = "gemini-2.5-flash",
@@ -400,24 +456,45 @@ class ImageTranslateActivity : Activity() {
         return Base64.encodeToString(byteArray, Base64.NO_WRAP)
     }
 
+    private fun checkCameraPermissionAndLaunch() {
+        if (checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+            launchCameraCapture()
+        } else {
+            requestPermissions(arrayOf(Manifest.permission.CAMERA), REQUEST_CODE_CAMERA_PERMISSION)
+        }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == REQUEST_CODE_CAMERA_PERMISSION) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                launchCameraCapture()
+            } else {
+                Toast.makeText(this, R.string.image_translate_camera_permission_needed, Toast.LENGTH_SHORT).show()
+                updateEmptyState()
+            }
+        }
+    }
+
     private fun launchCameraCapture() {
         try {
-            val values = android.content.ContentValues().apply {
-                put(MediaStore.Images.Media.TITLE, "TextGate_${System.currentTimeMillis()}")
-                put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
-            }
-            val photoUri = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
-            cameraImageUri = photoUri
+            val photoFile = File(cacheDir, "camera_photo_${System.currentTimeMillis()}.jpg")
+            currentCameraFile = photoFile
+            val photoUri = LocalFileProvider.getUriForFile(this, photoFile)
 
             val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE).apply {
-                if (photoUri != null) {
-                    putExtra(MediaStore.EXTRA_OUTPUT, photoUri)
-                    addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION or Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                }
+                putExtra(MediaStore.EXTRA_OUTPUT, photoUri)
+                addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION or Intent.FLAG_GRANT_READ_URI_PERMISSION)
             }
             startActivityForResult(cameraIntent, REQUEST_CODE_CAMERA)
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            Log.e("TextGate", "Failed to launch camera", e)
             Toast.makeText(this, R.string.image_translate_camera_error, Toast.LENGTH_SHORT).show()
+            updateEmptyState()
         }
     }
 
@@ -431,19 +508,29 @@ class ImageTranslateActivity : Activity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (resultCode != RESULT_OK) return
+        if (resultCode != RESULT_OK) {
+            updateEmptyState()
+            return
+        }
 
         when (requestCode) {
             REQUEST_CODE_CAMERA -> {
-                val uri = cameraImageUri ?: data?.data
-                if (uri != null) {
+                val file = currentCameraFile
+                if (file != null && file.exists() && file.length() > 0) {
+                    val uri = Uri.fromFile(file)
                     loadImageAndTranslate(uri)
+                } else if (data?.data != null) {
+                    loadImageAndTranslate(data.data!!)
+                } else {
+                    updateEmptyState()
                 }
             }
             REQUEST_CODE_GALLERY -> {
                 val selectedUri = data?.data
                 if (selectedUri != null) {
                     loadImageAndTranslate(selectedUri)
+                } else {
+                    updateEmptyState()
                 }
             }
         }

@@ -298,4 +298,7 @@
     <string name="image_translate_network_error">Błąd sieci. Sprawdź połączenie internetowe.</string>
     <string name="image_translate_timeout">Przekroczono czas oczekiwania. Spróbuj ponownie.</string>
     <string name="image_translate_generic_error">Nie udało się przetłumaczyć zdjęcia.</string>
+    <string name="image_translate_prompt">Przetłumacz tekst ze zdjęcia</string>
+    <string name="image_translate_prompt_sub">Zrób nowe zdjęcie aparatem lub wybierz z galerii</string>
+    <string name="image_translate_camera_permission_needed">Do zrobienia zdjęcia potrzebne jest uprawnienie do aparatu.</string>
 </resources>

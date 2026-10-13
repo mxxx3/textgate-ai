@@ -119,6 +119,9 @@
             <action android:name="android.intent.action.MAIN" />
             <category android:name="android.intent.category.LAUNCHER" />
         </intent>
+        <intent>
+            <action android:name="android.media.action.IMAGE_CAPTURE" />
+        </intent>
         <package android:name="com.miui.securitycenter" />
         <package android:name="com.huawei.systemmanager" />
         <package android:name="com.hihonor.systemmanager" />
@@ -264,6 +267,12 @@
             android:exported="false"
             android:configChanges="orientation|screenSize|keyboardHidden"
             android:windowSoftInputMode="adjustResize" />
+
+        <provider
+            android:name=".translate.LocalFileProvider"
+            android:authorities="${applicationId}.localfileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true" />
 
     </application>
 </manifest>

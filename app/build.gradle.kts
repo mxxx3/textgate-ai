@@ -11,8 +11,8 @@ android {
         applicationId = "com.textgate.ai"
         minSdk = 26
         targetSdk = 36
-        versionCode = 44
-        versionName = "2.0.16"
+        versionCode = 45
+        versionName = "2.0.17"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

@@ -281,4 +281,21 @@
     <string name="label_live_model_38">Gemini 3.8 Live (Szybszy ~1.18s, 65K TPM — BETA)</string>
     <string name="settings_advanced_toggle_title">Opcje zaawansowane</string>
     <string name="settings_advanced_toggle_subtitle">Model tekstowy, test połączenia, lista aplikacji, prywatność</string>
+
+    <!-- v2.x: Tłumaczenie ze zdjęć -->
+    <string name="translate_camera_content_description">Tłumacz ze zdjęcia</string>
+    <string name="image_translate_title">Tłumacz ze zdjęcia</string>
+    <string name="image_translate_toggle_overlay">Przełącz widok oryginał / tłumaczenie</string>
+    <string name="image_translate_loading">Analizowanie i tłumaczenie przez Gemini…</string>
+    <string name="image_translate_no_text">Nie wykryto tekstu na tym zdjęciu.</string>
+    <string name="image_translate_selected_block">Wybrany fragment</string>
+    <string name="image_translate_original_prefix">Oryginał: %1$s</string>
+    <string name="image_translate_btn_camera">Aparat</string>
+    <string name="image_translate_btn_gallery">Galeria</string>
+    <string name="image_translate_copy_all">Kopiuj całe tłumaczenie</string>
+    <string name="image_translate_load_failed">Nie udało się załadować zdjęcia.</string>
+    <string name="image_translate_camera_error">Nie można uruchomić aparatu.</string>
+    <string name="image_translate_network_error">Błąd sieci. Sprawdź połączenie internetowe.</string>
+    <string name="image_translate_timeout">Przekroczono czas oczekiwania. Spróbuj ponownie.</string>
+    <string name="image_translate_generic_error">Nie udało się przetłumaczyć zdjęcia.</string>
 </resources>

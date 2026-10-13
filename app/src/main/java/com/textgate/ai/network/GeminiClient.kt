@@ -130,6 +130,33 @@ object GeminiClient {
         }
     }
 
+    data class DetectedTextBlock(
+        val ymin: Float, // 0..1000
+        val xmin: Float,
+        val ymax: Float,
+        val xmax: Float,
+        val originalText: String,
+        val translatedText: String,
+        val textColor: String? = null,
+        val bgColor: String? = null
+    )
+
+    sealed class ImageTranslationResult {
+        data class Success(val blocks: List<DetectedTextBlock>) : ImageTranslationResult()
+        sealed class Failure : ImageTranslationResult() {
+            data object NoTextDetected : Failure()
+            data object MissingApiKey : Failure()
+            data object InvalidModel : Failure()
+            data object NetworkError : Failure()
+            data object Timeout : Failure()
+            data class QuotaExceeded(val scope: Result.Failure.QuotaScope, val retryAfterSeconds: Long? = null) : Failure()
+            data class HttpError(val code: Int, val detail: String? = null) : Failure()
+            data object EmptyResponse : Failure()
+            data object InvalidResponse : Failure()
+            data object HostNotAllowed : Failure()
+        }
+    }
+
     /**
      * Performs one blocking HTTPS request. Must be called off the main
      * thread. [userText] is the ONLY user-originated content included in
@@ -212,6 +239,80 @@ object GeminiClient {
     }
 
     /**
+     * Performs a blocking multimodal image translation request. Sends JPEG image
+     * data in inlineData along with an OCR & translation prompt. Returns detected
+     * text bounding boxes and translations.
+     */
+    fun translateImageBlocking(
+        apiKey: String,
+        model: String,
+        imageBase64: String,
+        targetLanguageName: String,
+        timeoutMs: Int = 30_000
+    ): ImageTranslationResult {
+        if (apiKey.isBlank()) return ImageTranslationResult.Failure.MissingApiKey
+        val trimmedModel = model.trim()
+        if (!isValidModelId(trimmedModel)) return ImageTranslationResult.Failure.InvalidModel
+
+        val url = try {
+            URL(
+                String.format(
+                    ENDPOINT_TEMPLATE,
+                    NetworkAllowlist.GEMINI_HOST,
+                    URLEncoder.encode(trimmedModel, "UTF-8")
+                )
+            )
+        } catch (_: Exception) {
+            return ImageTranslationResult.Failure.InvalidModel
+        }
+
+        if (!NetworkAllowlist.isAllowedHost(url.host) || !url.protocol.equals("https", ignoreCase = true)) {
+            return ImageTranslationResult.Failure.HostNotAllowed
+        }
+
+        var connection: HttpsURLConnection? = null
+        return try {
+            connection = (url.openConnection() as HttpsURLConnection).apply {
+                requestMethod = "POST"
+                connectTimeout = 10_000
+                readTimeout = timeoutMs
+                doOutput = true
+                doInput = true
+                useCaches = false
+                setRequestProperty("Content-Type", "application/json; charset=utf-8")
+                setRequestProperty("x-goog-api-key", apiKey)
+            }
+
+            val bodyBytes = buildImageRequestBody(imageBase64, targetLanguageName).toString().toByteArray(Charsets.UTF_8)
+            connection.outputStream.use { it.write(bodyBytes) }
+
+            val statusCode = connection.responseCode
+            if (statusCode != 200) {
+                val errorStream = connection.errorStream ?: connection.inputStream
+                val errorBody = errorStream?.bufferedReader(Charsets.UTF_8)?.use { it.readText() } ?: ""
+                if (statusCode == HTTP_QUOTA_EXCEEDED) {
+                    val retryAfterHeader = connection.getHeaderField("Retry-After")
+                    val quotaFailure = parseQuotaFailure(errorBody, retryAfterHeader)
+                    return ImageTranslationResult.Failure.QuotaExceeded(quotaFailure.scope, quotaFailure.retryAfterSeconds)
+                }
+                return ImageTranslationResult.Failure.HttpError(statusCode, extractErrorMessage(errorBody))
+            }
+
+            val responseText = connection.inputStream.bufferedReader(Charsets.UTF_8).use { it.readText() }
+            parseImageResponse(responseText)
+        } catch (e: Exception) {
+            when (classifyException(e)) {
+                is Result.Failure.Timeout -> ImageTranslationResult.Failure.Timeout
+                is Result.Failure.NetworkError -> ImageTranslationResult.Failure.NetworkError
+                else -> ImageTranslationResult.Failure.InvalidResponse
+            }
+        } finally {
+            connection?.disconnect()
+        }
+    }
+
+
+    /**
      * Maps a caught exception to a [Result.Failure]. Extracted as its own
      * `internal` function purely so its classification rules (timeout vs.
      * generic I/O vs. anything else) can be unit-tested directly and
@@ -287,6 +388,126 @@ object GeminiClient {
             Result.Failure.InvalidResponse
         }
     }
+
+    internal fun buildImageRequestBody(imageBase64: String, targetLanguageName: String): JSONObject {
+        val prompt = "You are an accurate OCR and translation engine. " +
+            "Analyze this image and identify all distinct visible text elements (such as menu items, signs, labels, headings, paragraphs, buttons). " +
+            "For each detected text segment, provide: " +
+            "1. box_2d: [ymin, xmin, ymax, xmax] as integers normalized from 0 to 1000 representing the exact bounding box (where 0,0 is top-left, 1000,1000 is bottom-right). " +
+            "2. original: The exact text from the image in its original language. " +
+            "3. translated: The natural translation into $targetLanguageName. " +
+            "4. text_color: 'dark' if the original text is dark, or 'light' if it is light/white. " +
+            "5. bg_color: Hex color string (e.g. '#FFFFFF', '#111827', '#F5A623') approximating the background color right behind the text. " +
+            "Return ONLY a JSON array of objects with keys: box_2d, original, translated, text_color, bg_color. " +
+            "If no text is detected in the image, return []."
+
+        val parts = JSONArray().apply {
+            put(JSONObject().apply {
+                put("inlineData", JSONObject().apply {
+                    put("mimeType", "image/jpeg")
+                    put("data", imageBase64)
+                })
+            })
+            put(JSONObject().apply {
+                put("text", prompt)
+            })
+        }
+
+        val userContent = JSONObject().apply {
+            put("role", "user")
+            put("parts", parts)
+        }
+
+        val generationConfig = JSONObject().apply {
+            put("temperature", 0.1)
+            put("responseMimeType", "application/json")
+        }
+
+        return JSONObject().apply {
+            put("contents", JSONArray().put(userContent))
+            put("generationConfig", generationConfig)
+        }
+    }
+
+    internal fun parseImageResponse(raw: String): ImageTranslationResult {
+        return try {
+            val root = JSONObject(raw)
+            val candidates = root.optJSONArray("candidates")
+                ?: return ImageTranslationResult.Failure.InvalidResponse
+            if (candidates.length() == 0) return ImageTranslationResult.Failure.InvalidResponse
+
+            val content = candidates.getJSONObject(0).optJSONObject("content")
+                ?: return ImageTranslationResult.Failure.InvalidResponse
+            val parts = content.optJSONArray("parts")
+                ?: return ImageTranslationResult.Failure.InvalidResponse
+            if (parts.length() == 0) return ImageTranslationResult.Failure.InvalidResponse
+
+            val textPart = parts.getJSONObject(0).optString("text", "").trim()
+            if (textPart.isEmpty()) return ImageTranslationResult.Failure.NoTextDetected
+
+            val jsonCleaned = textPart
+                .removePrefix("```json")
+                .removePrefix("```")
+                .removeSuffix("```")
+                .trim()
+
+            val jsonArray = if (jsonCleaned.startsWith("[")) {
+                JSONArray(jsonCleaned)
+            } else if (jsonCleaned.startsWith("{")) {
+                val obj = JSONObject(jsonCleaned)
+                obj.optJSONArray("items")
+                    ?: obj.optJSONArray("translations")
+                    ?: obj.optJSONArray("text")
+                    ?: obj.optJSONArray("boxes")
+                    ?: JSONArray()
+            } else {
+                return ImageTranslationResult.Failure.NoTextDetected
+            }
+
+            if (jsonArray.length() == 0) {
+                return ImageTranslationResult.Failure.NoTextDetected
+            }
+
+            val blocks = mutableListOf<DetectedTextBlock>()
+            for (i in 0 until jsonArray.length()) {
+                val item = jsonArray.optJSONObject(i) ?: continue
+                val box = item.optJSONArray("box_2d") ?: item.optJSONArray("box") ?: continue
+                if (box.length() < 4) continue
+                val ymin = box.optDouble(0, 0.0).toFloat()
+                val xmin = box.optDouble(1, 0.0).toFloat()
+                val ymax = box.optDouble(2, 0.0).toFloat()
+                val xmax = box.optDouble(3, 0.0).toFloat()
+                val original = item.optString("original", "").trim()
+                val translated = item.optString("translated", "").trim()
+                if (original.isEmpty() && translated.isEmpty()) continue
+
+                val textColor = item.optString("text_color").takeIf { it.isNotBlank() }
+                val bgColor = item.optString("bg_color").takeIf { it.isNotBlank() }
+
+                blocks.add(
+                    DetectedTextBlock(
+                        ymin = ymin.coerceIn(0f, 1000f),
+                        xmin = xmin.coerceIn(0f, 1000f),
+                        ymax = ymax.coerceIn(0f, 1000f),
+                        xmax = xmax.coerceIn(0f, 1000f),
+                        originalText = original,
+                        translatedText = translated.ifEmpty { original },
+                        textColor = textColor,
+                        bgColor = bgColor
+                    )
+                )
+            }
+
+            if (blocks.isEmpty()) {
+                ImageTranslationResult.Failure.NoTextDetected
+            } else {
+                ImageTranslationResult.Success(blocks)
+            }
+        } catch (_: Exception) {
+            ImageTranslationResult.Failure.InvalidResponse
+        }
+    }
+
 
     /**
      * Classifies a 429 response into a [Result.Failure.QuotaExceeded],

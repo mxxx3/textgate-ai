@@ -178,6 +178,19 @@ class TranslateTabController(
         }
         binding.buttonSpeakResult.setOnClickListener { speakResult() }
         binding.buttonMicInput.setOnClickListener { startMicInput() }
+        binding.buttonCameraInput.setOnClickListener {
+            val sourceIndex = binding.spinnerSourceLanguage.selectedItemPosition
+            val sourceLang = sourceLanguageValues.getOrNull(sourceIndex)
+            val targetIndex = binding.spinnerTargetLanguage.selectedItemPosition
+            val targetLang = targetLanguageValues.getOrNull(targetIndex) ?: Languages.DEFAULT
+
+            val intent = ImageTranslateActivity.intent(
+                context = activity,
+                sourceLanguageCode = sourceLang?.code,
+                targetLanguageCode = targetLang.code
+            )
+            activity.startActivity(intent)
+        }
     }
 
     // ---------------------------------------------------------------

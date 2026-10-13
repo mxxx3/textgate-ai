@@ -228,4 +228,85 @@ class GeminiClientTest {
         val result = GeminiClient.extractErrorMessage(body)
         assertEquals(200, result?.length)
     }
+
+    @Test
+    fun `buildImageRequestBody includes inlineData and target language`() {
+        val json = GeminiClient.buildImageRequestBody("base64data", "Polski")
+        val contents = json.getJSONArray("contents")
+        val userContent = contents.getJSONObject(0)
+        val parts = userContent.getJSONArray("parts")
+        val inlineDataPart = parts.getJSONObject(0).getJSONObject("inlineData")
+        assertEquals("image/jpeg", inlineDataPart.getString("mimeType"))
+        assertEquals("base64data", inlineDataPart.getString("data"))
+        val textPrompt = parts.getJSONObject(1).getString("text")
+        assertTrue(textPrompt.contains("Polski"))
+        val genConfig = json.getJSONObject("generationConfig")
+        assertEquals("application/json", genConfig.getString("responseMimeType"))
+    }
+
+    @Test
+    fun `parseImageResponse parses boxes and translations correctly`() {
+        val raw = """
+            {
+                "candidates": [{
+                    "content": {
+                        "parts": [{
+                            "text": "[{\"box_2d\":[100,200,300,400],\"original\":\"Hello\",\"translated\":\"Cześć\",\"text_color\":\"dark\",\"bg_color\":\"#FFFFFF\"}]"
+                        }]
+                    }
+                }]
+            }
+        """.trimIndent()
+        val result = GeminiClient.parseImageResponse(raw)
+        assertTrue(result is GeminiClient.ImageTranslationResult.Success)
+        val success = result as GeminiClient.ImageTranslationResult.Success
+        assertEquals(1, success.blocks.size)
+        val block = success.blocks[0]
+        assertEquals(100f, block.ymin)
+        assertEquals(200f, block.xmin)
+        assertEquals(300f, block.ymax)
+        assertEquals(400f, block.xmax)
+        assertEquals("Hello", block.originalText)
+        assertEquals("Cześć", block.translatedText)
+        assertEquals("dark", block.textColor)
+        assertEquals("#FFFFFF", block.bgColor)
+    }
+
+    @Test
+    fun `parseImageResponse handles markdown code fence wrapping`() {
+        val raw = """
+            {
+                "candidates": [{
+                    "content": {
+                        "parts": [{
+                            "text": "```json\n[{\"box_2d\":[50,60,70,80],\"original\":\"Exit\",\"translated\":\"Wyjście\"}]\n```"
+                        }]
+                    }
+                }]
+            }
+        """.trimIndent()
+        val result = GeminiClient.parseImageResponse(raw)
+        assertTrue(result is GeminiClient.ImageTranslationResult.Success)
+        val success = result as GeminiClient.ImageTranslationResult.Success
+        assertEquals(1, success.blocks.size)
+        assertEquals("Wyjście", success.blocks[0].translatedText)
+    }
+
+    @Test
+    fun `parseImageResponse returns NoTextDetected when list is empty`() {
+        val raw = """
+            {
+                "candidates": [{
+                    "content": {
+                        "parts": [{
+                            "text": "[]"
+                        }]
+                    }
+                }]
+            }
+        """.trimIndent()
+        val result = GeminiClient.parseImageResponse(raw)
+        assertTrue(result is GeminiClient.ImageTranslationResult.Failure.NoTextDetected)
+    }
 }
+

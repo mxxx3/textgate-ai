@@ -279,4 +279,21 @@
     <string name="label_live_model_38">Gemini 3.8 Live (Faster ~1.18s, 65K TPM — BETA)</string>
     <string name="settings_advanced_toggle_title">Advanced Options</string>
     <string name="settings_advanced_toggle_subtitle">Text AI model, connection test, app list, privacy</string>
+
+    <!-- v2.x: Image translation -->
+    <string name="translate_camera_content_description" tools:ignore="MissingTranslation">Translate from photo</string>
+    <string name="image_translate_title" tools:ignore="MissingTranslation">Photo Translate</string>
+    <string name="image_translate_toggle_overlay" tools:ignore="MissingTranslation">Toggle translation overlay</string>
+    <string name="image_translate_loading" tools:ignore="MissingTranslation">Analyzing and translating with Gemini…</string>
+    <string name="image_translate_no_text" tools:ignore="MissingTranslation">No text detected in this image.</string>
+    <string name="image_translate_selected_block" tools:ignore="MissingTranslation">Selected segment</string>
+    <string name="image_translate_original_prefix" tools:ignore="MissingTranslation">Original: %1$s</string>
+    <string name="image_translate_btn_camera" tools:ignore="MissingTranslation">Camera</string>
+    <string name="image_translate_btn_gallery" tools:ignore="MissingTranslation">Gallery</string>
+    <string name="image_translate_copy_all" tools:ignore="MissingTranslation">Copy all translation</string>
+    <string name="image_translate_load_failed" tools:ignore="MissingTranslation">Failed to load image.</string>
+    <string name="image_translate_camera_error" tools:ignore="MissingTranslation">Could not open camera.</string>
+    <string name="image_translate_network_error" tools:ignore="MissingTranslation">Network error. Please check your connection.</string>
+    <string name="image_translate_timeout" tools:ignore="MissingTranslation">Translation timed out. Please try again.</string>
+    <string name="image_translate_generic_error" tools:ignore="MissingTranslation">Image translation failed.</string>
 </resources>

@@ -1,0 +1,278 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/rootImageTranslate"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/tg_background">
+
+    <!-- Top Action Bar -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="16dp"
+        android:background="@color/tg_surface">
+
+        <ImageButton
+            android:id="@+id/buttonBack"
+            android:layout_width="38dp"
+            android:layout_height="38dp"
+            android:background="@drawable/bg_circle_btn"
+            android:src="@drawable/ic_arrow_back"
+            android:tint="@color/tg_text_primary"
+            android:contentDescription="Wstecz" />
+
+        <TextView
+            android:id="@+id/textTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="12dp"
+            android:text="@string/image_translate_title"
+            android:textColor="@color/tg_text_primary"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <ImageButton
+            android:id="@+id/buttonToggleOverlay"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@drawable/bg_circle_btn"
+            android:src="@drawable/ic_visibility"
+            android:tint="@color/tg_primary"
+            android:contentDescription="@string/image_translate_toggle_overlay" />
+    </LinearLayout>
+
+    <!-- Language Selector Capsule -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:background="@drawable/bg_pill_container"
+        android:elevation="1dp">
+
+        <Spinner
+            android:id="@+id/spinnerSourceLanguage"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:dropDownWidth="240dp" />
+
+        <ImageButton
+            android:id="@+id/buttonSwapLanguages"
+            android:layout_width="34dp"
+            android:layout_height="34dp"
+            android:layout_marginHorizontal="4dp"
+            android:background="@drawable/bg_circle_btn"
+            android:src="@drawable/ic_swap"
+            android:tint="@color/tg_primary"
+            android:contentDescription="@string/translate_swap_content_description" />
+
+        <Spinner
+            android:id="@+id/spinnerTargetLanguage"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:dropDownWidth="240dp" />
+    </LinearLayout>
+
+    <!-- Center Canvas / Image Container -->
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="#000000">
+
+        <com.textgate.ai.translate.ImageOverlayView
+            android:id="@+id/imageOverlayView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <!-- Loading State Indicator -->
+        <LinearLayout
+            android:id="@+id/layoutLoading"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#99000000"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <ProgressBar
+                android:id="@+id/progressLoading"
+                style="?android:attr/progressBarStyleLarge"
+                android:layout_width="54dp"
+                android:layout_height="54dp"
+                android:indeterminateTint="@color/tg_primary" />
+
+            <TextView
+                android:id="@+id/textLoadingStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="@string/image_translate_loading"
+                android:textColor="#FFFFFF"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <!-- No Text Warning -->
+        <LinearLayout
+            android:id="@+id/layoutNoText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:paddingHorizontal="20dp"
+            android:paddingVertical="14dp"
+            android:background="@drawable/bg_card"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/image_translate_no_text"
+                android:textColor="@color/tg_text_primary"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+    </FrameLayout>
+
+    <!-- Block Detail Selection Card (pops up when user taps a translated box) -->
+    <LinearLayout
+        android:id="@+id/cardSelectedBlock"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@drawable/bg_card"
+        android:layout_margin="12dp"
+        android:padding="14dp"
+        android:elevation="4dp"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/textBlockHeader"
+                style="@style/TgCardLabelPrimary"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:text="@string/image_translate_selected_block" />
+
+            <ImageButton
+                android:id="@+id/buttonCloseBlockCard"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:background="@drawable/bg_circle_btn"
+                android:src="@drawable/ic_clear"
+                android:tint="@color/tg_text_secondary"
+                android:contentDescription="Zamknij" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/textBlockOriginal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:textColor="@color/tg_text_secondary"
+            android:textSize="13sp"
+            tools:text="Original: Entrance Only" />
+
+        <TextView
+            android:id="@+id/textBlockTranslated"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:textColor="@color/tg_text_primary"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            tools:text="Tylko wejście" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:orientation="horizontal"
+            android:gravity="end">
+
+            <ImageButton
+                android:id="@+id/buttonCopyBlock"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:background="@drawable/bg_circle_btn"
+                android:src="@drawable/ic_copy"
+                android:tint="@color/tg_primary"
+                android:contentDescription="@string/translate_copy_content_description" />
+
+            <ImageButton
+                android:id="@+id/buttonSpeakBlock"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:layout_marginStart="8dp"
+                android:background="@drawable/bg_circle_btn"
+                android:src="@drawable/ic_speaker"
+                android:tint="@color/tg_primary"
+                android:contentDescription="@string/translate_speak_content_description" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Bottom Action Bar -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="16dp"
+        android:background="@color/tg_surface">
+
+        <Button
+            android:id="@+id/buttonCamera"
+            android:layout_width="0dp"
+            android:layout_height="44dp"
+            android:layout_weight="1"
+            android:background="@drawable/bg_btn_secondary"
+            android:text="@string/image_translate_btn_camera"
+            android:textColor="@color/tg_primary"
+            android:textSize="13sp"
+            android:textStyle="bold" />
+
+        <Button
+            android:id="@+id/buttonGallery"
+            android:layout_width="0dp"
+            android:layout_height="44dp"
+            android:layout_weight="1"
+            android:layout_marginStart="8dp"
+            android:background="@drawable/bg_btn_secondary"
+            android:text="@string/image_translate_btn_gallery"
+            android:textColor="@color/tg_primary"
+            android:textSize="13sp"
+            android:textStyle="bold" />
+
+        <ImageButton
+            android:id="@+id/buttonCopyAll"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:layout_marginStart="8dp"
+            android:background="@drawable/bg_circle_btn"
+            android:src="@drawable/ic_copy"
+            android:tint="@color/tg_primary"
+            android:contentDescription="@string/image_translate_copy_all" />
+    </LinearLayout>
+
+</LinearLayout>

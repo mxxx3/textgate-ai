@@ -184,12 +184,27 @@ class TranslateTabController(
             val targetIndex = binding.spinnerTargetLanguage.selectedItemPosition
             val targetLang = targetLanguageValues.getOrNull(targetIndex) ?: Languages.DEFAULT
 
-            val intent = ImageTranslateActivity.intent(
-                context = activity,
-                sourceLanguageCode = sourceLang?.code,
-                targetLanguageCode = targetLang.code
+            val options = arrayOf(
+                activity.getString(R.string.image_translate_btn_camera),
+                activity.getString(R.string.image_translate_btn_gallery)
             )
-            activity.startActivity(intent)
+            android.app.AlertDialog.Builder(activity)
+                .setTitle(R.string.image_translate_title)
+                .setItems(options) { _, which ->
+                    val autoMode = if (which == 0) {
+                        ImageTranslateActivity.AutoLaunch.CAMERA
+                    } else {
+                        ImageTranslateActivity.AutoLaunch.GALLERY
+                    }
+                    val intent = ImageTranslateActivity.intent(
+                        context = activity,
+                        sourceLanguageCode = sourceLang?.code,
+                        targetLanguageCode = targetLang.code,
+                        autoLaunch = autoMode
+                    )
+                    activity.startActivity(intent)
+                }
+                .show()
         }
     }
 

@@ -63,10 +63,13 @@ class ImageTranslateActivity : Activity() {
     private var selectedSourceLanguage: SupportedLanguage? = null
     private var selectedTargetLanguage: SupportedLanguage = Languages.ALL[0]
 
+    enum class AutoLaunch { NONE, CAMERA, GALLERY }
+
     companion object {
         const val EXTRA_IMAGE_URI = "extra_image_uri"
         const val EXTRA_SOURCE_LANG_CODE = "extra_source_lang_code"
         const val EXTRA_TARGET_LANG_CODE = "extra_target_lang_code"
+        const val EXTRA_AUTO_LAUNCH = "extra_auto_launch"
 
         private const val REQUEST_CODE_CAMERA = 1001
         private const val REQUEST_CODE_GALLERY = 1002
@@ -77,12 +80,14 @@ class ImageTranslateActivity : Activity() {
             context: Context,
             imageUri: Uri? = null,
             sourceLanguageCode: String? = null,
-            targetLanguageCode: String? = null
+            targetLanguageCode: String? = null,
+            autoLaunch: AutoLaunch = AutoLaunch.NONE
         ): Intent {
             return Intent(context, ImageTranslateActivity::class.java).apply {
                 imageUri?.let { putExtra(EXTRA_IMAGE_URI, it) }
                 sourceLanguageCode?.let { putExtra(EXTRA_SOURCE_LANG_CODE, it) }
                 targetLanguageCode?.let { putExtra(EXTRA_TARGET_LANG_CODE, it) }
+                putExtra(EXTRA_AUTO_LAUNCH, autoLaunch.name)
             }
         }
     }
@@ -120,10 +125,19 @@ class ImageTranslateActivity : Activity() {
             intent.getParcelableExtra<Uri>(EXTRA_IMAGE_URI)
         }
 
+        val autoLaunchName = intent.getStringExtra(EXTRA_AUTO_LAUNCH)
+        val autoLaunch = autoLaunchName?.let { runCatching { AutoLaunch.valueOf(it) }.getOrNull() } ?: AutoLaunch.NONE
+
         if (initialUri != null) {
             loadImageAndTranslate(initialUri)
         } else {
-            checkCameraPermissionAndLaunch()
+            when (autoLaunch) {
+                AutoLaunch.CAMERA -> checkCameraPermissionAndLaunch()
+                AutoLaunch.GALLERY -> launchGalleryPicker()
+                AutoLaunch.NONE -> {
+                    // Show initial prompt screen with [Aparat] and [Galeria] buttons
+                }
+            }
         }
     }
 
@@ -403,50 +417,64 @@ class ImageTranslateActivity : Activity() {
 
     private fun loadOptimizedBitmap(uri: Uri): Bitmap? {
         val context = applicationContext
-
-        // 1. Decode bounds
-        val boundsOptions = BitmapFactory.Options().apply { inJustDecodeBounds = true }
-        context.contentResolver.openInputStream(uri)?.use { input ->
-            BitmapFactory.decodeStream(input, null, boundsOptions)
-        } ?: return null
-
-        val maxDim = max(boundsOptions.outWidth, boundsOptions.outHeight)
-        var sampleSize = 1
-        while (maxDim / (sampleSize * 2) >= MAX_IMAGE_DIMENSION) {
-            sampleSize *= 2
-        }
-
-        // 2. Decode sampled bitmap
-        val decodeOptions = BitmapFactory.Options().apply { inSampleSize = sampleSize }
-        val decoded = context.contentResolver.openInputStream(uri)?.use { input ->
-            BitmapFactory.decodeStream(input, null, decodeOptions)
-        } ?: return null
-
-        // 3. Read EXIF rotation and rotate if necessary
-        val rotation = try {
+        val tempFile = File(context.cacheDir, "temp_img_decode_${System.currentTimeMillis()}.jpg")
+        try {
+            // Copy URI content stream to a local cache file ONCE to avoid ephemeral permission or re-read errors.
             context.contentResolver.openInputStream(uri)?.use { input ->
-                val exif = ExifInterface(input)
+                tempFile.outputStream().use { output ->
+                    input.copyTo(output)
+                }
+            } ?: return null
+
+            if (!tempFile.exists() || tempFile.length() == 0L) return null
+
+            // 1. Decode bounds
+            val boundsOptions = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+            BitmapFactory.decodeFile(tempFile.absolutePath, boundsOptions)
+
+            val outWidth = boundsOptions.outWidth
+            val outHeight = boundsOptions.outHeight
+            if (outWidth <= 0 || outHeight <= 0) return null
+
+            val maxDim = max(outWidth, outHeight)
+            var sampleSize = 1
+            while (maxDim / (sampleSize * 2) >= MAX_IMAGE_DIMENSION) {
+                sampleSize *= 2
+            }
+
+            // 2. Decode sampled bitmap
+            val decodeOptions = BitmapFactory.Options().apply { inSampleSize = sampleSize }
+            val decoded = BitmapFactory.decodeFile(tempFile.absolutePath, decodeOptions) ?: return null
+
+            // 3. Read EXIF rotation from file path
+            val rotation = try {
+                val exif = ExifInterface(tempFile.absolutePath)
                 when (exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL)) {
                     ExifInterface.ORIENTATION_ROTATE_90 -> 90f
                     ExifInterface.ORIENTATION_ROTATE_180 -> 180f
                     ExifInterface.ORIENTATION_ROTATE_270 -> 270f
                     else -> 0f
                 }
-            } ?: 0f
-        } catch (_: Exception) {
-            0f
-        }
-
-        if (rotation != 0f) {
-            val matrix = Matrix().apply { postRotate(rotation) }
-            val rotated = Bitmap.createBitmap(decoded, 0, 0, decoded.width, decoded.height, matrix, true)
-            if (rotated != decoded) {
-                decoded.recycle()
+            } catch (_: Exception) {
+                0f
             }
-            return rotated
-        }
 
-        return decoded
+            if (rotation != 0f) {
+                val matrix = Matrix().apply { postRotate(rotation) }
+                val rotated = Bitmap.createBitmap(decoded, 0, 0, decoded.width, decoded.height, matrix, true)
+                if (rotated != decoded) {
+                    decoded.recycle()
+                }
+                return rotated
+            }
+
+            return decoded
+        } catch (e: Exception) {
+            Log.e("TextGate", "Failed to load optimized bitmap", e)
+            return null
+        } finally {
+            tempFile.delete()
+        }
     }
 
     private fun bitmapToBase64Jpeg(bitmap: Bitmap): String {
@@ -499,11 +527,30 @@ class ImageTranslateActivity : Activity() {
     }
 
     private fun launchGalleryPicker() {
-        val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
-            type = "image/*"
-            addCategory(Intent.CATEGORY_OPENABLE)
+        val pickerIntent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            Intent(MediaStore.ACTION_PICK_IMAGES).apply {
+                type = "image/*"
+            }
+        } else {
+            Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI).apply {
+                type = "image/*"
+            }
         }
-        startActivityForResult(intent, REQUEST_CODE_GALLERY)
+        try {
+            startActivityForResult(pickerIntent, REQUEST_CODE_GALLERY)
+        } catch (_: Exception) {
+            val fallback = Intent(Intent.ACTION_GET_CONTENT).apply {
+                type = "image/*"
+                addCategory(Intent.CATEGORY_OPENABLE)
+            }
+            try {
+                startActivityForResult(fallback, REQUEST_CODE_GALLERY)
+            } catch (e: Exception) {
+                Log.e("TextGate", "Failed to launch gallery picker", e)
+                Toast.makeText(this, R.string.image_translate_load_failed, Toast.LENGTH_SHORT).show()
+                updateEmptyState()
+            }
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

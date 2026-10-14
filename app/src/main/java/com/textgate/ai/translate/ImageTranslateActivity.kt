@@ -150,6 +150,16 @@ class ImageTranslateActivity : Activity() {
         super.onDestroy()
     }
 
+    @Suppress("DEPRECATION", "OVERRIDE_DEPRECATION")
+    override fun onBackPressed() {
+        if (binding.cardSelectedBlock.visibility == View.VISIBLE) {
+            binding.cardSelectedBlock.visibility = View.GONE
+            binding.imageOverlayView.selectedBlock = null
+            return
+        }
+        super.onBackPressed()
+    }
+
     @android.annotation.TargetApi(Build.VERSION_CODES.R)
     private fun applyInsetsAsPadding(root: View) {
         val basePaddingLeft = root.paddingLeft
@@ -317,6 +327,7 @@ class ImageTranslateActivity : Activity() {
         val hasImage = currentBitmap != null
         binding.layoutEmptyPrompt.visibility = if (hasImage) View.GONE else View.VISIBLE
         binding.imageOverlayView.visibility = if (hasImage) View.VISIBLE else View.GONE
+        binding.bottomActionBar.visibility = if (hasImage) View.VISIBLE else View.GONE
     }
 
     private fun loadImageAndTranslate(uri: Uri) {
@@ -503,7 +514,11 @@ class ImageTranslateActivity : Activity() {
                 launchCameraCapture()
             } else {
                 Toast.makeText(this, R.string.image_translate_camera_permission_needed, Toast.LENGTH_SHORT).show()
-                updateEmptyState()
+                if (currentBitmap == null) {
+                    finish()
+                } else {
+                    updateEmptyState()
+                }
             }
         }
     }
@@ -522,7 +537,11 @@ class ImageTranslateActivity : Activity() {
         } catch (e: Exception) {
             Log.e("TextGate", "Failed to launch camera", e)
             Toast.makeText(this, R.string.image_translate_camera_error, Toast.LENGTH_SHORT).show()
-            updateEmptyState()
+            if (currentBitmap == null) {
+                finish()
+            } else {
+                updateEmptyState()
+            }
         }
     }
 
@@ -548,7 +567,11 @@ class ImageTranslateActivity : Activity() {
             } catch (e: Exception) {
                 Log.e("TextGate", "Failed to launch gallery picker", e)
                 Toast.makeText(this, R.string.image_translate_load_failed, Toast.LENGTH_SHORT).show()
-                updateEmptyState()
+                if (currentBitmap == null) {
+                    finish()
+                } else {
+                    updateEmptyState()
+                }
             }
         }
     }
@@ -556,7 +579,11 @@ class ImageTranslateActivity : Activity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (resultCode != RESULT_OK) {
-            updateEmptyState()
+            if (currentBitmap == null) {
+                finish()
+            } else {
+                updateEmptyState()
+            }
             return
         }
 
@@ -569,7 +596,11 @@ class ImageTranslateActivity : Activity() {
                 } else if (data?.data != null) {
                     loadImageAndTranslate(data.data!!)
                 } else {
-                    updateEmptyState()
+                    if (currentBitmap == null) {
+                        finish()
+                    } else {
+                        updateEmptyState()
+                    }
                 }
             }
             REQUEST_CODE_GALLERY -> {
@@ -577,7 +608,11 @@ class ImageTranslateActivity : Activity() {
                 if (selectedUri != null) {
                     loadImageAndTranslate(selectedUri)
                 } else {
-                    updateEmptyState()
+                    if (currentBitmap == null) {
+                        finish()
+                    } else {
+                        updateEmptyState()
+                    }
                 }
             }
         }

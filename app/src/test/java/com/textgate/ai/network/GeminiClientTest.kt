@@ -308,5 +308,24 @@ class GeminiClientTest {
         val result = GeminiClient.parseImageResponse(raw)
         assertTrue(result is GeminiClient.ImageTranslationResult.Failure.NoTextDetected)
     }
+
+    @Test
+    fun `parseImageResponse falls back to original when translated is empty or missing`() {
+        val raw = """
+            {
+                "candidates": [{
+                    "content": {
+                        "parts": [{
+                            "text": "[{\"box_2d\":[10,20,30,40],\"original\":\"16947650\",\"translated\":\"\"}]"
+                        }]
+                    }
+                }]
+            }
+        """.trimIndent()
+        val result = GeminiClient.parseImageResponse(raw)
+        assertTrue(result is GeminiClient.ImageTranslationResult.Success)
+        val success = result as GeminiClient.ImageTranslationResult.Success
+        assertEquals("16947650", success.blocks[0].translatedText)
+    }
 }
 

@@ -10,14 +10,18 @@ import android.text.Layout
 import android.text.StaticLayout
 import android.text.TextPaint
 import android.util.AttributeSet
+import android.view.GestureDetector
 import android.view.MotionEvent
+import android.view.ScaleGestureDetector
 import android.view.View
 import com.textgate.ai.network.GeminiClient.DetectedTextBlock
+import kotlin.math.max
 import kotlin.math.min
 
 /**
  * Interactive View that displays an image and renders translated text
  * directly overlaid on top of the original text bounding boxes.
+ * Supports pinch-to-zoom, pan, double-tap zoom reset, and block selection.
  */
 class ImageOverlayView @JvmOverloads constructor(
     context: Context,
@@ -28,6 +32,10 @@ class ImageOverlayView @JvmOverloads constructor(
     var bitmap: Bitmap? = null
         set(value) {
             field = value
+            scaleFactor = 1.0f
+            panX = 0f
+            panY = 0f
+            selectedBlock = null
             requestLayout()
             invalidate()
         }
@@ -70,47 +78,202 @@ class ImageOverlayView @JvmOverloads constructor(
         isAntiAlias = true
     }
 
-    private var downX = 0f
-    private var downY = 0f
+    private var scaleFactor = 1.0f
+    private var panX = 0f
+    private var panY = 0f
+
+    private val scaleDetector = ScaleGestureDetector(context, object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
+        override fun onScale(detector: ScaleGestureDetector): Boolean {
+            scaleFactor = (scaleFactor * detector.scaleFactor).coerceIn(1.0f, 4.0f)
+            clampPan()
+            invalidate()
+            return true
+        }
+    })
+
+    private val gestureDetector = GestureDetector(context, object : GestureDetector.SimpleOnGestureListener() {
+        override fun onDown(e: MotionEvent): Boolean = true
+
+        override fun onScroll(e1: MotionEvent?, e2: MotionEvent, distanceX: Float, distanceY: Float): Boolean {
+            if (scaleFactor > 1.05f) {
+                panX -= distanceX
+                panY -= distanceY
+                clampPan()
+                invalidate()
+                return true
+            }
+            return false
+        }
+
+        override fun onSingleTapConfirmed(e: MotionEvent): Boolean {
+            val pivotX = width / 2f
+            val pivotY = height / 2f
+            val mappedX = (e.x - panX - pivotX) / scaleFactor + pivotX
+            val mappedY = (e.y - panY - pivotY) / scaleFactor + pivotY
+            handleTap(mappedX, mappedY)
+            return true
+        }
+
+        override fun onDoubleTap(e: MotionEvent): Boolean {
+            if (scaleFactor > 1.2f) {
+                scaleFactor = 1.0f
+                panX = 0f
+                panY = 0f
+            } else {
+                scaleFactor = 2.5f
+                panX = (width / 2f - e.x) * (scaleFactor - 1f)
+                panY = (height / 2f - e.y) * (scaleFactor - 1f)
+                clampPan()
+            }
+            invalidate()
+            return true
+        }
+    })
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         val bmp = bitmap ?: return
 
         computeImageBounds(bmp)
+
+        val pivotX = width / 2f
+        val pivotY = height / 2f
+
+        canvas.save()
+        canvas.translate(panX, panY)
+        canvas.scale(scaleFactor, scaleFactor, pivotX, pivotY)
+
         canvas.drawBitmap(bmp, null, imageDstRect, null)
 
-        if (!showOverlay || blocks.isEmpty()) return
+        if (showOverlay && blocks.isNotEmpty()) {
+            drawOverlayBlocks(canvas)
+        }
 
+        canvas.restore()
+    }
+
+    private fun drawOverlayBlocks(canvas: Canvas) {
         val scaleX = imageDstRect.width() / 1000f
         val scaleY = imageDstRect.height() / 1000f
 
+        val paddingX = dpToPx(4f)
+        val paddingY = dpToPx(2.5f)
+        val minPillHeight = dpToPx(16f)
+
         for (block in blocks) {
-            val left = imageDstRect.left + block.xmin * scaleX
-            val top = imageDstRect.top + block.ymin * scaleY
-            val right = imageDstRect.left + block.xmax * scaleX
-            val bottom = imageDstRect.top + block.ymax * scaleY
+            val text = block.translatedText.ifBlank { block.originalText }.trim()
+            if (text.isEmpty()) continue
 
-            // Add 1.5dp slight expansion to ensure complete coverage of underlying text
-            val padding = dpToPx(1.5f)
-            blockDrawRect.set(left - padding, top - padding, right + padding, bottom + padding)
+            val rawLeft = imageDstRect.left + block.xmin * scaleX
+            val rawTop = imageDstRect.top + block.ymin * scaleY
+            val rawRight = imageDstRect.left + block.xmax * scaleX
+            val rawBottom = imageDstRect.top + block.ymax * scaleY
 
-            // Determine background color
+            val rawWidth = (rawRight - rawLeft).coerceAtLeast(1f)
+            val rawHeight = (rawBottom - rawTop).coerceAtLeast(1f)
+
+            // Determine background & text colors
             val bgColor = parseColorOrFallback(block.bgColor, block.textColor == "light")
             bgPaint.color = bgColor
 
+            val isDark = isColorDark(bgColor)
+            val textColor = if (isDark) Color.WHITE else Color.parseColor("#0F172A")
+            textPaint.color = textColor
+
+            val basePillHeight = max(rawHeight + paddingY * 2, minPillHeight)
+            val centerY = (rawTop + rawBottom) / 2f
+
+            val maxAvailWidth = (imageDstRect.right - rawLeft + paddingX).coerceAtLeast(dpToPx(24f))
+
+            // Initial candidate font size based on box height
+            var candidateSize = (basePillHeight * 0.70f).coerceIn(dpToPx(8.5f), dpToPx(22f))
+            textPaint.textSize = candidateSize
+            textPaint.isFakeBoldText = (candidateSize <= dpToPx(12f))
+
+            val singleLineWidth = textPaint.measureText(text)
+
+            val layout: StaticLayout
+            val pillWidth: Float
+            val pillHeight: Float
+            val pillLeft: Float
+            val pillTop: Float
+            val pillRight: Float
+            val pillBottom: Float
+
+            if (singleLineWidth + paddingX * 2 <= maxAvailWidth) {
+                // Fits cleanly on a single line
+                pillWidth = max(rawWidth + paddingX * 2, singleLineWidth + paddingX * 2).coerceAtMost(maxAvailWidth)
+                pillHeight = basePillHeight
+                pillLeft = (rawLeft - paddingX).coerceIn(imageDstRect.left, (imageDstRect.right - pillWidth).coerceAtLeast(imageDstRect.left))
+                pillRight = pillLeft + pillWidth
+                pillTop = centerY - pillHeight / 2f
+                pillBottom = centerY + pillHeight / 2f
+
+                layout = StaticLayout.Builder.obtain(
+                    text,
+                    0,
+                    text.length,
+                    textPaint,
+                    (pillWidth - paddingX).toInt().coerceAtLeast(1)
+                )
+                    .setAlignment(Layout.Alignment.ALIGN_NORMAL)
+                    .setIncludePad(false)
+                    .build()
+            } else {
+                // Paragraph or long sentence requiring line wrapping
+                val wrapWidth = max(rawWidth + paddingX * 2, min(singleLineWidth + paddingX * 2, maxAvailWidth)).coerceAtMost(maxAvailWidth)
+                var bestSize = candidateSize
+                val minFontSize = dpToPx(7.5f)
+
+                var bestLayout = StaticLayout.Builder.obtain(
+                    text,
+                    0,
+                    text.length,
+                    textPaint,
+                    (wrapWidth - paddingX * 2).toInt().coerceAtLeast(1)
+                )
+                    .setAlignment(Layout.Alignment.ALIGN_NORMAL)
+                    .setIncludePad(false)
+                    .build()
+
+                while (bestSize > minFontSize && bestLayout.lineCount > 3 && bestLayout.height > basePillHeight * 2f) {
+                    bestSize -= 1.5f
+                    textPaint.textSize = bestSize
+                    textPaint.isFakeBoldText = (bestSize <= dpToPx(12f))
+                    bestLayout = StaticLayout.Builder.obtain(
+                        text,
+                        0,
+                        text.length,
+                        textPaint,
+                        (wrapWidth - paddingX * 2).toInt().coerceAtLeast(1)
+                    )
+                        .setAlignment(Layout.Alignment.ALIGN_NORMAL)
+                        .setIncludePad(false)
+                        .build()
+                }
+
+                layout = bestLayout
+                pillWidth = wrapWidth
+                pillHeight = max(basePillHeight, layout.height.toFloat() + paddingY * 2)
+                pillLeft = (rawLeft - paddingX).coerceIn(imageDstRect.left, (imageDstRect.right - pillWidth).coerceAtLeast(imageDstRect.left))
+                pillRight = pillLeft + pillWidth
+                pillTop = centerY - pillHeight / 2f
+                pillBottom = centerY + pillHeight / 2f
+            }
+
+            blockDrawRect.set(pillLeft, pillTop, pillRight, pillBottom)
+
+            // Draw pill background
             val cornerRadius = dpToPx(4f)
             canvas.drawRoundRect(blockDrawRect, cornerRadius, cornerRadius, bgPaint)
 
-            // Draw translated text
-            val textColor = if (isColorDark(bgColor)) Color.WHITE else Color.parseColor("#111827")
-            textPaint.color = textColor
-
-            drawFittedText(
-                canvas = canvas,
-                text = block.translatedText,
-                rect = blockDrawRect
-            )
+            // Draw translated text centered inside the pill
+            canvas.save()
+            val textOffsetY = pillTop + (pillHeight - layout.height) / 2f
+            val textOffsetX = pillLeft + paddingX
+            canvas.translate(textOffsetX, textOffsetY)
+            layout.draw(canvas)
+            canvas.restore()
 
             // Highlight selected block
             if (block == selectedBlock) {
@@ -137,65 +300,10 @@ class ImageOverlayView @JvmOverloads constructor(
         imageDstRect.set(left, top, left + destWidth, top + destHeight)
     }
 
-    private fun drawFittedText(canvas: Canvas, text: String, rect: RectF) {
-        val width = rect.width() - dpToPx(4f)
-        val height = rect.height() - dpToPx(2f)
-        if (width <= 4 || height <= 4) return
-
-        // Auto-scale font size
-        var fontSize = min(height * 0.85f, dpToPx(22f))
-        val minFontSize = dpToPx(8f)
-
-        var staticLayout: StaticLayout? = null
-        while (fontSize >= minFontSize) {
-            textPaint.textSize = fontSize
-            staticLayout = StaticLayout.Builder.obtain(
-                text,
-                0,
-                text.length,
-                textPaint,
-                width.toInt().coerceAtLeast(1)
-            )
-                .setAlignment(Layout.Alignment.ALIGN_NORMAL)
-                .setIncludePad(false)
-                .build()
-
-            if (staticLayout.height <= height) {
-                break
-            }
-            fontSize -= 1.5f
-        }
-
-        if (staticLayout == null) return
-
-        canvas.save()
-        // Clip to the bounding box to avoid any overflow
-        canvas.clipRect(rect)
-        // Center text vertically inside the box
-        val offsetY = rect.top + (rect.height() - staticLayout.height) / 2f
-        val offsetX = rect.left + dpToPx(2f)
-        canvas.translate(offsetX, offsetY)
-        staticLayout.draw(canvas)
-        canvas.restore()
-    }
-
     override fun onTouchEvent(event: MotionEvent): Boolean {
-        when (event.actionMasked) {
-            MotionEvent.ACTION_DOWN -> {
-                downX = event.x
-                downY = event.y
-                return true
-            }
-            MotionEvent.ACTION_UP -> {
-                val dx = Math.abs(event.x - downX)
-                val dy = Math.abs(event.y - downY)
-                if (dx < dpToPx(10f) && dy < dpToPx(10f)) {
-                    handleTap(event.x, event.y)
-                }
-                return true
-            }
-        }
-        return super.onTouchEvent(event)
+        val scaleHandled = scaleDetector.onTouchEvent(event)
+        val gestureHandled = gestureDetector.onTouchEvent(event)
+        return scaleHandled || gestureHandled || super.onTouchEvent(event)
     }
 
     private fun handleTap(x: Float, y: Float) {
@@ -206,10 +314,10 @@ class ImageOverlayView @JvmOverloads constructor(
 
         var clicked: DetectedTextBlock? = null
         for (block in blocks) {
-            val left = imageDstRect.left + block.xmin * scaleX
-            val top = imageDstRect.top + block.ymin * scaleY
-            val right = imageDstRect.left + block.xmax * scaleX
-            val bottom = imageDstRect.top + block.ymax * scaleY
+            val left = imageDstRect.left + block.xmin * scaleX - dpToPx(4f)
+            val top = imageDstRect.top + block.ymin * scaleY - dpToPx(4f)
+            val right = imageDstRect.left + block.xmax * scaleX + dpToPx(8f)
+            val bottom = imageDstRect.top + block.ymax * scaleY + dpToPx(4f)
 
             if (x in left..right && y in top..bottom) {
                 clicked = block
@@ -222,6 +330,19 @@ class ImageOverlayView @JvmOverloads constructor(
         invalidate()
     }
 
+    private fun clampPan() {
+        if (scaleFactor <= 1.0f) {
+            scaleFactor = 1.0f
+            panX = 0f
+            panY = 0f
+            return
+        }
+        val maxPanX = width * (scaleFactor - 1f) / 2f
+        val maxPanY = height * (scaleFactor - 1f) / 2f
+        panX = panX.coerceIn(-maxPanX, maxPanX)
+        panY = panY.coerceIn(-maxPanY, maxPanY)
+    }
+
     private fun parseColorOrFallback(hex: String?, isDarkBg: Boolean): Int {
         if (!hex.isNullOrBlank()) {
             try {
@@ -230,7 +351,7 @@ class ImageOverlayView @JvmOverloads constructor(
             } catch (_: Exception) {
             }
         }
-        return if (isDarkBg) Color.parseColor("#1E1E1E") else Color.parseColor("#F3F4F6")
+        return if (isDarkBg) Color.parseColor("#1E1E1E") else Color.parseColor("#FFFFFF")
     }
 
     private fun isColorDark(color: Int): Boolean {

@@ -391,13 +391,14 @@ object GeminiClient {
 
     internal fun buildImageRequestBody(imageBase64: String, targetLanguageName: String): JSONObject {
         val prompt = "You are an accurate OCR and translation engine. " +
-            "Analyze this image and identify all distinct visible text elements (such as menu items, signs, labels, headings, paragraphs, buttons). " +
+            "Analyze this image and identify all distinct visible text elements (such as headings, paragraphs, labels, values, table lines, small print, buttons, signs). " +
+            "Ensure full coverage: translate every single text element, do not omit or skip small print, account numbers, or table lines. " +
             "For each detected text segment, provide: " +
             "1. box_2d: [ymin, xmin, ymax, xmax] as integers normalized from 0 to 1000 representing the exact bounding box (where 0,0 is top-left, 1000,1000 is bottom-right). " +
             "2. original: The exact text from the image in its original language. " +
-            "3. translated: The natural translation into $targetLanguageName. " +
+            "3. translated: The natural translation into $targetLanguageName. For names, numbers, codes, IBANs, and addresses that should stay as-is, keep them accurately in 'translated' (never leave 'translated' empty). " +
             "4. text_color: 'dark' if the original text is dark, or 'light' if it is light/white. " +
-            "5. bg_color: Hex color string (e.g. '#FFFFFF', '#111827', '#F5A623') approximating the background color right behind the text. " +
+            "5. bg_color: Hex color string (e.g. '#FFFFFF', '#111827') approximating the background color right behind the text. " +
             "Return ONLY a JSON array of objects with keys: box_2d, original, translated, text_color, bg_color. " +
             "If no text is detected in the image, return []."
 
@@ -478,7 +479,7 @@ object GeminiClient {
                 val ymax = box.optDouble(2, 0.0).toFloat()
                 val xmax = box.optDouble(3, 0.0).toFloat()
                 val original = item.optString("original", "").trim()
-                val translated = item.optString("translated", "").trim()
+                val translated = item.optString("translated", "").trim().ifEmpty { original }
                 if (original.isEmpty() && translated.isEmpty()) continue
 
                 val textColor = item.optString("text_color").takeIf { it.isNotBlank() }
